@@ -1,0 +1,11 @@
+{
+  "name": "The Racing Puzzle",
+  "short_name": "Racing Puzzle",
+  "description": "Professional punter's tool",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#1a1a1a",
+  "orientation": "portrait",
+  "icons": []
+}

@@ -24,7 +24,6 @@ function goHome(){if(mode!=='sw')setMode('sw');else goTo(0);}
 
 
 // ─── SWIPE ENGINE ───
-const CARDS=[{id:'today',lbl:'Today',col:'var(--gld)'},{id:'cards',lbl:'Racecards',col:'#60a5fa'},{id:'results',lbl:'Results',col:'#fb923c'},{id:'coach',lbl:'Coach',col:'#cc44aa'},{id:'bank',lbl:'Bank',col:'#f0aa44'},{id:'watch',lbl:'Puzzle Profiler',col:'#e879f9'}];
 let cur=0,drag=false,sx=0,dx=0,px=0,pt=0,vel=0;
 const swShell=document.getElementById('sw-shell');
 const sNav=document.getElementById('snav');

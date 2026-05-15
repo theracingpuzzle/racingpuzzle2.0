@@ -106,6 +106,7 @@ function calcStakeGuide(mode){
   guideEl.style.cursor='pointer';
   guideEl.title='Tap to use £'+suggested.toFixed(2);
   guideEl.onclick=function(){stakeEl.value=suggested.toFixed(2);calcStakeGuide(mode);};
+}
 
 function renderBetLimit(){
   const el=document.getElementById('tbetlimit');if(!el)return;

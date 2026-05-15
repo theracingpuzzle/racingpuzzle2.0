@@ -320,8 +320,8 @@
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <div style="font-size:20px;font-weight:700;color:#60a5fa;">Racecards</div>
             <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;">
-              <button id="sw-btn-today" onclick="rcSwSetDay('today')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border:none;cursor:pointer;background:#60a5fa;color:#141414;font-weight:700;">Today</button>
-              <button id="sw-btn-tmrw" onclick="rcSwSetDay('tomorrow')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Tomorrow</button>
+              <button id="sw-btn-course" onclick="rcSwSetView('course')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border:none;cursor:pointer;background:#60a5fa;color:#141414;font-weight:700;">Course</button>
+              <button id="sw-btn-time" onclick="rcSwSetView('time')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Time</button>
             </div>
           </div>
         </div>
@@ -332,6 +332,7 @@
           </div>
           <div id="sw-rc-status" style="color:var(--mut);font-style:italic;font-size:13px;display:none;padding:4px 0 8px;"></div>
           <div id="sw-rc-meeting-chips"></div>
+          <div id="sw-rc-time-list" style="display:none;"></div>
         </div>
       </div>
     </div>

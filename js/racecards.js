@@ -10,21 +10,116 @@ function rcSwipeInit(){
   }
 }
 
-function rcSwSetDay(day){
-  rcSwDay=day;
-  const tb=document.getElementById('sw-btn-today');
-  const tmb=document.getElementById('sw-btn-tmrw');
-  if(tb){tb.style.background=day==='today'?'#60a5fa':'transparent';tb.style.color=day==='today'?'#141414':'var(--mut)';tb.style.fontWeight=day==='today'?'700':'400';}
-  if(tmb){tmb.style.background=day==='tomorrow'?'#fb923c':'transparent';tmb.style.color=day==='tomorrow'?'#141414':'var(--mut)';tmb.style.fontWeight=day==='tomorrow'?'700':'400';}
+let rcSwView='course';
+
+function rcSwSetView(view){
+  rcSwView=view;
+  const cb=document.getElementById('sw-btn-course');
+  const tb=document.getElementById('sw-btn-time');
+  if(cb){cb.style.background=view==='course'?'#60a5fa':'transparent';cb.style.color=view==='course'?'#141414':'var(--mut)';cb.style.fontWeight=view==='course'?'700':'400';}
+  if(tb){tb.style.background=view==='time'?'#60a5fa':'transparent';tb.style.color=view==='time'?'#141414':'var(--mut)';tb.style.fontWeight=view==='time'?'700':'400';}
+  // Show/hide meeting chips vs time list
   const chips=document.getElementById('sw-rc-meeting-chips');
-  if(chips)chips.innerHTML='';
-  const listEl=document.getElementById('sw-rc-list');if(listEl)listEl.innerHTML='';
-  const lbl=document.getElementById('sw-rc-meetings-lbl');if(lbl)lbl.textContent='Loading meetings…';
-  rcSwCurrentRaces=[];rcSwSortedRaces=[];rcSwRacesByMeeting={};
-  rcSwLoadMeetings();
+  const timeList=document.getElementById('sw-rc-time-list');
+  if(chips)chips.style.display=view==='course'?'block':'none';
+  if(timeList)timeList.style.display=view==='time'?'block':'none';
+  // If switching to time and races loaded, render
+  if(view==='time'&&rcSwCurrentRaces.length) rcSwRenderTimeView();
+  // If switching to time and no races, load first
+  if(view==='time'&&!rcSwCurrentRaces.length) rcSwLoadMeetings().then(()=>rcSwRenderTimeView());
 }
 
 function rcSwLoad(){ rcSwLoadMeetings(); }
+
+function rcSwRenderTimeView(){
+  const tl=document.getElementById('sw-rc-time-list');
+  if(!tl)return;
+
+  // Flatten all races
+  const allRaces=[];
+  rcSwCurrentRaces.forEach(function(meeting){
+    const course=meeting.course||meeting.venue||'Unknown';
+    if(meeting.runners){
+      allRaces.push({...meeting,_course:course});
+    } else {
+      (meeting.races||[]).forEach(function(r){
+        allRaces.push({...r,_course:course});
+      });
+    }
+  });
+
+  allRaces.sort(function(a,b){
+    return timeToMins(a.off||a.off_time||a.time||'') - timeToMins(b.off||b.off_time||b.time||'');
+  });
+
+  const nowMins=new Date().getHours()*60+new Date().getMinutes();
+  const upcoming=[],past=[];
+  allRaces.forEach(function(r){
+    const mins=timeToMins(r.off||r.off_time||r.time||'');
+    if(mins===9999||(mins-nowMins)>-30) upcoming.push(r);
+    else past.push(r);
+  });
+
+  if(!allRaces.length){
+    tl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;padding:8px 0;">No races loaded.</div>';
+    return;
+  }
+
+  let html='';
+  upcoming.forEach(function(r,i){
+    const time=r.off||r.off_time||r.time||'—';
+    const course=r._course||r.course||'';
+    const flag=rcCountryFlag(rcCourseCountry(course));
+    const name=r.race_name||r.name||r.title||'';
+    const runners=(r.runners||r.horses||[]).filter(function(h){
+      return !(h.non_runner||h.isNonRunner||(''+h.number).toUpperCase()==='NR');
+    }).length;
+    const isNext=i===0;
+    html+='<div style="padding:11px 0;border-bottom:1px solid var(--bdr);'
+      +(isNext?'':'')
+      +'cursor:pointer;" onclick="rcSwOpenTimeRace('+allRaces.indexOf(r)+')">'
+      +'<div style="display:flex;align-items:center;gap:8px;">'
+      +(isNext?'<span style="font-family:monospace;font-size:13px;font-weight:700;color:#60a5fa;">'+time+'</span>'
+              :'<span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--gld);">'+time+'</span>')
+      +flag+' '
+      +(isNext?'<span style="font-size:9px;font-weight:700;background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3);padding:1px 5px;border-radius:4px;letter-spacing:.05em;">NEXT</span>':'')
+      +'<span style="font-size:13px;font-weight:'+(isNext?'700':'500')+';color:'+(isNext?'var(--txt)':'var(--txt)')+';flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+course+'</span>'
+      +'<span style="font-size:11px;color:var(--mut);flex-shrink:0;">'+runners+'</span>'
+      +'</div>'
+      +(name?'<div style="font-size:11px;color:var(--mut);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+name+'</div>':'')
+      +'</div>';
+  });
+
+  if(past.length){
+    html+='<div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;padding:12px 0 4px;border-top:1px solid var(--bdr);margin-top:4px;">Earlier today</div>';
+    past.forEach(function(r){
+      const time=r.off||r.off_time||r.time||'—';
+      const course=r._course||r.course||'';
+      const flag=rcCountryFlag(rcCourseCountry(course));
+      const name=r.race_name||r.name||r.title||'';
+      html+='<div style="padding:9px 0;border-bottom:1px solid var(--bdr);opacity:0.38;">'
+        +'<div style="display:flex;align-items:center;gap:6px;">'
+        +'<span style="font-family:monospace;font-size:12px;color:var(--mut);">'+time+'</span>'
+        +flag
+        +'<span style="font-size:13px;color:var(--mut);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+course+'</span>'
+        +'</div>'
+        +(name?'<div style="font-size:11px;color:var(--mut);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+name+'</div>':'')
+        +'</div>';
+    });
+  }
+  tl.innerHTML=html;
+}
+
+function rcSwOpenTimeRace(idx){
+  const allRaces=[];
+  rcSwCurrentRaces.forEach(function(meeting){
+    if(meeting.runners) allRaces.push(meeting);
+    else (meeting.races||[]).forEach(function(r){ allRaces.push(r); });
+  });
+  const race=allRaces[idx];
+  if(race) rcSwShowRace(race._course||race.course||'', race);
+}
+
 
 // Country detection helpers
 const UK_COURSES=['aintree','ascot','ayr','bangor','bangor-on-dee','bath','beverley','brighton','carlisle','cartmel','catterick','chelmsford','cheltenham','chepstow','chester','doncaster','epsom','exeter','fakenham','ffos las','fontwell','goodwood','hamilton','haydock','hereford','hexham','huntingdon','kelso','kempton','leicester','lingfield','ludlow','market rasen','musselburgh','newbury','newcastle','newmarket','newton abbot','nottingham','perth','plumpton','pontefract','redcar','ripon','salisbury','sandown','sedgefield','southwell','stratford','taunton','thirsk','uttoxeter','warwick','wetherby','wincanton','windsor','wolverhampton','worcester','yarmouth','york'];
@@ -83,7 +178,7 @@ async function rcSwLoadMeetings(){
       if(order[ca]!==order[cb])return order[ca]-order[cb];
       return a.localeCompare(b);
     });
-    if(lbl)lbl.textContent=(rcSwDay==='tomorrow'?'Tomorrow':'Today')+' · '+sorted.length+' meetings';
+    if(lbl)lbl.textContent='Today · '+sorted.length+' meetings';
     if(listEl){
       listEl.innerHTML=sorted.map(function(course){
         const r=meetings[course];

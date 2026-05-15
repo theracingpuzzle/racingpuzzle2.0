@@ -316,23 +316,17 @@
     <div class="card cRC" id="c1">
       <div class="cin" style="touch-action:pan-y;">
         <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid rgba(96,165,250,.2);">
-          <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(96,165,250,.5);margin-bottom:3px;">Race Day</div>
           <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="font-size:20px;font-weight:700;color:#60a5fa;">Racecards</div>
-            <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;">
-              <button id="sw-btn-course" onclick="rcSwSetView('course')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border:none;cursor:pointer;background:#60a5fa;color:#141414;font-weight:700;">Course</button>
-              <button id="sw-btn-time" onclick="rcSwSetView('time')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Time</button>
+            <div>
+              <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(96,165,250,.5);margin-bottom:3px;">Race Day</div>
+              <div style="font-size:20px;font-weight:700;color:#60a5fa;">Racecards</div>
             </div>
+            <button onclick="rcSwCurrentRaces=[];rcSwLoadMeetings();" style="font-family:monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:7px;border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.08);color:#60a5fa;cursor:pointer;">↻ Refresh</button>
           </div>
         </div>
         <div style="padding-top:12px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <div style="font-family:monospace;font-size:10px;color:var(--mut);" id="sw-rc-meetings-lbl">Loading meetings…</div>
-            <button onclick="rcSwLoadMeetings()" style="font-family:monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:7px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);cursor:pointer;">↻ Refresh</button>
-          </div>
           <div id="sw-rc-status" style="color:var(--mut);font-style:italic;font-size:13px;display:none;padding:4px 0 8px;"></div>
-          <div id="sw-rc-meeting-chips"></div>
-          <div id="sw-rc-time-list" style="display:none;"></div>
+          <div id="sw-rc-ui"></div>
         </div>
       </div>
     </div>

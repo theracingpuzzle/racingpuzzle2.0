@@ -225,7 +225,7 @@ function rcSwRenderRunners(idx, course, el){
     const age=r.age?r.age+'yo':'';
     const form=r.form||'';
     const rpr=r.rpr||r.officialRating||'';
-    const isNR=(r.non_runner||r.status==='non_runner'||(''+r.status).toLowerCase()==='nr'||(''+r.jockey).toUpperCase()==='NON-RUNNER')||r.isNonRunner;
+    const isNR=!!(r.non_runner||r.isNonRunner||(''+r.number).toUpperCase()==='NR'||r.status==='non_runner'||(''+r.status).toLowerCase()==='nr'||(''+r.jockey).toUpperCase()==='NON-RUNNER');
     const _bh=isNR?'':getBetHighlight(name,course,time);
     return'<div style="padding:9px 13px;border-bottom:1px solid var(--bdr);'+(isNR?'opacity:0.38;':_bh)+'display:flex;align-items:flex-start;gap:9px;">'
       +'<div style="width:22px;text-align:center;flex-shrink:0;padding-top:2px;">'
@@ -655,7 +655,7 @@ function rcRenderRunners(idx, course, el){
     const sp=r.sp||'';
     const pos=r.position||r.place||'';
     const hasResult=!!(pos&&pos!=='0');
-    const isNR=(r.non_runner||r.status==='non_runner'||r.status==='NR'||(''+r.status).toLowerCase()==='nr'||(''+r.jockey).toUpperCase()==='NON-RUNNER')||r.isNonRunner;
+    const isNR=!!(r.non_runner||r.isNonRunner||(''+r.number).toUpperCase()==='NR'||r.status==='non_runner'||r.status==='NR'||(''+r.status).toLowerCase()==='nr'||(''+r.jockey).toUpperCase()==='NON-RUNNER');
     const isFav=i===0&&!isNR;
     const borderCol=isNR?'rgba(239,68,68,.2)':hasResult?(pos==='1'?'var(--grn)':pos==='2'?'#60a5fa':pos==='3'?'#fb923c':'var(--bdr)'):'var(--bdr)';
 
@@ -739,7 +739,7 @@ function autoMatchBetResults(resultsData){
       const pos=parseInt(posRaw);
       const horseName=(r.horse||r.name||'').trim().toLowerCase();
       if(!horseName)return;
-      const isNR=(r.non_runner||(''+r.status).toLowerCase()==='nr'||(''+r.jockey).toUpperCase()==='NON-RUNNER')||false;
+      const isNR=!!(r.non_runner||r.isNonRunner||(''+r.number).toUpperCase()==='NR'||(''+r.status).toLowerCase()==='nr'||(''+r.jockey).toUpperCase()==='NON-RUNNER');
 
       function resolveResult(b){
         if(isNR)return'nr';

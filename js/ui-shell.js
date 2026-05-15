@@ -1,7 +1,15 @@
 // ─── UI SHELL ─── shell height, mode, swipe engine, header
 
 (function(){
-  function setH(){document.documentElement.style.setProperty('--shell-h',(window.innerHeight-56)+'px');}
+  function setH(){
+    // Read the actual safe-area-inset-top from CSS env()
+    const tmp = document.createElement('div');
+    tmp.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);height:0;pointer-events:none;';
+    document.body.appendChild(tmp);
+    const sat = tmp.getBoundingClientRect().top;
+    document.body.removeChild(tmp);
+    document.documentElement.style.setProperty('--shell-h', (window.innerHeight - 56 - sat) + 'px');
+  }
   setH();
   window.addEventListener('resize',setH);
   window.addEventListener('orientationchange',function(){setTimeout(setH,300);});

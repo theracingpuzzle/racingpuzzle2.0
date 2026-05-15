@@ -128,9 +128,9 @@ function rcSwRenderCourse(listEl){
     const type=rcMeetingType(races);
     const span=rcTimeSpan(races);
     const count=races.length;
-    const safe=course.replace(/\/g,'\\').replace(/'/g,"\'");
+    const safe=course.replace(/'/g,"\\'");
     return '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;margin-bottom:8px;overflow:hidden;">'
-      +'<div onclick="rcSwToggleCourse(''+safe+'')" style="display:flex;align-items:center;gap:12px;padding:13px;cursor:pointer;background:'+(isOpen?'rgba(96,165,250,.05)':'transparent')+';">'
+      +'<div onclick="rcSwToggleCourse(\''+safe+'\')"
         +'<span style="font-size:20px;flex-shrink:0;">'+flag+'</span>'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-size:15px;font-weight:700;color:'+(isOpen?'#60a5fa':'var(--txt)')+';">'+course+'</div>'

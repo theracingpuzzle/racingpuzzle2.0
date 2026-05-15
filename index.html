@@ -506,19 +506,20 @@
       <div id="rc-cards-section">
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
           <div style="flex:0 0 auto;">
-            <!-- Today / Tomorrow sub-toggle -->
-            <div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;">When</div>
+            <!-- Course / Time view toggle -->
+            <div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;">View</div>
             <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;">
-              <button id="rc-btn-today" onclick="rcSetDay('today')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;background:#60a5fa;color:#141414;font-weight:700;">Today</button>
-              <button id="rc-btn-tmrw" onclick="rcSetDay('tomorrow')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Tomorrow</button>
+              <button id="rc-btn-course" onclick="rcSetView('course')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;background:#60a5fa;color:#141414;font-weight:700;">Course</button>
+              <button id="rc-btn-time" onclick="rcSetView('time')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Time</button>
             </div>
           </div>
-          <div style="flex:1;min-width:140px;">
+          <div id="rc-meeting-wrap" style="flex:1;min-width:140px;">
             <div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;">Meeting</div>
             <select id="rc-meeting" onchange="rcLoadRaces()" style="width:100%;font-size:13px;"><option value="">— Select meeting —</option></select>
           </div>
           <button class="btn" style="flex-shrink:0;height:44px;padding:0 16px;background:#60a5fa;color:#141414;font-weight:700;border-radius:9px;" onclick="rcLoad()">Load</button>
         </div>
+        <div id="rc-time-list" style="display:none;"></div>
         <div id="rc-status" style="color:var(--mut);font-style:italic;font-size:13px;padding:4px 0 8px;display:none;"></div>
         <div id="rc-race-list"></div>
       </div>

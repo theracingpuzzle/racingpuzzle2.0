@@ -5,13 +5,15 @@ function getTracks(){const l=(D.dailyLog||[]).find(d=>d.date===td());return(l&&A
 function setTracks(t){D.dailyLog=D.dailyLog||[];let l=D.dailyLog.find(d=>d.date===td());if(!l){l={date:td(),checkedIn:false,mood:'neutral',notes:'',tracks:[],createdAt:Date.now()};D.dailyLog.push(l);}l.tracks=t;save();}
 function addTrack(){const el=document.getElementById('ttrack');const v=el.value.trim();if(!v)return;const t=getTracks();if(!t.includes(v)){t.push(v);setTracks(t);}el.value='';renderChips();rfrTL();}
 function rmTrack(n){setTracks(getTracks().filter(x=>x!==n));renderChips();rfrTL();}
+// cache shared via window._todayMeetingsCache
 async function loadTodayMeetings(){
   const stEl=document.getElementById('t-meetings-status');
   if(stEl)stEl.textContent='Loading…';
   const creds=getRacingCreds();
   if(!creds.username||!creds.password){if(stEl)stEl.textContent='';renderChips();return;}
   try{
-    const data=await callRacingAPI('racecards/free',{});
+    if(!window._todayMeetingsCache) window._todayMeetingsCache=await callRacingAPI('racecards/free',{});
+    const data=window._todayMeetingsCache;
     const races=data.racecards||data.races||[];
     const courses=[...new Set(races.map(r=>r.course||r.venue||'').filter(Boolean))].sort();
     const current=getTracks();
@@ -212,10 +214,7 @@ function renderToday(){
   renderThisWeek();
   renderNextRace();
   renderStudyReminder();
-  // Auto-load today's meetings if credentials set and not yet loaded
-  if(getRacingCreds().username&&!document.getElementById('t-meetings-picker')?.style.display?.includes('block')){
-    loadTodayMeetings();
-  }
+  // Meetings loaded on-demand only (via button tap) to avoid hammering the API
   const log=(D.dailyLog||[]).find(d=>d.date===t);
   const ci=document.getElementById('tcin');
   if(ci&&log&&log.checkedIn){ci.innerHTML=`<div style="background:rgba(45,184,122,.08);border:1px solid rgba(45,184,122,.25);border-radius:8px;padding:7px 10px;font-family:monospace;font-size:10px;color:var(--grn);">✓ Checked in today</div>`;document.getElementById('tmood').value=log.mood||'neutral';document.getElementById('tnotes').value=log.notes||'';}

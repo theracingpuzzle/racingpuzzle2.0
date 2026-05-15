@@ -20,7 +20,9 @@ async function rcSwLoadMeetings(){
       if(stEl){ stEl.style.display='block'; stEl.textContent='Set API credentials in Settings to load racecards.'; }
       return;
     }
-    const data=await callRacingAPI('racecards/free',{});
+    // Share cache with today.js to avoid double-fetching
+    if(!window._todayMeetingsCache) window._todayMeetingsCache=await callRacingAPI('racecards/free',{});
+    const data=window._todayMeetingsCache;
     rcSwCurrentRaces=data.racecards||data.races||[];
     if(stEl) stEl.style.display='none';
     if(!rcSwCurrentRaces.length){

@@ -40,9 +40,11 @@ function rcSwRenderUI(){
   const onTime=rcSwView==='time';
   const btnBase='font-family:monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 18px;border:none;cursor:pointer;font-weight:700;transition:all .12s;';
 
+  const timeActive = onTime?'background:#60a5fa;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;';
+  const courseActive = !onTime?'background:#60a5fa;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;';
   let html='<div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-bottom:12px;">'
-    +'<button style="'+btnBase+(onTime?'background:#60a5fa;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;')+'" onclick="rcSwView='time';rcSwRenderUI();">Time</button>'
-    +'<button style="'+btnBase+(!onTime?'background:#60a5fa;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;')+'" onclick="rcSwView='course';rcSwRenderUI();">Course</button>'
+    +'<button style="'+btnBase+timeActive+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
+    +'<button style="'+btnBase+courseActive+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
     +'</div>';
 
   uiEl.innerHTML=html;
@@ -87,6 +89,16 @@ function rcSwRenderTime(listEl){
 }
 
 let _rcSwOpenCourse='';
+
+function rcSwToggleCourse(course){
+  _rcSwOpenCourse = _rcSwOpenCourse===course ? '' : course;
+  const uiEl=document.getElementById('sw-rc-ui');
+  if(uiEl){
+    const listEl=uiEl.querySelectorAll('div')[1]||uiEl.lastElementChild;
+    if(listEl) rcSwRenderCourse(listEl);
+  }
+}
+
 function rcSwRenderCourse(listEl){
   const meetings={};
   rcSwCurrentRaces.forEach(function(meeting){
@@ -116,15 +128,15 @@ function rcSwRenderCourse(listEl){
     const type=rcMeetingType(races);
     const span=rcTimeSpan(races);
     const count=races.length;
-    const safeC=course.replace(/'/g,"\'");
+    const safe=course.replace(/\/g,'\\').replace(/'/g,"\'");
     return '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;margin-bottom:8px;overflow:hidden;">'
-      +'<div onclick="_rcSwOpenCourse=_rcSwOpenCourse===''+safeC+''?'':\''+safeC+'\';rcSwRenderCourse(this.closest('div').parentNode);" style="display:flex;align-items:center;gap:12px;padding:13px;cursor:pointer;background:'+(isOpen?'rgba(96,165,250,.05)':'transparent')+';">'
+      +'<div onclick="rcSwToggleCourse(''+safe+'')" style="display:flex;align-items:center;gap:12px;padding:13px;cursor:pointer;background:'+(isOpen?'rgba(96,165,250,.05)':'transparent')+';">'
         +'<span style="font-size:20px;flex-shrink:0;">'+flag+'</span>'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-size:15px;font-weight:700;color:'+(isOpen?'#60a5fa':'var(--txt)')+';">'+course+'</div>'
           +'<div style="font-family:monospace;font-size:10px;color:var(--mut);margin-top:2px;">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
         +'</div>'
-        +'<span style="color:'+(isOpen?'#60a5fa':'var(--mut)')+';font-size:16px;transition:transform .15s;transform:'+(isOpen?'rotate(90deg)':'none')+';">›</span>'
+        +'<span style="color:'+(isOpen?'#60a5fa':'var(--mut)')+';font-size:18px;transition:transform .15s;display:inline-block;transform:'+(isOpen?'rotate(90deg)':'none')+';">›</span>'
       +'</div>'
       +(isOpen
         ? '<div style="border-top:1px solid var(--bdr);padding:10px 10px 2px;">'

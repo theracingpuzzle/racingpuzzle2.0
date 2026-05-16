@@ -301,14 +301,14 @@ function openBetFlow(horse, course, time, jockey, trainer, raceName){
   const ov=document.createElement('div');
   ov.id='_bflow-ov';
   ov.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.75);display:flex;flex-direction:column;justify-content:flex-end;opacity:0;transition:opacity .2s;';
-  ov.innerHTML=`<div id="_bflow-sheet" style="background:var(--sur);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom,16px);max-height:92vh;display:flex;flex-direction:column;transform:translateY(40px);transition:transform .25s ease,opacity .25s ease;opacity:0;">`
-    +`<div style="display:flex;justify-content:center;padding:12px 0 4px;flex-shrink:0;"><div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);"></div></div>`
-    +`<div style="padding:12px 18px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0;">`
-      +`<div style="font-size:17px;font-weight:700;color:var(--txt);">\${horse}</div>`
-      +`<div style="font-size:11px;color:var(--mut);font-family:monospace;margin-top:1px;">\${time} · \${course}</div>`
-    +`</div>`
-    +`<div id="_bflow-content" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;">\${_betFlowChecklistHtml()}</div>`
-    +`</div>`;
+  ov.innerHTML='<div id="_bflow-sheet" style="background:var(--sur);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom,16px);max-height:92vh;display:flex;flex-direction:column;transform:translateY(40px);transition:transform .25s ease,opacity .25s ease;opacity:0;">'
+    +'<div style="display:flex;justify-content:center;padding:12px 0 4px;flex-shrink:0;"><div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);"></div></div>'
+    +'<div style="padding:12px 18px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0;">'
+      +'<div style="font-size:17px;font-weight:700;color:var(--txt);">'+horse+'</div>'
+      +'<div style="font-size:11px;color:var(--mut);font-family:monospace;margin-top:1px;">'+time+' · '+course+'</div>'
+    +'</div>'
+    +'<div id="_bflow-content" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;">'+_betFlowChecklistHtml()+'</div>'
+    +'</div>';
   ov.addEventListener('click',function(e){if(e.target===ov)_betFlowClose();});
   document.body.appendChild(ov);
   requestAnimationFrame(function(){
@@ -320,7 +320,7 @@ function openBetFlow(horse, course, time, jockey, trainer, raceName){
 
 function _betFlowChecklistHtml(){
   const sources=D.sources||[];
-  const opts=sources.map(s=>`<option value="\${s.id}" data-type="\${s.type}">\${s.label}</option>`).join('');
+  const opts=sources.map(s=>'<option value="'+s.id+'" data-type="'+s.type+'">'+s.label+'</option>').join('');
   return `<div style="padding:14px 18px 10px;flex-shrink:0;">`
       +`<div style="font-family:monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">Source</div>`
       +`<select id="_bflow-src-sel" onchange="_betFlowSourceChanged()" style="width:100%;box-sizing:border-box;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:11px 14px;font-size:14px;color:var(--txt);appearance:none;-webkit-appearance:none;cursor:pointer;">`
@@ -352,19 +352,19 @@ function _betFlowSourceChanged(){
   const wrap=document.getElementById('_bflow-cks-wrap');
   if(wrap){
     wrap.innerHTML=
-      `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 8px;">`
-        +`<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:\${accentCol};">\${type==='own'?'OWN STUDY':'TIP · '+label.toUpperCase()}</div>`
-        +`<div id="_bflow-score-lbl" style="font-family:monospace;font-size:11px;color:var(--mut);">0 / \${_flowActiveCKS.length}</div>`
-      +`</div>`
-      +`<div style="height:4px;border-radius:2px;background:var(--bdr);overflow:hidden;margin-bottom:12px;">`
-        +`<div id="_bflow-bar" style="height:100%;border-radius:2px;background:\${accentCol};width:0%;transition:width .25s;"></div>`
-      +`</div>`
-      +_flowActiveCKS.map((c,i)=>`<div id="_bflow-item-\${i}" onclick="_betFlowTick(\${i})" style="display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s;">`
-        +`<div id="_bflow-chk-\${i}" style="width:20px;height:20px;flex-shrink:0;border-radius:6px;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s;font-size:12px;"></div>`
-        +`<div><div style="font-size:13px;line-height:1.4;color:var(--txt);">\${c.t}</div>`
-        +`<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:3px;line-height:1.35;">\${c.s}</div></div>`
-        +`</div>`).join('')
-      +`<div style="height:8px;"></div>`;
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 8px;">'
+        +'<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:'+accentCol+';">'+(type==='own'?'OWN STUDY':'TIP · '+label.toUpperCase())+'</div>'
+        +'<div id="_bflow-score-lbl" style="font-family:monospace;font-size:11px;color:var(--mut);">0 / '+_flowActiveCKS.length+'</div>'
+      +'</div>'
+      +'<div style="height:4px;border-radius:2px;background:var(--bdr);overflow:hidden;margin-bottom:12px;">'
+        +'<div id="_bflow-bar" style="height:100%;border-radius:2px;background:'+accentCol+';width:0%;transition:width .25s;"></div>'
+      +'</div>'
+      +_flowActiveCKS.map(function(c,i){return '<div id="_bflow-item-'+i+'" onclick="_betFlowTick('+i+')" style="display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s;">'
+        +'<div id="_bflow-chk-'+i+'" style="width:20px;height:20px;flex-shrink:0;border-radius:6px;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s;font-size:12px;"></div>'
+        +'<div><div style="font-size:13px;line-height:1.4;color:var(--txt);">'+c.t+'</div>'
+        +'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:3px;line-height:1.35;">'+c.s+'</div></div>'
+        +'</div>';}).join('')
+      +'<div style="height:8px;"></div>';
   }
   const btn=document.getElementById('_bflow-btn');
   const rec=document.getElementById('_bflow-rec');

@@ -259,15 +259,15 @@ async function checkWatchlistRunners(races){
     +alerts.map(function(a){
       const wid=(a.wlEntry&&a.wlEntry.id)?a.wlEntry.id:'';
       return'<div data-wlid="'+wid+'" class="t-wl-item" style="padding:7px 0;border-bottom:1px solid rgba(167,139,250,.12);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;">'
+        +'<div>'
           +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+a.horse+'</div>'
           +'<div style="font-size:11px;color:var(--mut);">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
           +(a.jockey?'<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div>':'')
         +'</div>'
-        +'<span style="font-family:monospace;font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;cursor:pointer;">Profile →</span>'
+        +'<span style="font-family:monospace;font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;">Profile →</span>'
       +'</div>';
     }).join('')
   +'</div>';
-  // Use event delegation to avoid inline variable scope issues
   setTimeout(function(){
     alertEl.querySelectorAll('.t-wl-item').forEach(function(el){
       el.addEventListener('click',function(){var id=this.getAttribute('data-wlid');if(id)openWLForm(id);});

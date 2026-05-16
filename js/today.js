@@ -345,7 +345,6 @@ function renderToday(){
   }
 
   // ── Streak ──
-  renderStreak();
 
   // ── Today's bets ──
   renderTodayBets(tb, vtb);

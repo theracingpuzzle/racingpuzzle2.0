@@ -161,7 +161,7 @@ function renderWLList(){
   const el=document.getElementById('wl-list');if(!el)return;
   if(!entries.length){el.innerHTML='<div class="es">No profiles yet. Tap + to add a horse.</div>';return;}
   const REASON_ORDER=['eye-catcher','future-target','trainer-intel','form-study','tip-source'];
-  const REASON_META={'eye-catcher':{emoji:'👁',label:'Eye Catchers',col:'#a78bfa'},'future-target':{emoji:'📰',label:'Future Targets',col:'#fb923c'},'trainer-intel':{emoji:'🗣',label:'Trainer Intel',col:'#60a5fa'},'form-study':{emoji:'📊',label:'Form Study',col:'#ef4444'},'tip-source':{emoji:'💡',label:'Tips & Sources',col:'#eab308'}};
+  const REASON_META={'eye-catcher':{emoji:'🔭',label:'Eye Catchers',col:'#a78bfa'},'future-target':{emoji:'📰',label:'Future Targets',col:'#fb923c'},'trainer-intel':{emoji:'🗣',label:'Trainer Intel',col:'#60a5fa'},'form-study':{emoji:'📊',label:'Form Study',col:'#ef4444'},'tip-source':{emoji:'💡',label:'Tips & Sources',col:'#eab308'}};
   const groups={};
   entries.forEach(function(e){const r=e.reason||'eye-catcher';if(!groups[r])groups[r]=[];groups[r].push(e);});
   // If searching, expand all matching groups automatically
@@ -182,7 +182,7 @@ function renderWLList(){
 }
 
 function renderWLEntry(e){
-  const RMAP={'eye-catcher':{emoji:'👁',col:'#a78bfa',label:'Eye Catcher'},'future-target':{emoji:'📰',col:'#fb923c',label:'Future Target'},'trainer-intel':{emoji:'🗣',col:'#60a5fa',label:'Trainer Intel'},'form-study':{emoji:'📊',col:'#ef4444',label:'Form Study'},'tip-source':{emoji:'💡',col:'#eab308',label:'Tip / Source'}};
+  const RMAP={'eye-catcher':{emoji:'🔭',col:'#a78bfa',label:'Eye Catcher'},'future-target':{emoji:'📰',col:'#fb923c',label:'Future Target'},'trainer-intel':{emoji:'🗣',col:'#60a5fa',label:'Trainer Intel'},'form-study':{emoji:'📊',col:'#ef4444',label:'Form Study'},'tip-source':{emoji:'💡',col:'#eab308',label:'Tip / Source'}};
   const rm=RMAP[e.reason||'eye-catcher']||RMAP['eye-catcher'];
   const obs=e.observations||[];
   const targets=e.targets||[];
@@ -228,7 +228,7 @@ function openWLForm(id,prefill){
   const goingPrefs=e?e.goingPrefs||[]:[];
   _wlDossier.goingPrefs=goingPrefs.slice();
   const goingHtml=going.map(function(g){const sel=_wlDossier.goingPrefs.includes(g);return'<button type="button" data-going="'+g+'" onclick="wlToggleGoing(this)" style="padding:5px 10px;border-radius:20px;border:1px solid '+(sel?'#e879f9':'rgba(232,121,249,.25)')+';background:'+(sel?'rgba(232,121,249,.2)':'transparent')+';color:'+(sel?'#e879f9':'var(--mut)')+';font-family:monospace;font-size:10px;cursor:pointer;margin-right:5px;margin-bottom:5px;">'+g+'</button>';}).join('');
-  const REASONS=[{value:'eye-catcher',emoji:'👁',label:'Eye Catcher'},{value:'future-target',emoji:'📰',label:'Future Target'},{value:'trainer-intel',emoji:'🗣',label:'Trainer Intel'},{value:'form-study',emoji:'📊',label:'Form Study'},{value:'tip-source',emoji:'💡',label:'Tip / Source'}];
+  const REASONS=[{value:'eye-catcher',emoji:'🔭',label:'Eye Catcher'},{value:'future-target',emoji:'📰',label:'Future Target'},{value:'trainer-intel',emoji:'🗣',label:'Trainer Intel'},{value:'form-study',emoji:'📊',label:'Form Study'},{value:'tip-source',emoji:'💡',label:'Tip / Source'}];
   const curReason=e?e.reason||'eye-catcher':'eye-catcher';
   const REASON_COLS={'eye-catcher':'#a78bfa','future-target':'#fb923c','trainer-intel':'#60a5fa','form-study':'#ef4444','tip-source':'#eab308'};
   const reasonHtml=REASONS.map(function(r){const sel=r.value===curReason;const col=REASON_COLS[r.value]||'#e879f9';const selAlpha=col.replace('#','');return'<button type="button" data-reason="'+r.value+'" onclick="wlSelectReason(this)" style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:10px;border:1px solid '+(sel?col:'rgba(255,255,255,.1)')+';background:'+(sel?'rgba('+parseInt(selAlpha.slice(0,2),16)+','+parseInt(selAlpha.slice(2,4),16)+','+parseInt(selAlpha.slice(4,6),16)+',.15)':'transparent')+';color:'+(sel?col:'var(--mut)')+';cursor:pointer;flex:1;min-width:0;"><span style="font-size:17px;">'+r.emoji+'</span><span style="font-family:monospace;font-size:8px;font-weight:'+(sel?'700':'400')+';text-align:center;line-height:1.2;">'+r.label+'</span></button>';}).join('');

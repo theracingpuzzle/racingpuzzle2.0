@@ -244,19 +244,27 @@ function rcSwToggleFlatRace(idx){
 
 
 // Country detection helpers
-const UK_COURSES=['aintree','ascot','ayr','bangor','bangor-on-dee','bath','beverley','brighton','carlisle','cartmel','catterick','chelmsford','cheltenham','chepstow','chester','doncaster','epsom','exeter','fakenham','ffos las','fontwell','goodwood','hamilton','haydock','hereford','hexham','huntingdon','kelso','kempton','leicester','lingfield','ludlow','market rasen','musselburgh','newbury','newcastle','newmarket','newton abbot','nottingham','perth','plumpton','pontefract','redcar','ripon','salisbury','sandown','sedgefield','southwell','stratford','taunton','thirsk','uttoxeter','warwick','wetherby','wincanton','windsor','wolverhampton','worcester','yarmouth','york'];
+const ENG_COURSES=['aintree','ascot','bath','beverley','brighton','carlisle','cartmel','catterick','chelmsford','cheltenham','chester','doncaster','epsom','exeter','fakenham','fontwell','goodwood','haydock','hereford','hexham','huntingdon','kempton','leicester','lingfield','ludlow','market rasen','newbury','newcastle','newmarket','newton abbot','nottingham','plumpton','pontefract','redcar','ripon','salisbury','sandown','sedgefield','southwell','stratford','taunton','thirsk','uttoxeter','warwick','wetherby','wincanton','windsor','wolverhampton','worcester','yarmouth','york'];
+const SCO_COURSES=['ayr','hamilton','kelso','musselburgh','perth'];
+const WAL_COURSES=['bangor','bangor-on-dee','chepstow','ffos las'];
 const IRE_COURSES=['the curragh','leopardstown','naas','navan','gowran park','galway','tipperary','cork','killarney','listowel','down royal','downpatrick','dundalk','fairyhouse','kilbeggan','laytown','limerick','roscommon','sligo','tramore','thurles','punchestown','ballinrobe','bellewstown','clonmel','mullingar','wexford','kilmalloch'];
 
 function rcCourseCountry(course){
   const c=(course||'').toLowerCase().trim();
-  if(UK_COURSES.some(k=>c.includes(k)))return'gb';
+  if(SCO_COURSES.some(k=>c.includes(k)))return'sco';
+  if(WAL_COURSES.some(k=>c.includes(k)))return'wal';
+  if(ENG_COURSES.some(k=>c.includes(k)))return'eng';
   if(IRE_COURSES.some(k=>c.includes(k)))return'ie';
-  if(c.includes('(aw)'))return'gb';
+  if(c.includes('(aw)'))return'eng';
   return'intl';
 }
 
 function rcCountryFlag(code){
-  return code==='gb'?'🇬🇧':code==='ie'?'🇮🇪':'🌍';
+  if(code==='eng')return'🏴󠁧󠁢󠁥󠁮󠁧󠁿';
+  if(code==='sco')return'🏴󠁧󠁢󠁳󠁣󠁴󠁿';
+  if(code==='wal')return'🏴󠁧󠁢󠁷󠁬󠁳󠁿';
+  if(code==='ie')return'🇮🇪';
+  return'🌍';
 }
 
 function rcMeetingType(races){
@@ -1118,8 +1126,10 @@ async function rcLoadResults(){
         const name=race.race_name||race.name||'Race';
         const runners=race.runners||[];
         const places=runners.slice(0,4);
+        const flag=rcCountryFlag(rcCourseCountry(course));
         return'<div class="blk" style="margin-bottom:10px;padding:12px 14px;">'
-          +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">'
+          +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+            +'<span style="font-size:18px;flex-shrink:0;">'+flag+'</span>'
             +'<div><div style="font-weight:700;font-size:14px;">'+time+' '+course+'</div>'
             +'<div style="font-size:12px;color:var(--mut);">'+name+'</div></div>'
           +'</div>'

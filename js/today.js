@@ -257,8 +257,8 @@ async function checkWatchlistRunners(races){
   alertEl.innerHTML='<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:11px;padding:12px 14px;">'
     +'<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:8px;">🔔 Watchlist Running Today</div>'
     +alerts.map(function(a){
-      return'<div style="padding:7px 0;border-bottom:1px solid rgba(167,139,250,.12);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;" style="cursor:pointer;" onclick="if(a&&a.wlEntry&&a.wlEntry.id)openWLForm(a.wlEntry.id)">'
-        +'<div>'
+      const wid=(a.wlEntry&&a.wlEntry.id)?a.wlEntry.id:'';
+      return'<div data-wlid="'+wid+'" class="t-wl-item" style="padding:7px 0;border-bottom:1px solid rgba(167,139,250,.12);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;">'
           +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+a.horse+'</div>'
           +'<div style="font-size:11px;color:var(--mut);">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
           +(a.jockey?'<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div>':'')
@@ -267,6 +267,12 @@ async function checkWatchlistRunners(races){
       +'</div>';
     }).join('')
   +'</div>';
+  // Use event delegation to avoid inline variable scope issues
+  setTimeout(function(){
+    alertEl.querySelectorAll('.t-wl-item').forEach(function(el){
+      el.addEventListener('click',function(){var id=this.getAttribute('data-wlid');if(id)openWLForm(id);});
+    });
+  },0);
 }
 
 function renderThisWeek(){

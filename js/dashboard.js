@@ -523,10 +523,28 @@ function delBetEM(){
   if(!confirm('Delete this bet permanently?'))return;
   const id=document.getElementById('emid').value;
   const isVirt=document.getElementById('emtype').value==='virt';
-  if(isVirt){const vb=getVBank();vb.bets=vb.bets.filter(x=>x.id!==id);}
-  else D.bets=D.bets.filter(x=>x.id!==id);
-  save();updHdr();closeEM();renderToday();renderNums();renderVBMini();
-  if(mode==='cmd'){renderDash();renderHist();}
+  if(isVirt){
+    const vb=getVBank();
+    const bet=vb.bets.find(x=>x.id===id);
+    // Reverse virtual bank delta
+    if(bet&&bet.result&&bet.result!=='pending'&&bet.result!=='nr'){
+      const outlay=(parseFloat(bet.stake)||0)*(bet.betType==='ew'?2:1);
+      const betPnl=(parseFloat(bet.returns)||0)-outlay;
+      vb.current=parseFloat(((vb.current||0)-betPnl).toFixed(2));
+    }
+    vb.bets=vb.bets.filter(x=>x.id!==id);
+  } else {
+    const bet=D.bets.find(x=>x.id===id);
+    // Reverse real bank delta if it was already banked
+    if(bet&&bet.betBanked&&bet.result&&bet.result!=='pending'&&bet.result!=='nr'&&bet.result!=='void'){
+      const outlay=ewOutlay(bet);
+      const betPnl=(parseFloat(bet.returns)||0)-outlay;
+      D.bank.current=parseFloat(((D.bank.current||0)-betPnl).toFixed(2));
+    }
+    D.bets=D.bets.filter(x=>x.id!==id);
+  }
+  save();updHdr();closeEM();renderVBMini();
+  if(mode==='cmd'){renderDash();renderHist();renderStats();}
 }
 document.getElementById('emod').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEM();});
 

@@ -297,6 +297,9 @@ async function _syncSettings(){
   const rows=Object.keys(s).map(function(k){
     return{user_id:uid,key:k,value:s[k],updated_at:new Date().toISOString()};
   });
+  if(D.sources&&D.sources.length){
+    rows.push({user_id:uid,key:'sources',value:JSON.stringify(D.sources),updated_at:new Date().toISOString()});
+  }
   await _supa('DELETE','settings',null,'user_id=eq.'+SUPA_USER_ID);
   if(rows.length) await _supa('POST','settings',rows);
 }
@@ -395,7 +398,14 @@ async function supaLoad(){
     // ── Settings ──
     if(Array.isArray(settingRows)){
       D.settings=D.settings||{};
-      settingRows.forEach(function(s){D.settings[s.key]=s.value;});
+      settingRows.forEach(function(s){
+        if(s.key==='sources'){
+          try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.sources=parsed;}
+          catch(e){}
+        } else {
+          D.settings[s.key]=s.value;
+        }
+      });
     }
 
     saveLocal();

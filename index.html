@@ -185,7 +185,7 @@
           <div id="lb-stake-guide" style="display:none;background:rgba(232,228,220,.07);border:1px solid rgba(232,228,220,.18);border-radius:9px;padding:10px 13px;margin-bottom:10px;">
             <div id="lb-stake-guide-content" style="font-size:13px;color:var(--txt);line-height:1.7;"></div>
           </div>
-          <div class="fg"><label>Source</label><select id="lbsrc"><option>Own Form Study</option><option>Albatross2.0</option><option>Pricewise (Tom Segal)</option><option>Signpost (RP)</option><option>Templegate</option><option>RFO Nap</option><option>Handicapper's Nap</option><option>Eye Catcher</option><option>Timeform</option><option>At The Races</option><option>Other</option></select></div>
+          <div class="fg"><label>Source</label><select id="lbsrc"></select></div>
           <div class="fg"><label>Edge in one sentence</label><textarea id="lbnotes" placeholder="Why this horse, why this price…" style="min-height:48px;"></textarea></div>
           <div class="sdiv">Result (fill after race)</div>
           <div class="g2">
@@ -549,6 +549,27 @@
       <div class="ptitle">Settings</div><div class="psub">Configure your tool and manage your data.</div>
 
       <div class="blk">
+        <div class="bttl">📋 Bet Sources</div>
+        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Manage the sources available when logging a bet. Each source is tagged as <strong style="color:#60a5fa;">Own</strong> (fires the own-study checklist) or <strong style="color:#e879f9;">Tip</strong> (fires the tip checklist).</div>
+        <div id="set-sources-list" style="margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:1;min-width:160px;">
+            <label style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);display:block;margin-bottom:5px;">Label</label>
+            <input type="text" id="set-src-new-label" placeholder="e.g. Racing Post" autocomplete="off" style="width:100%;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);display:block;margin-bottom:5px;">Type</label>
+            <select id="set-src-new-type" style="padding:10px 14px;border-radius:8px;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);font-size:13px;">
+              <option value="tip">Tip</option>
+              <option value="own">Own</option>
+            </select>
+          </div>
+          <button class="btn bgld" onclick="settingsAddSource()" style="white-space:nowrap;">+ Add Source</button>
+        </div>
+        <div style="font-family:monospace;font-size:11px;color:var(--mut);margin-top:8px;" id="set-src-status"></div>
+      </div>
+
+      <div class="blk">
         <div class="bttl">💰 Starting Bank</div>
         <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Set your starting bankroll. This is used to calculate ROI and growth percentage. Your current bank is updated from the Bank card.</div>
         <div class="fg"><label>Starting Bank (£)</label><input type="number" id="set-bk-start" step="10" placeholder="500" style="max-width:200px;"></div>
@@ -669,7 +690,7 @@
         <div class="fg"><label>Jockey</label><input type="text" id="em-jockey" autocomplete="off"></div>
         <div class="fg"><label>Trainer</label><input type="text" id="em-trainer" autocomplete="off"></div>
       </div>
-      <div class="fg"><label>Source</label><select id="em-source"><option>Own Form Study</option><option>Albatross2.0</option><option>Pricewise (Tom Segal)</option><option>Signpost (RP)</option><option>Templegate</option><option>RFO Nap</option><option>Handicapper's Nap</option><option>Eye Catcher</option><option>Timeform</option><option>At The Races</option><option>Other</option></select></div>
+      <div class="fg"><label>Source</label><select id="em-source"></select></div>
       <div class="fg"><label>Pre-Race Notes</label><textarea id="em-prenotes" style="min-height:44px;"></textarea></div>
     </div>
 

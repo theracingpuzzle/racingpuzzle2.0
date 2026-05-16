@@ -1,8 +1,23 @@
 // ─── STATE ───
 // Central data object — single source of truth
+const DEFAULT_SOURCES = [
+  {id:'own-form',    label:'Own Form Study',       type:'own'},
+  {id:'albatross',   label:'Albatross2.0',          type:'tip'},
+  {id:'pricewise',   label:'Pricewise (Tom Segal)', type:'tip'},
+  {id:'signpost',    label:'Signpost (RP)',          type:'tip'},
+  {id:'templegate',  label:'Templegate',             type:'tip'},
+  {id:'rfo-nap',     label:'RFO Nap',               type:'tip'},
+  {id:'hcap-nap',    label:"Handicapper's Nap",      type:'tip'},
+  {id:'eye-catcher', label:'Eye Catcher',            type:'tip'},
+  {id:'timeform',    label:'Timeform',               type:'tip'},
+  {id:'atr',         label:'At The Races',           type:'tip'},
+  {id:'other',       label:'Other',                  type:'tip'},
+];
+
 let D = {
   bets: [], bank: {start:0, current:0}, rules: [], dailyLog: [],
-  impulse: [], vBank: {start:500, current:500, bets:[]}, watchlist: []
+  impulse: [], vBank: {start:500, current:500, bets:[]}, watchlist: [],
+  sources: []
 };
 
 function load() {
@@ -17,6 +32,7 @@ function load() {
       if (!D.bank || typeof D.bank !== 'object') D.bank = {start:0, current:0};
       if (!D.vBank || typeof D.vBank !== 'object') D.vBank = {start:500, current:500, bets:[]};
       if (!Array.isArray(D.vBank.bets)) D.vBank.bets = [];
+      if (!Array.isArray(D.sources) || D.sources.length === 0) D.sources = DEFAULT_SOURCES.map(s=>({...s}));
       if (Array.isArray(D.watchlist)) {
         D.watchlist.forEach(w => { if (w.notes && !w.conditionsNotes) w.conditionsNotes = w.notes; });
       }

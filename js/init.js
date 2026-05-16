@@ -37,6 +37,7 @@ bldDots();
   rfrTL();
   renderChips();
   seedRules();
+  renderSourceDropdowns();
 
   const _cd = document.getElementById('cdate');
   if (_cd) _cd.value = td();

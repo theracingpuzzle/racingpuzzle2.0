@@ -418,7 +418,7 @@ function renderStats(){
 }
 
 // ─── CMD TAB ROUTER ───
-function cTab(id,btn){document.querySelectorAll('.cpane').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));document.getElementById('cp-'+id).classList.add('on');btn.classList.add('on');if(id==='dash')renderDash();if(id==='hist')renderHist();if(id==='stats')renderStats();if(id==='rules')renderCmdRules();if(id==='set'){loadApiKeyField();loadStartBankField();loadRacingCredsFields();loadAILimitField();}
+function cTab(id,btn){document.querySelectorAll('.cpane').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));document.getElementById('cp-'+id).classList.add('on');btn.classList.add('on');if(id==='dash')renderDash();if(id==='hist')renderHist();if(id==='stats')renderStats();if(id==='rules')renderCmdRules();if(id==='set'){loadApiKeyField();loadStartBankField();loadRacingCredsFields();loadAILimitField();renderSettingsSources();}
   if(id==='cards'){rcInit();}}
 
 // ─── EDIT MODAL ───

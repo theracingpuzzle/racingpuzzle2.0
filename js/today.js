@@ -203,51 +203,184 @@ function rfrTL(){const c=[...new Set([...getTracks(),...TKS])];document.querySel
 
 // ─── TODAY ───
 function renderToday(){
-  renderBetLimit();
-  const t=td(),tb=D.bets.filter(b=>b.date===t);
+  const t=td();
+  const dl=document.getElementById('tdlbl');
+  if(dl) dl.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+
+  // ── Real P&L today ──
+  const tb=D.bets.filter(b=>b.date===t);
   const set=tb.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr');
   const p=set.reduce((a,b)=>a+(pnl(b)||0),0);
-  const dl=document.getElementById('tdlbl');
-  if(dl)dl.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short',year:'numeric'});
-  const pe=document.getElementById('tpnl');pe.textContent=fmt(p);pe.className='sbig '+(p>0?'pos':p<0?'neg':'gld');
-  renderChips();
-  renderThisWeek();
-  renderNextRace();
-  renderStudyReminder();
-  // Meetings loaded on-demand only (via button tap) to avoid hammering the API
-  // But check watchlist against any already-cached races immediately
+  const pe=document.getElementById('tpnl');
+  if(pe){pe.textContent=fmt(p);pe.style.color=p>0?'var(--grn)':p<0?'var(--red)':'var(--gld)';}
+
+  // ── Virtual P&L today ──
+  const vb=getVBank();
+  const vtb=(vb.bets||[]).filter(b=>b.date===t);
+  const vset=vtb.filter(b=>b.result&&b.result!=='pending'&&b.result!=='nr');
+  const vp=vset.reduce((a,b)=>a+((parseFloat(b.returns)||0)-(parseFloat(b.stake)||0)),0);
+  const vpe=document.getElementById('t-virt-pnl');
+  if(vpe){vpe.textContent=fmt(vp);vpe.style.color=vp>0?'var(--grn)':vp<0?'var(--red)':'#fb923c';}
+
+  // ── Bet limit tile ──
+  renderBetLimit();
+
+  // ── Check-in state ──
+  renderCheckIn();
+
+  // ── Watchlist + Edge alerts ──
   if(window._todayMeetingsCache){
     const races=window._todayMeetingsCache.racecards||window._todayMeetingsCache.races||[];
     checkWatchlistRunners(races);
+    renderEdgeAlerts(races);
     renderNextRace();
   }
+
+  // ── Streak ──
+  renderStreak();
+
+  // ── Today's bets ──
+  renderTodayBets(tb, vtb);
+
+  // ── Outstanding ──
+  renderOutstanding();
+
+  // ── This week ──
+  renderThisWeek();
+}
+
+function renderCheckIn(){
+  const t=td();
   const log=(D.dailyLog||[]).find(d=>d.date===t);
   const ci=document.getElementById('tcin');
-  if(ci&&log&&log.checkedIn){ci.innerHTML=`<div style="background:rgba(45,184,122,.08);border:1px solid rgba(45,184,122,.25);border-radius:8px;padding:7px 10px;font-family:monospace;font-size:10px;color:var(--grn);">✓ Checked in today</div>`;document.getElementById('tmood').value=log.mood||'neutral';document.getElementById('tnotes').value=log.notes||'';}
-  const le=document.getElementById('tbets');
-  const vb=getVBank();
-  const vtb=(vb.bets||[]).filter(b=>b.date===t);
-  const allBets=[...tb.map(b=>({...b,_type:'real'})),...vtb.map(b=>({...b,_type:'virt'}))];
-  if(!allBets.length){le.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;padding:4px 0;">No bets today.</div>';}
-  else{
-    const bg={win:'bw1',place:'bp1',loss:'bl1',pending:'bpend',void:'bnr',nr:'bnr'};
-    le.innerHTML=allBets.map(function(b){
-      const isV=b._type==='virt';
-      const p2=isV?((b.result&&b.result!=='pending'&&b.result!=='nr')?(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0):null):pnl(b);
-      const os=b.oddsDisplay||(b.odds||'—');
-      const lbl=b.horse+(isV?' <span style="font-size:9px;color:#fb923c;font-family:monospace;">VIRT</span>':'');
-      const el=document.createElement('div');
-      el.className='mb '+(b.result||'pending');
-      el.style.borderLeftColor=isV?'#fb923c':'';
-      el.style.cursor='pointer';el.setAttribute('onclick',isV?'openVEM("'+b.id+'")':'openEM("'+b.id+'")');
-      el.innerHTML='<div class="mbl"><div class="mh">'+lbl+'</div><div class="mm">'+(b.track||'—')+(b.time?' · '+b.time:'')+' · <span style="font-family:monospace;">'+os+'</span></div></div>'
-        +'<div class="mbr"><span class="bdg '+(bg[b.result]||'bpend')+'">'+(b.result||'pending')+'</span>'
-        +'<div class="mp '+(p2===null?'':p2>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p2===null?'—':fmt(p2))+'</div></div>';
-      return el.outerHTML;
-    }).join('');
+  if(!ci) return;
+  if(log&&log.checkedIn){
+    const moodEmoji={poor:'😔',neutral:'😐',good:'🙂',great:'😄'}[log.mood||'neutral']||'😐';
+    ci.innerHTML='<div style="background:rgba(45,184,122,.08);border:1px solid rgba(45,184,122,.25);border-radius:11px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;">'
+      +'<div>'
+        +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grn);margin-bottom:3px;">✓ Checked in</div>'
+        +(log.focus?'<div style="font-size:13px;color:var(--txt);">'+log.focus+'</div>':'<div style="font-size:12px;color:var(--mut);font-style:italic;">No focus set</div>')
+      +'</div>'
+      +'<span style="font-size:22px;">'+moodEmoji+'</span>'
+      +'</div>';
+  } else {
+    // Show check-in form — restore mood button active state
+    const mood=(log&&log.mood)||'neutral';
+    document.querySelectorAll('#tmood-btns button').forEach(function(b){
+      const m=b.getAttribute('onclick').replace("setMood('","").replace("')","");
+      b.style.background=m===mood?'rgba(232,228,220,.15)':'transparent';
+      b.style.borderColor=m===mood?'rgba(232,228,220,.4)':'var(--bdr)';
+    });
+    const tf=document.getElementById('t-focus');
+    if(tf&&log&&log.focus) tf.value=log.focus;
   }
+}
 
-  // Outstanding: pending bets from previous days
+function setMood(mood){
+  document.querySelectorAll('#tmood-btns button').forEach(function(b){
+    b.style.background='transparent';b.style.borderColor='var(--bdr)';
+  });
+  const btn=document.getElementById('mood-'+mood);
+  if(btn){btn.style.background='rgba(232,228,220,.15)';btn.style.borderColor='rgba(232,228,220,.4)';}
+  const t=td();
+  D.dailyLog=D.dailyLog||[];
+  let log=D.dailyLog.find(d=>d.date===t);
+  if(!log){log={date:t,checkedIn:false,mood:'neutral',notes:'',tracks:[],createdAt:Date.now()};D.dailyLog.push(log);}
+  log.mood=mood;
+  save();
+}
+
+function saveFocus(val){
+  const t=td();
+  D.dailyLog=D.dailyLog||[];
+  let log=D.dailyLog.find(d=>d.date===t);
+  if(!log){log={date:t,checkedIn:false,mood:'neutral',notes:'',tracks:[],createdAt:Date.now()};D.dailyLog.push(log);}
+  log.focus=val.trim();
+  save();
+}
+
+function doCheckIn(){
+  const t=td();
+  D.dailyLog=D.dailyLog||[];
+  let log=D.dailyLog.find(d=>d.date===t);
+  if(!log){log={date:t,checkedIn:false,mood:'neutral',notes:'',tracks:[],createdAt:Date.now()};D.dailyLog.push(log);}
+  const mood=document.querySelector('#tmood-btns button[style*="rgba(232"]');
+  if(mood){const m=mood.getAttribute('onclick').replace("setMood('","").replace("')","");log.mood=m;}
+  const focus=document.getElementById('t-focus');
+  if(focus)log.focus=focus.value.trim();
+  log.checkedIn=true;
+  log.checkedInAt=Date.now();
+  save();
+  renderCheckIn();
+}
+
+function renderEdgeAlerts(races){
+  const el=document.getElementById('t-edge-alerts');
+  if(!el) return;
+  const wl=getWL();
+  const edges=[];
+  (races||[]).forEach(function(race){
+    const course=race.course||race.venue||'';
+    const time=race.off||race.off_time||race.time||'';
+    (race.runners||race.horses||[]).forEach(function(r){
+      const name=(r.horse||r.name||'').toLowerCase().trim();
+      wl.forEach(function(w){
+        const wn=(w.horse||'').toLowerCase().trim();
+        if(name&&wn&&(name===wn||name.includes(wn)||wn.includes(name))){
+          const mr=parseFloat(w.myRating);
+          const or=parseFloat(w.currentRating);
+          if(mr&&or&&mr>or){
+            const edge=mr-or;
+            if(!edges.find(e=>e.horse.toLowerCase()===name)){
+              edges.push({horse:w.horse,course,time,edge,mr,or});
+            }
+          }
+        }
+      });
+    });
+  });
+  if(!edges.length){el.style.display='none';return;}
+  edges.sort(function(a,b){return b.edge-a.edge;});
+  el.style.display='block';
+  el.innerHTML='<div style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);border-radius:11px;padding:12px 14px;">'
+    +'<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#4ade80;margin-bottom:8px;">⭐ Edge Running Today</div>'
+    +edges.map(function(e){
+      return'<div style="padding:7px 0;border-bottom:1px solid rgba(74,222,128,.1);display:flex;align-items:center;justify-content:space-between;" onclick="goTo(5)">'
+        +'<div>'
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+e.horse+'</div>'
+          +'<div style="font-family:monospace;font-size:10px;color:var(--mut);">'+e.time+' · '+e.course+'</div>'
+        +'</div>'
+        +'<span style="font-family:monospace;font-size:11px;font-weight:700;color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:3px 8px;border-radius:8px;white-space:nowrap;">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
+        +'</div>';
+    }).join('')
+  +'</div>';
+}
+
+function renderTodayBets(tb, vtb){
+  const le=document.getElementById('tbets');
+  if(!le) return;
+  const allBets=[...tb.map(b=>({...b,_type:'real'})),...vtb.map(b=>({...b,_type:'virt'}))];
+  if(!allBets.length){le.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;padding:4px 0;">No bets logged today.</div>';return;}
+  const bg={win:'bw1',place:'bp1',loss:'bl1',pending:'bpend',void:'bnr',nr:'bnr'};
+  le.innerHTML=allBets.map(function(b){
+    const isV=b._type==='virt';
+    const p2=isV?((b.result&&b.result!=='pending'&&b.result!=='nr')?(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0):null):pnl(b);
+    const os=b.oddsDisplay||(b.odds||'—');
+    const el=document.createElement('div');
+    el.className='mb '+(b.result||'pending');
+    el.style.borderLeftColor=isV?'#fb923c':'';
+    el.style.cursor='pointer';
+    el.setAttribute('onclick',isV?'openVEM("'+b.id+'")':'openEM("'+b.id+'")');
+    el.innerHTML='<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-size:9px;color:#fb923c;font-family:monospace;">VIRT</span>':'')+'</div>'
+      +'<div class="mm">'+(b.track||'—')+(b.time?' · '+b.time:'')+' · <span style="font-family:monospace;">'+os+'</span></div></div>'
+      +'<div class="mbr"><span class="bdg '+(bg[b.result]||'bpend')+'">'+(b.result||'pending')+'</span>'
+      +'<div class="mp '+(p2===null?'':p2>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p2===null?'—':fmt(p2))+'</div></div>';
+    return el.outerHTML;
+  }).join('');
+}
+
+function renderOutstanding(){
+  const t=td();
   const allPrev=[
     ...D.bets.filter(b=>(!b.result||b.result==='pending')&&b.date!==t).map(b=>({...b,_type:'real'})),
     ...getVBank().bets.filter(b=>(!b.result||b.result==='pending')&&b.date!==t).map(b=>({...b,_type:'virt'}))
@@ -255,18 +388,17 @@ function renderToday(){
   const owrap=document.getElementById('t-outstanding-wrap');
   const olist=document.getElementById('t-outstanding');
   const ocnt=document.getElementById('t-outstanding-count');
-  if(owrap)owrap.style.display=allPrev.length?'block':'none';
-  if(ocnt)ocnt.textContent=allPrev.length+' pending';
+  if(owrap) owrap.style.display=allPrev.length?'block':'none';
+  if(ocnt) ocnt.textContent=allPrev.length+' pending';
   if(olist&&allPrev.length){
-    const bg2={win:'bw1',place:'bp1',loss:'bl1',pending:'bpend',void:'bnr',nr:'bnr'};
     olist.innerHTML=allPrev.map(function(b){
       const isV=b._type==='virt';
       const fn=isV?'openVEM':'openEM';
       const os=b.oddsDisplay||(b.odds||'—');
-      return '<div class="mb pending" onclick="'+fn+'(\''+b.id+'\')" style="cursor:pointer;border-left-color:'+(isV?'#fb923c':'var(--red)')+';">'
+      return'<div class="mb pending" onclick="'+fn+'(\''+b.id+'\')" style="cursor:pointer;border-left-color:'+(isV?'#fb923c':'var(--red)')+';">'
         +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-family:monospace;font-size:9px;color:#fb923c;">VIRT</span>':'')+'</div>'
         +'<div class="mm">'+b.date+' · '+(b.track||'—')+' · <span style="font-family:monospace;">'+os+'</span> · '+fp(b.stake)+'</div></div>'
-        +'<div class="mbr"><span class="bdg bpend" style="background:rgba(196,58,58,.15);color:var(--red);">update</span></div></div>';
+        +'<div class="mbr"><span class="bdg bpend" style="background:rgba(196,58,58,.15);color:var(--red);">settle</span></div></div>';
     }).join('');
   }
 }

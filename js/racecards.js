@@ -412,20 +412,16 @@ function rcSwRenderRunners(idx, course, el){
         +'<div style="font-size:11px;color:var(--mut);">T: '+trainer+(age?' · '+age:'')+(rpr?' · <span style="font-size:9px;background:var(--sur2);border:1px solid var(--bdr);padding:1px 4px;border-radius:3px;">'+rpr+'</span>':'')+'</div>'
       +'</div>'
       +(isNR?''
-        :'<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">'
-          +'<button onclick="rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\',\'real\')" style="font-family:monospace;font-size:10px;font-weight:700;padding:5px 10px;border-radius:7px;border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.1);color:#60a5fa;cursor:pointer;">R</button>'
-          +'<button onclick="rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\',\'virt\')" style="font-family:monospace;font-size:10px;font-weight:700;padding:5px 10px;border-radius:7px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.1);color:#fb923c;cursor:pointer;">V</button>'
-        +'</div>')
+        :'<button onclick="rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\')\" style="font-family:monospace;font-size:10px;font-weight:700;padding:5px 12px;border-radius:7px;border:1px solid rgba(232,228,220,.25);background:rgba(232,228,220,.08);color:var(--txt);cursor:pointer;flex-shrink:0;">Bet</button>')
     +'</div>';
   }).join('');
   el.innerHTML=html;
 }
 
 // ── Overlay flow: Racecard R/V → Checklist overlay → Log Bet overlay → back to Racecards ──
-function rcSwBet(event, horse, course, time, jockey, trainer, raceName, mode){
+function rcSwBet(event, horse, course, time, jockey, trainer, raceName){
   event.stopPropagation();
-  _pendingRCBet={horse,course,time,jockey,trainer,raceName,mode};
-  openPrebetOverlay();
+  openBetFlow(horse, course, time, jockey, trainer, raceName);
 }
 
 function openPrebetOverlay(){

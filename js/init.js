@@ -1,16 +1,6 @@
 // ─── INIT ─── runs after all other modules are loaded (must be last script tag)
 
-load();
-setTimeout(function(){ if (typeof _supaPing === 'function') _supaPing(); }, 800);
-
-// Record today's visit for streak tracking
-(function recordVisit() {
-  D.dailyLog = D.dailyLog || [];
-  if (!D.dailyLog.find(function(d){ return d.date === td(); })) {
-    D.dailyLog.push({date:td(), visited:true, checkedIn:false, mood:'neutral', notes:'', tracks:[], createdAt:Date.now()});
-    try { localStorage.setItem(SK, JSON.stringify(D)); } catch(e) {}
-  }
-})();
+load(); // load from localStorage first (instant, offline-safe)
 
 bldDots();
 goTo(0, true);
@@ -30,12 +20,32 @@ if (it.length === 1) {
   if (_lbt) _lbt.value = it[0];
 }
 
-// Auto-navigate to Coach if API key set and no brief today
-if (getApiKey() && localStorage.getItem('re-brief-date') !== td()) {
-  setTimeout(() => goTo(3, false), 600);
-}
+// ─── SUPABASE STARTUP SYNC ───
+// Pull from Supabase on every load so Device B always has current data
+// before the user can make any changes that would overwrite it
+(async function startupSync() {
+  if (!SUPA_URL || !SUPA_ANON) return;
 
-// ─── SUPABASE PING ───
+  const dot = document.getElementById('supa-dot');
+  if (dot) { dot.style.background = '#f59e0b'; dot.title = 'Supabase: syncing...'; }
+
+  try {
+    const loaded = await supaLoad();
+    if (loaded) {
+      // Re-render with fresh data from Supabase
+      updHdr();
+      renderToday();
+      renderChips();
+      if (dot) { dot.style.background = '#34d399'; dot.title = 'Supabase: synced ✅'; }
+    } else {
+      if (dot) { dot.style.background = '#f59e0b'; dot.title = 'Supabase: offline'; }
+    }
+  } catch(e) {
+    if (dot) { dot.style.background = '#ef4444'; dot.title = 'Supabase: ' + e.message; }
+  }
+})();
+
+// ─── SUPABASE PING (used for settings test) ───
 function _supaPing() {
   if (!SUPA_URL || !SUPA_ANON) return;
   const dot = document.getElementById('supa-dot');
@@ -60,4 +70,9 @@ function enterApp() {
   s.style.transition = 'opacity .35s ease';
   s.style.opacity = '0';
   setTimeout(function(){ s.style.display = 'none'; }, 360);
+}
+
+// Auto-navigate to Coach if API key set and no brief today
+if (getApiKey() && localStorage.getItem('re-brief-date') !== td()) {
+  setTimeout(function(){ goTo(3, false); }, 600);
 }

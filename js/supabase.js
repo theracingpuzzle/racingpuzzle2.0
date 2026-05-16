@@ -20,6 +20,21 @@ function supaSync(){
 }
 
 // Helper: Supabase REST fetch
+async function _supaUpsert(table,rows){
+  // Upsert using POST with Prefer: resolution=merge-duplicates
+  if(!rows||!rows.length)return;
+  const url=SUPA_URL+'/rest/v1/'+table;
+  await fetch(url,{
+    method:'POST',
+    headers:{
+      'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,
+      'Content-Type':'application/json',
+      'Prefer':'resolution=merge-duplicates,return=minimal'
+    },
+    body:JSON.stringify(rows)
+  });
+}
+
 async function _supa(method,table,body,params){
   const url=SUPA_URL+'/rest/v1/'+table+(params?'?'+params:'');
   const headers={'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON};
@@ -195,7 +210,7 @@ async function _syncBets(){
   } else {
     await _supa('DELETE','bets',null,'user_id=eq.'+uid);
   }
-  if(all.length) await _supa('POST','bets',all);
+  if(all.length) await _supaUpsert('bets',all);
 }
 
 // ── Horse Profiles + Observations + Targets ──
@@ -234,14 +249,20 @@ async function _syncProfiles(){
         created_at:new Date().toISOString()});
     });
   });
-  // Delete all observations and targets for this user, then reinsert
-  await _supa('DELETE','profile_observations',null,'user_id=eq.'+uid);
-  await _supa('DELETE','profile_targets',null,'user_id=eq.'+uid);
-  // Delete all profiles then reinsert (obs/targets already cleared above)
-  await _supa('DELETE','horse_profiles',null,'user_id=eq.'+uid);
-  if(profiles.length) await _supa('POST','horse_profiles',profiles);
+  // Upsert profiles (safe across devices — won't wipe records from other devices)
+  if(profiles.length) await _supaUpsert('horse_profiles',profiles);
+  // For observations/targets: delete only this profile's records then reinsert
+  const profileIds=profiles.map(function(p){return p.id;});
+  if(profileIds.length){
+    await _supa('DELETE','profile_observations',null,'user_id=eq.'+uid+'&profile_id=in.('+profileIds.join(',')+')');
+    await _supa('DELETE','profile_targets',null,'user_id=eq.'+uid+'&profile_id=in.('+profileIds.join(',')+')');
+  }
   if(obs.length) await _supa('POST','profile_observations',obs);
   if(targets.length) await _supa('POST','profile_targets',targets);
+  // Remove any profiles deleted locally
+  if(profileIds.length){
+    await _supa('DELETE','horse_profiles',null,'user_id=eq.'+uid+'&id=not.in.('+profileIds.join(',')+')');
+  }
 }
 
 // ── Rules ──

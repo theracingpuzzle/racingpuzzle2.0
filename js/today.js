@@ -243,7 +243,7 @@ async function checkWatchlistRunners(races){
       const horseName=(r.horse||r.name||'').toLowerCase().trim();
       watching.forEach(function(w){
         const wlName=(w.horse||'').toLowerCase().trim();
-        if(horseName&&wlName&&(horseName===wlName||horseName.includes(wlName)||wlName.includes(horseName))){
+        if(horseName&&wlName&&horseName===wlName){
           if(!alerts.find(a=>a.horse.toLowerCase()===horseName)){
             alerts.push({horse:r.horse||r.name,course,time,raceName,jockey:r.jockey||'',wlEntry:w});
           }
@@ -439,7 +439,7 @@ function renderEdgeAlerts(races){
       const name=(r.horse||r.name||'').toLowerCase().trim();
       wl.forEach(function(w){
         const wn=(w.horse||'').toLowerCase().trim();
-        if(name&&wn&&(name===wn||name.includes(wn)||wn.includes(name))){
+        if(name&&wn&&name===wn){
           const mr=parseFloat(w.myRating);
           const or=parseFloat(w.currentRating);
           if(mr&&or&&mr>or){

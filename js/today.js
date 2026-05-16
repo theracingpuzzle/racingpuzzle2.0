@@ -5,6 +5,114 @@ function getTracks(){const l=(D.dailyLog||[]).find(d=>d.date===td());return(l&&A
 function setTracks(t){D.dailyLog=D.dailyLog||[];let l=D.dailyLog.find(d=>d.date===td());if(!l){l={date:td(),checkedIn:false,mood:'neutral',notes:'',tracks:[],createdAt:Date.now()};D.dailyLog.push(l);}l.tracks=t;save();}
 function addTrack(){const el=document.getElementById('ttrack');const v=el.value.trim();if(!v)return;const t=getTracks();if(!t.includes(v)){t.push(v);setTracks(t);}el.value='';renderChips();rfrTL();}
 function rmTrack(n){setTracks(getTracks().filter(x=>x!==n));renderChips();rfrTL();}
+
+// ─── TODAY DEMO ───
+function runTodayDemo(){
+  const btn = document.getElementById('t-demo-btn');
+  if(btn && btn.textContent.trim() === 'Demo ›'){
+    btn.textContent = 'Clear ✕';
+    btn.style.color = 'var(--red)';
+    btn.style.borderColor = 'rgba(196,58,58,.3)';
+    _showTodayDemo();
+  } else {
+    if(btn){ btn.textContent = 'Demo ›'; btn.style.color = 'rgba(232,228,220,.4)'; btn.style.borderColor = 'rgba(232,228,220,.15)'; }
+    renderToday(); // restore real state
+  }
+}
+
+function _showTodayDemo(){
+  // ── P&L tiles ──
+  const pe = document.getElementById('tpnl');
+  if(pe){ pe.textContent = '+£42.50'; pe.style.color = 'var(--grn)'; }
+  const vpe = document.getElementById('t-virt-pnl');
+  if(vpe){ vpe.textContent = '+£18.00'; vpe.style.color = 'var(--grn)'; }
+
+  // ── Bet limit tile ──
+  const bl = document.getElementById('tbetlimit');
+  if(bl) bl.innerHTML = '<div style="font-family:monospace;font-size:9px;color:rgba(232,228,220,.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Bets Today</div>'
+    + '<div style="font-family:monospace;font-size:17px;font-weight:700;color:var(--gld);">2 <span style="font-size:11px;color:var(--mut);">/ 3</span></div>';
+
+  // ── Check-in ──
+  const ci = document.getElementById('tcin');
+  if(ci) ci.innerHTML = '<div style="background:rgba(45,184,122,.08);border:1px solid rgba(45,184,122,.25);border-radius:11px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;">'
+    + '<div><div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grn);margin-bottom:3px;">✓ Checked in</div>'
+    + '<div style="font-size:13px;color:var(--txt);">Looking for a well-treated handicapper on decent ground</div></div>'
+    + '<span style="font-size:22px;">🙂</span></div>';
+
+  // ── Edge alerts ──
+  const ea = document.getElementById('t-edge-alerts');
+  if(ea){
+    ea.style.display = 'block';
+    ea.innerHTML = '<div style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);border-radius:11px;padding:12px 14px;">'
+      + '<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#4ade80;margin-bottom:8px;">⭐ Edge Running Today</div>'
+      + [
+          {horse:'Midnight Envoy', course:'Ascot', time:'14:30', mr:92, or:88, edge:4},
+          {horse:'Thistle Down',   course:'York',  time:'16:10', mr:85, or:82, edge:3},
+        ].map(function(e){
+          return '<div style="padding:7px 0;border-bottom:1px solid rgba(74,222,128,.1);display:flex;align-items:center;justify-content:space-between;">'
+            + '<div><div style="font-size:13px;font-weight:700;color:var(--txt);">'+e.horse+'</div>'
+            + '<div style="font-family:monospace;font-size:10px;color:var(--mut);">'+e.time+' · '+e.course+'</div></div>'
+            + '<span style="font-family:monospace;font-size:11px;font-weight:700;color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:3px 8px;border-radius:8px;white-space:nowrap;">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+
+  // ── Watchlist alert ──
+  const wa = document.getElementById('t-wl-alerts');
+  if(wa){
+    wa.style.display = 'block';
+    wa.innerHTML = '<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:11px;padding:12px 14px;">'
+      + '<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:8px;">🔔 Watchlist Running Today</div>'
+      + [
+          {horse:'Midnight Envoy', course:'Ascot', time:'14:30', jockey:'F. Dettori', race:'Copper Horse Stakes'},
+          {horse:'Velvet Sunrise',  course:'Newmarket', time:'15:45', jockey:'R. Moore', race:'July Stakes'},
+        ].map(function(a){
+          return '<div style="padding:7px 0;border-bottom:1px solid rgba(167,139,250,.12);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
+            + '<div><div style="font-size:13px;font-weight:700;color:var(--txt);">'+a.horse+'</div>'
+            + '<div style="font-size:11px;color:var(--mut);">'+a.time+' · '+a.course+' · '+a.race+'</div>'
+            + '<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div></div>'
+            + '<span style="font-family:monospace;font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;">Card →</span>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+
+  // ── Next race ──
+  const nr = document.getElementById('t-next-race');
+  const nrc = document.getElementById('t-next-race-content');
+  if(nr && nrc){
+    nr.style.display = 'block';
+    nrc.innerHTML = '<div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:11px;padding:12px 14px;">'
+      + '<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#60a5fa;margin-bottom:6px;">⏰ Next Race</div>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+      + '<div><div style="font-size:14px;font-weight:700;color:var(--txt);">Ascot — 14:30</div>'
+      + '<div style="font-size:11px;color:var(--mut);">Copper Horse Stakes · 12 runners</div></div>'
+      + '<div style="font-family:monospace;font-size:20px;font-weight:700;color:#60a5fa;">8m</div>'
+      + '</div></div>';
+  }
+
+  // ── Today's bets ──
+  const le = document.getElementById('tbets');
+  if(le){
+    le.innerHTML = [
+      {horse:'Midnight Envoy', track:'Ascot',    time:'14:30', odds:'7/2',  stake:10, result:'win',     returns:45,  type:'real'},
+      {horse:'Velvet Sunrise',  track:'Newmarket',time:'15:45', odds:'5/1',  stake:5,  result:'loss',    returns:0,   type:'real'},
+      {horse:'Thistle Down',    track:'York',     time:'16:10', odds:'9/4',  stake:8,  result:'pending', returns:0,   type:'virt'},
+    ].map(function(b){
+      const isV=b.type==='virt';
+      const p=b.result==='win'?b.returns-b.stake:b.result==='loss'?-b.stake:null;
+      const bgMap={win:'bw1',loss:'bl1',pending:'bpend'};
+      return '<div class="mb '+(b.result)+'" style="border-left-color:'+(isV?'#fb923c':'')+';cursor:pointer;">'
+        +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-size:9px;color:#fb923c;font-family:monospace;">VIRT</span>':'')+'</div>'
+        +'<div class="mm">'+b.track+' · '+b.time+' · <span style="font-family:monospace;">'+b.odds+'</span></div></div>'
+        +'<div class="mbr"><span class="bdg '+(bgMap[b.result]||'bpend')+'">'+b.result+'</span>'
+        +'<div class="mp '+(p===null?'':p>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p===null?'—':fmt(p))+'</div></div>'
+        +'</div>';
+    }).join('');
+  }
+}
+
 // cache shared via window._todayMeetingsCache
 async function loadTodayMeetings(){
   const stEl=document.getElementById('t-meetings-status');

@@ -72,7 +72,7 @@ function _showTodayDemo(){
             + '<div><div style="font-size:13px;font-weight:700;color:var(--txt);">'+a.horse+'</div>'
             + '<div style="font-size:11px;color:var(--mut);">'+a.time+' · '+a.course+' · '+a.race+'</div>'
             + '<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div></div>'
-            + '<span style="font-family:monospace;font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;">Card →</span>'
+            + '<span style="font-family:monospace;font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;">Profile →</span>'
             + '</div>';
         }).join('')
       + '</div>';
@@ -257,13 +257,13 @@ async function checkWatchlistRunners(races){
   alertEl.innerHTML='<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:11px;padding:12px 14px;">'
     +'<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:8px;">🔔 Watchlist Running Today</div>'
     +alerts.map(function(a){
-      return'<div style="padding:7px 0;border-bottom:1px solid rgba(167,139,250,.12);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;" onclick="goTo(1)" style="cursor:pointer;">'
+      return'<div style="padding:7px 0;border-bottom:1px solid rgba(167,139,250,.12);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;" style="cursor:pointer;" onclick="if(a&&a.wlEntry&&a.wlEntry.id)openWLForm(a.wlEntry.id)">'
         +'<div>'
           +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+a.horse+'</div>'
           +'<div style="font-size:11px;color:var(--mut);">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
           +(a.jockey?'<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div>':'')
         +'</div>'
-        +'<span style="font-family:monospace;font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;cursor:pointer;">Card →</span>'
+        +'<span style="font-family:monospace;font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;cursor:pointer;">Profile →</span>'
       +'</div>';
     }).join('')
   +'</div>';

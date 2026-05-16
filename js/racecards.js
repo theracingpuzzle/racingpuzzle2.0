@@ -45,8 +45,8 @@ function rcSwRenderUI(){
   const timeActive = onTime?'background:#60a5fa;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;';
   const courseActive = !onTime?'background:#60a5fa;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;';
   let html='<div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-bottom:12px;">'
-    +'<button style="'+btnBase+timeActive+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
     +'<button style="'+btnBase+courseActive+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
+    +'<button style="'+btnBase+timeActive+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
     +'</div>';
 
   uiEl.innerHTML=html;
@@ -176,7 +176,7 @@ function rcSwRaceCardPreview(r, course, isNext, isPast){
   }).length;
   const idx=_rcSwFlatRaces.length;
   _rcSwFlatRaces.push({race:r, course:course});
-  const uid='rctp-'+idx;
+  const uid='rcr-'+idx;
   return '<div style="background:var(--sur);border:1px solid '+(isNext?'rgba(96,165,250,.35)':'var(--bdr)')+';border-radius:12px;margin-bottom:8px;overflow:hidden;'+(isPast?'opacity:0.38;':'')+'">'
     +'<div onclick="rcSwToggleFlatRace('+idx+')" style="padding:11px 13px;'+(isNext?'background:rgba(96,165,250,.05);':'')+'display:flex;align-items:center;gap:8px;cursor:pointer;">'
       +'<span style="font-family:monospace;font-size:14px;font-weight:700;color:'+(isNext?'#60a5fa':'var(--gld)')+';">'+time+'</span>'
@@ -201,7 +201,7 @@ function rcSwFullRaceCard(r, course){
   const runnerCount=runners.length-nrCount;
   const idx=_rcSwFlatRaces.length;
   _rcSwFlatRaces.push({race:r, course:course});
-  const uid='rcfc-'+idx;
+  const uid='rcr-'+idx;
   return '<div style="background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:8px;overflow:hidden;">'
     +'<div data-race-idx="'+idx+'" onclick="rcSwToggleFlatRace('+idx+')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;">'
       +'<div>'
@@ -218,7 +218,7 @@ function rcSwFullRaceCard(r, course){
 }
 
 function rcSwToggleFlatRace(idx){
-  const el=document.getElementById('rcfc-'+idx);
+  const el=document.getElementById('rcr-'+idx);
   const chev=document.getElementById('rcfc-chev-'+idx);
   if(!el)return;
   const open=el.style.display!=='none';
@@ -565,8 +565,8 @@ function rcSwRenderResultsUI(){
   filterEl.style.display = 'block';
   filterEl.innerHTML =
     '<div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-bottom:12px;">'
-    + '<button style="'+btnBase+(onT?'background:#fb923c;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
     + '<button style="'+btnBase+(!onT?'background:#fb923c;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
+    + '<button style="'+btnBase+(onT?'background:#fb923c;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
     + '</div>';
 
   const listEl = document.getElementById('sw-results-list');

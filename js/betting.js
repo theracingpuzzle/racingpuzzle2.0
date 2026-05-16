@@ -238,3 +238,53 @@ function renderBkCard(){
 function saveBank(){if(!D.bank||typeof D.bank!=='object')D.bank={start:0,current:0};const c=parseFloat(document.getElementById('bkcu').value)||0;D.bank.current=c;save();updHdr();renderBkCard();calcStk();renderRealBankMini();const btn=document.querySelector('#c4 .bgld');if(btn){const o=btn.textContent;btn.textContent='✓ Saved';btn.style.background='var(--grn)';setTimeout(()=>{btn.textContent=o;btn.style.background='';},3000);}}
 function calcStk(){const m=document.getElementById('bkm').value,bank=D.bank.current||0;const kw=document.getElementById('kelwin'),lbl=document.getElementById('bkil'),re=document.getElementById('stkres'),oe=document.getElementById('stkout'),ne=document.getElementById('stknote');kw.style.display=m==='kelly'?'block':'none';let stake=0,note='';if(m==='level'){lbl.textContent='Stake (£)';stake=parseFloat(document.getElementById('bkin').value)||0;note='Fixed amount per bet.';}else if(m==='pct'){lbl.textContent='% of Bank';const p=parseFloat(document.getElementById('bkin').value)||0;stake=bank*(p/100);note=`${p}% of ${fp(bank)}`;}else if(m==='kelly'){const p=(parseFloat(document.getElementById('kp').value)||0)/100,b=(parseFloat(document.getElementById('ko').value)||0)-1,fr=parseFloat(document.getElementById('kf').value)||.5;if(p>0&&b>0){const k=(p*b-(1-p))/b;stake=k>0?bank*k*fr:0;note=k<=0?'No edge — do not bet.':`Full Kelly: ${(k*100).toFixed(2)}% → ${(fr*100).toFixed(0)}% applied`;}}if(stake>0){re.style.display='block';oe.textContent='£'+stake.toFixed(2);ne.textContent=note;}else re.style.display='none';}
 
+
+function recalcBanks(){
+  if(!confirm('Recalculate both banks from your full bet history?\nThis will overwrite any manually entered balance.'))return;
+
+  // ── Real bank ──
+  D.bank=D.bank||{start:0,current:0};
+  D.bank.current=D.bank.start||0;
+  // Clear betBanked flags so applyBankDelta replays cleanly
+  (D.bets||[]).forEach(function(b){ b.betBanked=false; });
+  (D.bets||[]).forEach(function(b){
+    if(b.result&&b.result!=='pending'){
+      applyBankDelta(b,null,0);
+    }
+  });
+
+  // ── Virtual bank ──
+  const vb=getVBank();
+  vb.current=vb.start||500;
+  (vb.bets||[]).forEach(function(b){
+    if(b.result&&b.result!=='pending'&&b.result!=='nr'){
+      const outlay=(parseFloat(b.stake)||0)*(b.betType==='ew'?2:1);
+      const betPnl=(parseFloat(b.returns)||0)-outlay;
+      vb.current=parseFloat((vb.current+betPnl).toFixed(2));
+    }
+  });
+
+  save();
+  updHdr();
+  renderBkCard();
+  renderRealBankMini();
+  renderVBMini();
+  if(typeof renderDash==='function') renderDash();
+  if(typeof renderStats==='function') renderStats();
+
+  // Show confirmation
+  const btn=document.querySelector('[onclick="recalcBanks()"]');
+  if(btn){
+    const orig=btn.textContent;
+    btn.textContent='✓ Done — banks recalculated';
+    btn.style.background='var(--grn)';
+    btn.style.borderColor='var(--grn)';
+    btn.style.color='#141414';
+    setTimeout(function(){
+      btn.textContent=orig;
+      btn.style.background='';
+      btn.style.borderColor='';
+      btn.style.color='';
+    },3000);
+  }
+}

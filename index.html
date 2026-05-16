@@ -280,6 +280,9 @@
         <div class="fg"><label>Current Bank (£)</label><input type="number" id="bkcu" step="0.01" placeholder="487.50"></div>
         <button class="btn bgld bw" onclick="saveBank()">Update Bank</button>
         <div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:8px;">To change your starting bank, go to Command → Settings.</div>
+        <div class="sdiv" style="margin-top:20px;">🔄 Recalculate</div>
+        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">If your balance looks wrong after editing or deleting bets, this rebuilds both banks from scratch using your full bet history.</div>
+        <button class="btn bout bw" onclick="recalcBanks()">Recalculate Banks from Bets</button>
 
         <div class="sdiv" style="margin-top:20px;">🎯 Staking Plan</div>
         <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Points-based staking. Set your <strong style="color:var(--txt);">point value</strong> once — your confidence level determines the stake automatically.</div>

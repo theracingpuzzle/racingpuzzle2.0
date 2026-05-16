@@ -215,6 +215,12 @@ function renderToday(){
   renderNextRace();
   renderStudyReminder();
   // Meetings loaded on-demand only (via button tap) to avoid hammering the API
+  // But check watchlist against any already-cached races immediately
+  if(window._todayMeetingsCache){
+    const races=window._todayMeetingsCache.racecards||window._todayMeetingsCache.races||[];
+    checkWatchlistRunners(races);
+    renderNextRace();
+  }
   const log=(D.dailyLog||[]).find(d=>d.date===t);
   const ci=document.getElementById('tcin');
   if(ci&&log&&log.checkedIn){ci.innerHTML=`<div style="background:rgba(45,184,122,.08);border:1px solid rgba(45,184,122,.25);border-radius:8px;padding:7px 10px;font-family:monospace;font-size:10px;color:var(--grn);">✓ Checked in today</div>`;document.getElementById('tmood').value=log.mood||'neutral';document.getElementById('tnotes').value=log.notes||'';}

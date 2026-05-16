@@ -1,7 +1,7 @@
 // ─── RACECARDS & RESULTS ─── swipe cards, results, overlay flow
 
 // ─── SWIPE RACECARDS / RESULTS ───
-let rcSwCurrentRaces=[], rcSwRacesByMeeting={}, rcSwView='time', _pendingRCBet=null;
+let rcSwCurrentRaces=[], rcSwRacesByMeeting={}, rcSwView='course', _pendingRCBet=null;
 
 function rcSwipeInit(){
   if(!rcSwCurrentRaces.length) rcSwLoadMeetings();
@@ -529,7 +529,7 @@ function goFromChecklist(){
   }
 }
 
-let rcSwResultsData = [], rcSwResultsView = 'time', rcSwResultsOpenCourse = '';
+let rcSwResultsData = [], rcSwResultsView = 'course', rcSwResultsOpenCourse = '';
 
 async function rcSwLoadResults(){
   const stEl = document.getElementById('sw-results-status');
@@ -965,6 +965,18 @@ function rcRenderRunners(idx, course, el){
           const wl=getWL();
           const nameLower=(name||'').toLowerCase().trim();
           const profiled=wl.find(function(w){return(w.horse||'').toLowerCase().trim()===nameLower;});
+          // Auto-update OR from API data if changed
+          if(profiled){
+            const apiOR=String(r.ofr||r.official_rating||r.rpr||'').replace('-','').trim();
+            if(apiOR&&apiOR!=='0'&&apiOR!==String(profiled.currentRating||'').trim()){
+              profiled.currentRating=apiOR;
+              profiled.orHistory=profiled.orHistory||[];
+              if(!profiled.orHistory.length||profiled.orHistory[profiled.orHistory.length-1].or!==apiOR){
+                profiled.orHistory.push({or:apiOR,date:td()});
+              }
+              save();
+            }
+          }
           const PREASON_META={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#fb923c'},'trainer-intel':{emoji:'🗣',col:'#60a5fa'},'form-study':{emoji:'📊',col:'#ef4444'},'tip-source':{emoji:'💡',col:'#eab308'}};
           const pm=profiled?PREASON_META[profiled.reason||'eye-catcher']:null;
           const profilerBadge=profiled?'<span style="font-size:9px;font-family:monospace;padding:1px 6px;border-radius:10px;border:1px solid '+pm.col+';color:'+pm.col+';background:rgba(0,0,0,.3);margin-left:4px;">'+pm.emoji+'</span>':'';

@@ -1,6 +1,33 @@
 // ─── WATCHLIST / PUZZLE PROFILER ───
 
 let wlView='cal', wlCalDate=new Date();
+// ── OR Edge helpers ──
+function orEdge(entry){
+  const mr=parseFloat(entry.myRating);
+  const or=parseFloat(entry.currentRating);
+  if(!mr||!or) return null;
+  return mr - or; // positive = horse running below your assessed mark = value
+}
+
+function orEdgeBadge(entry){
+  const edge=orEdge(entry);
+  if(edge===null) return '';
+  if(edge>0) return '<span style="font-family:monospace;font-size:10px;font-weight:700;color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:1px 6px;border-radius:4px;margin-left:4px;">▲ +'+edge+' edge</span>';
+  if(edge<0) return '<span style="font-family:monospace;font-size:10px;font-weight:700;color:#f87171;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25);padding:1px 6px;border-radius:4px;margin-left:4px;">▼ '+edge+' edge</span>';
+  return '<span style="font-family:monospace;font-size:10px;color:var(--mut);background:var(--sur2);border:1px solid var(--bdr);padding:1px 6px;border-radius:4px;margin-left:4px;">→ on mark</span>';
+}
+
+function orSummaryLine(entry){
+  const mr=parseFloat(entry.myRating);
+  const or=parseFloat(entry.currentRating);
+  if(!mr&&!or) return '';
+  let parts=[];
+  if(mr) parts.push('<span style="color:var(--gld);font-weight:700;">MR '+mr+'</span>');
+  if(or) parts.push('<span style="color:var(--mut);">OR '+or+'</span>');
+  return '<div style="font-family:monospace;font-size:11px;display:flex;align-items:center;gap:4px;margin-top:3px;">'+parts.join('<span style="color:var(--mut);margin:0 2px;">·</span>')+orEdgeBadge(entry)+'</div>';
+}
+
+
 
 function getWL(){if(!D.watchlist)D.watchlist=[];return D.watchlist;}
 
@@ -95,7 +122,8 @@ function wlSelectDay(dateStr){
       return'<div data-wl-id="'+d.horseId+'" style="cursor:pointer;border-left:3px solid #fb923c;margin-bottom:8px;padding:10px 11px;background:rgba(251,146,60,.05);border-radius:0 8px 8px 0;">'
         +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
           +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-weight:700;font-size:14px;margin-bottom:2px;">'+d.horse+(d.currentRating?'<span style="font-family:monospace;font-size:10px;color:var(--mut);font-weight:400;margin-left:6px;">OR '+d.currentRating+'</span>':'')+'</div>'
+            +'<div style="font-weight:700;font-size:14px;margin-bottom:2px;">'+d.horse+'</div>'
+            +orSummaryLine(d)
             +(d.trainer?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">'+d.trainer+'</div>':'')
             +'<div style="font-size:12px;color:#fb923c;font-weight:600;">'+t.race+(t.track?' · '+t.track:'')+'</div>'
             +(t.condition?'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:2px;">'+t.condition+'</div>':'')
@@ -165,7 +193,8 @@ function renderWLEntry(e){
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
       +'<div style="flex:1;min-width:0;">'
       +'<div style="margin-bottom:5px;"><span style="font-size:9px;font-family:monospace;padding:2px 7px;border-radius:20px;background:rgba(0,0,0,.2);border:1px solid '+rm.col+';color:'+rm.col+';font-weight:700;">'+rm.emoji+' '+rm.label+'</span>'+(e.reasonNote?'<span style="font-size:10px;color:var(--mut);font-style:italic;margin-left:6px;">'+e.reasonNote.slice(0,50)+(e.reasonNote.length>50?'…':'')+'</span>':'')+'</div>'
-      +'<div style="font-weight:700;font-size:15px;margin-bottom:2px;">'+e.horse+(e.currentRating?'<span style="font-family:monospace;font-size:10px;color:var(--mut);font-weight:400;margin-left:6px;">OR '+e.currentRating+'</span>':'')+'</div>'
+      +'<div style="font-weight:700;font-size:15px;margin-bottom:2px;">'+e.horse+'</div>'
+      +orSummaryLine(e)
       +(e.trainer?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">'+e.trainer+'</div>':'')
       +(lastObs?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">📋 <span style="color:var(--txt);">'+lastObs.raceName+(lastObs.track?' · '+lastObs.track:'')+'</span> · '+daysAgo+'</div>':'')
       +(targets.length?'<div style="margin-top:3px;">'+targets.slice(0,2).map(function(t){const tDate=t.date?(new Date(t.date+'T00:00:00')).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';return'<div style="font-size:11px;font-family:monospace;color:#fb923c;margin-bottom:1px;">🎯 '+t.race+(tDate?'<span style="color:var(--mut);"> · '+tDate+'</span>':'')+(t.track?'<span style="font-size:9px;color:var(--mut);"> · '+t.track+'</span>':'')+'</div>';}).join('')+'</div>':'')
@@ -214,7 +243,8 @@ function openWLForm(id,prefill){
     +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,121,249,.5);margin-bottom:8px;">Horse</div>'
     +'<div class="g2">'
     +'<div class="fg"><label>Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'"></div>'
-    +'<div class="fg"><label>Current OR</label><input type="number" id="wlf-rating" placeholder="e.g. 98" value="'+(e?e.currentRating||'':p.currentRating||'')+'"></div>'
+    +'<div class="fg"><label>Current OR <span style="font-size:10px;color:var(--mut);font-weight:400;">(official — updates automatically)</span></label><input type="number" id="wlf-rating" placeholder="e.g. 98" value="'+(e?e.currentRating||'':p.currentRating||'')+'"></div>'
+    +'<div class="fg"><label>My Mark (MR) <span style="font-size:10px;color:var(--mut);font-weight:400;">(the mark you believe this horse can win off)</span></label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" style="border-color:'+(e&&e.myRating?'rgba(251,191,36,.4)':'var(--bdr)')+';"></div>'
     +'</div>'
     +'<div class="fg"><label>Trainer</label><input type="text" id="wlf-trainer" value="'+(e?e.trainer||'':p.trainer||'')+'"></div>'
     +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,121,249,.5);margin:14px 0 8px;">Race Observations</div>'
@@ -342,6 +372,15 @@ function saveWLEntry(id){
   const entry={
     id:id||gid(),horse,
     currentRating:document.getElementById('wlf-rating').value.trim()||'',
+    myRating:document.getElementById('wlf-myrating').value.trim()||'',
+    orHistory:(function(){
+      const newOR=document.getElementById('wlf-rating').value.trim();
+      const prev=old?old.orHistory||[]:[];
+      if(newOR&&(!prev.length||prev[prev.length-1].or!==newOR)){
+        return [...prev,{or:newOR,date:td()}];
+      }
+      return prev;
+    })(),
     trainer:(document.getElementById('wlf-trainer').value||'').trim(),
     reason:(document.getElementById('wlf-reason')||{value:'eye-catcher'}).value||'eye-catcher',
     reasonNote:(document.getElementById('wlf-reason-note')||{value:''}).value.trim(),

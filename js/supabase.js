@@ -206,6 +206,8 @@ async function _syncProfiles(){
     id:e.id,user_id:uid,
     horse:e.horse,trainer:e.trainer||null,
     current_rating:e.currentRating||null,
+    my_rating:e.myRating||null,
+    or_history:e.orHistory||[],
     reason:e.reason||'eye-catcher',
     reason_note:e.reasonNote||null,
     trainer_intel:e.trainerIntel||null,
@@ -341,6 +343,8 @@ async function supaLoad(){
       D.watchlist=profileRows.map(function(p){return{
         id:p.id,horse:p.horse,trainer:p.trainer||'',
         currentRating:p.current_rating||'',
+        myRating:p.my_rating||'',
+        orHistory:p.or_history||[],
         reason:p.reason||'eye-catcher',
         reasonNote:p.reason_note||'',
         trainerIntel:p.trainer_intel||'',

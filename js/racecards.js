@@ -251,7 +251,7 @@ const IRE_COURSES=['the curragh','leopardstown','naas','navan','gowran park','ga
 
 function rcCourseCountry(course){
   const c=(course||'').toLowerCase().trim();
-  if(SCO_COURSES.some(k=>c.includes(k)))return'sco';
+  if(SCO_COURSES.some(k=>k==='perth'?(c===k||c.startsWith(k+' ')||c.endsWith(' '+k)):c.includes(k)))return'sco';
   if(WAL_COURSES.some(k=>c.includes(k)))return'wal';
   if(ENG_COURSES.some(k=>c.includes(k)))return'eng';
   if(IRE_COURSES.some(k=>c.includes(k)))return'ie';
@@ -640,8 +640,10 @@ function rcSwRenderResultsCourse(listEl){
     const safeId = course.replace(/\W/g,'_');
     const isOpen = rcSwResultsOpenCourse === course;
     const count = races.length;
+    const flag=rcCountryFlag(rcCourseCountry(course));
     return '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;margin-bottom:8px;overflow:hidden;">'
       + '<div onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':\''+course+'\';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));" style="display:flex;align-items:center;gap:12px;padding:13px;cursor:pointer;background:'+(isOpen?'rgba(251,146,60,.05)':'transparent')+';">'
+        + '<span style="font-size:18px;flex-shrink:0;">'+flag+'</span>'
         + '<div style="flex:1;">'
           + '<div style="font-size:15px;font-weight:700;color:'+(isOpen?'#fb923c':'var(--txt)')+';">'+course+'</div>'
           + '<div style="font-family:monospace;font-size:10px;color:var(--mut);margin-top:2px;">'+count+' race'+(count!==1?'s':'')+'</div>'

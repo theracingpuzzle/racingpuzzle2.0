@@ -288,3 +288,176 @@ function recalcBanks(){
     },3000);
   }
 }
+
+// ─── BET FLOW: source picker → checklist → log bet ───
+let _betFlowState={};
+let _flowCks=[];
+let _flowActiveCKS=[];
+
+function openBetFlow(mode,horse,course,time,jockey,trainer,raceName){
+  _betFlowState={mode:mode||'real',horse,course,time,jockey,trainer,raceName,source:'own',tipSource:''};
+  const existing=document.getElementById('_bflow-ov');
+  if(existing)existing.remove();
+  const modeCol=mode==='real'?'#60a5fa':'#fb923c';
+  const ov=document.createElement('div');
+  ov.id='_bflow-ov';
+  ov.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.75);display:flex;flex-direction:column;justify-content:flex-end;opacity:0;transition:opacity .2s;';
+  ov.innerHTML=`<div id="_bflow-sheet" style="background:var(--sur);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom,16px);max-height:90vh;display:flex;flex-direction:column;transform:translateY(40px);transition:transform .25s ease,opacity .25s ease;opacity:0;">`
+    +`<div style="display:flex;justify-content:center;padding:12px 0 4px;flex-shrink:0;"><div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);"></div></div>`
+    +`<div style="padding:12px 18px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0;">`
+      +`<div style="display:flex;align-items:center;gap:10px;">`
+        +`<span style="font-family:monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:${modeCol}22;border:1px solid ${modeCol}55;color:${modeCol};">${mode==='real'?'REAL':'VIRTUAL'}</span>`
+        +`<div><div style="font-size:17px;font-weight:700;color:var(--txt);">${horse}</div>`
+        +`<div style="font-size:11px;color:var(--mut);font-family:monospace;margin-top:1px;">${time} · ${course}</div></div>`
+      +`</div>`
+    +`</div>`
+    +`<div id="_bflow-content" style="padding:18px;overflow-y:auto;flex:1;">${_betFlowSourceHtml()}</div>`
+    +`</div>`;
+  ov.addEventListener('click',function(e){if(e.target===ov)_betFlowClose();});
+  document.body.appendChild(ov);
+  requestAnimationFrame(function(){
+    ov.style.opacity='1';
+    const sh=document.getElementById('_bflow-sheet');
+    if(sh){sh.style.transform='translateY(0)';sh.style.opacity='1';}
+  });
+}
+
+function _betFlowSourceHtml(){
+  return `<div style="font-family:monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;">How did you find this selection?</div>`
+    +`<button onclick="_betFlowSelectSource('own')" style="width:100%;text-align:left;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);cursor:pointer;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-sizing:border-box;">`
+      +`<span style="font-size:24px;flex-shrink:0;">🔍</span>`
+      +`<div><div style="font-size:15px;font-weight:700;">My Own Selection</div>`
+      +`<div style="font-size:12px;color:var(--mut);font-family:monospace;margin-top:2px;">I did the form study</div></div>`
+    +`</button>`
+    +`<button onclick="_betFlowSelectSource('tip')" style="width:100%;text-align:left;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);cursor:pointer;margin-bottom:18px;display:flex;align-items:center;gap:14px;box-sizing:border-box;">`
+      +`<span style="font-size:24px;flex-shrink:0;">💬</span>`
+      +`<div><div style="font-size:15px;font-weight:700;">Tip / Source</div>`
+      +`<div style="font-size:12px;color:var(--mut);font-family:monospace;margin-top:2px;">Someone else's selection</div></div>`
+    +`</button>`
+    +`<button onclick="_betFlowClose()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">✕ Cancel</button>`;
+}
+
+function _betFlowSelectSource(source){
+  _betFlowState.source=source;
+  const content=document.getElementById('_bflow-content');
+  if(!content)return;
+  if(source==='own'){
+    _flowActiveCKS=CKS_OWN;
+    _betFlowShowChecklist();
+  } else {
+    content.innerHTML=`<div style="font-family:monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;">Who is the tip from?</div>`
+      +`<input id="_bflow-tip-src" type="text" placeholder="e.g. Racing Post, Twitter, friend…" autocomplete="off"`
+      +` style="width:100%;box-sizing:border-box;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:13px 14px;font-size:15px;color:var(--txt);outline:none;margin-bottom:14px;">`
+      +`<button onclick="_betFlowConfirmTip()" style="width:100%;padding:13px;border-radius:10px;border:none;background:#e879f9;color:#141414;font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:10px;">Continue →</button>`
+      +`<button onclick="_betFlowClose()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">✕ Cancel</button>`;
+    setTimeout(function(){const el=document.getElementById('_bflow-tip-src');if(el)el.focus();},100);
+  }
+}
+
+function _betFlowConfirmTip(){
+  const inp=document.getElementById('_bflow-tip-src');
+  const val=(inp?inp.value.trim():'');
+  if(!val){if(inp){inp.style.borderColor='var(--red)';inp.focus();}return;}
+  _betFlowState.tipSource=val;
+  _flowActiveCKS=CKS_TIP;
+  _betFlowShowChecklist();
+}
+
+function _betFlowShowChecklist(){
+  _flowCks=new Array(_flowActiveCKS.length).fill(false);
+  const s=_betFlowState;
+  const isOwn=s.source==='own';
+  const accentCol=isOwn?'#60a5fa':'#e879f9';
+  const heading=isOwn?'Own Selection — 0 / '+_flowActiveCKS.length:'Tip: '+s.tipSource+' — 0 / '+_flowActiveCKS.length;
+  const content=document.getElementById('_bflow-content');
+  if(!content)return;
+  content.style.padding='0';
+  content.innerHTML=
+    `<div style="padding:16px 18px 0;">`
+      +`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">`
+        +`<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:${accentCol};">${isOwn?'MY SELECTION':'TIP · '+s.tipSource.toUpperCase()}</div>`
+        +`<div id="_bflow-score-lbl" style="font-family:monospace;font-size:11px;color:var(--mut);">0 / ${_flowActiveCKS.length}</div>`
+      +`</div>`
+      +`<div style="height:4px;border-radius:2px;background:var(--bdr);overflow:hidden;margin-bottom:14px;">`
+        +`<div id="_bflow-bar" style="height:100%;border-radius:2px;background:${accentCol};width:0%;transition:width .25s;"></div>`
+      +`</div>`
+    +`</div>`
+    +`<div style="padding:0 18px;overflow-y:auto;">`
+      +_flowActiveCKS.map((c,i)=>`<div id="_bflow-item-${i}" onclick="_betFlowTick(${i})" style="display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s;">`
+        +`<div id="_bflow-chk-${i}" style="width:20px;height:20px;flex-shrink:0;border-radius:6px;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s;font-size:12px;color:transparent;"></div>`
+        +`<div><div style="font-size:13px;line-height:1.4;color:var(--txt);">${c.t}</div>`
+        +`<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:3px;line-height:1.35;">${c.s}</div></div>`
+        +`</div>`).join('')
+      +`<div style="height:8px;"></div>`
+    +`</div>`
+    // Sticky bottom action bar — accessible with thumb
+    +`<div style="position:sticky;bottom:0;background:var(--sur);border-top:1px solid var(--bdr);padding:12px 18px env(safe-area-inset-bottom,16px);flex-shrink:0;">`
+      +`<div id="_bflow-rec" style="font-family:monospace;font-size:11px;color:var(--mut);margin-bottom:8px;min-height:16px;"></div>`
+      +`<div style="display:flex;gap:8px;">`
+        +`<button id="_bflow-btn" onclick="_betFlowProceed()" style="flex:1;padding:14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;">Tick the checklist above</button>`
+        +`<button onclick="_betFlowClose()" style="padding:14px 16px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:14px;cursor:pointer;">✕</button>`
+      +`</div>`
+    +`</div>`;
+}
+
+function _betFlowTick(i){
+  _flowCks[i]=!_flowCks[i];
+  const isOwn=_betFlowState.source==='own';
+  const accentCol=isOwn?'#60a5fa':'#e879f9';
+  const item=document.getElementById('_bflow-item-'+i);
+  const chk=document.getElementById('_bflow-chk-'+i);
+  if(item){item.style.borderColor=_flowCks[i]?accentCol:'var(--bdr)';item.style.background=_flowCks[i]?accentCol+'18':'var(--sur2)';}
+  if(chk){chk.style.background=_flowCks[i]?accentCol:'transparent';chk.style.borderColor=_flowCks[i]?accentCol:'var(--bdr)';chk.style.color=_flowCks[i]?'#141414':'transparent';chk.textContent=_flowCks[i]?'✓':'';}
+  _betFlowUpdateScore();
+}
+
+function _betFlowUpdateScore(){
+  const done=_flowCks.filter(Boolean).length;
+  const total=_flowActiveCKS.length;
+  const pct=total>0?done/total*100:0;
+  const isOwn=_betFlowState.source==='own';
+  const accentCol=isOwn?'#60a5fa':'#e879f9';
+  const mode=_betFlowState.mode;
+  const lbl=document.getElementById('_bflow-score-lbl');
+  if(lbl)lbl.textContent=done+' / '+total;
+  const bar=document.getElementById('_bflow-bar');
+  if(bar){bar.style.width=pct+'%';bar.style.background=done===total?'var(--grn)':pct>=66?'var(--gld)':accentCol;}
+  const btn=document.getElementById('_bflow-btn');
+  const rec=document.getElementById('_bflow-rec');
+  if(done===0){
+    if(btn){btn.style.background='var(--sur2)';btn.style.color='var(--mut)';btn.style.borderColor='var(--bdr)';btn.textContent='Tick the checklist above';}
+    if(rec)rec.textContent='';
+    return;
+  }
+  let recTxt='',recCol='var(--mut)',btnBg='',btnCol='',btnBdr='',btnTxt='';
+  const betLbl=mode==='real'?'Real Bet':'Virtual Bet';
+  if(done===total){
+    recTxt='✅ All checks passed';recCol='var(--grn)';
+    btnBg='var(--grn)';btnCol='#141414';btnBdr='var(--grn)';btnTxt='→ Log '+betLbl;
+  } else if(pct>=66){
+    recTxt='⚠️ Most checks passed — proceed with care';recCol='var(--gld)';
+    btnBg='rgba(232,228,220,.12)';btnCol='var(--gld)';btnBdr='var(--gld)';btnTxt='→ Log '+betLbl;
+  } else {
+    recTxt='🔴 Low score — consider Virtual only';recCol='var(--red)';
+    btnBg='rgba(251,146,60,.1)';btnCol='#fb923c';btnBdr='#fb923c';btnTxt='→ Log Virtual Bet';
+  }
+  if(btn){btn.style.background=btnBg;btn.style.color=btnCol;btn.style.borderColor=btnBdr;btn.textContent=btnTxt;}
+  if(rec){rec.style.color=recCol;rec.textContent=recTxt;}
+}
+
+function _betFlowProceed(){
+  const done=_flowCks.filter(Boolean).length;
+  if(done===0){alert('Work through the checklist first — tick at least what you have considered.');return;}
+  const s=_betFlowState;
+  _betFlowClose();
+  _rcDoLogBet(s);
+}
+
+function _betFlowClose(){
+  const ov=document.getElementById('_bflow-ov');
+  if(!ov)return;
+  const sh=document.getElementById('_bflow-sheet');
+  if(sh){sh.style.transform='translateY(40px)';sh.style.opacity='0';}
+  ov.style.opacity='0';
+  setTimeout(function(){if(ov.parentNode)ov.remove();},250);
+}

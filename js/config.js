@@ -31,3 +31,28 @@ const CKS = [
   {t:'This is NOT a boredom or entertainment bet',s:'There is genuine evidence here — not just an itch to have something on'},
   {t:'Stake fits the staking plan — not inflated or reduced by emotion',s:'Following the rules, not the feeling. Same unit as always'}
 ];
+
+// ─── OWN SELECTION CHECKLIST ───
+const CKS_OWN = [
+  {t:'I can state in one sentence exactly why this horse wins',s:"If I can't articulate it clearly, I'm guessing"},
+  {t:'Going is suitable — horse has proven form on today\'s ground',s:'Check last 3+ runs on similar conditions, not just assumed'},
+  {t:'Distance is proven or the step up/down is well evidenced',s:'Won or placed over this trip, or clear form reason to back the change'},
+  {t:'Race conditions suit — class, weights, and draw considered',s:'How does the race set up? Is my horse getting in well or fighting uphill?'},
+  {t:'I have estimated the true probability and the price is value',s:'My P% is meaningfully greater than what the odds imply'},
+  {t:'I have assessed the whole field — not tunnel-visioned on my pick',s:'Are others well-treated, unexpectedly dangerous, or drifting for a reason?'},
+  {t:'I am NOT chasing a loss or trying to recover a bad run',s:'This bet stands entirely on its own merits — yesterday is irrelevant'},
+  {t:'This is NOT a boredom or entertainment bet',s:'There is genuine evidence here — not just an itch to have something on'},
+  {t:'Stake fits the staking plan — not inflated or reduced by emotion',s:'Following the rules, not the feeling. Same unit as always'}
+];
+
+// ─── TIP / SOURCE CHECKLIST ───
+const CKS_TIP = [
+  {t:'I know and respect this source\'s long-term track record',s:"One big winner doesn't make a reliable source — what's the full picture?"},
+  {t:'I have independently looked at the form myself',s:"Not just taking their word — I've checked going, distance, and class"},
+  {t:'I understand the actual reason this horse is being backed',s:'Trainer move, handicap mark, course form — I know the angle, not just the name'},
+  {t:'The price on offer is acceptable — not a bad price on borrowed conviction',s:'Value still has to exist even when following someone else'},
+  {t:'I have checked the whole field and nothing jumps out as a serious danger',s:'A quick scan — am I aware of the likely dangers?'},
+  {t:'I am not backing this just because the source sounds confident',s:'Confidence is not edge. I must have my own reasons to agree'},
+  {t:'I am NOT chasing a loss or trying to recover a bad run',s:'This bet stands entirely on its own merits — yesterday is irrelevant'},
+  {t:'Stake is the same as I\'d use for my own selections',s:"Tips don't get bigger stakes — the discipline stays constant"}
+];

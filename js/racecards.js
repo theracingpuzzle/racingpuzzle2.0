@@ -1166,19 +1166,28 @@ function rcAddToWatchlist(horse, course, jockey, trainer, raceName){
 
 function rcBetFromRunner(event, horse, course, time, jockey, trainer, raceName, mode){
   event.stopPropagation();
-  mode=mode||'real';
+  openBetFlow(mode||'real', horse, course, time, jockey, trainer, raceName);
+}
+
+// Called by _betFlowProceed in betting.js once checklist is complete
+function _rcDoLogBet(s){
   setMode('sw');
   goTo(2);
   setTimeout(function(){
-    setLBMode(mode);
-    const prefix=mode==='real'?'lb':'vb';
-    const h=document.getElementById(prefix+'h');if(h)h.value=horse;
-    const t=document.getElementById(prefix+'t')||document.getElementById('lbt');if(t)t.value=course;
-    const ti=document.getElementById(prefix+'time');if(ti)ti.value=time;
-    const j=document.getElementById(prefix+'jockey');if(j)j.value=jockey;
-    const tr=document.getElementById(prefix+'trainer');if(tr)tr.value=trainer;
+    setLBMode(s.mode);
+    const pre=s.mode==='real'?'lb':'vb';
+    const h=document.getElementById(pre+'h');if(h)h.value=s.horse;
+    const t=document.getElementById(pre+'t')||document.getElementById('lbt');if(t)t.value=s.course;
+    const ti=document.getElementById(pre+'time');if(ti)ti.value=s.time;
+    const j=document.getElementById(pre+'jockey');if(j)j.value=s.jockey;
+    const tr=document.getElementById(pre+'trainer');if(tr)tr.value=s.trainer;
     renderLogBetCard();
-    if(mode==='real')setTimeout(calcLiveStake,150);
+    // Set source after form renders
+    setTimeout(function(){
+      const src=document.getElementById('lbsrc');
+      if(src)src.value=s.source==='tip'?(s.tipSource||'Tip'):'Own Selection';
+    },100);
+    if(s.mode==='real')setTimeout(calcLiveStake,150);
     else setTimeout(calcVirtStake,150);
   },300);
 }

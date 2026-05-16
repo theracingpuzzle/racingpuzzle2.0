@@ -47,14 +47,14 @@
 
         <!-- ── TOP LINE: Date + P&L ── -->
         <div style="margin:-18px -17px 0;padding:14px 17px 13px;border-bottom:1px solid rgba(232,228,220,.08);">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
             <div>
               <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:3px;">Race Day</div>
               <div style="font-size:20px;font-weight:700;color:var(--gld);" id="tdlbl">Today</div>
             </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-              <div style="text-align:right;" id="tstreak-tile"></div>
+            <div style="display:flex;align-items:center;gap:10px;">
               <button onclick="runTodayDemo()" id="t-demo-btn" style="font-family:monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:4px 9px;border-radius:6px;border:1px solid rgba(232,228,220,.15);background:rgba(232,228,220,.05);color:rgba(232,228,220,.4);cursor:pointer;">Demo ›</button>
+              <div style="text-align:right;" id="tstreak-tile"></div>
             </div>
           </div>
           <!-- P&L row: Real · Virtual · Bet count -->

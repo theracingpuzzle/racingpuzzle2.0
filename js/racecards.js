@@ -29,6 +29,8 @@ async function rcSwLoadMeetings(){
       if(uiEl) uiEl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">No racecards available.</div>';
       return;
     }
+    // Update today card watchlist + edge alerts now that races are cached
+    if(typeof renderToday==='function') renderToday();
     rcSwRenderUI();
   }catch(e){
     if(stEl){ stEl.style.display='block'; stEl.textContent='⚠️ '+e.message; }

@@ -149,22 +149,7 @@ function updHdr(){
   const st=document.getElementById('tstreak-tile');
   if(st){st.innerHTML='<div style="font-family:monospace;font-size:24px;font-weight:700;color:var(--gld);margin-bottom:2px;">'+streak+'<span style="font-size:18px;">🔥</span></div><div style="font-family:monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,228,220,.45);">Day Streak</div>';}
 
-  // Today card bank tiles — real=blue+arrow, virtual=orange+arrow
-  const rb=document.getElementById('t-real-bank');
-  if(rb){
-    const rdiff=bankCur-bankStart;
-    const rarrow=bankStart?(rdiff>0?' ▲':rdiff<0?' ▼':''):'';
-    const rcol=bankStart?(rdiff>0?'#34d399':rdiff<0?'#ef4444':'#60a5fa'):'#60a5fa';
-    rb.innerHTML='£'+bankCur.toFixed(2)+'<span style="font-size:10px;color:'+rcol+';">'+rarrow+'</span>';
-    rb.style.color='#60a5fa';
-  }
-  const vbt=document.getElementById('t-virt-bank');
-  if(vbt){
-    const vdiff2=vc-vs;
-    const varrow2=vs?(vdiff2>0?' ▲':vdiff2<0?' ▼':''):'';
-    const vcol=vs?(vdiff2>0?'#34d399':vdiff2<0?'#ef4444':'#fb923c'):'#fb923c';
-    vbt.innerHTML='£'+vc.toFixed(2)+'<span style="font-size:10px;color:'+vcol+';">'+varrow2+'</span>';
-    vbt.style.color='#fb923c';
-  }
+  // Re-render today card so P&L tiles stay in sync
+  if(typeof renderToday === 'function') renderToday();
 }
 

@@ -1005,14 +1005,11 @@ function rcRenderRunners(idx, course, el){
 
       +'</div>'
 
-      // Right: position/SP + R/V buttons
+      // Right: position/SP + Bet button
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;min-width:60px;">'
         +(hasResult&&sp?'<span style="font-family:monospace;font-size:13px;font-weight:700;color:var(--grn);">'+sp+'</span>':'')
         +(isNR?''
-          :'<div style="display:flex;gap:4px;">'
-            +'<button onclick="rcBetFromRunner(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\',\'real\')" style="font-family:monospace;font-size:10px;font-weight:700;padding:5px 10px;border-radius:7px;border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.1);color:#60a5fa;cursor:pointer;">R</button>'
-            +'<button onclick="rcBetFromRunner(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\',\'virt\')" style="font-family:monospace;font-size:10px;font-weight:700;padding:5px 10px;border-radius:7px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.1);color:#fb923c;cursor:pointer;">V</button>'
-          +'</div>')
+          :'<button onclick="rcBetFromRunner(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\')\" style="font-family:monospace;font-size:10px;font-weight:700;padding:5px 12px;border-radius:7px;border:1px solid rgba(232,228,220,.25);background:rgba(232,228,220,.08);color:var(--txt);cursor:pointer;">Bet</button>')
       +'</div>'
 
     +'</div>';
@@ -1164,9 +1161,9 @@ function rcAddToWatchlist(horse, course, jockey, trainer, raceName){
   });
 }
 
-function rcBetFromRunner(event, horse, course, time, jockey, trainer, raceName, mode){
+function rcBetFromRunner(event, horse, course, time, jockey, trainer, raceName){
   event.stopPropagation();
-  openBetFlow(mode||'real', horse, course, time, jockey, trainer, raceName);
+  openBetFlow(horse, course, time, jockey, trainer, raceName);
 }
 
 // Called by _betFlowProceed in betting.js once checklist is complete
@@ -1185,7 +1182,7 @@ function _rcDoLogBet(s){
     // Set source after form renders
     setTimeout(function(){
       const src=document.getElementById('lbsrc');
-      if(src)src.value=s.source==='tip'?(s.tipSource||'Tip'):'Own Selection';
+      if(src)src.value=s.source==='own'?'Own Form Study':(s.tipSource||'Other');
     },100);
     if(s.mode==='real')setTimeout(calcLiveStake,150);
     else setTimeout(calcVirtStake,150);

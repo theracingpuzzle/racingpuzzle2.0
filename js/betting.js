@@ -294,11 +294,10 @@ let _betFlowState={};
 let _flowCks=[];
 let _flowActiveCKS=[];
 
-function openBetFlow(mode,horse,course,time,jockey,trainer,raceName){
-  _betFlowState={mode:mode||'real',horse,course,time,jockey,trainer,raceName,source:'own',tipSource:''};
+function openBetFlow(horse, course, time, jockey, trainer, raceName){
+  _betFlowState={horse,course,time,jockey,trainer,raceName,source:'own',tipSource:''};
   const existing=document.getElementById('_bflow-ov');
   if(existing)existing.remove();
-  const modeCol=mode==='real'?'#60a5fa':'#fb923c';
   const ov=document.createElement('div');
   ov.id='_bflow-ov';
   ov.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.75);display:flex;flex-direction:column;justify-content:flex-end;opacity:0;transition:opacity .2s;';
@@ -306,7 +305,6 @@ function openBetFlow(mode,horse,course,time,jockey,trainer,raceName){
     +`<div style="display:flex;justify-content:center;padding:12px 0 4px;flex-shrink:0;"><div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);"></div></div>`
     +`<div style="padding:12px 18px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0;">`
       +`<div style="display:flex;align-items:center;gap:10px;">`
-        +`<span style="font-family:monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:${modeCol}22;border:1px solid ${modeCol}55;color:${modeCol};">${mode==='real'?'REAL':'VIRTUAL'}</span>`
         +`<div><div style="font-size:17px;font-weight:700;color:var(--txt);">${horse}</div>`
         +`<div style="font-size:11px;color:var(--mut);font-family:monospace;margin-top:1px;">${time} · ${course}</div></div>`
       +`</div>`
@@ -323,44 +321,41 @@ function openBetFlow(mode,horse,course,time,jockey,trainer,raceName){
 }
 
 function _betFlowSourceHtml(){
-  return `<div style="font-family:monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;">How did you find this selection?</div>`
-    +`<button onclick="_betFlowSelectSource('own')" style="width:100%;text-align:left;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);cursor:pointer;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-sizing:border-box;">`
-      +`<span style="font-size:24px;flex-shrink:0;">🔍</span>`
-      +`<div><div style="font-size:15px;font-weight:700;">My Own Selection</div>`
-      +`<div style="font-size:12px;color:var(--mut);font-family:monospace;margin-top:2px;">I did the form study</div></div>`
-    +`</button>`
-    +`<button onclick="_betFlowSelectSource('tip')" style="width:100%;text-align:left;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);cursor:pointer;margin-bottom:18px;display:flex;align-items:center;gap:14px;box-sizing:border-box;">`
-      +`<span style="font-size:24px;flex-shrink:0;">💬</span>`
-      +`<div><div style="font-size:15px;font-weight:700;">Tip / Source</div>`
-      +`<div style="font-size:12px;color:var(--mut);font-family:monospace;margin-top:2px;">Someone else's selection</div></div>`
-    +`</button>`
-    +`<button onclick="_betFlowClose()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">✕ Cancel</button>`;
+  const sources=[
+    {val:'own', label:'Own Form Study',      icon:'🔍', sub:'I did the form study'},
+    {val:'tip', label:'Albatross2.0',         icon:'💬', sub:'External source'},
+    {val:'tip', label:'Pricewise (Tom Segal)',icon:'💬', sub:'External source'},
+    {val:'tip', label:'Signpost (RP)',        icon:'💬', sub:'External source'},
+    {val:'tip', label:'Templegate',           icon:'💬', sub:'External source'},
+    {val:'tip', label:'RFO Nap',              icon:'💬', sub:'External source'},
+    {val:'tip', label:"Handicapper's Nap",    icon:'💬', sub:'External source'},
+    {val:'tip', label:'Eye Catcher',          icon:'💬', sub:'External source'},
+    {val:'tip', label:'Timeform',             icon:'💬', sub:'External source'},
+    {val:'tip', label:'At The Races',         icon:'💬', sub:'External source'},
+    {val:'tip', label:'Other',                icon:'💬', sub:'Another source'},
+  ];
+  return `<div style="font-family:monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;">Where is this selection from?</div>`
+    +sources.map(function(s){
+      return `<button onclick="_betFlowSelectSource('${s.val}','${s.label.replace(/'/g,"\\'")}')" style="width:100%;text-align:left;padding:12px 14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-sizing:border-box;">`
+        +`<span style="font-size:18px;flex-shrink:0;">${s.icon}</span>`
+        +`<div><div style="font-size:14px;font-weight:${s.val==='own'?'700':'400'};">${s.label}</div></div>`
+      +`</button>`;
+    }).join('')
+    +`<button onclick="_betFlowClose()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;margin-top:4px;">✕ Cancel</button>`;
 }
 
-function _betFlowSelectSource(source){
+function _betFlowSelectSource(source, label){
   _betFlowState.source=source;
+  _betFlowState.tipSource=label||'';
   const content=document.getElementById('_bflow-content');
   if(!content)return;
   if(source==='own'){
     _flowActiveCKS=CKS_OWN;
     _betFlowShowChecklist();
   } else {
-    content.innerHTML=`<div style="font-family:monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;">Who is the tip from?</div>`
-      +`<input id="_bflow-tip-src" type="text" placeholder="e.g. Racing Post, Twitter, friend…" autocomplete="off"`
-      +` style="width:100%;box-sizing:border-box;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:13px 14px;font-size:15px;color:var(--txt);outline:none;margin-bottom:14px;">`
-      +`<button onclick="_betFlowConfirmTip()" style="width:100%;padding:13px;border-radius:10px;border:none;background:#e879f9;color:#141414;font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:10px;">Continue →</button>`
-      +`<button onclick="_betFlowClose()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">✕ Cancel</button>`;
-    setTimeout(function(){const el=document.getElementById('_bflow-tip-src');if(el)el.focus();},100);
+    _flowActiveCKS=CKS_TIP;
+    _betFlowShowChecklist();
   }
-}
-
-function _betFlowConfirmTip(){
-  const inp=document.getElementById('_bflow-tip-src');
-  const val=(inp?inp.value.trim():'');
-  if(!val){if(inp){inp.style.borderColor='var(--red)';inp.focus();}return;}
-  _betFlowState.tipSource=val;
-  _flowActiveCKS=CKS_TIP;
-  _betFlowShowChecklist();
 }
 
 function _betFlowShowChecklist(){
@@ -417,7 +412,6 @@ function _betFlowUpdateScore(){
   const pct=total>0?done/total*100:0;
   const isOwn=_betFlowState.source==='own';
   const accentCol=isOwn?'#60a5fa':'#e879f9';
-  const mode=_betFlowState.mode;
   const lbl=document.getElementById('_bflow-score-lbl');
   if(lbl)lbl.textContent=done+' / '+total;
   const bar=document.getElementById('_bflow-bar');
@@ -430,15 +424,14 @@ function _betFlowUpdateScore(){
     return;
   }
   let recTxt='',recCol='var(--mut)',btnBg='',btnCol='',btnBdr='',btnTxt='';
-  const betLbl=mode==='real'?'Real Bet':'Virtual Bet';
   if(done===total){
-    recTxt='✅ All checks passed';recCol='var(--grn)';
-    btnBg='var(--grn)';btnCol='#141414';btnBdr='var(--grn)';btnTxt='→ Log '+betLbl;
+    recTxt='✅ All checks passed — log as Real Bet';recCol='var(--grn)';
+    btnBg='var(--grn)';btnCol='#141414';btnBdr='var(--grn)';btnTxt='→ Log Real Bet';
   } else if(pct>=66){
     recTxt='⚠️ Most checks passed — proceed with care';recCol='var(--gld)';
-    btnBg='rgba(232,228,220,.12)';btnCol='var(--gld)';btnBdr='var(--gld)';btnTxt='→ Log '+betLbl;
+    btnBg='rgba(232,228,220,.12)';btnCol='var(--gld)';btnBdr='var(--gld)';btnTxt='→ Log Real Bet';
   } else {
-    recTxt='🔴 Low score — consider Virtual only';recCol='var(--red)';
+    recTxt='🔴 Low score — Virtual only';recCol='var(--red)';
     btnBg='rgba(251,146,60,.1)';btnCol='#fb923c';btnBdr='#fb923c';btnTxt='→ Log Virtual Bet';
   }
   if(btn){btn.style.background=btnBg;btn.style.color=btnCol;btn.style.borderColor=btnBdr;btn.textContent=btnTxt;}
@@ -448,6 +441,10 @@ function _betFlowUpdateScore(){
 function _betFlowProceed(){
   const done=_flowCks.filter(Boolean).length;
   if(done===0){alert('Work through the checklist first — tick at least what you have considered.');return;}
+  const total=_flowActiveCKS.length;
+  const pct=total>0?done/total*100:0;
+  // Derive mode from score — same thresholds as display
+  _betFlowState.mode=pct>=66?'real':'virt';
   const s=_betFlowState;
   _betFlowClose();
   _rcDoLogBet(s);

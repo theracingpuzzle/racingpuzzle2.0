@@ -612,16 +612,20 @@ function rcSwRaceCard(race, course){
         const jock = r.jockey||'\u2014';
         const trainer = r.trainer||'\u2014';
         const sp = r.sp||'\u2014';
+        const ofr = r.ofr||r.official_rating||r.officialRating||r.rpr||'';
         const posCol = pos==1?'var(--grn)':pos==2?'#60a5fa':pos==3?'#fb923c':'var(--mut)';
-        const esc = s => s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        const esc = s => (s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
         return '<div style="display:flex;align-items:center;gap:10px;padding:8px 13px;border-bottom:1px solid var(--bdr);">'
           + '<span style="font-family:monospace;font-weight:700;font-size:14px;color:'+posCol+';min-width:18px;">'+pos+'</span>'
           + '<div style="flex:1;min-width:0;">'
-            + '<div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+horse+'</div>'
+            + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
+              + '<span style="font-weight:600;font-size:13px;">'+horse+'</span>'
+              + (ofr?'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:#60a5fa;">'+ofr+'</span>':'')
+            + '</div>'
             + '<div style="font-size:11px;color:var(--mut);">'+jock+'</div>'
           + '</div>'
           + '<span style="font-family:monospace;font-size:12px;font-weight:700;color:var(--gld);flex-shrink:0;">'+sp+'</span>'
-          + '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\')" style="font-family:monospace;font-size:10px;font-weight:700;padding:4px 8px;border-radius:7px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;flex-shrink:0;">W</button>'
+          + '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\')" style="font-family:monospace;font-size:10px;font-weight:700;padding:4px 8px;border-radius:7px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;flex-shrink:0;">W</button>'
         + '</div>';
       }).join('')
     + '</div>';
@@ -843,13 +847,20 @@ async function rcLoadResults(){
             const jock=r.jockey||'—';
             const trainer=r.trainer||'—';
             const sp=r.sp||r.starting_price||'—';
+            const ofr=r.ofr||r.official_rating||r.officialRating||r.rpr||'';
             const posCol=pos==1?'var(--grn)':pos==2?'#60a5fa':pos==3?'#fb923c':'var(--mut)';
+            const esc2=function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");};
             return'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bdr);">'
               +'<span style="font-family:monospace;font-weight:700;font-size:14px;color:'+posCol+';min-width:20px;">'+pos+'</span>'
-              +'<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+horse+'</div>'
-              +'<div style="font-size:11px;color:var(--mut);">'+jock+'</div></div>'
+              +'<div style="flex:1;min-width:0;">'
+                +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
+                  +'<span style="font-weight:600;font-size:13px;">'+horse+'</span>'
+                  +(ofr?'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:#60a5fa;">'+ofr+'</span>':'')
+                +'</div>'
+                +'<div style="font-size:11px;color:var(--mut);">'+jock+'</div>'
+              +'</div>'
               +'<span style="font-family:monospace;font-size:13px;color:var(--gld);flex-shrink:0;">'+sp+'</span>'
-              +'<button onclick="rcAddToWatchlist(\''+horse.replace(/'/g,"\\'")+'\',\''+course+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+name+'\')" style="font-family:monospace;font-size:10px;font-weight:700;padding:4px 8px;border-radius:7px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;flex-shrink:0;">W</button>'
+              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\')" style="font-family:monospace;font-size:10px;font-weight:700;padding:4px 8px;border-radius:7px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;flex-shrink:0;">W</button>'
               +'</div>';
           }).join('')
           +'</div>';
@@ -860,13 +871,12 @@ async function rcLoadResults(){
   }
 }
 
-function rcAddToWatchlist(horse, course, jockey, trainer, raceName){
-  // Open the watchlist form overlay pre-filled — don't save immediately
-  // raceName and track are intentionally omitted: user is planning ahead for a future race
+function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr){
   openWLForm(null, {
     horse: horse,
     trainer: trainer,
     jockey: jockey,
+    currentRating: ofr||'',
     notes: 'Noted from results on '+td()
   });
 }

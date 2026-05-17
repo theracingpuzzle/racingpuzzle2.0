@@ -1,25 +1,8 @@
 // ─── STATE ───
 // Central data object — single source of truth
-const DEFAULT_SOURCES = [
-  {id:'own-form',    label:'Own Form Study',       type:'own'},
-  {id:'albatross',   label:'Albatross2.0',          type:'tip'},
-  {id:'pricewise',   label:'Pricewise (Tom Segal)', type:'tip'},
-  {id:'signpost',    label:'Signpost (RP)',          type:'tip'},
-  {id:'templegate',  label:'Templegate',             type:'tip'},
-  {id:'rfo-nap',     label:'RFO Nap',               type:'tip'},
-  {id:'hcap-nap',    label:"Handicapper's Nap",      type:'tip'},
-  {id:'eye-catcher', label:'Eye Catcher',            type:'tip'},
-  {id:'timeform',    label:'Timeform',               type:'tip'},
-  {id:'atr',         label:'At The Races',           type:'tip'},
-  {id:'other',       label:'Other',                  type:'tip'},
-];
-
 let D = {
   bets: [], bank: {start:0, current:0}, rules: [], dailyLog: [],
-  impulse: [], vBank: {start:500, current:500, bets:[]}, watchlist: [],
-  sources: [],
-  cksOwn: [],
-  cksTip: []
+  impulse: [], vBank: {start:500, current:500, bets:[]}, watchlist: []
 };
 
 function load() {
@@ -34,14 +17,33 @@ function load() {
       if (!D.bank || typeof D.bank !== 'object') D.bank = {start:0, current:0};
       if (!D.vBank || typeof D.vBank !== 'object') D.vBank = {start:500, current:500, bets:[]};
       if (!Array.isArray(D.vBank.bets)) D.vBank.bets = [];
-      if (!Array.isArray(D.sources) || D.sources.length === 0) D.sources = DEFAULT_SOURCES.map(s=>({...s}));
-      if (!Array.isArray(D.cksOwn) || D.cksOwn.length === 0) D.cksOwn = CKS_OWN.map(c=>JSON.parse(JSON.stringify(c)));
-      if (!Array.isArray(D.cksTip) || D.cksTip.length === 0) D.cksTip = CKS_TIP.map(c=>JSON.parse(JSON.stringify(c)));
       if (Array.isArray(D.watchlist)) {
         D.watchlist.forEach(w => { if (w.notes && !w.conditionsNotes) w.conditionsNotes = w.notes; });
       }
     }
   } catch(e) {}
+  _migrateEWStakes();
+}
+
+// ─── MIGRATION: EW stake → total outlay ───
+// Previously stake stored per-leg; now stored as total (×2).
+// Runs once, guarded by a flag in localStorage.
+function _migrateEWStakes() {
+  const FLAG = 'rp-ew-stake-migrated-v1';
+  if (localStorage.getItem(FLAG)) return;
+  let changed = false;
+  const migrate = function(bets) {
+    (bets || []).forEach(function(b) {
+      if (b.betType === 'ew' && b.stake) {
+        b.stake = parseFloat((b.stake * 2).toFixed(2));
+        changed = true;
+      }
+    });
+  };
+  migrate(D.bets);
+  migrate(D.vBank && D.vBank.bets);
+  if (changed) { try { localStorage.setItem(SK, JSON.stringify(D)); } catch(e) {} }
+  localStorage.setItem(FLAG, '1');
 }
 
 function saveLocal() {

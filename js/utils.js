@@ -6,7 +6,7 @@ function fp(n){return'£'+(parseFloat(n)||0).toFixed(2);}
 function fo(s){if(!s)return 0;s=String(s).trim().toUpperCase().replace(/\s/g,'');if(s==='EVS'||s==='EVENS'||s==='1/1')return 2;const m=s.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);if(m){const n=parseFloat(m[1]),d=parseFloat(m[2]);return d>0?parseFloat((n/d+1).toFixed(4)):0;}const n=parseFloat(s);return isNaN(n)?0:n;}
 function dOdds(s){return s?s:'—';}
 
-function pnl(b){if(!b.result||b.result==='pending')return null;if(b.result==='void'||b.result==='nr')return 0;const outlay=(parseFloat(b.stake)||0)*(b.betType==='ew'?2:1);return(parseFloat(b.returns)||0)-outlay;}
+function pnl(b){if(!b.result||b.result==='pending')return null;if(b.result==='void'||b.result==='nr')return 0;const outlay=parseFloat(b.stake)||0;return(parseFloat(b.returns)||0)-outlay;}
 
 function flash(id){const el=document.getElementById(id);if(!el)return;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3500);}
 
@@ -25,17 +25,23 @@ function decToFrac(dec){
 }
 
 function calcReturns(result,stake,odDec,betType,ewTerms){
+  // For EW bets stake = total outlay (both legs); per-leg = stake/2
   stake=parseFloat(stake)||0; odDec=parseFloat(odDec)||0;
   if(!stake||!odDec)return 0;
   if(result==='win'){
     if(betType==='ew'){
+      const leg=stake/2;
       let frac=0.25;const m=(ewTerms||'').match(/1\/(\d+)/);if(m)frac=1/parseInt(m[1]);
-      return parseFloat((stake*odDec + stake*(frac*(odDec-1)+1)).toFixed(2));
+      return parseFloat((leg*odDec + leg*(frac*(odDec-1)+1)).toFixed(2));
     }
     return parseFloat((stake*odDec).toFixed(2));
   }
   if(result==='place'){
-    if(betType==='ew'){let frac=0.25;const m=(ewTerms||'').match(/1\/(\d+)/);if(m)frac=1/parseInt(m[1]);return parseFloat((stake*(frac*(odDec-1)+1)).toFixed(2));}
+    if(betType==='ew'){
+      const leg=stake/2;
+      let frac=0.25;const m=(ewTerms||'').match(/1\/(\d+)/);if(m)frac=1/parseInt(m[1]);
+      return parseFloat((leg*(frac*(odDec-1)+1)).toFixed(2));
+    }
     if(betType==='place')return parseFloat((stake*odDec).toFixed(2));
     return 0;
   }
@@ -45,8 +51,8 @@ function calcReturns(result,stake,odDec,betType,ewTerms){
 }
 
 function ewOutlay(bet){
-  // EW total outlay is stake × 2 (win leg + place leg)
-  return (parseFloat(bet.stake)||0) * (bet.betType==='ew'?2:1);
+  // stake is now stored as total outlay for EW — no multiplier needed
+  return parseFloat(bet.stake)||0;
 }
 function applyBankDelta(bet,oldResult,oldReturns){
   if(!D.bank||typeof D.bank!=='object')D.bank={start:0,current:0};
@@ -92,7 +98,7 @@ function calcStakeGuide(mode){
     +'<span style="font-size:11px;color:var(--mut);">'+pts+'pt × '+fp(pv)+'/pt</span>'
     +'</div>';
   if(isEW){
-    html+='<div style="font-size:11px;color:var(--mut);margin-bottom:6px;">EW total outlay: <strong style="color:var(--txt);">'+fp(suggested*2)+'</strong> ('+fp(suggested)+' each leg)</div>';
+    html+='<div style="font-size:11px;color:var(--mut);margin-bottom:6px;">EW total stake: <strong style="color:var(--txt);">'+fp(suggested)+'</strong> ('+fp(suggested/2)+' each leg)</div>';
   }
   if(current){
     const overLimit=pv>0&&current>(CONF_PTS[4]*pv*1.5);

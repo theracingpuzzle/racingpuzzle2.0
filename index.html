@@ -359,31 +359,15 @@
 <!-- COMMAND CENTRE -->
 <div class="cmd-shell" id="cmd-shell">
   <nav class="ctabs">
-    <button class="ctab on" onclick="cTab('dash',this)">Dashboard</button>
+    <button class="ctab on" onclick="cTab('stats',this)">Stats</button>
     <button class="ctab" onclick="cTab('hist',this)">History</button>
-    <button class="ctab" onclick="cTab('stats',this)">Stats</button>
     <button class="ctab" onclick="cTab('rules',this)">Checklists</button>
     <button class="ctab" onclick="cTab('set',this)">Settings</button>
   </nav>
   <div class="cpane-wrap">
 
     <!-- DASHBOARD -->
-    <div class="cpane on" id="cp-dash">
-      <div class="ptitle">Command Centre</div>
-      <div class="psub">Your complete picture — know where you stand before you act.</div>
-      <div class="sg" id="d-sg"></div>
 
-      <!-- Real vs Virtual head-to-head -->
-      <div class="blk" id="d-compare-blk" style="background:linear-gradient(135deg,rgba(58,127,212,.04),rgba(251,146,60,.04));border-color:rgba(100,160,200,.2);">
-        <div class="bttl">Real vs Virtual — Head to Head</div>
-        <div id="d-compare"></div>
-      </div>
-      <div class="tc">
-        
-        <div class="blk"><div class="bttl">Bankroll Health</div><div id="d-bk"></div></div>
-      </div>
-      <div class="blk"><div class="bttl">Recent Bets — Tap to Update</div><div id="d-rec"></div></div>
-    </div>
 
     <!-- HISTORY -->
     <div class="cpane" id="cp-hist">
@@ -438,7 +422,7 @@
     </div>
 
     <!-- STATS -->
-    <div class="cpane" id="cp-stats">
+    <div class="cpane on" id="cp-stats">
       <div class="ptitle">Angles &amp; Stats</div>
       <div class="psub">Where your edge is. Where you're leaking. Auto-generated from your bets.</div>
 
@@ -485,6 +469,11 @@
       </div>
 
       <div class="blk"><div class="bttl">Monthly P&L</div><div id="st-monthly"></div></div>
+
+      <div class="blk" id="d-compare-blk" style="background:linear-gradient(135deg,rgba(58,127,212,.04),rgba(251,146,60,.04));border-color:rgba(100,160,200,.2);">
+        <div class="bttl">Real vs Virtual — Head to Head</div>
+        <div id="d-compare"></div>
+      </div>
     </div>
 
     <!-- RULES CMD -->

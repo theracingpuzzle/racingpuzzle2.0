@@ -1,21 +1,9 @@
 // ─── DASHBOARD ─── cmd dashboard, history, stats, edit modal, tab router
 
 // ─── CMD DASHBOARD ───
-function renderDash(){
-  const set=D.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr');
-  const wins=set.filter(b=>b.result==='win'),places=set.filter(b=>b.result==='place');
-  const staked=set.reduce((a,b)=>a+(parseFloat(b.stake)||0),0),rets=set.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
-  const p=rets-staked,roi=staked>0?(p/staked*100):0,sr=set.length>0?((wins.length+places.length)/set.length*100):0;
-  const tb=D.bets.filter(b=>b.date===td()),tset=tb.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr');
-  const tp=tset.reduce((a,b)=>a+(pnl(b)||0),0);const pend=D.bets.filter(b=>b.result==='pending');
-  const sg=document.getElementById('d-sg');
-  if(sg)sg.innerHTML=`<div class="sc2 ${p>=0?'pc':'nc'}"><div class="sv ${p>=0?'pos':'neg'}">${fmt(p)}</div><div class="sl">All-Time P&L</div></div><div class="sc2 ${roi>=0?'pc':'nc'}"><div class="sv ${roi>=0?'pos':'neg'}">${roi.toFixed(1)}%</div><div class="sl">ROI</div></div><div class="sc2"><div class="sv gld">${sr.toFixed(0)}%</div><div class="sl">Strike Rate</div></div><div class="sc2 ${tp>=0?'pc':'nc'}"><div class="sv ${tp>=0?'pos':'neg'}">${fmt(tp)}</div><div class="sl">Today P&L</div></div><div class="sc2"><div class="sv">${set.length}</div><div class="sl">Settled Bets</div></div><div class="sc2"><div class="sv gld">${pend.length}</div><div class="sl">Pending</div></div><div class="sc2"><div class="sv">${wins.length}</div><div class="sl">Wins</div></div><div class="sc2"><div class="sv">${fp(staked)}</div><div class="sl">Total Staked</div></div>`;
-  const ds=document.getElementById('d-sess');
-  if(ds){const log=(D.dailyLog||[]).find(d=>d.date===td());const mm={focused:'🎯 Focused',good:'😊 Good',neutral:'😐 Neutral',distracted:'😤 Distracted',chasing:'🚨 Chasing'};if(log&&log.checkedIn){let out='<div style="font-size:13px;color:var(--grn);font-family:monospace;margin-bottom:6px;">✓ Checked in</div>';out+='<div style="font-size:14px;margin-bottom:5px;">'+( mm[log.mood]||'—')+'</div>';if(log.notes)out+='<div style="font-size:13px;color:var(--mut);font-style:italic;">&quot;'+log.notes+'&quot;</div>';if(tb.length)out+='<div style="margin-top:9px;font-family:monospace;font-size:11px;color:var(--mut);">'+tb.length+' bet'+(tb.length!==1?'s':'')+' today · <span style="color:'+(tp>=0?'var(--grn)':'var(--red)')+';">'+fmt(tp)+'</span></div>';else out+='<div style="margin-top:7px;font-size:13px;color:var(--mut);font-style:italic;">No bets today.</div>';ds.innerHTML=out;}else{ds.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Not logged today yet.</div>';}}
-  const db=document.getElementById('d-bk');
-  if(db){const s=D.bank.start||0,c=D.bank.current||0,diff=c-s,pct=s>0?(c/s*100):100;db.innerHTML=s?`<div class="srow"><span class="srl">Starting</span><span class="srv">${fp(s)}</span></div><div class="srow"><span class="srl">Current</span><span class="srv gld">${fp(c)}</span></div><div class="srow"><span class="srl">Change</span><span class="srv ${diff>=0?'pos':'neg'}">${fmt(diff)}</span></div><div class="prog"><div class="progf ${diff<0?'lp':''}" style="width:${Math.min(100,Math.max(2,pct)).toFixed(1)}%;"></div></div><div style="font-family:monospace;font-size:9px;color:var(--mut);text-align:right;margin-top:3px;">${pct.toFixed(1)}%</div>${pct<80?'<div style="margin-top:9px;background:rgba(200,72,72,.1);border:1px solid var(--red);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--red);">⚠️ Bank below 80% — review staking before continuing.</div>':''}`:
-    '<div style="color:var(--mut);font-style:italic;font-size:13px;">Set your bank in the Staking tab.</div>';}
-  // Real vs Virtual comparison
+function renderDash(){} // Dashboard removed - stats is now the default tab
+
+function renderCompare(set,p,roi,sr){
   const dc=document.getElementById('d-compare');
   const dcblk=document.getElementById('d-compare-blk');
   if(dc){
@@ -67,9 +55,7 @@ function renderDash(){
         +(insight?'<div style="margin-top:10px;padding:9px 12px;background:rgba(232,228,220,.07);border:1px solid rgba(232,228,220,.15);border-radius:8px;font-size:13px;color:var(--txt);line-height:1.6;">'+insight+'</div>':'');
     }
   }
-  const dr=document.getElementById('d-rec');
-  if(dr){const rec=[...D.bets].reverse().slice(0,12);if(!rec.length){dr.innerHTML='<div class="es">No bets logged yet.</div>';}else{const bg={win:'bw1',place:'bp1',loss:'bl1',pending:'bpend',void:'bnr',nr:'bnr'};dr.innerHTML=rec.map(b=>{const p2=pnl(b),os=b.oddsDisplay||(b.odds||'—');return'<div class="mb" onclick="openEM(\''+b.id+'\')" style="cursor:pointer;"><div class="mbl"><div class="mh">'+b.horse+'</div><div class="mm">'+b.date+' · '+(b.track||'—')+' · <span style="font-family:monospace;">'+os+'</span></div></div><div class="mbr"><span class="bdg '+(bg[b.result]||'bpend')+'">'+(b.result||'pending')+'</span><div class="mp '+(p2===null?'':p2>0?'pos':p2<0?'neg':'')+'" style="margin-top:2px;">'+(p2===null?'—':fmt(p2))+'</div></div></div>';}).join('');}}
-}
+  }
 
 // ─── HISTORY ───
 let histMode='real';
@@ -415,10 +401,15 @@ function renderStats(){
         +'</div>';}).join('')+'</div>';
     }
   }
+  // Real vs Virtual comparison — at the bottom of stats
+  renderCompare(
+    D.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr'),
+    p, roi, sr
+  );
 }
 
 // ─── CMD TAB ROUTER ───
-function cTab(id,btn){document.querySelectorAll('.cpane').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));document.getElementById('cp-'+id).classList.add('on');btn.classList.add('on');if(id==='dash')renderDash();if(id==='hist')renderHist();if(id==='stats')renderStats();if(id==='rules')renderCmdRules();if(id==='set'){loadApiKeyField();loadStartBankField();loadRacingCredsFields();loadAILimitField();renderSettingsSources();}
+function cTab(id,btn){document.querySelectorAll('.cpane').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));document.getElementById('cp-'+id).classList.add('on');btn.classList.add('on');if(id==='hist')renderHist();if(id==='stats')renderStats();if(id==='rules')renderCmdRules();if(id==='set'){loadApiKeyField();loadStartBankField();loadRacingCredsFields();loadAILimitField();renderSettingsSources();}
   if(id==='cards'){rcInit();}}
 
 // ─── EDIT MODAL ───
@@ -505,7 +496,7 @@ function saveEM(){
     }
     // NR/void: returns = stake so net bank impact is zero (nothing to do)
     save();updHdr();closeEM();renderToday();renderVBMini();
-    if(mode==='cmd'){renderDash();renderHist();}
+    if(mode==='cmd'){renderStats();renderHist();}
     return;
   }
   const idx=D.bets.findIndex(x=>x.id===id);if(idx===-1)return;
@@ -516,7 +507,7 @@ function saveEM(){
   b.result=newRes;b.returns=newRet;b.postNotes=postNotes;
   applyBankDelta(b,oldResult,oldReturns);
   save();updHdr();closeEM();renderToday();renderNums();
-  if(mode==='cmd'){renderDash();renderHist();}
+  if(mode==='cmd'){renderStats();renderHist();}
 }
 function closeEM(){document.getElementById('emod').classList.remove('open');}
 function delBetEM(){
@@ -544,7 +535,7 @@ function delBetEM(){
     D.bets=D.bets.filter(x=>x.id!==id);
   }
   save();updHdr();closeEM();renderVBMini();
-  if(mode==='cmd'){renderDash();renderHist();renderStats();}
+  if(mode==='cmd'){renderStats();renderHist();renderStats();}
 }
 document.getElementById('emod').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEM();});
 

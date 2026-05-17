@@ -346,7 +346,7 @@ function _betFlowSourceChanged(){
   const label=opt.text;
   _betFlowState.source=type;
   _betFlowState.tipSource=label;
-  _flowActiveCKS=type==='own'?CKS_OWN:CKS_TIP;
+  _flowActiveCKS=(type==='own'?(D.cksOwn&&D.cksOwn.length?D.cksOwn:CKS_OWN):(D.cksTip&&D.cksTip.length?D.cksTip:CKS_TIP));
   _flowCks=new Array(_flowActiveCKS.length).fill(false);
   const accentCol=type==='own'?'#60a5fa':'#e879f9';
   const wrap=document.getElementById('_bflow-cks-wrap');

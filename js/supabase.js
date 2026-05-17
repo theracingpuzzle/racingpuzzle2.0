@@ -300,6 +300,12 @@ async function _syncSettings(){
   if(D.sources&&D.sources.length){
     rows.push({user_id:uid,key:'sources',value:JSON.stringify(D.sources),updated_at:new Date().toISOString()});
   }
+  if(D.cksOwn&&D.cksOwn.length){
+    rows.push({user_id:uid,key:'cksOwn',value:JSON.stringify(D.cksOwn),updated_at:new Date().toISOString()});
+  }
+  if(D.cksTip&&D.cksTip.length){
+    rows.push({user_id:uid,key:'cksTip',value:JSON.stringify(D.cksTip),updated_at:new Date().toISOString()});
+  }
   await _supa('DELETE','settings',null,'user_id=eq.'+SUPA_USER_ID);
   if(rows.length) await _supa('POST','settings',rows);
 }
@@ -401,6 +407,12 @@ async function supaLoad(){
       settingRows.forEach(function(s){
         if(s.key==='sources'){
           try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.sources=parsed;}
+          catch(e){}
+        } else if(s.key==='cksOwn'){
+          try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.cksOwn=parsed;}
+          catch(e){}
+        } else if(s.key==='cksTip'){
+          try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.cksTip=parsed;}
           catch(e){}
         } else {
           D.settings[s.key]=s.value;

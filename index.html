@@ -362,7 +362,7 @@
     <button class="ctab on" onclick="cTab('dash',this)">Dashboard</button>
     <button class="ctab" onclick="cTab('hist',this)">History</button>
     <button class="ctab" onclick="cTab('stats',this)">Stats</button>
-    <button class="ctab" onclick="cTab('rules',this)">Rules</button>
+    <button class="ctab" onclick="cTab('rules',this)">Checklists</button>
     <button class="ctab" onclick="cTab('set',this)">Settings</button>
   </nav>
   <div class="cpane-wrap">
@@ -488,23 +488,7 @@
     </div>
 
     <!-- RULES CMD -->
-    <div class="cpane" id="cp-rules">
-      <div class="ptitle">My Rules</div><div class="psub">The code of the professional punter. Read before you bet.</div>
-      <div class="blk"><div id="rls-cmd"></div></div>
-      <div class="blk"><div class="bttl">Add a Rule</div>
-        <textarea id="rlinp-cmd" placeholder="e.g. Never back a horse in a handicap if it's carrying 10st+ on its first handicap run…" style="min-height:56px;margin-bottom:7px;"></textarea>
-        <button class="btn bgld" onclick="addRule('cmd')">Add Rule</button>
-      </div>
-      <div class="blk" style="background:linear-gradient(135deg,rgba(232,228,220,.04),transparent);border-color:rgba(232,228,220,.15);">
-        <div class="bttl">The Punter's Manifesto</div>
-        <div style="line-height:1.95;font-size:14px;color:var(--mut);">
-          <p style="margin-bottom:8px;color:var(--txt);">The professional punter is not defined by winners — they are defined by <em>process</em>.</p>
-          <p style="margin-bottom:8px;">Your edge comes from <strong style="color:#e8e4dc;">knowledge</strong> — more form study, better understanding of handicaps, trainer patterns, going preferences than the market.</p>
-          <p style="margin-bottom:8px;">Your edge comes from <strong style="color:#e8e4dc;">discipline</strong> — only backing when the price is right, not when the urge is there.</p>
-          <p style="color:var(--gld);font-style:italic;font-size:15px;margin-top:11px;">The race is not won in the betting ring. It is won in the hours of preparation before you ever open an account.</p>
-        </div>
-      </div>
-    </div>
+    <div class="cpane" id="cp-rules"></div>
 
     <!-- SETTINGS -->
     <div class="cpane" id="cp-set">

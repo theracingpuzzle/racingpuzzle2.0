@@ -645,12 +645,32 @@ function rcSwRaceCard(race, course){
 }
 
 function rcSwRenderResultsTime(listEl){
-  const sorted = rcSwResultsData.slice().sort(function(a,b){
-    return cmpTime(b.off_time||b.off||b.time||'',a.off_time||a.off||a.time||'');
+  const domestic = rcSwResultsData.filter(function(r){
+    const c=(r.course||r.venue||'').toLowerCase();
+    return ENG_COURSES.some(k=>c.includes(k))
+      || SCO_COURSES.some(function(k){return k==='perth'?(c===k||c.startsWith(k+' ')||c.endsWith(' '+k)):c.includes(k);})
+      || WAL_COURSES.some(k=>c.includes(k))
+      || IRE_COURSES.some(k=>c.includes(k));
   });
-  listEl.innerHTML = sorted.map(function(race){
+  const intl = rcSwResultsData.filter(function(r){
+    return !domestic.includes(r);
+  });
+  domestic.sort(function(a,b){
+    return cmpTime(a.off_time||a.off||a.time||'',b.off_time||b.off||b.time||'');
+  });
+  intl.sort(function(a,b){
+    return cmpTime(a.off_time||a.off||a.time||'',b.off_time||b.off||b.time||'');
+  });
+  let html = domestic.map(function(race){
     return rcSwRaceCard(race, race.course||race.venue||'Unknown');
   }).join('');
+  if(intl.length){
+    html += '<div style="font-family:monospace;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);padding:10px 4px 6px;">\U0001f30d International</div>';
+    html += intl.map(function(race){
+      return rcSwRaceCard(race, race.course||race.venue||'Unknown');
+    }).join('');
+  }
+  listEl.innerHTML = html;
 }
 
 function rcSwRenderResultsCourse(listEl){

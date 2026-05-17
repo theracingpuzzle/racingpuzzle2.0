@@ -549,6 +549,19 @@ function goFromChecklist(){
 
 let rcSwResultsData = [], rcSwResultsView = 'course', rcSwResultsOpenCourse = '';
 
+// Look up OR for a horse name from today's racecard data
+function rcGetOFR(horseName){
+  const nl=(horseName||'').toLowerCase().trim();
+  for(const race of rcSwCurrentRaces){
+    for(const r of (race.runners||[])){
+      if((r.horse||r.name||'').toLowerCase().trim()===nl){
+        return r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||'';
+      }
+    }
+  }
+  return '';
+}
+
 async function rcSwLoadResults(){
   const stEl = document.getElementById('sw-results-status');
   const listEl = document.getElementById('sw-results-list');
@@ -612,7 +625,7 @@ function rcSwRaceCard(race, course){
         const jock = r.jockey||'\u2014';
         const trainer = r.trainer||'\u2014';
         const sp = r.sp||'\u2014';
-        const ofr = r.ofr||r.official_rating||r.officialRating||r.rpr||'';
+        const ofr = r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||rcGetOFR(horse)||'';
         const posCol = pos==1?'var(--grn)':pos==2?'#60a5fa':pos==3?'#fb923c':'var(--mut)';
         const esc = s => (s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
         return '<div style="display:flex;align-items:center;gap:10px;padding:8px 13px;border-bottom:1px solid var(--bdr);">'
@@ -847,7 +860,7 @@ async function rcLoadResults(){
             const jock=r.jockey||'—';
             const trainer=r.trainer||'—';
             const sp=r.sp||r.starting_price||'—';
-            const ofr=r.ofr||r.official_rating||r.officialRating||r.rpr||'';
+            const ofr=r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||rcGetOFR(horse)||'';
             const posCol=pos==1?'var(--grn)':pos==2?'#60a5fa':pos==3?'#fb923c':'var(--mut)';
             const esc2=function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");};
             return'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bdr);">'

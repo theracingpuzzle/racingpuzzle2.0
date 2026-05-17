@@ -10,9 +10,9 @@ const CARDS = [
   {id:'today',  lbl:'Today',          col:'var(--gld)'},
   {id:'cards',  lbl:'Racecards',      col:'#60a5fa'},
   {id:'results',lbl:'Results',        col:'#fb923c'},
-  {id:'coach',  lbl:'Coach',          col:'#cc44aa'},
   {id:'bank',   lbl:'Bank',           col:'#f0aa44'},
-  {id:'watch',  lbl:'Puzzle Profiler',col:'#e879f9'}
+  {id:'watch',  lbl:'Puzzle Profiler',col:'#e879f9'},
+  {id:'coach',  lbl:'Coach',          col:'#cc44aa', comingSoon:true}
 ];
 
 // ─── TRACKS ───

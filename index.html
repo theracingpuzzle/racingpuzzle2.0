@@ -185,7 +185,7 @@
           <div id="lb-stake-guide" style="display:none;background:rgba(232,228,220,.07);border:1px solid rgba(232,228,220,.18);border-radius:9px;padding:10px 13px;margin-bottom:10px;">
             <div id="lb-stake-guide-content" style="font-size:13px;color:var(--txt);line-height:1.7;"></div>
           </div>
-          <div class="fg"><label>Source</label><select id="lbsrc"><option>Own Form Study</option><option>Albatross2.0</option><option>Pricewise (Tom Segal)</option><option>Signpost (RP)</option><option>Templegate</option><option>RFO Nap</option><option>Handicapper's Nap</option><option>Eye Catcher</option><option>Timeform</option><option>At The Races</option><option>Other</option></select></div>
+          <div class="fg"><label>Source</label><select id="lbsrc"></select></div>
           <div class="fg"><label>Edge in one sentence</label><textarea id="lbnotes" placeholder="Why this horse, why this price…" style="min-height:48px;"></textarea></div>
           <div class="sdiv">Result (fill after race)</div>
           <div class="g2">
@@ -237,6 +237,11 @@
 
     <!-- COACH -->
     <div class="card cC" id="c5" style="position:relative;">
+      <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,20,.85);backdrop-filter:blur(4px);border-radius:inherit;">
+        <div style="font-size:32px;margin-bottom:12px;">🧠</div>
+        <div style="font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#cc44aa;border:1px solid #cc44aa;padding:5px 16px;border-radius:20px;margin-bottom:10px;">Coming Soon</div>
+        <div style="font-size:13px;color:var(--mut);text-align:center;max-width:220px;line-height:1.6;">The AI Coach is in development.<br>Check back soon.</div>
+      </div>
       <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,20,.85);backdrop-filter:blur(4px);border-radius:inherit;">
         <div style="font-size:32px;margin-bottom:12px;">🧠</div>
         <div style="font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#cc44aa;border:1px solid #cc44aa;padding:5px 16px;border-radius:20px;margin-bottom:10px;">Coming Soon</div>
@@ -364,30 +369,13 @@
 <!-- COMMAND CENTRE -->
 <div class="cmd-shell" id="cmd-shell">
   <nav class="ctabs">
-    <button class="ctab on" onclick="cTab('dash',this)">Dashboard</button>
+    <button class="ctab on" onclick="cTab('stats',this)">Stats</button>
     <button class="ctab" onclick="cTab('hist',this)">History</button>
-    <button class="ctab" onclick="cTab('stats',this)">Stats</button>
-    <button class="ctab" onclick="cTab('rules',this)">Rules</button>
+    <button class="ctab" onclick="cTab('rules',this)">Checklists</button>
     <button class="ctab" onclick="cTab('set',this)">Settings</button>
   </nav>
   <div class="cpane-wrap">
 
-    <!-- DASHBOARD -->
-    <div class="cpane on" id="cp-dash">
-      <div class="ptitle">Command Centre</div>
-      <div class="psub">Your complete picture — know where you stand before you act.</div>
-      <div class="sg" id="d-sg"></div>
-
-      <!-- Real vs Virtual head-to-head -->
-      <div class="blk" id="d-compare-blk" style="background:linear-gradient(135deg,rgba(58,127,212,.04),rgba(251,146,60,.04));border-color:rgba(100,160,200,.2);">
-        <div class="bttl">Real vs Virtual — Head to Head</div>
-        <div id="d-compare"></div>
-      </div>
-      <div class="tc">
-        
-        <div class="blk"><div class="bttl">Bankroll Health</div><div id="d-bk"></div></div>
-      </div>
-      <div class="blk"><div class="bttl">Recent Bets — Tap to Update</div><div id="d-rec"></div></div>
     </div>
 
     <!-- HISTORY -->
@@ -443,7 +431,7 @@
     </div>
 
     <!-- STATS -->
-    <div class="cpane" id="cp-stats">
+    <div class="cpane on" id="cp-stats">
       <div class="ptitle">Angles &amp; Stats</div>
       <div class="psub">Where your edge is. Where you're leaking. Auto-generated from your bets.</div>
 
@@ -490,6 +478,11 @@
       </div>
 
       <div class="blk"><div class="bttl">Monthly P&L</div><div id="st-monthly"></div></div>
+
+      <div class="blk" id="d-compare-blk" style="background:linear-gradient(135deg,rgba(58,127,212,.04),rgba(251,146,60,.04));border-color:rgba(100,160,200,.2);">
+        <div class="bttl">Real vs Virtual — Head to Head</div>
+        <div id="d-compare"></div>
+      </div>
     </div>
 
     <!-- RACECARDS -->
@@ -531,27 +524,32 @@
     </div>
 
     <!-- RULES CMD -->
-    <div class="cpane" id="cp-rules">
-      <div class="ptitle">My Rules</div><div class="psub">The code of the professional punter. Read before you bet.</div>
-      <div class="blk"><div id="rls-cmd"></div></div>
-      <div class="blk"><div class="bttl">Add a Rule</div>
-        <textarea id="rlinp-cmd" placeholder="e.g. Never back a horse in a handicap if it's carrying 10st+ on its first handicap run…" style="min-height:56px;margin-bottom:7px;"></textarea>
-        <button class="btn bgld" onclick="addRule('cmd')">Add Rule</button>
-      </div>
-      <div class="blk" style="background:linear-gradient(135deg,rgba(232,228,220,.04),transparent);border-color:rgba(232,228,220,.15);">
-        <div class="bttl">The Punter's Manifesto</div>
-        <div style="line-height:1.95;font-size:14px;color:var(--mut);">
-          <p style="margin-bottom:8px;color:var(--txt);">The professional punter is not defined by winners — they are defined by <em>process</em>.</p>
-          <p style="margin-bottom:8px;">Your edge comes from <strong style="color:#e8e4dc;">knowledge</strong> — more form study, better understanding of handicaps, trainer patterns, going preferences than the market.</p>
-          <p style="margin-bottom:8px;">Your edge comes from <strong style="color:#e8e4dc;">discipline</strong> — only backing when the price is right, not when the urge is there.</p>
-          <p style="color:var(--gld);font-style:italic;font-size:15px;margin-top:11px;">The race is not won in the betting ring. It is won in the hours of preparation before you ever open an account.</p>
-        </div>
-      </div>
-    </div>
+    <div class="cpane" id="cp-rules"></div>
 
     <!-- SETTINGS -->
     <div class="cpane" id="cp-set">
       <div class="ptitle">Settings</div><div class="psub">Configure your tool and manage your data.</div>
+
+      <div class="blk">
+        <div class="bttl">📋 Bet Sources</div>
+        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Manage the sources available when logging a bet. Tag each as <strong style="color:#60a5fa;">Own</strong> (own-study checklist) or <strong style="color:#e879f9;">Tip</strong> (tip checklist).</div>
+        <div id="set-sources-list" style="margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:1;min-width:160px;">
+            <label style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);display:block;margin-bottom:5px;">Label</label>
+            <input type="text" id="set-src-new-label" placeholder="e.g. Racing Post" autocomplete="off" style="width:100%;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);display:block;margin-bottom:5px;">Type</label>
+            <select id="set-src-new-type" style="padding:10px 14px;border-radius:8px;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);font-size:13px;">
+              <option value="tip">Tip</option>
+              <option value="own">Own</option>
+            </select>
+          </div>
+          <button class="btn bgld" onclick="settingsAddSource()" style="white-space:nowrap;">+ Add Source</button>
+        </div>
+        <div style="font-family:monospace;font-size:11px;color:var(--mut);margin-top:8px;" id="set-src-status"></div>
+      </div>
 
       <div class="blk">
         <div class="bttl">💰 Starting Bank</div>
@@ -674,7 +672,7 @@
         <div class="fg"><label>Jockey</label><input type="text" id="em-jockey" autocomplete="off"></div>
         <div class="fg"><label>Trainer</label><input type="text" id="em-trainer" autocomplete="off"></div>
       </div>
-      <div class="fg"><label>Source</label><select id="em-source"><option>Own Form Study</option><option>Albatross2.0</option><option>Pricewise (Tom Segal)</option><option>Signpost (RP)</option><option>Templegate</option><option>RFO Nap</option><option>Handicapper's Nap</option><option>Eye Catcher</option><option>Timeform</option><option>At The Races</option><option>Other</option></select></div>
+      <div class="fg"><label>Source</label><select id="em-source"></select></div>
       <div class="fg"><label>Pre-Race Notes</label><textarea id="em-prenotes" style="min-height:44px;"></textarea></div>
     </div>
 

@@ -395,6 +395,7 @@ function rcSwRenderRunners(idx, course, el){
     const form=r.form||'';
     const rpr=r.ofr||r.rpr||r.official_rating||r.officialRating||r.or||'';
     const isNR=!!(r.non_runner||r.isNonRunner||(''+r.number).toUpperCase()==='NR'||r.status==='non_runner'||(''+r.status).toLowerCase()==='nr'||(''+r.jockey).toUpperCase()==='NON-RUNNER');
+    const _bh=isNR?'':getBetHighlight(name,course,time);
     const _wl2=getWL();const _nl2=(name||'').toLowerCase().trim();
     const _pr2=_wl2.find(function(w){return(w.horse||'').toLowerCase().trim()===_nl2;});
     const _PM2={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#fb923c'},'trainer-intel':{emoji:'🗣',col:'#60a5fa'},'form-study':{emoji:'📊',col:'#ef4444'},'tip-source':{emoji:'💡',col:'#eab308'}};

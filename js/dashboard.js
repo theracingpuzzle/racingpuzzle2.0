@@ -180,7 +180,7 @@ function setStatsScope(scope){
 }
 
 function renderStats(){
-  const scope=window._statsScope||'real';
+  const scope=window._statsScope||'both';
   const vbBets=getVBank().bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='nr';});
   const realBets=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
   const set=scope==='real'?realBets:scope==='virt'?vbBets:[...realBets,...vbBets.map(function(b){return Object.assign({},b,{_virt:true});})];
@@ -192,15 +192,19 @@ function renderStats(){
   const avg=set.length>0?set.reduce((a,b)=>a+(parseFloat(b.odds)||0),0)/set.length:0;
   const ownStudyOnly=window._ownStudyOnly||false;
   const OWN_SOURCES=['Own Form Study'];
-  // Discipline set: filtered to own study only when toggle is on
-  // Financial set: always full set (source ROI, track, monthly remain unfiltered)
   const disciplineSet=ownStudyOnly?set.filter(b=>OWN_SOURCES.includes(b.source||'')):set;
 
-  // Top-line stats — remove sg, dashboard already has these
+  // If the selected scope has no bets, show empty state
   if(!set.length){
-    ['st-insights-body','st-src-table','st-conf-table','st-type-table','st-monthly','st-trk'].forEach(id=>{
-      const el=document.getElementById(id);if(el)el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Log more settled bets to unlock this insight.</div>';
+    const scopeLabel=scope==='real'?'real':scope==='virt'?'virtual':'settled';
+    ['st-insights-body','st-src-table','st-conf-table','st-type-table','st-monthly','st-trk','st-ck-table','st-jockey','st-trainer'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">No '+scopeLabel+' bets settled yet.</div>';
     });
+    const dc=document.getElementById('d-compare');
+    const dcblk=document.getElementById('d-compare-blk');
+    if(dc)dc.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Log real and virtual bets to see the comparison.</div>';
+    if(dcblk)dcblk.style.display='none';
     return;
   }
 

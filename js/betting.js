@@ -399,8 +399,8 @@ function _betFlowSourceChanged(){
           +'<div style="font-size:13px;color:var(--txt);margin-bottom:4px;">'+c.t+'</div>'
           +'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-bottom:8px;line-height:1.35;">'+c.s+'</div>'
           +'<div style="display:flex;gap:8px;">'
-            +'<button id="_bflow-yn-'+i+'-yes" onclick="_betFlowYN('+i+','yes')" style="flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;">Yes</button>'
-            +'<button id="_bflow-yn-'+i+'-no" onclick="_betFlowYN('+i+','no')" style="flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;">No</button>'
+            +'<button id="_bflow-yn-'+i+'-yes" onclick="_betFlowYN('+i+',\'yes\')" style="flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;">Yes</button>'
+            +'<button id="_bflow-yn-'+i+'-no" onclick="_betFlowYN('+i+',\'no\')" style="flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;">No</button>'
           +'</div>'
         +'</div>';
       }).join('')

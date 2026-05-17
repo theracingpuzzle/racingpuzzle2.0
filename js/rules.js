@@ -50,9 +50,9 @@ function _cksSection(type,title,col,items){
           +extraHtml
         +'</div>'
         +'<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">'
-          +(i>0?'<button onclick="_cksMoveItem(''+type+'','+i+',-1)" style="background:transparent;border:none;color:var(--mut);cursor:pointer;font-size:13px;padding:2px 5px;">↑</button>':'<span style="width:24px;display:block;height:21px;"></span>')
-          +(i<items.length-1?'<button onclick="_cksMoveItem(''+type+'','+i+',1)" style="background:transparent;border:none;color:var(--mut);cursor:pointer;font-size:13px;padding:2px 5px;">↓</button>':'<span style="width:24px;display:block;height:21px;"></span>')
-          +'<button onclick="_cksDelItem(''+type+'','+i+')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 5px;">×</button>'
+          +(i>0?'<button onclick="_cksMoveItem(\''+type+'\',' +i+',-1)" style="background:transparent;border:none;color:var(--mut);cursor:pointer;font-size:13px;padding:2px 5px;">↑</button>':'<span style="width:24px;display:block;height:21px;"></span>')
+          +(i<items.length-1?'<button onclick="_cksMoveItem(\''+type+'\',' +i+',1)" style="background:transparent;border:none;color:var(--mut);cursor:pointer;font-size:13px;padding:2px 5px;">↓</button>':'<span style="width:24px;display:block;height:21px;"></span>')
+          +'<button onclick="_cksDelItem(\''+type+'\','+i+')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 5px;">×</button>'
         +'</div>'
       +'</div>'
     +'</div>';

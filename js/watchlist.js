@@ -61,13 +61,19 @@ function renderWLCal(){
   const dateMap={};
   wl.forEach(function(e){
     if(e.raceDate){
-      if(!dateMap[e.raceDate])dateMap[e.raceDate]={entries:[],targets:[]};
+      if(!dateMap[e.raceDate])dateMap[e.raceDate]={entries:[],targets:[],obs:[]};
       dateMap[e.raceDate].entries.push(e);
     }
     (e.targets||[]).forEach(function(t){
       if(t.date){
-        if(!dateMap[t.date])dateMap[t.date]={entries:[],targets:[]};
+        if(!dateMap[t.date])dateMap[t.date]={entries:[],targets:[],obs:[]};
         dateMap[t.date].targets.push({horse:e.horse,trainer:e.trainer||'',currentRating:e.currentRating||'',horseId:e.id,target:t});
+      }
+    });
+    (e.observations||[]).forEach(function(o){
+      if(o.date){
+        if(!dateMap[o.date])dateMap[o.date]={entries:[],targets:[],obs:[]};
+        dateMap[o.date].obs.push({horse:e.horse,horseId:e.id,obs:o});
       }
     });
   });
@@ -79,19 +85,25 @@ function renderWLCal(){
   for(let i=0;i<start;i++)html+='<div></div>';
   for(let d=1;d<=daysInMonth;d++){
     const dateStr=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const dayData=dateMap[dateStr]||{entries:[],targets:[]};
+    const dayData=dateMap[dateStr]||{entries:[],targets:[],obs:[]};
     const entries=dayData.entries;
     const dayTargets=dayData.targets;
+    const dayObs=dayData.obs;
     const isToday=dateStr===today;
-    const hasBet=entries.length>0||dayTargets.length>0;
+    const hasBet=entries.length>0||dayTargets.length>0||dayObs.length>0;
     const fixtures=getFixtureForDate(dateStr);
     const hasFixture=fixtures.length>0;
-    const dotCol=dayTargets.length&&!entries.length?'#fb923c':'#e879f9';
+    const dotCol=dayTargets.length&&!entries.length&&!dayObs.length?'#fb923c':dayObs.length&&!entries.length&&!dayTargets.length?'#4ade80':'#e879f9';
     const fixtureBar=hasFixture?'<div style="height:3px;border-radius:2px;background:'+fixtures[0].colour+';margin:1px 2px 0;" title="'+fixtures[0].name+'"></div>':'';
+    // Show up to 3 coloured dots for different event types
+    const dots=[];
+    if(entries.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#e879f9;display:inline-block;margin:0 1px;"></div>');
+    if(dayTargets.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#fb923c;display:inline-block;margin:0 1px;"></div>');
+    if(dayObs.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#4ade80;display:inline-block;margin:0 1px;"></div>');
     html+='<div onclick="wlSelectDay(\''+dateStr+'\')" style="cursor:pointer;padding:5px 2px;border-radius:6px;'+(isToday?'background:rgba(232,121,249,.15);':'')+'text-align:center;">'
-      +'<div style="font-size:11px;color:'+(isToday?'#e879f9':hasBet?'var(--txt)':'var(--mut)'+';font-weight:'+(hasBet?'700':'400'))+';">'+d+'</div>'
-      +(hasBet?'<div style="width:5px;height:5px;border-radius:50%;background:'+dotCol+';margin:1px auto 0;"></div>':'<div style="height:4px;"></div>')+fixtureBar
-      +'</div>';
+      +'<div style="font-size:11px;color:'+(isToday?'#e879f9':hasBet?'var(--txt)':'var(--mut)')+(hasBet?';font-weight:700':';font-weight:400')+';">'+d+'</div>'
+      +(hasBet?'<div style="display:flex;justify-content:center;margin:1px 0 0;">'+dots.join('')+'</div>':'<div style="height:7px;"></div>')+fixtureBar
+    +'</div>';
   }
   grid.innerHTML=html;
   // Show today's or selected day entries
@@ -102,11 +114,14 @@ function renderWLCal(){
 function wlSelectDay(dateStr){
   const wl=getWL();
   const entries=wl.filter(e=>e.raceDate===dateStr);
-  // Gather targets from all horses that point to this date
   const dayTargets=[];
+  const dayObs=[];
   wl.forEach(function(e){
     (e.targets||[]).forEach(function(t){
       if(t.date===dateStr)dayTargets.push({horse:e.horse,trainer:e.trainer||'',currentRating:e.currentRating||'',horseId:e.id,target:t});
+    });
+    (e.observations||[]).forEach(function(o){
+      if(o.date===dateStr)dayObs.push({horse:e.horse,horseId:e.id,obs:o});
     });
   });
   const el=document.getElementById('wl-cal-day-entries');if(!el)return;
@@ -114,7 +129,7 @@ function wlSelectDay(dateStr){
   const fixtureBanner=dayFixtures.map(f=>'<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;background:rgba(0,0,0,.2);border-left:3px solid '+f.colour+';margin-bottom:8px;"><span>'+f.emoji+'</span><div><div style="font-weight:700;font-size:13px;color:'+f.colour+';">'+f.name+'</div><div style="font-size:11px;color:var(--mut);">'+f.course+'</div></div></div>').join('');
   const dayLabel='<div style="font-family:monospace;font-size:9px;color:rgba(232,121,249,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+'</div>';
   let html=fixtureBanner+dayLabel;
-  // Target race cards (orange accent)
+  // Target race cards
   if(dayTargets.length){
     html+='<div style="font-family:monospace;font-size:9px;color:rgba(251,146,60,.6);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">🎯 Target Races</div>';
     html+=dayTargets.map(function(d){
@@ -128,17 +143,33 @@ function wlSelectDay(dateStr){
             +'<div style="font-size:12px;color:#fb923c;font-weight:600;">'+t.race+(t.track?' · '+t.track:'')+'</div>'
             +(t.condition?'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:2px;">'+t.condition+'</div>':'')
           +'</div>'
-
         +'</div>'
       +'</div>';
     }).join('');
   }
-  // Regular watchlist entries (observation raceDate)
+  // Observations
+  if(dayObs.length){
+    html+='<div style="font-family:monospace;font-size:9px;color:rgba(74,222,128,.6);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;'+(dayTargets.length?'margin-top:10px;':'')+'">📋 Observations</div>';
+    html+=dayObs.map(function(d){
+      const o=d.obs;
+      const resultCol=o.result&&o.result.toLowerCase().includes('win')?'#4ade80':o.result?'#fb923c':'var(--mut)';
+      return'<div data-wl-id="'+d.horseId+'" style="cursor:pointer;border-left:3px solid #4ade80;margin-bottom:8px;padding:10px 11px;background:rgba(74,222,128,.04);border-radius:0 8px 8px 0;">'
+        +'<div style="font-weight:700;font-size:14px;margin-bottom:3px;">'+d.horse+'</div>'
+        +(o.raceName?'<div style="font-size:12px;color:var(--mut);margin-bottom:3px;">'+o.raceName+'</div>':'')
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;">'
+          +(o.result?'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:'+resultCol+';">'+o.result+'</span>':'')
+          +(o.going?'<span style="font-family:monospace;font-size:10px;color:var(--mut);padding:1px 6px;border-radius:4px;background:var(--sur2);border:1px solid var(--bdr);">'+o.going+'</span>':'')
+        +'</div>'
+        +(o.notes?'<div style="font-size:12px;color:var(--mut);font-style:italic;line-height:1.45;">'+o.notes+'</div>':'')
+      +'</div>';
+    }).join('');
+  }
+  // Regular watchlist entries
   if(entries.length){
-    if(dayTargets.length)html+='<div style="font-family:monospace;font-size:9px;color:rgba(232,121,249,.5);text-transform:uppercase;letter-spacing:.1em;margin:10px 0 6px;">Puzzle Profiler</div>';
+    if(dayTargets.length||dayObs.length)html+='<div style="font-family:monospace;font-size:9px;color:rgba(232,121,249,.5);text-transform:uppercase;letter-spacing:.1em;margin:10px 0 6px;">Puzzle Profiler</div>';
     html+=entries.map(function(e){return renderWLEntry(e);}).join('');
   }
-  if(!entries.length&&!dayTargets.length){
+  if(!entries.length&&!dayTargets.length&&!dayObs.length){
     html+='<div style="color:var(--mut);font-style:italic;font-size:13px;padding:8px 0;">No targets on '+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'.<br><span style="font-size:12px;">Tap + to add one.</span></div>';
   }
   el.innerHTML=html;

@@ -656,10 +656,10 @@ function rcSwRenderResultsTime(listEl){
     return !domestic.includes(r);
   });
   domestic.sort(function(a,b){
-    return cmpTime(a.off_time||a.off||a.time||'',b.off_time||b.off||b.time||'');
+    return cmpTime(b.off_time||b.off||b.time||'',a.off_time||a.off||a.time||'');
   });
   intl.sort(function(a,b){
-    return cmpTime(a.off_time||a.off||a.time||'',b.off_time||b.off||b.time||'');
+    return cmpTime(b.off_time||b.off||b.time||'',a.off_time||a.off||a.time||'');
   });
   let html = domestic.map(function(race){
     return rcSwRaceCard(race, race.course||race.venue||'Unknown');

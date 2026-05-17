@@ -185,7 +185,7 @@
           <div id="lb-stake-guide" style="display:none;background:rgba(232,228,220,.07);border:1px solid rgba(232,228,220,.18);border-radius:9px;padding:10px 13px;margin-bottom:10px;">
             <div id="lb-stake-guide-content" style="font-size:13px;color:var(--txt);line-height:1.7;"></div>
           </div>
-          <div class="fg"><label>Source</label><select id="lbsrc"></select></div>
+          <div class="fg"><label>Source</label><select id="lbsrc"><option>Own Form Study</option><option>Albatross2.0</option><option>Pricewise (Tom Segal)</option><option>Signpost (RP)</option><option>Templegate</option><option>RFO Nap</option><option>Handicapper's Nap</option><option>Eye Catcher</option><option>Timeform</option><option>At The Races</option><option>Other</option></select></div>
           <div class="fg"><label>Edge in one sentence</label><textarea id="lbnotes" placeholder="Why this horse, why this price…" style="min-height:48px;"></textarea></div>
           <div class="sdiv">Result (fill after race)</div>
           <div class="g2">
@@ -487,44 +487,6 @@
       <div class="blk"><div class="bttl">Monthly P&L</div><div id="st-monthly"></div></div>
     </div>
 
-    <!-- RACECARDS -->
-    <div class="cpane" id="cp-cards">
-      <div class="ptitle">Racecards</div>
-
-      <!-- Toggle at top — always visible -->
-      <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;overflow:hidden;margin-bottom:14px;width:fit-content;">
-        <button id="rc-btn-cards" onclick="rcSetMode('cards')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:7px 16px;border:none;cursor:pointer;background:#60a5fa;color:#141414;font-weight:700;">Racecards</button>
-        <button id="rc-btn-results" onclick="rcSetMode('results')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:7px 16px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Results</button>
-      </div>
-
-      <!-- Racecards section -->
-      <div id="rc-cards-section">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
-          <div style="flex:0 0 auto;">
-            <!-- Course / Time view toggle -->
-            <div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;">View</div>
-            <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;">
-              <button id="rc-btn-course" onclick="rcSetView('course')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;background:#60a5fa;color:#141414;font-weight:700;">Course</button>
-              <button id="rc-btn-time" onclick="rcSetView('time')" style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Time</button>
-            </div>
-          </div>
-          <div id="rc-meeting-wrap" style="flex:1;min-width:140px;">
-            <div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;">Meeting</div>
-            <select id="rc-meeting" onchange="rcLoadRaces()" style="width:100%;font-size:13px;"><option value="">— Select meeting —</option></select>
-          </div>
-          <button class="btn" style="flex-shrink:0;height:44px;padding:0 16px;background:#60a5fa;color:#141414;font-weight:700;border-radius:9px;" onclick="rcLoad()">Load</button>
-        </div>
-        <div id="rc-time-list" style="display:none;"></div>
-        <div id="rc-status" style="color:var(--mut);font-style:italic;font-size:13px;padding:4px 0 8px;display:none;"></div>
-        <div id="rc-race-list"></div>
-      </div>
-
-      <!-- Results section -->
-      <div id="rc-results-section" style="display:none;">
-        <div id="rc-results-list"></div>
-      </div>
-    </div>
-
     <!-- RULES CMD -->
     <div class="cpane" id="cp-rules">
       <div class="ptitle">My Rules</div><div class="psub">The code of the professional punter. Read before you bet.</div>
@@ -547,27 +509,6 @@
     <!-- SETTINGS -->
     <div class="cpane" id="cp-set">
       <div class="ptitle">Settings</div><div class="psub">Configure your tool and manage your data.</div>
-
-      <div class="blk">
-        <div class="bttl">📋 Bet Sources</div>
-        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Manage the sources available when logging a bet. Each source is tagged as <strong style="color:#60a5fa;">Own</strong> (fires the own-study checklist) or <strong style="color:#e879f9;">Tip</strong> (fires the tip checklist).</div>
-        <div id="set-sources-list" style="margin-bottom:12px;"></div>
-        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
-          <div style="flex:1;min-width:160px;">
-            <label style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);display:block;margin-bottom:5px;">Label</label>
-            <input type="text" id="set-src-new-label" placeholder="e.g. Racing Post" autocomplete="off" style="width:100%;box-sizing:border-box;">
-          </div>
-          <div>
-            <label style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);display:block;margin-bottom:5px;">Type</label>
-            <select id="set-src-new-type" style="padding:10px 14px;border-radius:8px;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);font-size:13px;">
-              <option value="tip">Tip</option>
-              <option value="own">Own</option>
-            </select>
-          </div>
-          <button class="btn bgld" onclick="settingsAddSource()" style="white-space:nowrap;">+ Add Source</button>
-        </div>
-        <div style="font-family:monospace;font-size:11px;color:var(--mut);margin-top:8px;" id="set-src-status"></div>
-      </div>
 
       <div class="blk">
         <div class="bttl">💰 Starting Bank</div>
@@ -690,7 +631,7 @@
         <div class="fg"><label>Jockey</label><input type="text" id="em-jockey" autocomplete="off"></div>
         <div class="fg"><label>Trainer</label><input type="text" id="em-trainer" autocomplete="off"></div>
       </div>
-      <div class="fg"><label>Source</label><select id="em-source"></select></div>
+      <div class="fg"><label>Source</label><select id="em-source"><option>Own Form Study</option><option>Albatross2.0</option><option>Pricewise (Tom Segal)</option><option>Signpost (RP)</option><option>Templegate</option><option>RFO Nap</option><option>Handicapper's Nap</option><option>Eye Catcher</option><option>Timeform</option><option>At The Races</option><option>Other</option></select></div>
       <div class="fg"><label>Pre-Race Notes</label><textarea id="em-prenotes" style="min-height:44px;"></textarea></div>
     </div>
 

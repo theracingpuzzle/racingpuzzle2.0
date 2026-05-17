@@ -19,20 +19,40 @@ function renderCmdRules(){
     +'</div>';
 }
 
+function _cksTypeLabel(t){return{'yes-no':'Yes/No','scale':'Scale 1–5','multi':'Multi-choice','auto':'Auto'}[t]||'Yes/No';}
+
 function _cksSection(type,title,col,items){
   const rows=items.map(function(item,i){
+    const itype=item.type||'yes-no';
+    const typePill='<span style="font-family:monospace;font-size:9px;padding:2px 7px;border-radius:10px;border:1px solid '+col+';color:'+col+';">'+_cksTypeLabel(itype)+'</span>';
+    let extraHtml='';
+    if(itype==='multi'){
+      extraHtml='<div style="margin-top:8px;">';
+      (item.options||[]).forEach(function(opt,oi){
+        extraHtml+='<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">'
+          +'<input id="cks-opt-lbl-'+type+'-'+i+'-'+oi+'" value="'+_esc(opt.label)+'" oninput="_cksDirty()" placeholder="Option" style="flex:1;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.06);color:var(--txt);font-size:11px;padding:2px 0;outline:none;">'
+          +'<input id="cks-opt-scr-'+type+'-'+i+'-'+oi+'" type="number" value="'+opt.score+'" min="0" max="100" oninput="_cksDirty()" style="width:48px;background:var(--sur);border:1px solid var(--bdr);border-radius:5px;color:var(--mut);font-family:monospace;font-size:10px;padding:3px 5px;text-align:center;">'
+        +'</div>';
+      });
+      extraHtml+='</div>';
+    }
+    if(itype==='auto'){
+      extraHtml='<div style="font-family:monospace;font-size:10px;color:var(--mut);margin-top:6px;">Auto-captured. Bands: Morning (<12)=100 · Afternoon (<17)=75 · Evening (<20)=50 · Late=25</div>';
+    }
     return '<div style="background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;margin-bottom:8px;">'
       +'<div style="display:flex;align-items:flex-start;gap:10px;">'
         +'<div style="flex:1;min-width:0;">'
+          +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'+typePill+'</div>'
           +'<input id="cks-t-'+type+'-'+i+'" value="'+_esc(item.t)+'" oninput="_cksDirty()" '
-            +'style="width:100%;box-sizing:border-box;background:transparent;border:none;border-bottom:1px solid var(--bdr);color:var(--txt);font-size:13px;font-weight:600;padding:2px 0 4px;margin-bottom:6px;outline:none;">'
+            +'style="width:100%;box-sizing:border-box;background:transparent;border:none;border-bottom:1px solid var(--bdr);color:var(--txt);font-size:13px;font-weight:600;padding:2px 0 4px;margin-bottom:4px;outline:none;">'
           +'<input id="cks-s-'+type+'-'+i+'" value="'+_esc(item.s)+'" oninput="_cksDirty()" '
             +'style="width:100%;box-sizing:border-box;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.06);color:var(--mut);font-size:11px;font-style:italic;padding:2px 0 4px;outline:none;">'
+          +extraHtml
         +'</div>'
         +'<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">'
-          +(i>0?'<button onclick="_cksMoveItem(\''+type+'\','+i+',-1)" style="background:transparent;border:none;color:var(--mut);cursor:pointer;font-size:13px;padding:2px 5px;">↑</button>':'<span style="width:24px;display:block;height:21px;"></span>')
-          +(i<items.length-1?'<button onclick="_cksMoveItem(\''+type+'\','+i+',1)" style="background:transparent;border:none;color:var(--mut);cursor:pointer;font-size:13px;padding:2px 5px;">↓</button>':'<span style="width:24px;display:block;height:21px;"></span>')
-          +'<button onclick="_cksDelItem(\''+type+'\','+i+')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 5px;">×</button>'
+          +(i>0?'<button onclick="_cksMoveItem(''+type+'','+i+',-1)" style="background:transparent;border:none;color:var(--mut);cursor:pointer;font-size:13px;padding:2px 5px;">↑</button>':'<span style="width:24px;display:block;height:21px;"></span>')
+          +(i<items.length-1?'<button onclick="_cksMoveItem(''+type+'','+i+',1)" style="background:transparent;border:none;color:var(--mut);cursor:pointer;font-size:13px;padding:2px 5px;">↓</button>':'<span style="width:24px;display:block;height:21px;"></span>')
+          +'<button onclick="_cksDelItem(''+type+'','+i+')" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 5px;">×</button>'
         +'</div>'
       +'</div>'
     +'</div>';
@@ -63,10 +83,21 @@ function _cksDirty(){
 
 function _cksReadItems(type){
   const list=type==='own'?D.cksOwn:D.cksTip;
-  return list.map(function(_,i){
+  return list.map(function(orig,i){
     const t=(document.getElementById('cks-t-'+type+'-'+i)||{}).value||''
     const s=(document.getElementById('cks-s-'+type+'-'+i)||{}).value||''
-    return{t:t.trim(),s:s.trim()};
+    const itype=orig.type||'yes-no';
+    const item={id:orig.id||'cks-'+i,t:t.trim(),s:s.trim(),type:itype,goodAnswer:orig.goodAnswer};
+    if(itype==='scale'){item.scaleMin=orig.scaleMin;item.scaleMax=orig.scaleMax;}
+    if(itype==='multi'){
+      item.options=(orig.options||[]).map(function(opt,oi){
+        const lbl=(document.getElementById('cks-opt-lbl-'+type+'-'+i+'-'+oi)||{}).value||opt.label;
+        const scr=parseInt((document.getElementById('cks-opt-scr-'+type+'-'+i+'-'+oi)||{}).value)||opt.score;
+        return{label:lbl,score:scr};
+      });
+    }
+    if(itype==='auto'){item.autoCapture=orig.autoCapture;item.bands=orig.bands;}
+    return item;
   }).filter(function(c){return c.t;});
 }
 

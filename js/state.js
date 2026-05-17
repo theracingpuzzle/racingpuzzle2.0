@@ -35,8 +35,8 @@ function load() {
       if (!D.vBank || typeof D.vBank !== 'object') D.vBank = {start:500, current:500, bets:[]};
       if (!Array.isArray(D.vBank.bets)) D.vBank.bets = [];
       if (!Array.isArray(D.sources) || D.sources.length === 0) D.sources = DEFAULT_SOURCES.map(s=>({...s}));
-      if (!Array.isArray(D.cksOwn) || D.cksOwn.length === 0) D.cksOwn = CKS_OWN.map(c=>({...c}));
-      if (!Array.isArray(D.cksTip) || D.cksTip.length === 0) D.cksTip = CKS_TIP.map(c=>({...c}));
+      if (!Array.isArray(D.cksOwn) || D.cksOwn.length === 0) D.cksOwn = CKS_OWN.map(c=>JSON.parse(JSON.stringify(c)));
+      if (!Array.isArray(D.cksTip) || D.cksTip.length === 0) D.cksTip = CKS_TIP.map(c=>JSON.parse(JSON.stringify(c)));
       if (Array.isArray(D.watchlist)) {
         D.watchlist.forEach(w => { if (w.notes && !w.conditionsNotes) w.conditionsNotes = w.notes; });
       }

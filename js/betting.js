@@ -359,52 +359,131 @@ function _betFlowSourceChanged(){
       +'<div style="height:4px;border-radius:2px;background:var(--bdr);overflow:hidden;margin-bottom:12px;">'
         +'<div id="_bflow-bar" style="height:100%;border-radius:2px;background:'+accentCol+';width:0%;transition:width .25s;"></div>'
       +'</div>'
-      +_flowActiveCKS.map(function(c,i){return '<div id="_bflow-item-'+i+'" onclick="_betFlowTick('+i+')" style="display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s;">'
-        +'<div id="_bflow-chk-'+i+'" style="width:20px;height:20px;flex-shrink:0;border-radius:6px;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s;font-size:12px;"></div>'
-        +'<div><div style="font-size:13px;line-height:1.4;color:var(--txt);">'+c.t+'</div>'
-        +'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:3px;line-height:1.35;">'+c.s+'</div></div>'
-        +'</div>';}).join('')
+      +_flowActiveCKS.map(function(c,i){
+        const type=c.type||'yes-no';
+        // Auto-capture: resolve score immediately, render as info pill
+        if(type==='auto'&&c.autoCapture==='time-of-day'){
+          const h=new Date().getHours();
+          const band=(c.bands||[]).find(function(b){return h<b.before;})||{label:'Late',score:25};
+          _flowCks[i]={score:band.score,label:band.label,answered:true};
+          return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:8px;opacity:.7;">'
+            +'<div style="flex:1;"><div style="font-size:12px;color:var(--txt);">'+c.t+'</div></div>'
+            +'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:3px 9px;border-radius:5px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);color:#60a5fa;flex-shrink:0;">'+band.label+'</span>'
+          +'</div>';
+        }
+        // Scale 1–5
+        if(type==='scale'){
+          return '<div style="padding:10px 12px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:8px;">'
+            +'<div style="font-size:13px;color:var(--txt);margin-bottom:4px;">'+c.t+'</div>'
+            +'<div style="display:flex;justify-content:space-between;font-family:monospace;font-size:9px;color:var(--mut);margin-bottom:6px;"><span>'+(c.scaleMin||'Low')+'</span><span>'+(c.scaleMax||'High')+'</span></div>'
+            +'<div style="display:flex;gap:6px;">'
+            +[1,2,3,4,5].map(function(v){
+              return '<button id="_bflow-scale-'+i+'-'+v+'" onclick="_betFlowScale('+i+','+v+')" style="flex:1;padding:8px 0;border-radius:7px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;">'+v+'</button>';
+            }).join('')
+            +'</div>'
+          +'</div>';
+        }
+        // Multi-choice
+        if(type==='multi'){
+          return '<div style="padding:10px 12px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:8px;">'
+            +'<div style="font-size:13px;color:var(--txt);margin-bottom:8px;">'+c.t+'</div>'
+            +'<div style="display:flex;flex-wrap:wrap;gap:6px;">'
+            +(c.options||[]).map(function(opt,oi){
+              return '<button id="_bflow-multi-'+i+'-'+oi+'" onclick="_betFlowMulti('+i+','+oi+')" style="padding:7px 12px;border-radius:7px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;cursor:pointer;transition:all .15s;">'+opt.label+'</button>';
+            }).join('')
+            +'</div>'
+          +'</div>';
+        }
+        // Yes/No (default)
+        return '<div style="padding:10px 12px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:8px;">'
+          +'<div style="font-size:13px;color:var(--txt);margin-bottom:4px;">'+c.t+'</div>'
+          +'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-bottom:8px;line-height:1.35;">'+c.s+'</div>'
+          +'<div style="display:flex;gap:8px;">'
+            +'<button id="_bflow-yn-'+i+'-yes" onclick="_betFlowYN('+i+','yes')" style="flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;">Yes</button>'
+            +'<button id="_bflow-yn-'+i+'-no" onclick="_betFlowYN('+i+','no')" style="flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;">No</button>'
+          +'</div>'
+        +'</div>';
+      }).join('')
       +'<div style="height:8px;"></div>';
   }
-  const btn=document.getElementById('_bflow-btn');
-  const rec=document.getElementById('_bflow-rec');
-  if(btn){btn.style.background='var(--sur2)';btn.style.color='var(--mut)';btn.style.borderColor='var(--bdr)';btn.textContent='Tick the checklist above';}
-  if(rec)rec.textContent='';
+  _betFlowUpdateScore();
 }
-function _betFlowTick(i){
-  _flowCks[i]=!_flowCks[i];
-  const isOwn=_betFlowState.source==='own';
-  const accentCol=isOwn?'#60a5fa':'#e879f9';
-  const item=document.getElementById('_bflow-item-'+i);
-  const chk=document.getElementById('_bflow-chk-'+i);
-  if(item){item.style.borderColor=_flowCks[i]?accentCol:'var(--bdr)';item.style.background=_flowCks[i]?accentCol+'18':'var(--sur2)';}
-  if(chk){chk.style.background=_flowCks[i]?accentCol:'transparent';chk.style.borderColor=_flowCks[i]?accentCol:'var(--bdr)';chk.style.color=_flowCks[i]?'#141414':'transparent';chk.textContent=_flowCks[i]?'✓':'';}
+
+function _betFlowYN(i,answer){
+  const c=_flowActiveCKS[i];
+  const good=c.goodAnswer||'yes';
+  const score=answer===good?100:0;
+  _flowCks[i]={score,answer,answered:true};
+  const accentCol=answer===good?'var(--grn)':'var(--red)';
+  ['yes','no'].forEach(function(v){
+    const btn=document.getElementById('_bflow-yn-'+i+'-'+v);
+    if(!btn)return;
+    const active=v===answer;
+    const col=v===good?'var(--grn)':'var(--red)';
+    btn.style.background=active?col:'var(--sur2)';
+    btn.style.borderColor=active?col:'var(--bdr)';
+    btn.style.color=active?'#141414':'var(--mut)';
+  });
+  _betFlowUpdateScore();
+}
+
+function _betFlowScale(i,val){
+  const score=Math.round((val-1)/4*100);
+  _flowCks[i]={score,val,answered:true};
+  const accentCol=_betFlowState.source==='own'?'#60a5fa':'#e879f9';
+  for(let v=1;v<=5;v++){
+    const btn=document.getElementById('_bflow-scale-'+i+'-'+v);
+    if(!btn)return;
+    const active=v===val;
+    btn.style.background=active?accentCol:'var(--sur2)';
+    btn.style.borderColor=active?accentCol:'var(--bdr)';
+    btn.style.color=active?'#141414':'var(--mut)';
+  }
+  _betFlowUpdateScore();
+}
+
+function _betFlowMulti(i,oi){
+  const c=_flowActiveCKS[i];
+  const opt=(c.options||[])[oi];
+  if(!opt)return;
+  _flowCks[i]={score:opt.score,label:opt.label,answered:true};
+  const scoreCol=opt.score>=75?'var(--grn)':opt.score>=50?'var(--gld)':'var(--red)';
+  (c.options||[]).forEach(function(_,j){
+    const btn=document.getElementById('_bflow-multi-'+i+'-'+j);
+    if(!btn)return;
+    const active=j===oi;
+    btn.style.background=active?scoreCol:'var(--sur2)';
+    btn.style.borderColor=active?scoreCol:'var(--bdr)';
+    btn.style.color=active?'#141414':'var(--mut)';
+  });
   _betFlowUpdateScore();
 }
 
 function _betFlowUpdateScore(){
-  const done=_flowCks.filter(Boolean).length;
+  const answered=_flowCks.filter(function(c){return c&&c.answered;});
   const total=_flowActiveCKS.length;
-  const pct=total>0?done/total*100:0;
   const isOwn=_betFlowState.source==='own';
   const accentCol=isOwn?'#60a5fa':'#e879f9';
+  // Average score of answered items
+  const avgScore=answered.length>0?answered.reduce(function(a,c){return a+c.score;},0)/answered.length:0;
+  const pct=avgScore;
   const lbl=document.getElementById('_bflow-score-lbl');
-  if(lbl)lbl.textContent=done+' / '+total;
+  if(lbl)lbl.textContent=answered.length+' / '+total;
   const bar=document.getElementById('_bflow-bar');
-  if(bar){bar.style.width=pct+'%';bar.style.background=done===total?'var(--grn)':pct>=66?'var(--gld)':accentCol;}
+  if(bar){bar.style.width=pct+'%';bar.style.background=pct>=80?'var(--grn)':pct>=50?'var(--gld)':'var(--red)';}
   const btn=document.getElementById('_bflow-btn');
   const rec=document.getElementById('_bflow-rec');
-  if(done===0){
-    if(btn){btn.style.background='var(--sur2)';btn.style.color='var(--mut)';btn.style.borderColor='var(--bdr)';btn.textContent='Tick the checklist above';}
+  if(answered.length===0){
+    if(btn){btn.style.background='var(--sur2)';btn.style.color='var(--mut)';btn.style.borderColor='var(--bdr)';btn.textContent='Answer the questions above';}
     if(rec)rec.textContent='';
     return;
   }
-  let recTxt='',recCol='var(--mut)',btnBg='',btnCol='',btnBdr='',btnTxt='';
-  if(done===total){
-    recTxt='✅ All checks passed — log as Real Bet';recCol='var(--grn)';
+  let recTxt='',recCol='',btnBg='',btnCol='',btnBdr='',btnTxt='';
+  if(pct>=80){
+    recTxt='✅ Strong score — log as Real Bet';recCol='var(--grn)';
     btnBg='var(--grn)';btnCol='#141414';btnBdr='var(--grn)';btnTxt='→ Log Real Bet';
-  } else if(pct>=66){
-    recTxt='⚠️ Most checks passed — proceed with care';recCol='var(--gld)';
+  } else if(pct>=50){
+    recTxt='⚠️ Moderate score — proceed with care';recCol='var(--gld)';
     btnBg='rgba(232,228,220,.12)';btnCol='var(--gld)';btnBdr='var(--gld)';btnTxt='→ Log Real Bet';
   } else {
     recTxt='🔴 Low score — Virtual only';recCol='var(--red)';
@@ -415,12 +494,15 @@ function _betFlowUpdateScore(){
 }
 
 function _betFlowProceed(){
-  const done=_flowCks.filter(Boolean).length;
-  if(done===0){alert('Work through the checklist first — tick at least what you have considered.');return;}
-  const total=_flowActiveCKS.length;
-  const pct=total>0?done/total*100:0;
-  // Derive mode from score — same thresholds as display
-  _betFlowState.mode=pct>=66?'real':'virt';
+  const answered=_flowCks.filter(function(c){return c&&c.answered;});
+  if(answered.length===0){alert('Answer at least one question before proceeding.');return;}
+  const avgScore=answered.reduce(function(a,c){return a+c.score;},0)/answered.length;
+  _betFlowState.mode=avgScore>=50?'real':'virt';
+  // Store answers with the bet for Stats & Angles
+  _betFlowState.checklistAnswers=_flowActiveCKS.map(function(c,i){
+    const ans=_flowCks[i];
+    return{id:c.id||i,q:c.t,type:c.type||'yes-no',answer:ans?ans.answer||ans.label||ans.val||ans.label:null,score:ans?ans.score:null};
+  });
   const s=_betFlowState;
   _betFlowClose();
   _rcDoLogBet(s);

@@ -144,52 +144,17 @@ function updCkScore(){
   if(recEl){if(rec){recEl.style.display='block';recEl.style.background=recBg;recEl.style.borderColor=recBdr;recEl.style.color=recCol;recEl.textContent=rec;}else recEl.style.display='none';}
   const gb=document.getElementById('ckgo');
   if(gb){
-    if(done>=9){gb.style.background='var(--grn)';gb.style.color='var(--bg)';gb.style.borderColor='var(--grn)';gb.textContent='→ Log Real Bet';}
-    else if(done>=6){gb.style.background='rgba(232,228,220,.15)';gb.style.color='var(--gld)';gb.style.borderColor='var(--gld)';gb.textContent='→ Log Virtual Bet (recommended)';}
-    else if(done>0){gb.style.background='rgba(251,146,60,.1)';gb.style.color='#fb923c';gb.style.borderColor='#fb923c';gb.textContent='→ Log Virtual Bet';}
-    else{gb.style.background='transparent';gb.style.color='var(--mut)';gb.style.borderColor='var(--bdr)';gb.textContent='Tick the checklist above';}
+    if(done>=9){gb.style.background='var(--grn)';gb.style.color='var(--bg)';gb.style.borderColor='var(--grn)';}
+    else if(done>=6){gb.style.background='rgba(232,228,220,.15)';gb.style.color='var(--gld)';gb.style.borderColor='var(--gld)';}
+    else if(done>0){gb.style.background='rgba(251,146,60,.1)';gb.style.color='#fb923c';gb.style.borderColor='#fb923c';}
+    else{gb.style.background='transparent';gb.style.color='var(--mut)';gb.style.borderColor='var(--bdr)';}
   }
 }
-function goFromChecklist(){
+function goFromChecklist(mode){
   const done=cks.filter(Boolean).length;
   if(done===0){alert('Run through the checklist first — at least tick what you have checked.');return;}
-  const pct=done/CKS.length*100;
-  const suggested=pct===100?'real':'virt';
-  const recTxt=pct===100?'✅ All checks — Real recommended':pct>=60?'⚠️ Most checks — Virtual recommended':'🔴 Low score — Virtual recommended';
-  const recCol=pct===100?'var(--grn)':pct>=60?'var(--gld)':'var(--red)';
-  const existing=document.getElementById('_ck-modepick');if(existing)existing.remove();
-  const el=document.createElement('div');
-  el.id='_ck-modepick';
-  el.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);display:flex;flex-direction:column;justify-content:flex-end;';
-  const rBdr=suggested==='real'?'var(--grn)':'var(--bdr)';
-  const rBg=suggested==='real'?'rgba(38,168,101,.12)':'var(--sur2)';
-  const rCol=suggested==='real'?'var(--grn)':'var(--mut)';
-  const vBdr=suggested==='virt'?'#fb923c':'var(--bdr)';
-  const vBg=suggested==='virt'?'rgba(251,146,60,.1)':'var(--sur2)';
-  const vCol=suggested==='virt'?'#fb923c':'var(--mut)';
-  el.innerHTML='<div style="background:var(--sur);border-radius:20px 20px 0 0;padding:20px 18px env(safe-area-inset-bottom,20px);">'
-    +'<div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);margin:0 auto 16px;"></div>'
-    +'<div style="font-family:monospace;font-size:11px;color:var(--mut);text-align:center;margin-bottom:6px;">'+done+' / '+CKS.length+' checks passed</div>'
-    +'<div style="font-size:13px;color:'+recCol+';text-align:center;margin-bottom:18px;">'+recTxt+'</div>'
-    +'<div style="display:flex;gap:10px;margin-bottom:10px;">'
-      +'<button id="_ck-real-btn" style="flex:1;padding:16px;border-radius:12px;border:1px solid '+rBdr+';background:'+rBg+';color:'+rCol+';font-family:monospace;font-size:12px;font-weight:700;cursor:pointer;">💷 Real'+(suggested==='real'?' ★':'')+'</button>'
-      +'<button id="_ck-virt-btn" style="flex:1;padding:16px;border-radius:12px;border:1px solid '+vBdr+';background:'+vBg+';color:'+vCol+';font-family:monospace;font-size:12px;font-weight:700;cursor:pointer;">🏦 Virtual'+(suggested==='virt'?' ★':'')+'</button>'
-    +'</div>'
-    +'<button id="_ck-cancel-btn" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:11px;cursor:pointer;">✕ Cancel</button>'
-    +'</div>';
-  el.addEventListener('click',function(e){if(e.target===el)el.remove();});
-  document.body.appendChild(el);
-  document.getElementById('_ck-real-btn').addEventListener('click',function(){
-    el.remove();
-    if(_pendingRCBet)document.getElementById('prebet-overlay').style.display='none';
-    openLogbetOverlay('real');
-  });
-  document.getElementById('_ck-virt-btn').addEventListener('click',function(){
-    el.remove();
-    if(_pendingRCBet)document.getElementById('prebet-overlay').style.display='none';
-    openLogbetOverlay('virt');
-  });
-  document.getElementById('_ck-cancel-btn').addEventListener('click',function(){el.remove();});
+  if(_pendingRCBet)document.getElementById('prebet-overlay').style.display='none';
+  openLogbetOverlay(mode||'real');
 }
 
 
@@ -408,7 +373,8 @@ function _betFlowShowChecklist(){
     +`<div style="position:sticky;bottom:0;background:var(--sur);border-top:1px solid var(--bdr);padding:12px 18px env(safe-area-inset-bottom,16px);flex-shrink:0;">`
       +`<div id="_bflow-rec" style="font-family:monospace;font-size:11px;color:var(--mut);margin-bottom:8px;min-height:16px;"></div>`
       +`<div style="display:flex;gap:8px;">`
-        +`<button id="_bflow-btn" onclick="_betFlowProceed()" style="flex:1;padding:14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;">Tick the checklist above</button>`
+        +`<button id="_bflow-btn-real" onclick="_betFlowProceed('real')" style="flex:1;padding:14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .2s;">💷 Real</button>`
+        +`<button id="_bflow-btn-virt" onclick="_betFlowProceed('virt')" style="flex:1;padding:14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .2s;">🏦 Virtual</button>`
         +`<button onclick="_betFlowClose()" style="padding:14px 16px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:14px;cursor:pointer;">✕</button>`
       +`</div>`
     +`</div>`;
@@ -436,33 +402,36 @@ function _betFlowUpdateScore(){
   if(lbl)lbl.textContent=done+' / '+total;
   const bar=document.getElementById('_bflow-bar');
   if(bar){bar.style.width=pct+'%';bar.style.background=done===total?'var(--grn)':pct>=66?'var(--gld)':accentCol;}
-  const btn=document.getElementById('_bflow-btn');
+  const btnReal=document.getElementById('_bflow-btn-real');
+  const btnVirt=document.getElementById('_bflow-btn-virt');
   const rec=document.getElementById('_bflow-rec');
   if(done===0){
-    if(btn){btn.style.background='var(--sur2)';btn.style.color='var(--mut)';btn.style.borderColor='var(--bdr)';btn.textContent='Tick the checklist above';}
+    if(btnReal){btnReal.style.background='var(--sur2)';btnReal.style.color='var(--mut)';btnReal.style.borderColor='var(--bdr)';}
+    if(btnVirt){btnVirt.style.background='var(--sur2)';btnVirt.style.color='var(--mut)';btnVirt.style.borderColor='var(--bdr)';}
     if(rec)rec.textContent='';
     return;
   }
-  let recTxt='',recCol='var(--mut)',btnBg='',btnCol='',btnBdr='',btnTxt='';
-  const betLbl=mode==='real'?'Real Bet':'Virtual Bet';
+  let recTxt='',recCol='';
   if(done===total){
-    recTxt='✅ All checks passed';recCol='var(--grn)';
-    btnBg='var(--grn)';btnCol='#141414';btnBdr='var(--grn)';btnTxt='→ Log '+betLbl;
+    recTxt='✅ All checks — Real recommended';recCol='var(--grn)';
+    if(btnReal){btnReal.style.background='var(--grn)';btnReal.style.color='#141414';btnReal.style.borderColor='var(--grn)';}
+    if(btnVirt){btnVirt.style.background='var(--sur2)';btnVirt.style.color='var(--mut)';btnVirt.style.borderColor='var(--bdr)';}
   } else if(pct>=66){
-    recTxt='⚠️ Most checks passed — proceed with care';recCol='var(--gld)';
-    btnBg='rgba(232,228,220,.12)';btnCol='var(--gld)';btnBdr='var(--gld)';btnTxt='→ Log '+betLbl;
+    recTxt='⚠️ Most checks — Virtual recommended';recCol='var(--gld)';
+    if(btnReal){btnReal.style.background='var(--sur2)';btnReal.style.color='var(--mut)';btnReal.style.borderColor='var(--bdr)';}
+    if(btnVirt){btnVirt.style.background='rgba(232,228,220,.12)';btnVirt.style.color='var(--gld)';btnVirt.style.borderColor='var(--gld)';}
   } else {
-    recTxt='🔴 Low score — consider Virtual only';recCol='var(--red)';
-    btnBg='rgba(251,146,60,.1)';btnCol='#fb923c';btnBdr='#fb923c';btnTxt='→ Log Virtual Bet';
+    recTxt='🔴 Low score — Virtual only';recCol='var(--red)';
+    if(btnReal){btnReal.style.background='var(--sur2)';btnReal.style.color='var(--mut)';btnReal.style.borderColor='var(--bdr)';}
+    if(btnVirt){btnVirt.style.background='rgba(251,146,60,.1)';btnVirt.style.color='#fb923c';btnVirt.style.borderColor='#fb923c';}
   }
-  if(btn){btn.style.background=btnBg;btn.style.color=btnCol;btn.style.borderColor=btnBdr;btn.textContent=btnTxt;}
   if(rec){rec.style.color=recCol;rec.textContent=recTxt;}
 }
 
-function _betFlowProceed(){
+function _betFlowProceed(chosenMode){
   const done=_flowCks.filter(Boolean).length;
   if(done===0){alert('Work through the checklist first — tick at least what you have considered.');return;}
-  const s=_betFlowState;
+  const s=Object.assign({},_betFlowState,{mode:chosenMode});
   _betFlowClose();
   _rcDoLogBet(s);
 }

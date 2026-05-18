@@ -441,7 +441,7 @@ function rcSwRenderRunners(idx, course, el){
 // ── Overlay flow: Racecard R/V → Checklist overlay → Log Bet overlay → back to Racecards ──
 function rcSwBet(event, horse, course, time, jockey, trainer, raceName){
   event.stopPropagation();
-  openBetFlow(horse, course, time, jockey, trainer, raceName);
+  openBetFlow('real', horse, course, time, jockey, trainer, raceName);
 }
 
 function openPrebetOverlay(){
@@ -515,9 +515,6 @@ function openLogbetOverlay(mode){
       if(mode==='real')calcLiveStake();else calcVirtStake();
     },50);
   }
-  // Hide prebet-overlay in case checklist was inside it
-  const prebetOv=document.getElementById('prebet-overlay');
-  if(prebetOv)prebetOv.style.display='none';
   overlay.style.display='block';
 }
 

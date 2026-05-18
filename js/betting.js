@@ -582,15 +582,14 @@ function _betFlowProceed(chosenMode){
   const done=_flowCks.filter(Boolean).length;
   if(done===0){alert('Work through the checklist first — tick at least what you have considered.');return;}
   const s=Object.assign({},_betFlowState,{mode:chosenMode});
-  _betFlowClose();
-  _rcDoLogBet(s);
+  _betFlowClose(function(){_rcDoLogBet(s);});
 }
 
-function _betFlowClose(){
+function _betFlowClose(cb){
   const ov=document.getElementById('_bflow-ov');
-  if(!ov)return;
+  if(!ov){if(cb)cb();return;}
   const sh=document.getElementById('_bflow-sheet');
   if(sh){sh.style.transform='translateY(40px)';sh.style.opacity='0';}
   ov.style.opacity='0';
-  setTimeout(function(){if(ov.parentNode)ov.remove();},250);
+  setTimeout(function(){if(ov.parentNode)ov.remove();if(cb)cb();},250);
 }

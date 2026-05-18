@@ -143,4 +143,4 @@ function renderBetLimit(){
   el.innerHTML=html;
 }
 
-
+function calcLiveStake(){calcStakeGuide('real');}

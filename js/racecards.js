@@ -515,6 +515,9 @@ function openLogbetOverlay(mode){
       if(mode==='real')calcLiveStake();else calcVirtStake();
     },50);
   }
+  // Hide prebet-overlay in case checklist was inside it
+  const prebetOv=document.getElementById('prebet-overlay');
+  if(prebetOv)prebetOv.style.display='none';
   overlay.style.display='block';
 }
 
@@ -535,43 +538,16 @@ function closeLogbetOverlay(){
 function goFromChecklist(){
   const done=cks.filter(Boolean).length;
   if(done===0){alert('Run through the checklist first.');return;}
-  const pct=done/CKS.length*100;
-  const suggested=pct===100?'real':'virt';
-  const recTxt=pct===100?'✅ All checks — Real recommended':pct>=60?'⚠️ Most checks — Virtual recommended':'🔴 Low score — Virtual recommended';
-  const recCol=pct===100?'var(--grn)':pct>=60?'var(--gld)':'var(--red)';
-  const existing=document.getElementById('_ck-modepick');if(existing)existing.remove();
-  const el=document.createElement('div');
-  el.id='_ck-modepick';
-  el.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);display:flex;flex-direction:column;justify-content:flex-end;';
-  const rBdr=suggested==='real'?'var(--grn)':'var(--bdr)';
-  const rBg=suggested==='real'?'rgba(38,168,101,.12)':'var(--sur2)';
-  const rCol=suggested==='real'?'var(--grn)':'var(--mut)';
-  const vBdr=suggested==='virt'?'#fb923c':'var(--bdr)';
-  const vBg=suggested==='virt'?'rgba(251,146,60,.1)':'var(--sur2)';
-  const vCol=suggested==='virt'?'#fb923c':'var(--mut)';
-  el.innerHTML='<div style="background:var(--sur);border-radius:20px 20px 0 0;padding:20px 18px env(safe-area-inset-bottom,20px);">'
-    +'<div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);margin:0 auto 16px;"></div>'
-    +'<div style="font-family:monospace;font-size:11px;color:var(--mut);text-align:center;margin-bottom:6px;">'+done+' / '+CKS.length+' checks passed</div>'
-    +'<div style="font-size:13px;color:'+recCol+';text-align:center;margin-bottom:18px;">'+recTxt+'</div>'
-    +'<div style="display:flex;gap:10px;margin-bottom:10px;">'
-      +'<button id="_ck-real-btn" style="flex:1;padding:16px;border-radius:12px;border:1px solid '+rBdr+';background:'+rBg+';color:'+rCol+';font-family:monospace;font-size:12px;font-weight:700;cursor:pointer;">💷 Real'+(suggested==='real'?' ★':'')+'</button>'
-      +'<button id="_ck-virt-btn" style="flex:1;padding:16px;border-radius:12px;border:1px solid '+vBdr+';background:'+vBg+';color:'+vCol+';font-family:monospace;font-size:12px;font-weight:700;cursor:pointer;">🏦 Virtual'+(suggested==='virt'?' ★':'')+'</button>'
-    +'</div>'
-    +'<button id="_ck-cancel-btn" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:11px;cursor:pointer;">✕ Cancel</button>'
-    +'</div>';
-  el.addEventListener('click',function(e){if(e.target===el)el.remove();});
-  document.body.appendChild(el);
-  document.getElementById('_ck-real-btn').addEventListener('click',function(){
-    el.remove();
-    if(_pendingRCBet)document.getElementById('prebet-overlay').style.display='none';
-    openLogbetOverlay('real');
-  });
-  document.getElementById('_ck-virt-btn').addEventListener('click',function(){
-    el.remove();
-    if(_pendingRCBet)document.getElementById('prebet-overlay').style.display='none';
-    openLogbetOverlay('virt');
-  });
-  document.getElementById('_ck-cancel-btn').addEventListener('click',function(){el.remove();});
+  const mode=_pendingRCBet?(_pendingRCBet.mode||( done>=9?'real':'virt')):(done>=9?'real':'virt');
+  if(_pendingRCBet){
+    // Close checklist overlay, open logbet overlay
+    document.getElementById('prebet-overlay').style.display='none';
+    openLogbetOverlay(mode);
+  } else {
+    // Normal flow — use swipe cards
+    goTo(CARDS.findIndex(c=>c.id==='today'));
+    setTimeout(()=>setLBMode(mode),300);
+  }
 }
 
 let rcSwResultsData = [], rcSwResultsView = 'course', rcSwResultsOpenCourse = '';

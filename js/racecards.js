@@ -916,30 +916,17 @@ function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr){
 
 function rcBetFromRunner(event, horse, course, time, jockey, trainer, raceName){
   event.stopPropagation();
-  openBetFlow(horse, course, time, jockey, trainer, raceName);
+  openBetFlow('real', horse, course, time, jockey, trainer, raceName);
 }
 
 // Called by _betFlowProceed in betting.js once checklist is complete
 function _rcDoLogBet(s){
-  setMode('sw');
-  goTo(2);
+  _pendingRCBet={horse:s.horse,course:s.course,time:s.time,jockey:s.jockey,trainer:s.trainer,mode:s.mode};
+  openLogbetOverlay(s.mode);
   setTimeout(function(){
-    setLBMode(s.mode);
-    const pre=s.mode==='real'?'lb':'vb';
-    const h=document.getElementById(pre+'h');if(h)h.value=s.horse;
-    const t=document.getElementById(pre+'t')||document.getElementById('lbt');if(t)t.value=s.course;
-    const ti=document.getElementById(pre+'time');if(ti)ti.value=s.time;
-    const j=document.getElementById(pre+'jockey');if(j)j.value=s.jockey;
-    const tr=document.getElementById(pre+'trainer');if(tr)tr.value=s.trainer;
-    renderLogBetCard();
-    // Set source after form renders
-    setTimeout(function(){
-      const src=document.getElementById('lbsrc');
-      if(src)src.value=s.source==='own'?'Own Form Study':(s.tipSource||'Other');
-    },100);
-    if(s.mode==='real')setTimeout(calcLiveStake,150);
-    else setTimeout(calcVirtStake,150);
-  },300);
+    const src=document.getElementById('lbsrc');
+    if(src)src.value=s.source==='own'?'Own Form Study':(s.tipSource||'');
+  },150);
 }
 
 function rcSetStatus(msg){

@@ -56,6 +56,7 @@ function loadStartBankField(){
   const vc=document.getElementById('set-vbk-cur');if(vc)vc.value=D.vBank&&D.vBank.current!=null?D.vBank.current:500;
   const pv=document.getElementById('set-pv');if(pv)pv.value=getPointValue();
   renderPVPreview();
+  renderSources();
 }
 function renderPVPreview(){
   const el=document.getElementById('pv-preview');if(!el)return;
@@ -79,6 +80,40 @@ function savePointValue(){
   const st=document.getElementById('set-pv-status');
   if(st){st.textContent='✓ Saved — '+fp(pv)+'/pt';st.style.color='var(--grn)';}
   setTimeout(()=>{const el=document.getElementById('set-pv-status');if(el)el.textContent='';},3000);
+}
+
+function renderSources(){
+  if(!D.sources)D.sources=[];
+  const el=document.getElementById('sources-list');
+  if(!el)return;
+  if(!D.sources.length){
+    el.innerHTML='<div style="font-family:monospace;font-size:11px;color:var(--mut);padding:8px 0;">No sources added yet.</div>';
+    return;
+  }
+  el.innerHTML=D.sources.map(function(s,i){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:9px;background:var(--sur2);border:1px solid var(--bdr);margin-bottom:7px;">'
+      +'<span style="font-size:13px;color:var(--txt);">💬 '+s+'</span>'
+      +'<button onclick="removeSource('+i+')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(196,58,58,.3);background:rgba(196,58,58,.08);color:var(--red);font-family:monospace;font-size:10px;cursor:pointer;">Remove</button>'
+      +'</div>';
+  }).join('');
+}
+function addSource(){
+  const inp=document.getElementById('source-input');
+  if(!inp)return;
+  const val=inp.value.trim();
+  if(!val){inp.style.borderColor='var(--red)';inp.focus();return;}
+  if(!D.sources)D.sources=[];
+  if(D.sources.includes(val)){inp.style.borderColor='var(--gld)';return;}
+  D.sources.push(val);
+  save();
+  inp.value='';inp.style.borderColor='';
+  renderSources();
+}
+function removeSource(i){
+  if(!D.sources)return;
+  D.sources.splice(i,1);
+  save();
+  renderSources();
 }
 
 function setLBMode(m){
@@ -107,6 +142,13 @@ function renderVBMini(){
     +'<span style="color:var(--mut);font-size:9px;">Real: <span style="color:'+((D.bank.current||0)>=(D.bank.start||0)?'var(--grn)':'var(--red)')+';">£'+(D.bank.current||0).toFixed(2)+'</span></span>';
 }
 function renderLogBetCard(){
+  // Populate source dropdown from D.sources
+  const srcEl=document.getElementById('lbsrc');
+  if(srcEl){
+    const sources=(D.sources&&D.sources.length)?D.sources:['Own Form Study'];
+    if(!sources.includes('Own Form Study'))sources.unshift('Own Form Study');
+    srcEl.innerHTML=sources.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
+  }
   const limit=D.settings&&D.settings.dailyLimit?D.settings.dailyLimit:5;
   const todayCount=D.bets.filter(b=>b.date===td()).length;
   const el=document.getElementById('lb-limit-warn');
@@ -324,12 +366,18 @@ function _betFlowSelectSource(source){
     _flowActiveCKS=CKS_OWN;
     _betFlowShowChecklist();
   } else {
-    content.innerHTML=`<div style="font-family:monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;">Who is the tip from?</div>`
-      +`<input id="_bflow-tip-src" type="text" placeholder="e.g. Racing Post, Twitter, friend…" autocomplete="off"`
-      +` style="width:100%;box-sizing:border-box;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:13px 14px;font-size:15px;color:var(--txt);outline:none;margin-bottom:14px;">`
-      +`<button onclick="_betFlowConfirmTip()" style="width:100%;padding:13px;border-radius:10px;border:none;background:#e879f9;color:#141414;font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:10px;">Continue →</button>`
-      +`<button onclick="_betFlowClose()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">✕ Cancel</button>`;
-    setTimeout(function(){const el=document.getElementById('_bflow-tip-src');if(el)el.focus();},100);
+    // Show saved sources list + option to type a new one
+    const sources=(D.sources&&D.sources.length)?D.sources:[];
+    let html='<div style="font-family:monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;">Who is the tip from?</div>';
+    sources.forEach(function(src){
+      html+='<button onclick="_betFlowConfirmTipName(''+src.replace(/'/g,"\'")+'')" style="width:100%;text-align:left;padding:13px 16px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px;box-sizing:border-box;">💬 '+src+'</button>';
+    });
+    html+='<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;color:var(--mut);margin:12px 0 8px;">OR TYPE A NEW SOURCE</div>'
+      +'<input id="_bflow-tip-src" type="text" placeholder="e.g. Racing Post, Twitter, friend…" autocomplete="off"'
+      +' style="width:100%;box-sizing:border-box;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:13px 14px;font-size:15px;color:var(--txt);outline:none;margin-bottom:10px;">'
+      +'<button onclick="_betFlowConfirmTip()" style="width:100%;padding:13px;border-radius:10px;border:none;background:#e879f9;color:#141414;font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:10px;">Continue →</button>'
+      +'<button onclick="_betFlowClose()" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">✕ Cancel</button>';
+    content.innerHTML=html;
   }
 }
 
@@ -337,7 +385,10 @@ function _betFlowConfirmTip(){
   const inp=document.getElementById('_bflow-tip-src');
   const val=(inp?inp.value.trim():'');
   if(!val){if(inp){inp.style.borderColor='var(--red)';inp.focus();}return;}
-  _betFlowState.tipSource=val;
+  _betFlowConfirmTipName(val);
+}
+function _betFlowConfirmTipName(name){
+  _betFlowState.tipSource=name;
   _flowActiveCKS=CKS_TIP;
   _betFlowShowChecklist();
 }
@@ -362,11 +413,7 @@ function _betFlowShowChecklist(){
       +`</div>`
     +`</div>`
     +`<div style="padding:0 18px;overflow-y:auto;">`
-      +_flowActiveCKS.map((c,i)=>`<div id="_bflow-item-${i}" onclick="_betFlowTick(${i})" style="display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s;">`
-        +`<div id="_bflow-chk-${i}" style="width:20px;height:20px;flex-shrink:0;border-radius:6px;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s;font-size:12px;color:transparent;"></div>`
-        +`<div><div style="font-size:13px;line-height:1.4;color:var(--txt);">${c.t}</div>`
-        +`<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:3px;line-height:1.35;">${c.s}</div></div>`
-        +`</div>`).join('')
+      +_flowActiveCKS.map((c,i)=>_betFlowItemHtml(c,i)).join('')
       +`<div style="height:8px;"></div>`
     +`</div>`
     // Sticky bottom action bar — accessible with thumb
@@ -380,6 +427,100 @@ function _betFlowShowChecklist(){
     +`</div>`;
 }
 
+function _betFlowItemHtml(c,i){
+  const type=c.type||'checkbox';
+  const base='display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:8px;transition:border-color .15s,background .15s;';
+  if(type==='yes-no'){
+    return `<div id="_bflow-item-${i}" style="${base}">`
+      +`<div style="font-size:13px;line-height:1.4;color:var(--txt);">${c.t}</div>`
+      +`<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:-4px;">${c.s}</div>`
+      +`<div style="display:flex;gap:8px;">`
+        +`<button id="_bflow-yn-yes-${i}" onclick="_betFlowYesNo(${i},'yes')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--bdr);background:var(--sur);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;">Yes</button>`
+        +`<button id="_bflow-yn-no-${i}" onclick="_betFlowYesNo(${i},'no')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--bdr);background:var(--sur);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;">No</button>`
+      +`</div>`
+    +`</div>`;
+  }
+  if(type==='multi'){
+    const opts=(c.options||[]).map((o,oi)=>`<button id="_bflow-mo-${i}-${oi}" onclick="_betFlowMulti(${i},${oi},${o.score})" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--bdr);background:var(--sur);color:var(--mut);font-family:monospace;font-size:10px;font-weight:700;cursor:pointer;">${o.label}</button>`).join('');
+    return `<div id="_bflow-item-${i}" style="${base}">`
+      +`<div style="font-size:13px;line-height:1.4;color:var(--txt);">${c.t}</div>`
+      +`<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:-4px;">${c.s}</div>`
+      +`<div style="display:flex;gap:6px;flex-wrap:wrap;">${opts}</div>`
+    +`</div>`;
+  }
+  if(type==='scale'){
+    return `<div id="_bflow-item-${i}" style="${base}">`
+      +`<div style="font-size:13px;line-height:1.4;color:var(--txt);">${c.t}</div>`
+      +`<div style="display:flex;align-items:center;justify-content:space-between;font-family:monospace;font-size:9px;color:var(--mut);margin-bottom:2px;"><span>${c.scaleMin||'Low'}</span><span>${c.scaleMax||'High'}</span></div>`
+      +`<input id="_bflow-scale-${i}" type="range" min="0" max="100" value="0" oninput="_betFlowScale(${i},this.value)" style="width:100%;accent-color:#60a5fa;">`
+      +`<div id="_bflow-scale-lbl-${i}" style="font-family:monospace;font-size:11px;color:var(--mut);text-align:center;">Not set</div>`
+    +`</div>`;
+  }
+  if(type==='auto'){
+    // Auto-capture: set immediately
+    setTimeout(function(){_betFlowAutoCapture(i,c);},50);
+    return `<div id="_bflow-item-${i}" style="${base};opacity:.7;">`
+      +`<div style="display:flex;align-items:center;justify-content:space-between;">`
+        +`<div style="font-size:13px;color:var(--txt);">${c.t}</div>`
+        +`<div id="_bflow-auto-lbl-${i}" style="font-family:monospace;font-size:11px;color:var(--mut);">Detecting…</div>`
+      +`</div>`
+      +`<div style="font-size:11px;color:var(--mut);font-style:italic;">${c.s}</div>`
+    +`</div>`;
+  }
+  // Default: checkbox
+  return `<div id="_bflow-item-${i}" onclick="_betFlowTick(${i})" style="${base}cursor:pointer;">`
+    +`<div style="display:flex;align-items:flex-start;gap:12px;">`
+      +`<div id="_bflow-chk-${i}" style="width:20px;height:20px;flex-shrink:0;border-radius:6px;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s;font-size:12px;color:transparent;"></div>`
+      +`<div><div style="font-size:13px;line-height:1.4;color:var(--txt);">${c.t}</div>`
+      +`<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:3px;">${c.s}</div></div>`
+    +`</div>`
+  +`</div>`;
+}
+function _betFlowYesNo(i,ans){
+  const c=_flowActiveCKS[i];
+  const yes=document.getElementById('_bflow-yn-yes-'+i);
+  const no=document.getElementById('_bflow-yn-no-'+i);
+  const isGood=ans===c.goodAnswer;
+  if(yes){yes.style.background=ans==='yes'?(isGood&&ans==='yes'?'var(--grn)':'var(--red)'):'var(--sur)';yes.style.color=ans==='yes'?'#141414':'var(--mut)';}
+  if(no){no.style.background=ans==='no'?(isGood||ans!=='no'?'var(--sur)':'var(--red)'):'var(--sur)';no.style.color=ans==='no'?'#141414':'var(--mut)';}
+  // yes=good → green, no=good(odd case) → handle
+  if(yes)yes.style.background=ans==='yes'?(c.goodAnswer==='yes'?'var(--grn)':'rgba(196,58,58,.3)'):'var(--sur)';
+  if(no)no.style.background=ans==='no'?(c.goodAnswer==='no'?'var(--grn)':'rgba(196,58,58,.3)'):'var(--sur)';
+  if(yes)yes.style.color=ans==='yes'?'#141414':'var(--mut)';
+  if(no)no.style.color=ans==='no'?'#141414':'var(--mut)';
+  _flowCks[i]=(isGood?1:0.1); // partial score for wrong answer
+  _betFlowUpdateScore();
+}
+function _betFlowMulti(i,oi,score){
+  const c=_flowActiveCKS[i];
+  (c.options||[]).forEach(function(_,j){
+    const btn=document.getElementById('_bflow-mo-'+i+'-'+j);
+    if(btn){btn.style.background='var(--sur)';btn.style.color='var(--mut)';btn.style.borderColor='var(--bdr)';}
+  });
+  const sel=document.getElementById('_bflow-mo-'+i+'-'+oi);
+  const col=score>=75?'var(--grn)':score>=50?'var(--gld)':'rgba(196,58,58,.3)';
+  if(sel){sel.style.background=col;sel.style.color='#141414';sel.style.borderColor=col;}
+  _flowCks[i]=score/100;
+  _betFlowUpdateScore();
+}
+function _betFlowScale(i,val){
+  const v=parseInt(val);
+  const lbl=document.getElementById('_bflow-scale-lbl-'+i);
+  const col=v>=66?'var(--grn)':v>=33?'var(--gld)':'var(--mut)';
+  if(lbl){lbl.textContent=v+'%';lbl.style.color=col;}
+  _flowCks[i]=v/100;
+  _betFlowUpdateScore();
+}
+function _betFlowAutoCapture(i,c){
+  if(c.autoCapture==='time-of-day'){
+    const h=new Date().getHours();
+    const band=(c.bands||[]).find(function(b){return h<b.before;})||{label:'Late',score:25};
+    const lbl=document.getElementById('_bflow-auto-lbl-'+i);
+    if(lbl){lbl.textContent=band.label;lbl.style.color=band.score>=75?'var(--grn)':band.score>=50?'var(--gld)':'var(--mut)';}
+    _flowCks[i]=band.score/100;
+    _betFlowUpdateScore();
+  }
+}
 function _betFlowTick(i){
   _flowCks[i]=!_flowCks[i];
   const isOwn=_betFlowState.source==='own';
@@ -392,7 +533,7 @@ function _betFlowTick(i){
 }
 
 function _betFlowUpdateScore(){
-  const done=_flowCks.filter(Boolean).length;
+  const done=_flowCks.reduce(function(a,v){return a+(v?1:0);},0);
   const total=_flowActiveCKS.length;
   const pct=total>0?done/total*100:0;
   const isOwn=_betFlowState.source==='own';

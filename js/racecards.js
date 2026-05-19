@@ -484,8 +484,16 @@ function openLogbetOverlay(mode){
     src.style.position='static';
     src.style.height='auto';
     src.style.overflow='visible';
+    // Hide old card header (Record label, title, Real/Virtual toggle)
+    const cin=src.querySelector('.cin');
+    if(cin){const hdr=cin.children[0];if(hdr)hdr.style.display='none';}
+    // Hide bank tiles in both forms
+    ['lb-real-bank-amt','vb-mini-amt'].forEach(function(id){
+      const el=document.getElementById(id);
+      if(el){const tile=el.closest('.g2,div[style*="grid"]')||el.parentElement.parentElement;if(tile)tile.style.display='none';}
+    });
     const tgt=document.getElementById('lbo-content');
-    if(tgt){tgt.innerHTML='';tgt.appendChild(src);}
+    if(tgt){tgt.style.paddingBottom='90px';tgt.innerHTML='';tgt.appendChild(src);}
   }
   // Header colouring
   const typeEl=document.getElementById('lbo-type-lbl');

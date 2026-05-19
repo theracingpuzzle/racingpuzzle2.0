@@ -196,6 +196,7 @@ function goFromChecklist(mode){
 
 // ─── AUTO-CALC WIRED TO RESULT DROPDOWNS ───
 function onSwResChange(){const res=document.getElementById('lbres').value,stake=document.getElementById('lbs').value,od=fo(document.getElementById('lbo').value),bt=document.getElementById('lbtype').value;if(res!=='pending'&&stake&&od)document.getElementById('lbret').value=calcReturns(res,stake,od,bt,'');}
+function onVResChange(){const res=document.getElementById('vbres').value,stake=document.getElementById('vbs').value,od=fo(document.getElementById('vbo').value),bt=document.getElementById('vbtype').value;const el=document.getElementById('vbret');if(res!=='pending'&&stake&&od&&el)el.value=calcReturns(res,stake,od,bt,'');}
 function onCmdResChange(){/* removed panel */}
 function onEditResChange(){
   const res=(document.getElementById('emres')||{value:'pending'}).value;

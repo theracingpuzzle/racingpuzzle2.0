@@ -742,22 +742,23 @@
 </div>
 
 <!-- LOG BET OVERLAY -->
-<div id="logbet-overlay" style="display:none;position:fixed;inset:0;z-index:201;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;">
-  <div style="max-width:520px;margin:0 auto;padding:0 0 120px;">
+<div id="logbet-overlay" style="display:none;position:fixed;inset:0;z-index:201;background:var(--bg);overflow-y:scroll;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+  <style>#logbet-overlay::-webkit-scrollbar{display:none;}</style>
+  <div style="max-width:520px;margin:0 auto;padding:0 0 140px;">
     <!-- Header bar -->
-    <div style="position:sticky;top:0;z-index:10;background:var(--bg);padding:14px 17px 0;" id="lbo-header">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;">
+    <div style="position:sticky;top:0;z-index:10;background:var(--bg);padding:env(safe-area-inset-top,14px) 17px 0;" id="lbo-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;">
         <div>
-          <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:2px;" id="lbo-type-lbl">Real Bet</div>
-          <div style="font-size:20px;font-weight:700;" id="lbo-title">Log Bet</div>
+          <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:3px;" id="lbo-type-lbl">Real Bet</div>
+          <div style="font-size:22px;font-weight:700;" id="lbo-title">Log Bet</div>
         </div>
-        <button onclick="closeLogbetOverlay()" style="background:none;border:none;color:var(--mut);font-size:24px;cursor:pointer;padding:8px;line-height:1;">✕</button>
+        <button onclick="closeLogbetOverlay()" style="background:none;border:none;color:var(--mut);font-size:26px;cursor:pointer;padding:10px;line-height:1;">✕</button>
       </div>
-      <!-- Accent bar — colour set by openLogbetOverlay -->
+      <!-- Accent bar — colour updated by openLogbetOverlay -->
       <div id="lbo-accent-bar" style="height:3px;background:#60a5fa;margin:0 -17px;"></div>
     </div>
     <!-- Form injected here -->
-    <div id="lbo-content" style="padding:16px 17px 0;"></div>
+    <div id="lbo-content" style="padding:18px 17px 0;"></div>
   </div>
 </div>
 

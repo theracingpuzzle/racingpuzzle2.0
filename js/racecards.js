@@ -493,13 +493,7 @@ function openLogbetOverlay(mode, prefill){
       if(el){const tile=el.closest('.g2,div[style*="grid"]')||el.parentElement.parentElement;if(tile)tile.style.display='none';}
     });
     const tgt=document.getElementById('lbo-content');
-    if(tgt){
-      // Move src out first before clearing, so innerHTML='' doesn't destroy it
-      document.body.appendChild(src);
-      tgt.style.paddingBottom='90px';
-      tgt.innerHTML='';
-      tgt.appendChild(src);
-    }
+    if(tgt){tgt.style.paddingBottom='90px';tgt.innerHTML='';tgt.appendChild(src);}
   }
   // Header colouring
   const typeEl=document.getElementById('lbo-type-lbl');
@@ -519,17 +513,16 @@ function openLogbetOverlay(mode, prefill){
   if(accentBar)accentBar.style.background=accentCol;
   setLBMode(mode);
   renderLogBetCard();
-  // Pre-fill from pending
-  // Pre-fill from passed data (more reliable than _pendingRCBet)
-  const fillData=prefill||_pendingRCBet;
-  if(fillData){
+  // Pre-fill from passed data or _pendingRCBet
+  const _fillData=prefill||_pendingRCBet;
+  if(_fillData){
     const pre=mode==='real'?'lb':'vb';
     setTimeout(function(){
-      const he=document.getElementById(pre+'h');if(he&&fillData.horse)he.value=fillData.horse;
-      const te=document.getElementById(pre+'t');if(te&&fillData.course)te.value=fillData.course;
-      const ti=document.getElementById(pre+'time');if(ti&&fillData.time)ti.value=fillData.time;
-      const je=document.getElementById(pre+'jockey');if(je&&fillData.jockey)je.value=fillData.jockey;
-      const tr=document.getElementById(pre+'trainer');if(tr&&fillData.trainer)tr.value=fillData.trainer;
+      const he=document.getElementById(pre+'h');if(he&&_fillData.horse)he.value=_fillData.horse;
+      const te=document.getElementById(pre+'t')||document.getElementById('lbt');if(te&&_fillData.course)te.value=_fillData.course;
+      const ti=document.getElementById(pre+'time');if(ti&&_fillData.time)ti.value=_fillData.time;
+      const je=document.getElementById(pre+'jockey');if(je&&_fillData.jockey)je.value=_fillData.jockey;
+      const tr=document.getElementById(pre+'trainer');if(tr&&_fillData.trainer)tr.value=_fillData.trainer;
       if(mode==='real')calcLiveStake();else calcVirtStake();
     },80);
   }

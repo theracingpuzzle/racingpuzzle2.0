@@ -552,8 +552,21 @@ function _lboBackToChecklist(){
   const swShell=document.getElementById('sw-shell');
   if(src&&swShell){src.style.display='none';swShell.appendChild(src);}
   document.body.style.overflow='';
-  // Reopen the checklist from saved state
-  if(typeof _betFlowShowChecklist==='function')_betFlowShowChecklist();
+  // _betFlowClose() removed _bflow-ov from DOM — rebuild it then show checklist
+  // openBetFlow recreates the shell; _betFlowShowChecklist then populates it
+  if(typeof openBetFlow==='function'&&typeof _betFlowShowChecklist==='function'){
+    const s=_betFlowState;
+    openBetFlow(s.mode,s.horse,s.course,s.time,s.jockey,s.trainer,s.raceName);
+    // openBetFlow shows source picker — skip it, go straight to checklist
+    setTimeout(function(){
+      if(s.source==='tip'&&s.tipSource){
+        _flowActiveCKS=CKS_TIP;
+      } else {
+        _flowActiveCKS=CKS_OWN;
+      }
+      _betFlowShowChecklist();
+    },50);
+  }
 }
 
 function goFromChecklist(){

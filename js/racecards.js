@@ -484,9 +484,6 @@ function openLogbetOverlay(mode){
     src.style.position='static';
     src.style.height='auto';
     src.style.overflow='visible';
-    // Hide the inner card header — overlay header replaces it
-    const innerHdr=src.querySelector('.cin>div:first-child');
-    if(innerHdr)innerHdr.style.display='none';
     const tgt=document.getElementById('lbo-content');
     if(tgt){tgt.innerHTML='';tgt.appendChild(src);}
   }
@@ -518,6 +515,16 @@ function openLogbetOverlay(mode){
       if(mode==='real')calcLiveStake();else calcVirtStake();
     },50);
   }
+  // Add sticky close button at bottom if not already there
+  let closeBar=document.getElementById('lbo-close-bar');
+  if(!closeBar){
+    closeBar=document.createElement('div');
+    closeBar.id='lbo-close-bar';
+    closeBar.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:202;padding:12px 17px env(safe-area-inset-bottom,16px);background:var(--bg);border-top:1px solid var(--bdr);';
+    closeBar.innerHTML='<button onclick="_lboBackToChecklist()" style="width:100%;padding:14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">← Back to Checklist</button>';
+    document.body.appendChild(closeBar);
+  }
+  closeBar.style.display='block';
   overlay.style.display='block';
 }
 
@@ -528,11 +535,25 @@ function closeLogbetOverlay(){
   const swShell=document.getElementById('sw-shell');
   if(src&&swShell){src.style.display='none';swShell.appendChild(src);}
   overlay.style.display='none';
-  document.getElementById('prebet-overlay').style.display='none';
+  const cb=document.getElementById('lbo-close-bar');if(cb)cb.style.display='none';
+  const prebetOv=document.getElementById('prebet-overlay');if(prebetOv)prebetOv.style.display='none';
   document.body.style.overflow='';
   _pendingRCBet=null;
   // Return to Racecards card
   goTo(1);
+}
+
+function _lboBackToChecklist(){
+  // Close the log bet overlay without navigating away
+  const overlay=document.getElementById('logbet-overlay');
+  if(overlay)overlay.style.display='none';
+  const cb=document.getElementById('lbo-close-bar');if(cb)cb.style.display='none';
+  const src=document.getElementById('c_LOGBET_OLD');
+  const swShell=document.getElementById('sw-shell');
+  if(src&&swShell){src.style.display='none';swShell.appendChild(src);}
+  document.body.style.overflow='';
+  // Reopen the checklist from saved state
+  if(typeof _betFlowShowChecklist==='function')_betFlowShowChecklist();
 }
 
 function goFromChecklist(){

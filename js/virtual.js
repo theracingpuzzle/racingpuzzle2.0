@@ -101,7 +101,6 @@ function openVBEdit(id){
 // ─── VIRTUAL BETTING ───
 function vPnl(b){if(!b.result||b.result==='pending')return null;if(b.result==='void'||b.result==='nr')return 0;return(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);}
 
-function onVResChange(){/* removed panel */}
 
 function saveVBet(){/* removed panel */}
 

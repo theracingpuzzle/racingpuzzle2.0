@@ -118,10 +118,16 @@ function removeSource(i){
 
 function setLBMode(m){
   lbMode=m;
-  // Old card forms (kept for non-overlay usage)
-  const rf=document.getElementById('lb-real-form'),vf=document.getElementById('lb-virt-form');
-  if(rf)rf.style.display=m==='real'?'block':'none';
-  if(vf)vf.style.display=m==='virt'?'block':'none';
+  document.getElementById('lb-real-form').style.display=m==='real'?'block':'none';
+  document.getElementById('lb-virt-form').style.display=m==='virt'?'block':'none';
+  // Update card accent strip colour via CSS variable on the card element
+  const card=document.getElementById('c2');
+  if(card)card.style.setProperty('--card-accent',m==='real'?'linear-gradient(90deg,#1d4ed8,#60a5fa)':'linear-gradient(90deg,#ea580c,#fb923c)');
+  const tr=document.getElementById('lb-tog-real'),tv=document.getElementById('lb-tog-virt');
+  if(tr){tr.style.background=m==='real'?'var(--blu)':'transparent';tr.style.color=m==='real'?'white':'var(--mut)';}
+  if(tv){tv.style.background=m==='virt'?'#fb923c':'transparent';tv.style.color=m==='virt'?'#141414':'var(--mut)';}
+  const title=document.getElementById('lb-card-title');
+  if(title){title.textContent=m==='real'?'Real Bet':'Virtual Bet';title.style.color=m==='real'?'#60a5fa':'#fb923c';}
   if(m==='virt'){renderVBMini();setTimeout(calcVirtStake,100);}
   else{renderRealBankMini();setTimeout(calcLiveStake,100);}
 }
@@ -195,8 +201,8 @@ function goFromChecklist(mode){
 
 
 // ─── AUTO-CALC WIRED TO RESULT DROPDOWNS ───
-function onSwResChange(){const res=document.getElementById('lbres').value,stake=document.getElementById('lbs').value,od=fo(document.getElementById('lbo').value),bt=document.getElementById('lbtype').value;if(res!=='pending'&&stake&&od)document.getElementById('lbret').value=calcReturns(res,stake,od,bt,'');}
-function onVResChange(){const res=document.getElementById('vbres').value,stake=document.getElementById('vbs').value,od=fo(document.getElementById('vbo').value),bt=document.getElementById('vbtype').value;const el=document.getElementById('vbret');if(res!=='pending'&&stake&&od&&el)el.value=calcReturns(res,stake,od,bt,'');}
+function onSwResChange(){const res=document.getElementById('lbres').value,stakeStr=document.getElementById('lbs').value,od=fo(document.getElementById('lbo').value),bt=document.getElementById('lbtype').value;const el=document.getElementById('lbret');if(!el)return;if(!stakeStr||!od){return;}if(res==='void'||res==='nr'||res==='loss'){el.value='';return;}el.value=calcReturns(res==='pending'?'win':res,parseFloat(stakeStr),od,bt,'');}
+function onVResChange(){const res=document.getElementById('vbres').value,stakeStr=document.getElementById('vbs').value,od=fo(document.getElementById('vbo').value),bt=document.getElementById('vbtype').value;const el=document.getElementById('vbret');if(!el)return;if(!stakeStr||!od){return;}if(res==='void'||res==='nr'||res==='loss'){el.value='';return;}el.value=calcReturns(res==='pending'?'win':res,parseFloat(stakeStr),od,bt,'');}
 function onCmdResChange(){/* removed panel */}
 function onEditResChange(){
   const res=(document.getElementById('emres')||{value:'pending'}).value;

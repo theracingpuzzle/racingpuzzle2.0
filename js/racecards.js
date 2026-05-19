@@ -478,55 +478,100 @@ function closePrebetOverlay(){
 
 function openLogbetOverlay(mode){
   const overlay=document.getElementById('logbet-overlay');
-  const src=document.getElementById('c_LOGBET_OLD');
-  if(src){
-    src.style.display='block';
-    src.style.position='static';
-    src.style.height='auto';
-    src.style.overflow='visible';
-    // Hide old card header (Record label, title, Real/Virtual toggle)
-    const cin=src.querySelector('.cin');
-    if(cin){const hdr=cin.children[0];if(hdr)hdr.style.display='none';}
-    // Hide bank tiles in both forms
-    ['lb-real-bank-amt','vb-mini-amt'].forEach(function(id){
-      const el=document.getElementById(id);
-      if(el){const tile=el.closest('.g2,div[style*="grid"]')||el.parentElement.parentElement;if(tile)tile.style.display='none';}
-    });
-    const tgt=document.getElementById('lbo-content');
-    if(tgt){tgt.style.paddingBottom='90px';tgt.innerHTML='';tgt.appendChild(src);}
-  }
-  // Header colouring
+  if(!overlay)return;
+  const accentCol=mode==='virt'?'#fb923c':'#60a5fa';
+  const modeLabel=mode==='virt'?'Virtual Bet':'Real Bet';
+
+  // Update header
   const typeEl=document.getElementById('lbo-type-lbl');
   const titleEl=document.getElementById('lbo-title');
-  const hdr=document.getElementById('lbo-header');
-  const accentCol=mode==='virt'?'#fb923c':'#60a5fa';
-  if(mode==='virt'){
-    if(typeEl){typeEl.textContent='Virtual Bet';typeEl.style.color=accentCol;}
-    if(titleEl){titleEl.textContent='Virtual Bet';titleEl.style.color=accentCol;}
-    if(hdr)hdr.style.borderBottom='none';
-  } else {
-    if(typeEl){typeEl.textContent='Real Bet';typeEl.style.color=accentCol;}
-    if(titleEl){titleEl.textContent='Real Bet';titleEl.style.color=accentCol;}
-    if(hdr)hdr.style.borderBottom='none';
-  }
   const accentBar=document.getElementById('lbo-accent-bar');
+  if(typeEl){typeEl.textContent=modeLabel;typeEl.style.color=accentCol;}
+  if(titleEl){titleEl.textContent=modeLabel;titleEl.style.color=accentCol;}
   if(accentBar)accentBar.style.background=accentCol;
-  setLBMode(mode);
-  renderLogBetCard();
-  // Pre-fill from pending
+
+  // Render form directly into lbo-content
+  const tgt=document.getElementById('lbo-content');
+  if(tgt){
+    const isVirt=mode==='virt';
+    const pre=isVirt?'vb':'lb';
+    const saveBtn=isVirt
+      ?'<button class="btn bw" style="background:#fb923c;color:#141414;font-weight:700;padding:16px;width:100%;border-radius:12px;margin-top:4px;" onclick="saveVB()">Save Virtual Bet</button>'
+      :'<button class="btn bgld bw" style="padding:16px;width:100%;border-radius:12px;margin-top:4px;" onclick="saveLB()">Save Real Bet</button>';
+    const bankTile=isVirt
+      ?'<div id="_lbo-bank-tile" style="background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;"><span style="font-family:monospace;font-size:9px;color:rgba(251,146,60,.7);letter-spacing:.1em;text-transform:uppercase;">Virtual Bank</span><span style="font-family:monospace;font-size:18px;font-weight:700;color:#fb923c;" id="vb-mini-amt2">£0.00</span></div>'
+      :'<div id="_lbo-bank-tile" style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;"><span style="font-family:monospace;font-size:9px;color:rgba(96,165,250,.7);letter-spacing:.1em;text-transform:uppercase;">Real Bank</span><span style="font-family:monospace;font-size:18px;font-weight:700;color:#60a5fa;" id="lb-real-bank-amt2">£0.00</span></div>';
+
+    tgt.innerHTML=bankTile
+      +'<div id="_lbo-limit-warn" style="display:none;background:rgba(196,58,58,.08);border:1px solid rgba(196,58,58,.2);border-radius:9px;padding:9px 12px;font-family:monospace;font-size:11px;color:var(--red);margin-bottom:12px;"></div>'
+      +'<div class="fg"><label>Horse</label><input type="text" id="'+pre+'h" placeholder="" autocomplete="off"></div>'
+      +'<div class="g2">'
+        +'<div class="fg"><label>Track</label><input type="text" id="'+pre+'t" list="ltl2" placeholder="" autocomplete="off"><datalist id="ltl2" class="tl"></datalist></div>'
+        +'<div class="fg"><label>Time</label><input type="text" id="'+pre+'time" placeholder=""></div>'
+        +'<div class="fg"><label>Jockey</label><input type="text" id="'+pre+'jockey" placeholder="" autocomplete="off"></div>'
+        +'<div class="fg"><label>Trainer</label><input type="text" id="'+pre+'trainer" placeholder="" autocomplete="off"></div>'
+        +'<div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="'+pre+'o" placeholder="" list="oddsl2" style="font-family:monospace;" oninput="'+(isVirt?'calcVirtStake()':'calcLiveStake()')+'"><datalist id="oddsl2"><option value="EVS"><option value="1/2"><option value="4/6"><option value="4/5"><option value="5/4"><option value="6/4"><option value="7/4"><option value="2/1"><option value="9/4"><option value="5/2"><option value="11/4"><option value="3/1"><option value="7/2"><option value="4/1"><option value="9/2"><option value="5/1"><option value="11/2"><option value="6/1"><option value="7/1"><option value="8/1"><option value="10/1"><option value="12/1"><option value="14/1"><option value="16/1"><option value="20/1"><option value="25/1"><option value="33/1"><option value="50/1"><option value="100/1"></datalist></div>'
+        +'<div class="fg"><label>Stake (£)</label><input type="number" id="'+pre+'s" step="0.5" min="0" placeholder="" oninput="'+(isVirt?'calcVirtStake()':'calcLiveStake()')+'"></div>'
+        +'<div class="fg"><label>Type</label><select id="'+pre+'type"'+(isVirt?' onchange="calcVirtStake()"':'')+' ><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>'
+        +'<div class="fg"><label>Confidence</label><select id="'+pre+'conf" onchange="'+(isVirt?'calcVirtStake()':'calcLiveStake()')+'"><option value="1">1 — Speculative</option><option value="2">2 — Interested</option><option value="3" selected>3 — Solid</option><option value="4">4 — Strong</option><option value="5">5 — Best Bet</option></select></div>'
+      +'</div>'
+      +'<div id="'+(isVirt?'vb':'lb')+'-stake-guide" style="display:none;background:rgba('+(isVirt?'251,146,60':'232,228,220')+',.07);border:1px solid rgba('+(isVirt?'251,146,60':'232,228,220')+',.18);border-radius:9px;padding:10px 13px;margin-bottom:10px;cursor:pointer;">'
+        +'<div id="'+(isVirt?'vb':'lb')+'-stake-guide-content" style="font-size:13px;color:var(--txt);line-height:1.7;"></div>'
+      +'</div>'
+      +'<div class="fg"><label>Source</label><select id="'+pre+'src"></select></div>'
+      +'<div class="fg"><label>Edge in one sentence</label><textarea id="'+pre+'notes" placeholder="Why this horse, why this price…" style="min-height:56px;"></textarea></div>'
+      +'<div class="sdiv">Result (fill after race)</div>'
+      +'<div class="g2">'
+        +'<div class="fg"><label>Result</label><select id="'+pre+'res" onchange="'+(isVirt?'onVResChange()':'onSwResChange()')+'"><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>'
+        +'<div class="fg"><label>Returns (£)</label><input type="number" id="'+pre+'ret" step="0.01" min="0" placeholder=""></div>'
+      +'</div>'
+      +saveBtn;
+
+    // Populate track datalist
+    const tl=document.getElementById('ltl2');
+    if(tl)tl.innerHTML=(typeof TKS!=='undefined'?TKS:[]).map(function(t){return'<option value="'+t+'">';}).join('');
+
+    // Populate source dropdown
+    const srcEl=document.getElementById(pre+'src');
+    if(srcEl){
+      const sources=(D.settings&&D.settings.sources&&D.settings.sources.length)?D.settings.sources:[];
+      const allSrc=['Own Form Study'].concat(sources.filter(function(s){return s!=='Own Form Study';}));
+      srcEl.innerHTML=allSrc.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
+    }
+
+    // Daily limit warning
+    const warnEl=document.getElementById('_lbo-limit-warn');
+    if(warnEl&&!isVirt){
+      const limit=D.settings&&D.settings.dailyLimit?D.settings.dailyLimit:5;
+      const todayCount=(D.bets||[]).filter(function(b){return b.date===td();}).length;
+      if(todayCount>=limit){warnEl.style.display='block';warnEl.textContent='⚠️ Daily limit reached ('+todayCount+'/'+limit+' bets).';}
+      else if(todayCount===limit-1){warnEl.style.display='block';warnEl.style.color='var(--gld)';warnEl.textContent='Last bet of the day — make it count.';}
+    }
+
+    // Bank tile
+    if(isVirt){
+      const vb=D.vBank||{current:500};
+      const el=document.getElementById('vb-mini-amt2');if(el)el.textContent='£'+(vb.current||0).toFixed(2);
+    } else {
+      const el=document.getElementById('lb-real-bank-amt2');if(el)el.textContent='£'+(D.bank&&D.bank.current||0).toFixed(2);
+    }
+  }
+
+  // Pre-fill from pending racecard bet
   if(_pendingRCBet){
     const p=_pendingRCBet;
     const pre=mode==='real'?'lb':'vb';
     setTimeout(function(){
-      const he=document.getElementById(pre+'h');if(he)he.value=p.horse;
-      const te=document.getElementById(pre+'t')||document.getElementById('lbt');if(te)te.value=p.course;
-      const ti=document.getElementById(pre+'time');if(ti)ti.value=p.time;
-      const je=document.getElementById(pre+'jockey');if(je)je.value=p.jockey;
-      const tr=document.getElementById(pre+'trainer');if(tr)tr.value=p.trainer;
+      const he=document.getElementById(pre+'h');if(he)he.value=p.horse||'';
+      const te=document.getElementById(pre+'t');if(te)te.value=p.course||'';
+      const ti=document.getElementById(pre+'time');if(ti)ti.value=p.time||'';
+      const je=document.getElementById(pre+'jockey');if(je)je.value=p.jockey||'';
+      const tr=document.getElementById(pre+'trainer');if(tr)tr.value=p.trainer||'';
       if(mode==='real')calcLiveStake();else calcVirtStake();
     },50);
   }
-  // Add sticky close button at bottom if not already there
+
+  // Sticky close/back bar
   let closeBar=document.getElementById('lbo-close-bar');
   if(!closeBar){
     closeBar=document.createElement('div');
@@ -537,20 +582,15 @@ function openLogbetOverlay(mode){
   }
   closeBar.style.display='block';
   overlay.style.display='block';
+  overlay.scrollTop=0;
 }
 
 function closeLogbetOverlay(){
   const overlay=document.getElementById('logbet-overlay');
-  // Return log bet card to its hidden home
-  const src=document.getElementById('c_LOGBET_OLD');
-  const swShell=document.getElementById('sw-shell');
-  if(src&&swShell){src.style.display='none';swShell.appendChild(src);}
-  overlay.style.display='none';
+  if(overlay){overlay.style.display='none';const tgt=document.getElementById('lbo-content');if(tgt)tgt.innerHTML='';}
   const cb=document.getElementById('lbo-close-bar');if(cb)cb.style.display='none';
   const prebetOv=document.getElementById('prebet-overlay');if(prebetOv)prebetOv.style.display='none';
-  document.body.style.overflow='';
   _pendingRCBet=null;
-  // Return to Racecards card
   goTo(1);
 }
 

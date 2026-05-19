@@ -118,16 +118,10 @@ function removeSource(i){
 
 function setLBMode(m){
   lbMode=m;
-  document.getElementById('lb-real-form').style.display=m==='real'?'block':'none';
-  document.getElementById('lb-virt-form').style.display=m==='virt'?'block':'none';
-  // Update card accent strip colour via CSS variable on the card element
-  const card=document.getElementById('c2');
-  if(card)card.style.setProperty('--card-accent',m==='real'?'linear-gradient(90deg,#1d4ed8,#60a5fa)':'linear-gradient(90deg,#ea580c,#fb923c)');
-  const tr=document.getElementById('lb-tog-real'),tv=document.getElementById('lb-tog-virt');
-  if(tr){tr.style.background=m==='real'?'var(--blu)':'transparent';tr.style.color=m==='real'?'white':'var(--mut)';}
-  if(tv){tv.style.background=m==='virt'?'#fb923c':'transparent';tv.style.color=m==='virt'?'#141414':'var(--mut)';}
-  const title=document.getElementById('lb-card-title');
-  if(title){title.textContent=m==='real'?'Real Bet':'Virtual Bet';title.style.color=m==='real'?'#60a5fa':'#fb923c';}
+  // Old card forms (kept for non-overlay usage)
+  const rf=document.getElementById('lb-real-form'),vf=document.getElementById('lb-virt-form');
+  if(rf)rf.style.display=m==='real'?'block':'none';
+  if(vf)vf.style.display=m==='virt'?'block':'none';
   if(m==='virt'){renderVBMini();setTimeout(calcVirtStake,100);}
   else{renderRealBankMini();setTimeout(calcLiveStake,100);}
 }

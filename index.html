@@ -743,19 +743,22 @@
 
 <!-- LOG BET OVERLAY -->
 <div id="logbet-overlay" style="display:none;position:fixed;inset:0;z-index:201;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;">
-  <div style="max-width:520px;margin:0 auto;padding:0 0 40px;">
+  <div style="max-width:520px;margin:0 auto;padding:0 0 120px;">
     <!-- Header bar -->
-    <div style="position:sticky;top:0;z-index:10;background:var(--bg);padding:14px 17px;display:flex;align-items:center;justify-content:space-between;" id="lbo-header">
-      <div>
-        <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:2px;" id="lbo-type-lbl">Real Bet</div>
-        <div style="font-size:18px;font-weight:700;" id="lbo-title">Log Bet</div>
+    <div style="position:sticky;top:0;z-index:10;background:var(--bg);padding:14px 17px 0;" id="lbo-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;">
+        <div>
+          <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:2px;" id="lbo-type-lbl">Real Bet</div>
+          <div style="font-size:20px;font-weight:700;" id="lbo-title">Log Bet</div>
+        </div>
+        <button onclick="closeLogbetOverlay()" style="background:none;border:none;color:var(--mut);font-size:24px;cursor:pointer;padding:8px;line-height:1;">✕</button>
       </div>
-      <button onclick="closeLogbetOverlay()" style="background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer;padding:4px;">✕</button>
+      <!-- Accent bar — colour set by openLogbetOverlay -->
+      <div id="lbo-accent-bar" style="height:3px;background:#60a5fa;margin:0 -17px;"></div>
     </div>
     <!-- Form injected here -->
-    <div id="lbo-content" style="padding:0 17px;"></div>
+    <div id="lbo-content" style="padding:16px 17px 0;"></div>
   </div>
-  </div><!-- /cpane-wrap -->
 </div>
 
 <!-- ── JS modules — load order: config → state → utils → supabase → ui → features → init ── -->

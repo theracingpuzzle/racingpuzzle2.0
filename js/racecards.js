@@ -499,15 +499,18 @@ function openLogbetOverlay(mode){
   const typeEl=document.getElementById('lbo-type-lbl');
   const titleEl=document.getElementById('lbo-title');
   const hdr=document.getElementById('lbo-header');
+  const accentCol=mode==='virt'?'#fb923c':'#60a5fa';
   if(mode==='virt'){
-    if(typeEl){typeEl.textContent='Virtual Bet';typeEl.style.color='#fb923c';}
-    if(titleEl){titleEl.textContent='Virtual Bet';titleEl.style.color='#fb923c';}
-    if(hdr)hdr.style.borderBottom='1px solid rgba(251,146,60,.2)';
+    if(typeEl){typeEl.textContent='Virtual Bet';typeEl.style.color=accentCol;}
+    if(titleEl){titleEl.textContent='Virtual Bet';titleEl.style.color=accentCol;}
+    if(hdr)hdr.style.borderBottom='none';
   } else {
-    if(typeEl){typeEl.textContent='Real Bet';typeEl.style.color='#60a5fa';}
-    if(titleEl){titleEl.textContent='Real Bet';titleEl.style.color='#60a5fa';}
-    if(hdr)hdr.style.borderBottom='1px solid rgba(96,165,250,.2)';
+    if(typeEl){typeEl.textContent='Real Bet';typeEl.style.color=accentCol;}
+    if(titleEl){titleEl.textContent='Real Bet';titleEl.style.color=accentCol;}
+    if(hdr)hdr.style.borderBottom='none';
   }
+  const accentBar=document.getElementById('lbo-accent-bar');
+  if(accentBar)accentBar.style.background=accentCol;
   setLBMode(mode);
   renderLogBetCard();
   // Pre-fill from pending

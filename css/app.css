@@ -188,3 +188,37 @@ tr:hover td{background:rgba(232,228,220,.04);}
 .cB{background:radial-gradient(ellipse 120% 40% at 50% 0%,rgba(245,158,11,.06) 0%,var(--sur) 70%);}
 .cW{background:radial-gradient(ellipse 120% 40% at 50% 0%,rgba(232,121,249,.06) 0%,var(--sur) 70%);}
 </style>
+
+/* ── Log Bet Overlay ── */
+#logbet-overlay .cin{
+  height:auto;
+  overflow:visible;
+  padding:0;
+}
+#logbet-overlay input,
+#logbet-overlay select,
+#logbet-overlay textarea{
+  font-size:16px;       /* prevents iOS zoom on focus */
+  padding:13px 14px;
+  border-radius:10px;
+}
+#logbet-overlay .fg{
+  margin-bottom:14px;
+}
+#logbet-overlay .fg label{
+  font-size:9px;
+  letter-spacing:.15em;
+}
+#logbet-overlay .g2{
+  gap:12px;
+}
+#logbet-overlay .btn{
+  width:100%;
+  padding:16px;
+  font-size:12px;
+  border-radius:12px;
+  margin-top:4px;
+}
+#logbet-overlay .sdiv{
+  margin:18px 0 12px;
+}

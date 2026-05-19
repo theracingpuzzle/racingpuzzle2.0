@@ -327,7 +327,6 @@ function openBetFlow(mode,horse,course,time,jockey,trainer,raceName){
     +`<div style="display:flex;justify-content:center;padding:12px 0 4px;flex-shrink:0;"><div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);"></div></div>`
     +`<div style="padding:12px 18px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0;">`
       +`<div style="display:flex;align-items:center;gap:10px;">`
-        +`<span style="font-family:monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;background:${modeCol}22;border:1px solid ${modeCol}55;color:${modeCol};">${mode==='real'?'REAL':'VIRTUAL'}</span>`
         +`<div><div style="font-size:17px;font-weight:700;color:var(--txt);">${horse}</div>`
         +`<div style="font-size:11px;color:var(--mut);font-family:monospace;margin-top:1px;">${time} · ${course}</div></div>`
       +`</div>`

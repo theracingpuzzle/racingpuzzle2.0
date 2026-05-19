@@ -484,6 +484,9 @@ function openLogbetOverlay(mode){
     src.style.position='static';
     src.style.height='auto';
     src.style.overflow='visible';
+    // Hide the inner card header — overlay header replaces it
+    const innerHdr=src.querySelector('.cin>div:first-child');
+    if(innerHdr)innerHdr.style.display='none';
     const tgt=document.getElementById('lbo-content');
     if(tgt){tgt.innerHTML='';tgt.appendChild(src);}
   }

@@ -130,14 +130,14 @@ function settingsRemoveSource(i){
 }
 
 function renderSources(){
-  if(!D.sources)D.sources=[];
+  if(!D.settings)D.settings={};if(!D.settings.sources)D.settings.sources=[];
   const el=document.getElementById('sources-list');
   if(!el)return;
-  if(!D.sources.length){
+  if(!D.settings.sources.length){
     el.innerHTML='<div style="font-family:monospace;font-size:11px;color:var(--mut);padding:8px 0;">No sources added yet.</div>';
     return;
   }
-  el.innerHTML=D.sources.map(function(s,i){
+  el.innerHTML=D.settings.sources.map(function(s,i){
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:9px;background:var(--sur2);border:1px solid var(--bdr);margin-bottom:7px;">'
       +'<span style="font-size:13px;color:var(--txt);">💬 '+s+'</span>'
       +'<button onclick="removeSource('+i+')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(196,58,58,.3);background:rgba(196,58,58,.08);color:var(--red);font-family:monospace;font-size:10px;cursor:pointer;">Remove</button>'
@@ -149,16 +149,16 @@ function addSource(){
   if(!inp)return;
   const val=inp.value.trim();
   if(!val){inp.style.borderColor='var(--red)';inp.focus();return;}
-  if(!D.sources)D.sources=[];
-  if(D.sources.includes(val)){inp.style.borderColor='var(--gld)';return;}
-  D.sources.push(val);
+  if(!D.settings)D.settings={};if(!D.settings.sources)D.settings.sources=[];
+  if(D.settings.sources.includes(val)){inp.style.borderColor='var(--gld)';return;}
+  D.settings.sources.push(val);
   save();
   inp.value='';inp.style.borderColor='';
   renderSources();
 }
 function removeSource(i){
-  if(!D.sources)return;
-  D.sources.splice(i,1);
+  if(!D.settings||!D.settings.sources)return;
+  D.settings.sources.splice(i,1);
   save();
   renderSources();
 }
@@ -246,12 +246,7 @@ function updCkScore(){
     else{gb.style.background='transparent';gb.style.color='var(--mut)';gb.style.borderColor='var(--bdr)';}
   }
 }
-function goFromChecklist(mode){
-  const done=cks.filter(Boolean).length;
-  if(done===0){alert('Run through the checklist first — at least tick what you have checked.');return;}
-  if(_pendingRCBet)document.getElementById('prebet-overlay').style.display='none';
-  openLogbetOverlay(mode||'real');
-}
+// goFromChecklist defined in racecards.js
 
 
 // ─── AUTO-CALC WIRED TO RESULT DROPDOWNS ───
@@ -420,7 +415,7 @@ function _betFlowSelectSource(source){
     _betFlowShowChecklist();
   } else {
     // Show saved sources list + option to type a new one
-    const sources=(D.sources&&D.sources.length)?D.sources:[];
+    const sources=(D.settings&&D.settings.sources&&D.settings.sources.length)?D.settings.sources:[];
     let html='<div style="font-family:monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;">Who is the tip from?</div>';
     // Build source buttons using data attributes — avoids all quote escaping
     sources.forEach(function(src,si){

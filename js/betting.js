@@ -81,6 +81,54 @@ function savePointValue(){
   setTimeout(()=>{const el=document.getElementById('set-pv-status');if(el)el.textContent='';},3000);
 }
 
+function renderSetSources(){
+  if(!D.settings)D.settings={};
+  if(!D.settings.sources)D.settings.sources=[];
+  const el=document.getElementById('set-sources-list');
+  if(!el)return;
+  if(!D.settings.sources.length){
+    el.innerHTML='<div style="font-family:monospace;font-size:11px;color:var(--mut);padding:6px 0;">No sources added yet.</div>';
+    return;
+  }
+  el.innerHTML=D.settings.sources.map(function(s,i){
+    const label=typeof s==='object'?s.label:s;
+    const type=typeof s==='object'?s.type:'tip';
+    const col=type==='own'?'#60a5fa':'#e879f9';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:9px;background:var(--sur2);border:1px solid var(--bdr);margin-bottom:7px;">'
+      +'<div style="display:flex;align-items:center;gap:8px;">'
+        +'<span style="font-family:monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:'+col+'22;color:'+col+';border:1px solid '+col+'44;text-transform:uppercase;">'+type+'</span>'
+        +'<span style="font-size:13px;color:var(--txt);">'+label+'</span>'
+      +'</div>'
+      +'<button onclick="settingsRemoveSource('+i+')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(196,58,58,.3);background:rgba(196,58,58,.08);color:var(--red);font-family:monospace;font-size:10px;cursor:pointer;">Remove</button>'
+      +'</div>';
+  }).join('');
+}
+function renderSettingsSources(){renderSetSources();}
+function settingsAddSource(){
+  const labelEl=document.getElementById('set-src-new-label');
+  const typeEl=document.getElementById('set-src-new-type');
+  const statusEl=document.getElementById('set-src-status');
+  if(!labelEl)return;
+  const label=labelEl.value.trim();
+  if(!label){labelEl.style.borderColor='var(--red)';labelEl.focus();return;}
+  if(!D.settings)D.settings={};
+  if(!D.settings.sources)D.settings.sources=[];
+  // Check for duplicate
+  const exists=D.settings.sources.some(function(s){return(typeof s==='object'?s.label:s)===label;});
+  if(exists){labelEl.style.borderColor='var(--gld)';if(statusEl)statusEl.textContent='Source already exists.';return;}
+  D.settings.sources.push({label:label,type:typeEl?typeEl.value:'tip'});
+  save();
+  labelEl.value='';labelEl.style.borderColor='';
+  if(statusEl){statusEl.textContent='✓ Added';setTimeout(function(){statusEl.textContent='';},2000);}
+  renderSetSources();
+}
+function settingsRemoveSource(i){
+  if(!D.settings||!D.settings.sources)return;
+  D.settings.sources.splice(i,1);
+  save();
+  renderSetSources();
+}
+
 function renderSources(){
   if(!D.sources)D.sources=[];
   const el=document.getElementById('sources-list');
@@ -142,7 +190,8 @@ function renderVBMini(){
 }
 function getSourceOptions(){
   const saved=(D.settings&&D.settings.sources&&D.settings.sources.length)?D.settings.sources:[];
-  const all=['Own Form Study'].concat(saved.filter(function(s){return s!=='Own Form Study';}));
+  const labels=saved.map(function(s){return typeof s==='object'?s.label:s;});
+  const all=['Own Form Study'].concat(labels.filter(function(s){return s!=='Own Form Study';}));
   return all.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
 }
 function populateSourceDropdowns(){

@@ -317,17 +317,18 @@ async function _syncSettings(){
   const rows=Object.keys(s).map(function(k){
     return{user_id:uid,key:k,value:s[k],updated_at:new Date().toISOString()};
   });
-  if(D.sources&&D.sources.length){
-    rows.push({user_id:uid,key:'sources',value:JSON.stringify(D.sources),updated_at:new Date().toISOString()});
-  }
+
   if(D.cksOwn&&D.cksOwn.length){
     rows.push({user_id:uid,key:'cksOwn',value:JSON.stringify(D.cksOwn),updated_at:new Date().toISOString()});
   }
   if(D.cksTip&&D.cksTip.length){
     rows.push({user_id:uid,key:'cksTip',value:JSON.stringify(D.cksTip),updated_at:new Date().toISOString()});
   }
+  // Deduplicate by key — last value wins
+  const rowMap={};rows.forEach(function(r){rowMap[r.key]=r;});
+  const dedupedRows=Object.values(rowMap);
   await _supa('DELETE','settings',null,'user_id=eq.'+SUPA_USER_ID);
-  if(rows.length) await _supa('POST','settings',rows);
+  if(dedupedRows.length) await _supa('POST','settings',dedupedRows);
 }
 
 // ════════════════════════════════════════════════════════

@@ -444,7 +444,9 @@ function _openModal(b,type){
   document.getElementById('em-type-sel').value=b.betType||'win';
   document.getElementById('em-jockey').value=b.jockey||'';
   document.getElementById('em-trainer').value=b.trainer||'';
-  document.getElementById('em-source').value=b.source||'Own Form Study';
+  const emSrc=document.getElementById('em-source');
+  if(emSrc&&typeof getSourceOptions==='function')emSrc.innerHTML=getSourceOptions();
+  if(emSrc)emSrc.value=b.source||'Own Form Study';
   document.getElementById('em-prenotes').value=b.notes||'';
   document.getElementById('emres').value=b.result||'pending';
   document.getElementById('emret').value=b.returns||'';

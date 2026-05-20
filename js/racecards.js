@@ -513,16 +513,16 @@ function openLogbetOverlay(mode, prefill){
   if(accentBar)accentBar.style.background=accentCol;
   setLBMode(mode);
   renderLogBetCard();
-  // Pre-fill from passed data or _pendingRCBet
-  const _fillData=prefill||_pendingRCBet;
-  if(_fillData){
+  // Pre-fill from pending
+  const _fill=prefill||_pendingRCBet;
+  if(_fill){
     const pre=mode==='real'?'lb':'vb';
     setTimeout(function(){
-      const he=document.getElementById(pre+'h');if(he&&_fillData.horse)he.value=_fillData.horse;
-      const te=document.getElementById(pre+'t')||document.getElementById('lbt');if(te&&_fillData.course)te.value=_fillData.course;
-      const ti=document.getElementById(pre+'time');if(ti&&_fillData.time)ti.value=_fillData.time;
-      const je=document.getElementById(pre+'jockey');if(je&&_fillData.jockey)je.value=_fillData.jockey;
-      const tr=document.getElementById(pre+'trainer');if(tr&&_fillData.trainer)tr.value=_fillData.trainer;
+      const he=document.getElementById(pre+'h');if(he&&_fill.horse)he.value=_fill.horse;
+      const te=document.getElementById(pre+'t')||document.getElementById('lbt');if(te&&_fill.course)te.value=_fill.course;
+      const ti=document.getElementById(pre+'time');if(ti&&_fill.time)ti.value=_fill.time;
+      const je=document.getElementById(pre+'jockey');if(je&&_fill.jockey)je.value=_fill.jockey;
+      const tr=document.getElementById(pre+'trainer');if(tr&&_fill.trainer)tr.value=_fill.trainer;
       if(mode==='real')calcLiveStake();else calcVirtStake();
     },80);
   }
@@ -969,13 +969,13 @@ function rcBetFromRunner(event, horse, course, time, jockey, trainer, raceName){
 
 // Called by _betFlowProceed in betting.js once checklist is complete
 function _rcDoLogBet(s){
-  const prefill={horse:s.horse,course:s.course,time:s.time,jockey:s.jockey,trainer:s.trainer};
-  openLogbetOverlay(s.mode, prefill);
+  const _pf={horse:s.horse,course:s.course,time:s.time,jockey:s.jockey,trainer:s.trainer};
+  openLogbetOverlay(s.mode, _pf);
   setTimeout(function(){
     const pre=s.mode==='real'?'lb':'vb';
     const src=document.getElementById(pre+'src');
-    if(src&&s.tipSource)src.value=s.tipSource;
-  },150);
+    if(src)src.value=s.source==='own'?'Own Form Study':(s.tipSource||'Own Form Study');
+  },200);
 }
 
 function rcSetStatus(msg){

@@ -56,7 +56,6 @@ function loadStartBankField(){
   const vc=document.getElementById('set-vbk-cur');if(vc)vc.value=D.vBank&&D.vBank.current!=null?D.vBank.current:500;
   const pv=document.getElementById('set-pv');if(pv)pv.value=getPointValue();
   renderPVPreview();
-  renderSources();
 }
 function renderPVPreview(){
   const el=document.getElementById('pv-preview');if(!el)return;
@@ -141,14 +140,20 @@ function renderVBMini(){
   pnlEl.innerHTML='<span style="color:'+(diff>=0?'#fb923c':'var(--red)')+';">'+(diff>=0?'+':'')+'£'+Math.abs(diff).toFixed(2)+'</span><br>'
     +'<span style="color:var(--mut);font-size:9px;">Real: <span style="color:'+((D.bank.current||0)>=(D.bank.start||0)?'var(--grn)':'var(--red)')+';">£'+(D.bank.current||0).toFixed(2)+'</span></span>';
 }
+function getSourceOptions(){
+  const saved=(D.settings&&D.settings.sources&&D.settings.sources.length)?D.settings.sources:[];
+  const all=['Own Form Study'].concat(saved.filter(function(s){return s!=='Own Form Study';}));
+  return all.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
+}
+function populateSourceDropdowns(){
+  ['lbsrc','vbsrc'].forEach(function(id){
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=getSourceOptions();
+  });
+}
 function renderLogBetCard(){
   // Populate source dropdown from D.sources
-  const srcEl=document.getElementById('lbsrc');
-  if(srcEl){
-    const sources=(D.sources&&D.sources.length)?D.sources:['Own Form Study'];
-    if(!sources.includes('Own Form Study'))sources.unshift('Own Form Study');
-    srcEl.innerHTML=sources.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
-  }
+  populateSourceDropdowns();
   const limit=D.settings&&D.settings.dailyLimit?D.settings.dailyLimit:5;
   const todayCount=D.bets.filter(b=>b.date===td()).length;
   const el=document.getElementById('lb-limit-warn');
@@ -201,8 +206,7 @@ function goFromChecklist(mode){
 
 
 // ─── AUTO-CALC WIRED TO RESULT DROPDOWNS ───
-function onSwResChange(){const res=document.getElementById('lbres').value,stakeStr=document.getElementById('lbs').value,od=fo(document.getElementById('lbo').value),bt=document.getElementById('lbtype').value;const el=document.getElementById('lbret');if(!el)return;if(!stakeStr||!od){return;}if(res==='void'||res==='nr'||res==='loss'){el.value='';return;}el.value=calcReturns(res==='pending'?'win':res,parseFloat(stakeStr),od,bt,'');}
-function onVResChange(){const res=document.getElementById('vbres').value,stakeStr=document.getElementById('vbs').value,od=fo(document.getElementById('vbo').value),bt=document.getElementById('vbtype').value;const el=document.getElementById('vbret');if(!el)return;if(!stakeStr||!od){return;}if(res==='void'||res==='nr'||res==='loss'){el.value='';return;}el.value=calcReturns(res==='pending'?'win':res,parseFloat(stakeStr),od,bt,'');}
+function onSwResChange(){const res=document.getElementById('lbres').value,stake=document.getElementById('lbs').value,od=fo(document.getElementById('lbo').value),bt=document.getElementById('lbtype').value;if(res!=='pending'&&stake&&od)document.getElementById('lbret').value=calcReturns(res,stake,od,bt,'');}
 function onCmdResChange(){/* removed panel */}
 function onEditResChange(){
   const res=(document.getElementById('emres')||{value:'pending'}).value;

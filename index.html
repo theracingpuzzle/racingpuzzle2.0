@@ -177,8 +177,8 @@
             <div class="fg"><label>Time</label><input type="text" id="lbtime" placeholder=""></div>
             <div class="fg"><label>Jockey</label><input type="text" id="lbjockey" placeholder="" autocomplete="off"></div>
             <div class="fg"><label>Trainer</label><input type="text" id="lbtrainer" placeholder="" autocomplete="off"></div>
-            <div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="lbo" placeholder="" list="oddsl" style="font-family:'Courier New',monospace;" oninput="calcLiveStake();onSwResChange()"><datalist id="oddsl"><option value="EVS"><option value="1/2"><option value="4/6"><option value="4/5"><option value="5/4"><option value="6/4"><option value="7/4"><option value="2/1"><option value="9/4"><option value="5/2"><option value="11/4"><option value="3/1"><option value="7/2"><option value="4/1"><option value="9/2"><option value="5/1"><option value="11/2"><option value="6/1"><option value="7/1"><option value="8/1"><option value="10/1"><option value="12/1"><option value="14/1"><option value="16/1"><option value="20/1"><option value="25/1"><option value="33/1"><option value="50/1"><option value="100/1"></datalist></div>
-            <div class="fg"><label>Stake (£)</label><input type="number" id="lbs" step="0.5" min="0" placeholder="" oninput="calcLiveStake();onSwResChange()"></div>
+            <div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="lbo" placeholder="" list="oddsl" style="font-family:'Courier New',monospace;" oninput="calcLiveStake()"><datalist id="oddsl"><option value="EVS"><option value="1/2"><option value="4/6"><option value="4/5"><option value="5/4"><option value="6/4"><option value="7/4"><option value="2/1"><option value="9/4"><option value="5/2"><option value="11/4"><option value="3/1"><option value="7/2"><option value="4/1"><option value="9/2"><option value="5/1"><option value="11/2"><option value="6/1"><option value="7/1"><option value="8/1"><option value="10/1"><option value="12/1"><option value="14/1"><option value="16/1"><option value="20/1"><option value="25/1"><option value="33/1"><option value="50/1"><option value="100/1"></datalist></div>
+            <div class="fg"><label>Stake (£)</label><input type="number" id="lbs" step="0.5" min="0" placeholder="" oninput="calcLiveStake()"></div>
             <div class="fg"><label>Type</label><select id="lbtype"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>
             <div class="fg"><label>Confidence</label><select id="lbconf" onchange="calcLiveStake()"><option value="1">1 — Speculative</option><option value="2">2 — Interested</option><option value="3" selected>3 — Solid</option><option value="4">4 — Strong</option><option value="5">5 — Best Bet</option></select></div>
           </div>
@@ -214,7 +214,7 @@
             <div class="fg"><label>Jockey</label><input type="text" id="vbjockey" placeholder="" autocomplete="off"></div>
             <div class="fg"><label>Trainer</label><input type="text" id="vbtrainer" placeholder="" autocomplete="off"></div>
             <div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="vbo" placeholder="" list="oddsl" style="font-family:'Courier New',monospace;" oninput="onVResChange();calcVirtStake()"></div>
-            <div class="fg"><label>Stake (£)</label><input type="number" id="vbs" step="0.5" min="0" placeholder="" oninput="calcVirtStake();onVResChange()"></div>
+            <div class="fg"><label>Stake (£)</label><input type="number" id="vbs" step="0.5" min="0" placeholder="" oninput="calcVirtStake()"></div>
             <div class="fg"><label>Type</label><select id="vbtype" onchange="calcVirtStake()"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>
             <div class="fg"><label>Confidence</label><select id="vbconf" onchange="calcVirtStake()"><option value="1">1 — Speculative</option><option value="2">2 — Interested</option><option value="3" selected>3 — Solid</option><option value="4">4 — Strong</option><option value="5">5 — Best Bet</option></select></div>
           </div>
@@ -287,15 +287,6 @@
         <button class="btn bgld bw" onclick="savePointValue()">Save Point Value</button>
         <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--mut);margin-top:8px;" id="set-pv-status"></div>
 
-        <!-- SOURCES -->
-        <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--bdr);">
-          <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Tip Sources</div>
-          <div id="sources-list" style="margin-bottom:12px;"></div>
-          <div style="display:flex;gap:8px;">
-            <input id="source-input" type="text" placeholder="e.g. Racing Post, Telegram, Friend…" autocomplete="off" style="flex:1;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;padding:10px 13px;font-size:14px;color:var(--txt);outline:none;" onkeydown="if(event.key==='Enter')addSource()">
-            <button class="btn bgld" onclick="addSource()" style="flex:0 0 auto;">Add</button>
-          </div>
-        </div>
       </div>
     </div>
 

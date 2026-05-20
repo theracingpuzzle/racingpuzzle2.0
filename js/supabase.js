@@ -295,11 +295,10 @@ async function _syncSettings(){
   const uid=SUPA_USER_ID;
   const s=D.settings||{};
   const rows=Object.keys(s).map(function(k){
-    return{user_id:uid,key:k,value:s[k],updated_at:new Date().toISOString()};
+    const v=s[k];
+    return{user_id:uid,key:k,value:(typeof v==='object'?JSON.stringify(v):v),updated_at:new Date().toISOString()};
   });
-  if(D.sources&&D.sources.length){
-    rows.push({user_id:uid,key:'sources',value:JSON.stringify(D.sources),updated_at:new Date().toISOString()});
-  }
+
   if(D.cksOwn&&D.cksOwn.length){
     rows.push({user_id:uid,key:'cksOwn',value:JSON.stringify(D.cksOwn),updated_at:new Date().toISOString()});
   }
@@ -406,8 +405,16 @@ async function supaLoad(){
       D.settings=D.settings||{};
       settingRows.forEach(function(s){
         if(s.key==='sources'){
-          try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.sources=parsed;}
-          catch(e){}
+          try{
+            const parsed=JSON.parse(s.value);
+            if(Array.isArray(parsed)&&parsed.length){
+              // Migrate old string array to object format and store in D.settings.sources
+              D.settings.sources=parsed.map(function(x){
+                return typeof x==='object'?x:{label:x,type:'tip'};
+              });
+              D.sources=D.settings.sources.map(function(x){return x.label;});
+            }
+          }catch(e){}
         } else if(s.key==='cksOwn'){
           try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.cksOwn=parsed;}
           catch(e){}
@@ -415,7 +422,8 @@ async function supaLoad(){
           try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.cksTip=parsed;}
           catch(e){}
         } else {
-          D.settings[s.key]=s.value;
+          try{D.settings[s.key]=JSON.parse(s.value);}
+          catch(e){D.settings[s.key]=s.value;}
         }
       });
     }

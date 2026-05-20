@@ -259,6 +259,26 @@ async function _syncProfiles(){
   }
   if(obs.length) await _supa('POST','profile_observations',obs);
   if(targets.length) await _supa('POST','profile_targets',targets);
+  // Sync race results
+  const raceResults=[];
+  wl.forEach(function(e){
+    (e.raceResults||[]).forEach(function(r){
+      raceResults.push({
+        id:r.id,profile_id:e.id,user_id:uid,
+        result_date:r.date||null,track:r.track||null,
+        race_name:r.raceName||null,ran:r.ran!==false,
+        position:r.position||null,travelling:r.travelling||null,
+        going_suited:r.goingSuited!=null?r.goingSuited:null,
+        is_target_race:r.isTargetRace||false,
+        bet_id:r.betId||null,notes:r.notes||null,
+        created_at:new Date().toISOString()
+      });
+    });
+  });
+  if(profileIds.length){
+    await _supa('DELETE','profile_race_results',null,'user_id=eq.'+uid+'&profile_id=in.('+profileIds.join(',')+')');
+  }
+  if(raceResults.length) await _supa('POST','profile_race_results',raceResults);
   // Remove any profiles deleted locally
   if(profileIds.length){
     await _supa('DELETE','horse_profiles',null,'user_id=eq.'+uid+'&id=not.in.('+profileIds.join(',')+')');
@@ -295,10 +315,11 @@ async function _syncSettings(){
   const uid=SUPA_USER_ID;
   const s=D.settings||{};
   const rows=Object.keys(s).map(function(k){
-    const v=s[k];
-    return{user_id:uid,key:k,value:(typeof v==='object'?JSON.stringify(v):v),updated_at:new Date().toISOString()};
+    return{user_id:uid,key:k,value:s[k],updated_at:new Date().toISOString()};
   });
-
+  if(D.sources&&D.sources.length){
+    rows.push({user_id:uid,key:'sources',value:JSON.stringify(D.sources),updated_at:new Date().toISOString()});
+  }
   if(D.cksOwn&&D.cksOwn.length){
     rows.push({user_id:uid,key:'cksOwn',value:JSON.stringify(D.cksOwn),updated_at:new Date().toISOString()});
   }
@@ -318,12 +339,13 @@ async function supaLoad(){
   const uid=SUPA_USER_ID;
   try{
     // Fetch all tables in parallel
-    const [bankRows,betRows,profileRows,obsRows,targetRows,ruleRows,logRows,settingRows]=await Promise.all([
+    const [bankRows,betRows,profileRows,obsRows,targetRows,raceResultRows,ruleRows,logRows,settingRows]=await Promise.all([
       fetch(SUPA_URL+'/rest/v1/bank?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/bets?user_id=eq.'+uid+'&order=created_at.asc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/horse_profiles?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/profile_observations?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/profile_targets?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/profile_race_results?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/rules?user_id=eq.'+uid+'&order=sort_order.asc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/daily_log?user_id=eq.'+uid+'&order=log_date.desc&limit=90',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/settings?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();})
@@ -366,9 +388,10 @@ async function supaLoad(){
 
     // ── Horse Profiles (with obs and targets assembled) ──
     if(Array.isArray(profileRows)){
-      const obsMap={};const targetMap={};
+      const obsMap={};const targetMap={};const rrMap={};
       (obsRows||[]).forEach(function(o){if(!obsMap[o.profile_id])obsMap[o.profile_id]=[];obsMap[o.profile_id].push({id:o.id,date:o.obs_date||'',raceName:o.race_name||'',track:o.track||'',going:o.going||'',result:o.result||'',notes:o.notes||'',createdAt:new Date(o.created_at).getTime()});});
       (targetRows||[]).forEach(function(t){if(!targetMap[t.profile_id])targetMap[t.profile_id]=[];targetMap[t.profile_id].push({id:t.id,race:t.race||'',track:t.track||'',date:t.target_date||'',condition:t.condition||''});});
+      (raceResultRows||[]).forEach(function(r){if(!rrMap[r.profile_id])rrMap[r.profile_id]=[];rrMap[r.profile_id].push({id:r.id,date:r.result_date||'',track:r.track||'',raceName:r.race_name||'',ran:r.ran,position:r.position||'',travelling:r.travelling||null,goingSuited:r.going_suited,isTargetRace:r.is_target_race||false,betId:r.bet_id||null,notes:r.notes||''});});
       D.watchlist=profileRows.map(function(p){return{
         id:p.id,horse:p.horse,trainer:p.trainer||'',
         currentRating:p.current_rating||'',
@@ -383,6 +406,7 @@ async function supaLoad(){
         conditionsNotes:p.conditions_notes||'',
         observations:obsMap[p.id]||[],
         targets:targetMap[p.id]||[],
+        raceResults:rrMap[p.id]||[],
         createdAt:new Date(p.created_at).getTime(),
         updatedAt:new Date(p.updated_at).getTime()
       };});
@@ -405,16 +429,8 @@ async function supaLoad(){
       D.settings=D.settings||{};
       settingRows.forEach(function(s){
         if(s.key==='sources'){
-          try{
-            const parsed=JSON.parse(s.value);
-            if(Array.isArray(parsed)&&parsed.length){
-              // Migrate old string array to object format and store in D.settings.sources
-              D.settings.sources=parsed.map(function(x){
-                return typeof x==='object'?x:{label:x,type:'tip'};
-              });
-              D.sources=D.settings.sources.map(function(x){return x.label;});
-            }
-          }catch(e){}
+          try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.sources=parsed;}
+          catch(e){}
         } else if(s.key==='cksOwn'){
           try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.cksOwn=parsed;}
           catch(e){}
@@ -422,8 +438,7 @@ async function supaLoad(){
           try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.cksTip=parsed;}
           catch(e){}
         } else {
-          try{D.settings[s.key]=JSON.parse(s.value);}
-          catch(e){D.settings[s.key]=s.value;}
+          D.settings[s.key]=s.value;
         }
       });
     }

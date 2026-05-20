@@ -112,7 +112,8 @@
         </div>
 
         <!-- ── THIS WEEK ── -->
-        <div id="t-this-week" style="margin-top:14px;display:none;">
+        <div id="t-running-today" style="display:none;margin-bottom:14px;"></div>
+    <div id="t-this-week" style="margin-top:14px;display:none;">
           <div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(232,228,220,.4);margin-bottom:8px;">Coming Up</div>
           <div id="t-this-week-list"></div>
         </div>
@@ -287,6 +288,15 @@
         <button class="btn bgld bw" onclick="savePointValue()">Save Point Value</button>
         <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--mut);margin-top:8px;" id="set-pv-status"></div>
 
+        <!-- SOURCES -->
+        <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--bdr);">
+          <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Tip Sources</div>
+          <div id="sources-list" style="margin-bottom:12px;"></div>
+          <div style="display:flex;gap:8px;">
+            <input id="source-input" type="text" placeholder="e.g. Racing Post, Telegram, Friend…" autocomplete="off" style="flex:1;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;padding:10px 13px;font-size:14px;color:var(--txt);outline:none;" onkeydown="if(event.key==='Enter')addSource()">
+            <button class="btn bgld" onclick="addSource()" style="flex:0 0 auto;">Add</button>
+          </div>
+        </div>
       </div>
     </div>
 

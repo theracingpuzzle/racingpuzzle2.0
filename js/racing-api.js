@@ -2,7 +2,21 @@
 const RACING_CREDS_KEY='racing-puzzle-api';
 
 function getRacingCreds(){
-  try{return JSON.parse(localStorage.getItem(RACING_CREDS_KEY)||'{}');}catch(e){return {};}
+  try{
+    const local=JSON.parse(localStorage.getItem(RACING_CREDS_KEY)||'{}');
+    if(local.username&&local.password)return local;
+    // Fall back to Supabase-synced settings
+    const synced=D&&D.settings&&D.settings.racingCreds;
+    if(synced){
+      const parsed=typeof synced==='string'?JSON.parse(synced):synced;
+      if(parsed.username&&parsed.password){
+        // Cache locally for next time
+        localStorage.setItem(RACING_CREDS_KEY,JSON.stringify(parsed));
+        return parsed;
+      }
+    }
+    return {};
+  }catch(e){return {};}
 }
 
 function saveRacingCreds(){
@@ -12,9 +26,14 @@ function saveRacingCreds(){
   const existing=getRacingCreds();
   const finalPass=p||existing.password||'';
   if(!finalPass){alert('Enter your password.');return;}
-  localStorage.setItem(RACING_CREDS_KEY,JSON.stringify({username:u,password:finalPass}));
+  const creds={username:u,password:finalPass};
+  localStorage.setItem(RACING_CREDS_KEY,JSON.stringify(creds));
+  // Also sync to Supabase settings
+  if(!D.settings)D.settings={};
+  D.settings.racingCreds=creds;
+  save();
   const st=document.getElementById('racing-api-status');
-  if(st){st.textContent='✓ Saved';st.style.color='var(--grn)';}
+  if(st){st.textContent='✓ Saved & synced';st.style.color='var(--grn)';}
   setTimeout(()=>{const el=document.getElementById('racing-api-status');if(el){el.textContent='';el.style.color='';}},3000);
 }
 

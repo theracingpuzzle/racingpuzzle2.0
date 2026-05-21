@@ -52,7 +52,7 @@ function updateAIUsageDisplay(){
 let coachHistory = [];
 
 function getApiKey(){
-  return localStorage.getItem(COACH_KEY_STORE) || '';
+  return localStorage.getItem(COACH_KEY_STORE)||(D.settings&&D.settings.apiKey)||'';
 }
 
 function buildCoachContext(){

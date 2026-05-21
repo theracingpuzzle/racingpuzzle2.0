@@ -455,7 +455,12 @@ async function _supaUpsertNow(){
 }
 
 function loadApiKeyField(){
-  const key=localStorage.getItem(COACH_KEY_STORE)||'';
+  // Prefer localStorage, fall back to D.settings (synced from another device)
+  let key=localStorage.getItem(COACH_KEY_STORE)||'';
+  if(!key&&D.settings&&D.settings.apiKey){
+    key=D.settings.apiKey;
+    localStorage.setItem(COACH_KEY_STORE,key); // cache locally
+  }
   const inp=document.getElementById('apikey-inp');
   const st=document.getElementById('apikey-status');
   if(inp){inp.value=key?'•'.repeat(Math.min(key.length,24)):'';}
@@ -467,8 +472,12 @@ function saveApiKey(){
   const val=document.getElementById('apikey-inp').value.trim();
   if(!val||val.startsWith('•')){alert('Enter a valid API key.');return;}
   localStorage.setItem(COACH_KEY_STORE,val);
+  // Also save to D.settings so it syncs across devices via Supabase
+  if(!D.settings)D.settings={};
+  D.settings.apiKey=val;
+  save();
   const st=document.getElementById('apikey-status');
-  if(st){st.textContent='✓ Key saved';st.style.color='var(--grn)';}
+  if(st){st.textContent='✓ Key saved & synced';st.style.color='var(--grn)';}
   setTimeout(()=>{const el=document.getElementById('apikey-status');if(el){el.textContent='';el.style.color='';}},3000);
 }
 function saveAILimit(){

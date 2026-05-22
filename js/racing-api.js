@@ -2,7 +2,26 @@
 const RACING_CREDS_KEY='racing-puzzle-api';
 
 function getRacingCreds(){
-  try{return JSON.parse(localStorage.getItem(RACING_CREDS_KEY)||'{}');}catch(e){return {};}
+  try{
+    // 1. Config constants — fastest, works on all devices instantly
+    if(typeof RACING_API_USER!=='undefined'&&RACING_API_USER&&
+       typeof RACING_API_PASS!=='undefined'&&RACING_API_PASS){
+      return{username:RACING_API_USER,password:RACING_API_PASS};
+    }
+    // 2. localStorage cache
+    const local=JSON.parse(localStorage.getItem(RACING_CREDS_KEY)||'{}');
+    if(local.username&&local.password)return local;
+    // 3. Supabase-synced D.settings
+    const synced=typeof D!=='undefined'&&D.settings&&D.settings.racingCreds;
+    if(synced){
+      const parsed=typeof synced==='string'?JSON.parse(synced):synced;
+      if(parsed.username&&parsed.password){
+        localStorage.setItem(RACING_CREDS_KEY,JSON.stringify(parsed));
+        return parsed;
+      }
+    }
+    return {};
+  }catch(e){return {};}
 }
 
 function saveRacingCreds(){
@@ -10,8 +29,7 @@ function saveRacingCreds(){
   const p=document.getElementById('racing-api-pass').value.trim();
   if(!u){alert('Enter your username (email).');return;}
   const existing=getRacingCreds();
-  // If password field shows bullets (masked), keep the existing password
-  const finalPass=(p&&!p.startsWith('•'))?p:existing.password||'';
+  const finalPass=p||existing.password||'';
   if(!finalPass){alert('Enter your password.');return;}
   localStorage.setItem(RACING_CREDS_KEY,JSON.stringify({username:u,password:finalPass}));
   const st=document.getElementById('racing-api-status');
@@ -126,25 +144,17 @@ function clearRacingCreds(){
 
 function loadRacingCredsFields(){
   const c=getRacingCreds();
-  // If found in D.settings but not localStorage, cache locally now
-  if(c.username&&c.password&&!localStorage.getItem(RACING_CREDS_KEY)){
-    localStorage.setItem(RACING_CREDS_KEY,JSON.stringify(c));
-  }
   const u=document.getElementById('racing-api-user');
-  const p=document.getElementById('racing-api-pass');
   const st=document.getElementById('racing-api-status');
   if(u)u.value=c.username||'';
-  // Pre-fill password field masked so user can see it's set
-  if(p&&c.password)p.value='••••••••';
-  if(st){
-    if(!c.username&&!c.password){
-      st.textContent='No credentials saved';
-      st.style.color='var(--mut)';
-    } else if(c.password&&c.password.includes('•')){
-      st.textContent='⚠️ Password corrupted — re-enter and save';
+  // Never pre-fill password — show status instead
+  if(st&&c.password){
+    // Warn if password looks like bullets (corrupted from old bug)
+    if(c.password.includes('•')){
+      st.textContent='⚠️ Password corrupted — tap Clear & Reset';
       st.style.color='var(--red)';
     } else {
-      st.textContent='✓ Credentials saved';
+      st.textContent='✓ Password saved';
       st.style.color='var(--grn)';
     }
   }

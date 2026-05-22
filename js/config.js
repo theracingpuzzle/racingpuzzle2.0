@@ -5,6 +5,9 @@ const SUPA_URL = 'https://stsmantobrvejfykstrl.supabase.co';
 const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0c21hbnRvYnJ2ZWpmeWtzdHJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyODg0MDAsImV4cCI6MjA5Mzg2NDQwMH0.mNxwB3lIBpTUNBXWIFJ6ODzrMFG4onvU4WIYsduo83E';
 let SUPA_USER_ID = 'racing-puzzle-default'; // update when auth is added
 
+const RACING_API_USER = 'JC3VDOdhdp9SXcEYjo7GtHjA';
+const RACING_API_PASS = 'FA37Cd614nA1SeVY0H4DO3zX';
+
 // ─── SWIPE CARDS ───
 const CARDS = [
   {id:'today',  lbl:'Today',          col:'var(--gld)'},

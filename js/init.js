@@ -20,6 +20,14 @@ bldDots();
     try {
       await supaLoad(); // pull latest from Supabase — overwrites localStorage
       if (dot) { dot.style.background = '#34d399'; dot.title = 'Supabase: synced ✅'; }
+      // Cache credentials to localStorage so they survive offline / new device
+      if (D.settings && D.settings.racingCreds) {
+        const rc = typeof D.settings.racingCreds === 'string' ? JSON.parse(D.settings.racingCreds) : D.settings.racingCreds;
+        if (rc.username && rc.password) localStorage.setItem(RACING_CREDS_KEY, JSON.stringify(rc));
+      }
+      if (D.settings && D.settings.apiKey) {
+        localStorage.setItem(COACH_KEY_STORE, D.settings.apiKey);
+      }
     } catch(e) {
       // Offline or error — continue with localStorage data
       if (dot) { dot.style.background = '#f59e0b'; dot.title = 'Supabase: offline'; }

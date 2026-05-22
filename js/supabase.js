@@ -204,12 +204,12 @@ async function _syncBets(){
   const all=realBets.concat(virtBets);
   // Delete bets not in current data, then upsert all
   const ids=all.map(function(b){return b.id;});
-  // SAFETY: never delete all bets if local data is empty — could be a fresh device
-  // Only delete specific bets that were removed locally
   if(ids.length){
+    // Delete rows for this user that are no longer in the app
     await _supa('DELETE','bets',null,'user_id=eq.'+uid+'&id=not.in.('+ids.join(',')+')');
+  } else {
+    await _supa('DELETE','bets',null,'user_id=eq.'+uid);
   }
-  // If ids is empty we skip deletion entirely — Supabase is the source of truth
   if(all.length) await _supaUpsert('bets',all);
 }
 
@@ -268,14 +268,12 @@ async function _syncProfiles(){
 // ── Rules ──
 async function _syncRules(){
   const uid=SUPA_USER_ID;
+  // Delete all then re-insert (rules are just ordered strings, no stable IDs)
+  await _supa('DELETE','rules',null,'user_id=eq.'+uid);
   const rows=(D.rules||[]).map(function(r,i){
     return{user_id:uid,rule_text:r,sort_order:i};
   });
-  // Only delete+reinsert if we actually have rules locally
-  if(rows.length){
-    await _supa('DELETE','rules',null,'user_id=eq.'+uid);
-    await _supa('POST','rules',rows);
-  }
+  if(rows.length) await _supa('POST','rules',rows);
 }
 
 // ── Daily Log ──
@@ -288,10 +286,8 @@ async function _syncDailyLog(){
     tracks:d.tracks||[],
     created_at:d.createdAt?new Date(d.createdAt).toISOString():new Date().toISOString()
   };});
-  if(rows.length){
-    await _supa('DELETE','daily_log',null,'user_id=eq.'+SUPA_USER_ID);
-    await _supa('POST','daily_log',rows);
-  }
+  await _supa('DELETE','daily_log',null,'user_id=eq.'+SUPA_USER_ID);
+  if(rows.length) await _supa('POST','daily_log',rows);
 }
 
 // ── Settings ──
@@ -337,11 +333,27 @@ async function supaLoad(){
     // ── Bank ──
     if(bankRows&&bankRows.length){
       const b=bankRows[0];
+      // Use stored starting banks
       D.bank={start:b.real_start,current:b.real_current};
       D.vBank=D.vBank||{};
       D.vBank.start=b.virtual_start;
       D.vBank.current=b.virtual_current;
     }
+    // Always get authoritative balance from DB trigger calculation
+    try{
+      const rpcResp=await fetch(SUPA_URL+'/rest/v1/rpc/rebuild_bank_balance',{
+        method:'POST',
+        headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Content-Type':'application/json'},
+        body:JSON.stringify({p_user_id:SUPA_USER_ID})
+      });
+      if(rpcResp.ok){
+        const rpcData=await rpcResp.json();
+        if(rpcData&&rpcData.length){
+          D.bank.current=parseFloat(rpcData[0].real_current)||D.bank.current;
+          D.vBank.current=parseFloat(rpcData[0].virtual_current)||D.vBank.current;
+        }
+      }
+    }catch(e){/* use stored values as fallback */}
 
     // ── Bets (split back into real and virtual) ──
     if(Array.isArray(betRows)){

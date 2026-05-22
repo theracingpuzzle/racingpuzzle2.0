@@ -2,21 +2,7 @@
 const RACING_CREDS_KEY='racing-puzzle-api';
 
 function getRacingCreds(){
-  try{
-    const local=JSON.parse(localStorage.getItem(RACING_CREDS_KEY)||'{}');
-    if(local.username&&local.password)return local;
-    // Fall back to Supabase-synced settings
-    const synced=D&&D.settings&&D.settings.racingCreds;
-    if(synced){
-      const parsed=typeof synced==='string'?JSON.parse(synced):synced;
-      if(parsed.username&&parsed.password){
-        // Cache locally for next time
-        localStorage.setItem(RACING_CREDS_KEY,JSON.stringify(parsed));
-        return parsed;
-      }
-    }
-    return {};
-  }catch(e){return {};}
+  try{return JSON.parse(localStorage.getItem(RACING_CREDS_KEY)||'{}');}catch(e){return {};}
 }
 
 function saveRacingCreds(){
@@ -24,16 +10,12 @@ function saveRacingCreds(){
   const p=document.getElementById('racing-api-pass').value.trim();
   if(!u){alert('Enter your username (email).');return;}
   const existing=getRacingCreds();
-  const finalPass=p||existing.password||'';
+  // If password field shows bullets (masked), keep the existing password
+  const finalPass=(p&&!p.startsWith('•'))?p:existing.password||'';
   if(!finalPass){alert('Enter your password.');return;}
-  const creds={username:u,password:finalPass};
-  localStorage.setItem(RACING_CREDS_KEY,JSON.stringify(creds));
-  // Also sync to Supabase settings
-  if(!D.settings)D.settings={};
-  D.settings.racingCreds=creds;
-  save();
+  localStorage.setItem(RACING_CREDS_KEY,JSON.stringify({username:u,password:finalPass}));
   const st=document.getElementById('racing-api-status');
-  if(st){st.textContent='✓ Saved & synced';st.style.color='var(--grn)';}
+  if(st){st.textContent='✓ Saved';st.style.color='var(--grn)';}
   setTimeout(()=>{const el=document.getElementById('racing-api-status');if(el){el.textContent='';el.style.color='';}},3000);
 }
 
@@ -144,17 +126,25 @@ function clearRacingCreds(){
 
 function loadRacingCredsFields(){
   const c=getRacingCreds();
+  // If found in D.settings but not localStorage, cache locally now
+  if(c.username&&c.password&&!localStorage.getItem(RACING_CREDS_KEY)){
+    localStorage.setItem(RACING_CREDS_KEY,JSON.stringify(c));
+  }
   const u=document.getElementById('racing-api-user');
+  const p=document.getElementById('racing-api-pass');
   const st=document.getElementById('racing-api-status');
   if(u)u.value=c.username||'';
-  // Never pre-fill password — show status instead
-  if(st&&c.password){
-    // Warn if password looks like bullets (corrupted from old bug)
-    if(c.password.includes('•')){
-      st.textContent='⚠️ Password corrupted — tap Clear & Reset';
+  // Pre-fill password field masked so user can see it's set
+  if(p&&c.password)p.value='••••••••';
+  if(st){
+    if(!c.username&&!c.password){
+      st.textContent='No credentials saved';
+      st.style.color='var(--mut)';
+    } else if(c.password&&c.password.includes('•')){
+      st.textContent='⚠️ Password corrupted — re-enter and save';
       st.style.color='var(--red)';
     } else {
-      st.textContent='✓ Password saved';
+      st.textContent='✓ Credentials saved';
       st.style.color='var(--grn)';
     }
   }

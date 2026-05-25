@@ -279,7 +279,10 @@ async function _syncRules(){
 // ── Daily Log ──
 async function _syncDailyLog(){
   const uid=SUPA_USER_ID;
-  const rows=(D.dailyLog||[]).map(function(d){return{
+  // Deduplicate by date — last entry per date wins, preventing ON CONFLICT duplicate-row errors
+  const byDate={};
+  (D.dailyLog||[]).forEach(function(d){byDate[d.date]=d;});
+  const rows=Object.values(byDate).map(function(d){return{
     user_id:uid,log_date:d.date,
     visited:!!d.visited,checked_in:!!d.checkedIn,
     mood:d.mood||'neutral',notes:d.notes||null,
@@ -391,7 +394,10 @@ async function supaLoad(){
 
     // ── Daily Log ──
     if(Array.isArray(logRows)){
-      D.dailyLog=logRows.map(function(d){return{
+      // Deduplicate by date — last row wins (handles any pre-existing DB duplicates)
+      const logByDate={};
+      logRows.forEach(function(d){logByDate[d.log_date]=d;});
+      D.dailyLog=Object.values(logByDate).map(function(d){return{
         date:d.log_date,visited:d.visited,checkedIn:d.checked_in,
         mood:d.mood,notes:d.notes||'',tracks:d.tracks||[],
         createdAt:new Date(d.created_at).getTime()

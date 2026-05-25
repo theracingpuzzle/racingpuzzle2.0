@@ -31,17 +31,254 @@ function orSummaryLine(entry){
 
 function getWL(){if(!D.watchlist)D.watchlist=[];return D.watchlist;}
 
+// ── WL CARD SHELL CSS ──
+const WL_SHELL_CSS = `
+.wl-shell { display:flex;flex-direction:column;height:100%;font-family:'Outfit','Segoe UI',sans-serif; }
+
+/* ── TOOLBAR ── */
+.wl-toolbar {
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px 8px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  flex-shrink:0;
+}
+.wl-view-pills {
+  display:flex;border:1px solid rgba(232,121,249,.2);border-radius:8px;overflow:hidden;flex-shrink:0;
+}
+.wl-vpill {
+  padding:6px 12px;
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(232,121,249,.45);background:transparent;border:none;cursor:pointer;
+  transition:background .15s,color .15s;white-space:nowrap;
+}
+.wl-vpill.active { background:rgba(232,121,249,.18);color:#e879f9; }
+.wl-search-wrap {
+  flex:1;position:relative;
+}
+.wl-search {
+  width:100%;padding:6px 10px 6px 28px;
+  background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;color:#d4d8e8;font-size:12px;
+  font-family:'Outfit','Segoe UI',sans-serif;outline:none;
+}
+.wl-search::placeholder{color:rgba(255,255,255,.25);}
+.wl-search-icon {
+  position:absolute;left:8px;top:50%;transform:translateY(-50%);
+  font-size:11px;opacity:.4;pointer-events:none;
+}
+.wl-add-btn {
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(232,121,249,.15);border:1px solid rgba(232,121,249,.35);
+  color:#e879f9;font-size:20px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-weight:300;
+}
+
+/* ── CALENDAR ── */
+.wl-cal-wrap { display:flex;flex-direction:column;flex:1;overflow:hidden; }
+.wl-cal-header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px 6px;flex-shrink:0;
+}
+.wl-cal-nav {
+  width:28px;height:28px;border-radius:6px;
+  background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.07);
+  color:#d4d8e8;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.wl-cal-month-lbl {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:#e879f9;
+}
+.wl-cal-grid {
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:1px;padding:0 8px 6px;flex-shrink:0;
+}
+.wl-cal-day-entries {
+  flex:1;overflow-y:auto;padding:8px 12px 12px;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* ── LIST ── */
+.wl-list-wrap { flex:1;overflow-y:auto;padding:8px 12px 16px;-webkit-overflow-scrolling:touch; }
+
+/* ── GROUP HEADERS ── */
+.wl-group-hdr {
+  display:flex;align-items:center;gap:8px;
+  padding:9px 12px;border-radius:10px;
+  background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);
+  cursor:pointer;user-select:none;margin-bottom:4px;
+}
+.wl-group-emoji { font-size:14px; }
+.wl-group-label {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;flex:1;
+}
+.wl-group-count {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:10px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.3);
+  padding:2px 8px;border-radius:20px;
+}
+.wl-group-chevron { font-size:13px; }
+
+/* ── ENTRY CARDS ── */
+.wl-entry {
+  cursor:pointer;border-radius:10px;
+  background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.06);
+  margin-bottom:6px;overflow:hidden;
+  transition:border-color .15s;
+}
+.wl-entry:active { border-color:rgba(255,255,255,.15); }
+.wl-entry-inner {
+  display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+  border-left:3px solid var(--entry-col,#a78bfa);
+}
+.wl-entry-main { flex:1;min-width:0; }
+.wl-entry-tag {
+  display:inline-flex;align-items:center;gap:3px;
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  padding:2px 7px;border-radius:20px;
+  background:rgba(0,0,0,.2);margin-bottom:5px;
+}
+.wl-entry-name {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:17px;font-weight:800;letter-spacing:.5px;color:#fff;
+  margin-bottom:2px;line-height:1.1;
+}
+.wl-entry-trainer {
+  font-size:11px;color:rgba(255,255,255,.35);margin-bottom:4px;
+}
+.wl-entry-meta { display:flex;flex-wrap:wrap;gap:4px;align-items:center; }
+.wl-entry-obs-line {
+  font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;
+}
+.wl-entry-targets { margin-top:4px; }
+.wl-entry-target-line {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:11px;color:#fb923c;margin-bottom:1px;
+}
+.wl-entry-intel {
+  font-size:11px;color:rgba(255,255,255,.3);font-style:italic;
+  margin-top:4px;border-left:2px solid rgba(96,165,250,.25);padding-left:7px;
+}
+.wl-entry-empty-hint {
+  font-size:10px;color:rgba(255,255,255,.15);margin-top:4px;font-style:italic;
+}
+.wl-entry-right { text-align:right;flex-shrink:0; }
+.wl-entry-obscount {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:9px;color:rgba(255,255,255,.25);white-space:nowrap;
+}
+
+/* ── CAL DAY CARDS ── */
+.wl-day-section-lbl {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:6px;
+}
+.wl-day-card {
+  cursor:pointer;border-radius:10px;margin-bottom:8px;
+  padding:10px 12px;overflow:hidden;
+}
+.wl-day-card-horse {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:16px;font-weight:800;color:#fff;letter-spacing:.3px;margin-bottom:2px;
+}
+.wl-day-card-race { font-size:12px;font-weight:600;margin-top:3px; }
+.wl-day-card-chips { display:flex;gap:6px;flex-wrap:wrap;margin-top:4px; }
+.wl-chip {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;
+}
+.wl-day-empty {
+  color:rgba(255,255,255,.3);font-style:italic;font-size:13px;padding:8px 0;line-height:1.6;
+}
+
+/* ── FIXTURE BANNER ── */
+.wl-fixture-banner {
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;border-radius:9px;
+  background:rgba(0,0,0,.2);margin-bottom:8px;
+}
+
+/* ── DAY LABEL ── */
+.wl-day-label {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(232,121,249,.5);margin-bottom:10px;
+}
+`;
+
+function _injectWLShellCSS(){
+  if(document.getElementById('wl-shell-css'))return;
+  const s=document.createElement('style');
+  s.id='wl-shell-css';s.textContent=WL_SHELL_CSS;
+  document.head.appendChild(s);
+}
+
+function _getWatchCard(){
+  // Find the watch card container by CARDS index
+  const idx=CARDS.findIndex(function(c){return c.id==='watch';});
+  return idx>=0?document.getElementById('c'+idx):null;
+}
+
+function _buildWLShell(){
+  const card=_getWatchCard();if(!card)return;
+  if(document.getElementById('wl-cal-view'))return; // already built
+  card.innerHTML=
+    '<div class="wl-shell">'+
+      // TOOLBAR
+      '<div class="wl-toolbar">'+
+        '<div class="wl-view-pills">'+
+          '<button id="wl-cal-btn" class="wl-vpill active" onclick="setWLView(\'cal\')">📅 Cal</button>'+
+          '<button id="wl-list-btn" class="wl-vpill" onclick="setWLView(\'list\')">☰ List</button>'+
+        '</div>'+
+        '<div class="wl-search-wrap">'+
+          '<span class="wl-search-icon">🔍</span>'+
+          '<input id="wl-search" class="wl-search" type="text" placeholder="Search horses, trainers…" oninput="renderWLList()" autocomplete="off">'+
+        '</div>'+
+        '<div class="wl-add-btn" onclick="openWLForm()">+</div>'+
+      '</div>'+
+      // CALENDAR VIEW
+      '<div id="wl-cal-view" class="wl-cal-wrap">'+
+        '<div class="wl-cal-header">'+
+          '<div class="wl-cal-nav" onclick="wlCalPrev()">‹</div>'+
+          '<div id="wl-cal-month" class="wl-cal-month-lbl"></div>'+
+          '<div class="wl-cal-nav" onclick="wlCalNext()">›</div>'+
+        '</div>'+
+        '<div id="wl-cal-grid" class="wl-cal-grid"></div>'+
+        '<div id="wl-cal-day-entries" class="wl-cal-day-entries"></div>'+
+      '</div>'+
+      // LIST VIEW
+      '<div id="wl-list-view" style="display:none;" class="wl-list-wrap">'+
+        '<div id="wl-list"></div>'+
+      '</div>'+
+    '</div>';
+}
+
 function setWLView(v){
+  _injectWLShellCSS();
+  _buildWLShell();
   wlView=v;
-  document.getElementById('wl-cal-view').style.display=v==='cal'?'block':'none';
-  document.getElementById('wl-list-view').style.display=v==='list'?'block':'none';
-  const cb=document.getElementById('wl-cal-btn'),lb=document.getElementById('wl-list-btn');
-  if(cb){cb.style.background=v==='cal'?'rgba(232,121,249,.2)':'transparent';cb.style.borderColor=v==='cal'?'rgba(232,121,249,.4)':'var(--bdr)';cb.style.color=v==='cal'?'#e879f9':'var(--mut)';}
-  if(lb){lb.style.background=v==='list'?'rgba(232,121,249,.2)':'transparent';lb.style.borderColor=v==='list'?'rgba(232,121,249,.4)':'var(--bdr)';lb.style.color=v==='list'?'#e879f9':'var(--mut)';}
+  const calV=document.getElementById('wl-cal-view');
+  const listV=document.getElementById('wl-list-view');
+  if(calV)calV.style.display=v==='cal'?'flex':'none';
+  if(listV)listV.style.display=v==='list'?'block':'none';
+  const cb=document.getElementById('wl-cal-btn');
+  const lb=document.getElementById('wl-list-btn');
+  if(cb){cb.classList.toggle('active',v==='cal');}
+  if(lb){lb.classList.toggle('active',v==='list');}
   if(v==='cal')renderWLCal();else renderWLList();
 }
 
-function renderWatchlist(){setWLView(wlView);}
+function renderWatchlist(){
+  _injectWLShellCSS();
+  _buildWLShell();
+  setWLView(wlView);
+}
 
 function wlCalPrev(){wlCalDate=new Date(wlCalDate.getFullYear(),wlCalDate.getMonth()-1,1);renderWLCal();}
 function wlCalNext(){wlCalDate=new Date(wlCalDate.getFullYear(),wlCalDate.getMonth()+1,1);renderWLCal();}
@@ -79,9 +316,9 @@ function renderWLCal(){
   });
   // Day headers
   const dayNames=['S','M','T','W','T','F','S'];
-  let html=dayNames.map(d=>'<div style="color:var(--mut);font-size:9px;padding:3px 0;font-weight:700;">'+d+'</div>').join('');
+  let html=dayNames.map(function(d){return'<div style="color:rgba(255,255,255,.25);font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 0;text-align:center;">'+d+'</div>';}).join('');
   // Empty cells before first day
-  const start=firstDay; // Sun=0
+  const start=firstDay;
   for(let i=0;i<start;i++)html+='<div></div>';
   for(let d=1;d<=daysInMonth;d++){
     const dateStr=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
@@ -93,16 +330,14 @@ function renderWLCal(){
     const hasBet=entries.length>0||dayTargets.length>0||dayObs.length>0;
     const fixtures=getFixtureForDate(dateStr);
     const hasFixture=fixtures.length>0;
-    const dotCol=dayTargets.length&&!entries.length&&!dayObs.length?'#fb923c':dayObs.length&&!entries.length&&!dayTargets.length?'#4ade80':'#e879f9';
-    const fixtureBar=hasFixture?'<div style="height:3px;border-radius:2px;background:'+fixtures[0].colour+';margin:1px 2px 0;" title="'+fixtures[0].name+'"></div>':'';
-    // Show up to 3 coloured dots for different event types
     const dots=[];
-    if(entries.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#e879f9;display:inline-block;margin:0 1px;"></div>');
-    if(dayTargets.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#fb923c;display:inline-block;margin:0 1px;"></div>');
-    if(dayObs.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#4ade80;display:inline-block;margin:0 1px;"></div>');
-    html+='<div onclick="wlSelectDay(\''+dateStr+'\')" style="cursor:pointer;padding:5px 2px;border-radius:6px;'+(isToday?'background:rgba(232,121,249,.15);':'')+'text-align:center;">'
-      +'<div style="font-size:11px;color:'+(isToday?'#e879f9':hasBet?'var(--txt)':'var(--mut)')+(hasBet?';font-weight:700':';font-weight:400')+';">'+d+'</div>'
-      +(hasBet?'<div style="display:flex;justify-content:center;margin:1px 0 0;">'+dots.join('')+'</div>':'<div style="height:7px;"></div>')+fixtureBar
+    if(entries.length)dots.push('<div style="width:4px;height:4px;border-radius:50%;background:#e879f9;display:inline-block;margin:0 1px;"></div>');
+    if(dayTargets.length)dots.push('<div style="width:4px;height:4px;border-radius:50%;background:#fb923c;display:inline-block;margin:0 1px;"></div>');
+    if(dayObs.length)dots.push('<div style="width:4px;height:4px;border-radius:50%;background:#4ade80;display:inline-block;margin:0 1px;"></div>');
+    const fixtureBar=hasFixture?'<div style="height:2px;border-radius:2px;background:'+fixtures[0].colour+';margin:2px 3px 0;"></div>':'';
+    html+='<div onclick="wlSelectDay(\''+dateStr+'\')" style="cursor:pointer;padding:4px 2px;border-radius:7px;'+(isToday?'background:rgba(232,121,249,.15);':'')+' text-align:center;">'
+      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:'+(hasBet?'800':'400')+';color:'+(isToday?'#e879f9':hasBet?'#fff':'rgba(255,255,255,.3)')+';">'+d+'</div>'
+      +(hasBet?'<div style="display:flex;justify-content:center;margin:1px 0 0;">'+dots.join('')+'</div>':'<div style="height:6px;"></div>')+fixtureBar
     +'</div>';
   }
   grid.innerHTML=html;
@@ -126,51 +361,47 @@ function wlSelectDay(dateStr){
   });
   const el=document.getElementById('wl-cal-day-entries');if(!el)return;
   const dayFixtures=getFixtureForDate(dateStr);
-  const fixtureBanner=dayFixtures.map(f=>'<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;background:rgba(0,0,0,.2);border-left:3px solid '+f.colour+';margin-bottom:8px;"><span>'+f.emoji+'</span><div><div style="font-weight:700;font-size:13px;color:'+f.colour+';">'+f.name+'</div><div style="font-size:11px;color:var(--mut);">'+f.course+'</div></div></div>').join('');
-  const dayLabel='<div style="font-family:monospace;font-size:9px;color:rgba(232,121,249,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+'</div>';
+  const fixtureBanner=dayFixtures.map(function(f){return'<div class="wl-fixture-banner" style="border-left:3px solid '+f.colour+';"><span>'+f.emoji+'</span><div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:'+f.colour+';">'+f.name+'</div><div style="font-size:11px;color:rgba(255,255,255,.35);">'+f.course+'</div></div></div>';}).join('');
+  const dayLabel='<div class="wl-day-label">'+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+'</div>';
   let html=fixtureBanner+dayLabel;
   // Target race cards
   if(dayTargets.length){
-    html+='<div style="font-family:monospace;font-size:9px;color:rgba(251,146,60,.6);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">🎯 Target Races</div>';
+    html+='<div class="wl-day-section-lbl" style="color:rgba(251,146,60,.7);">🎯 Target Races</div>';
     html+=dayTargets.map(function(d){
       const t=d.target;
-      return'<div data-wl-id="'+d.horseId+'" style="cursor:pointer;border-left:3px solid #fb923c;margin-bottom:8px;padding:10px 11px;background:rgba(251,146,60,.05);border-radius:0 8px 8px 0;">'
-        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
-          +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-weight:700;font-size:14px;margin-bottom:2px;">'+d.horse+'</div>'
-            +orSummaryLine(d)
-            +(d.trainer?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">'+d.trainer+'</div>':'')
-            +'<div style="font-size:12px;color:#fb923c;font-weight:600;">'+t.race+(t.track?' · '+t.track:'')+'</div>'
-            +(t.condition?'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:2px;">'+t.condition+'</div>':'')
-          +'</div>'
-        +'</div>'
+      return'<div data-wl-id="'+d.horseId+'" class="wl-day-card" style="background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.15);border-left:3px solid #fb923c;">'
+        +'<div class="wl-day-card-horse">'+d.horse+'</div>'
+        +orSummaryLine(d)
+        +(d.trainer?'<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:2px;">'+d.trainer+'</div>':'')
+        +'<div class="wl-day-card-race" style="color:#fb923c;">'+t.race+(t.track?' · '+t.track:'')+'</div>'
+        +(t.condition?'<div style="font-size:11px;color:rgba(255,255,255,.3);font-style:italic;margin-top:2px;">'+t.condition+'</div>':'')
       +'</div>';
     }).join('');
   }
   // Observations
   if(dayObs.length){
-    html+='<div style="font-family:monospace;font-size:9px;color:rgba(74,222,128,.6);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;'+(dayTargets.length?'margin-top:10px;':'')+'">📋 Observations</div>';
+    html+='<div class="wl-day-section-lbl" style="color:rgba(74,222,128,.7);'+(dayTargets.length?'margin-top:10px;':'')+'">📋 Observations</div>';
     html+=dayObs.map(function(d){
       const o=d.obs;
-      const resultCol=o.result&&o.result.toLowerCase().includes('win')?'#4ade80':o.result?'#fb923c':'var(--mut)';
-      return'<div data-wl-id="'+d.horseId+'" style="cursor:pointer;border-left:3px solid #4ade80;margin-bottom:8px;padding:10px 11px;background:rgba(74,222,128,.04);border-radius:0 8px 8px 0;">'
-        +'<div style="font-weight:700;font-size:14px;margin-bottom:3px;">'+d.horse+'</div>'
-        +(o.raceName?'<div style="font-size:12px;color:var(--mut);margin-bottom:3px;">'+o.raceName+'</div>':'')
-        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;">'
-          +(o.result?'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:'+resultCol+';">'+o.result+'</span>':'')
-          +(o.going?'<span style="font-family:monospace;font-size:10px;color:var(--mut);padding:1px 6px;border-radius:4px;background:var(--sur2);border:1px solid var(--bdr);">'+o.going+'</span>':'')
+      const resultCol=o.result&&o.result.toLowerCase().includes('win')?'#4ade80':o.result?'#fb923c':'rgba(255,255,255,.4)';
+      return'<div data-wl-id="'+d.horseId+'" class="wl-day-card" style="background:rgba(74,222,128,.04);border:1px solid rgba(74,222,128,.12);border-left:3px solid #4ade80;">'
+        +'<div class="wl-day-card-horse">'+d.horse+'</div>'
+        +(o.raceName?'<div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:4px;">'+o.raceName+'</div>':'')
+        +'<div class="wl-day-card-chips">'
+          +(o.result?'<span class="wl-chip" style="background:'+resultCol+'20;border:1px solid '+resultCol+'40;color:'+resultCol+';">'+o.result+'</span>':'')
+          +(o.going?'<span class="wl-chip" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);">'+o.going+'</span>':'')
         +'</div>'
-        +(o.notes?'<div style="font-size:12px;color:var(--mut);font-style:italic;line-height:1.45;">'+o.notes+'</div>':'')
+        +(o.notes?'<div style="font-size:11px;color:rgba(255,255,255,.35);font-style:italic;margin-top:4px;line-height:1.45;">'+o.notes+'</div>':'')
       +'</div>';
     }).join('');
   }
   // Regular watchlist entries
   if(entries.length){
-    if(dayTargets.length||dayObs.length)html+='<div style="font-family:monospace;font-size:9px;color:rgba(232,121,249,.5);text-transform:uppercase;letter-spacing:.1em;margin:10px 0 6px;">Puzzle Profiler</div>';
+    if(dayTargets.length||dayObs.length)html+='<div class="wl-day-section-lbl" style="color:rgba(232,121,249,.5);margin-top:10px;">Puzzle Profiler</div>';
     html+=entries.map(function(e){return renderWLEntry(e);}).join('');
   }
   if(!entries.length&&!dayTargets.length&&!dayObs.length){
-    html+='<div style="color:var(--mut);font-style:italic;font-size:13px;padding:8px 0;">No targets on '+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'.<br><span style="font-size:12px;">Tap + to add one.</span></div>';
+    html+='<div class="wl-day-empty">No targets on '+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'.<br><span style="font-size:12px;">Tap + to add a horse.</span></div>';
   }
   el.innerHTML=html;
   el.querySelectorAll('[data-wl-id]').forEach(function(el2){el2.addEventListener('click',function(){openWLProfile(el2.getAttribute('data-wl-id'));});});
@@ -202,8 +433,12 @@ function renderWLList(){
     if(!groups[r]||!groups[r].length)return;
     const rm=REASON_META[r];
     const isOpen=isSearching||!!_wlGroupOpen[r];
-    const chevron=isOpen?'▾':'›';
-    html+='<div onclick="wlToggleGroup(this.dataset.wlg)" data-wlg="'+r+'" style="display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:'+(isOpen?'2':'8')+'px;border-radius:10px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.06);cursor:pointer;user-select:none;">'      +'<span style="font-size:14px;">'+rm.emoji+'</span>'      +'<span style="font-family:monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:'+rm.col+';flex:1;">'+rm.label+'</span>'      +'<span style="font-family:monospace;font-size:10px;background:rgba(255,255,255,.07);color:var(--mut);padding:2px 8px;border-radius:20px;">'+groups[r].length+'</span>'      +'<span style="color:'+rm.col+';font-size:14px;transition:transform .15s;">'+chevron+'</span>'    +'</div>';
+    html+='<div class="wl-group-hdr" onclick="wlToggleGroup(this.dataset.wlg)" data-wlg="'+r+'" style="border-color:rgba(255,255,255,.07);">'
+      +'<span class="wl-group-emoji">'+rm.emoji+'</span>'
+      +'<span class="wl-group-label" style="color:'+rm.col+';">'+rm.label+'</span>'
+      +'<span class="wl-group-count">'+groups[r].length+'</span>'
+      +'<span class="wl-group-chevron" style="color:'+rm.col+';">'+(isOpen?'▾':'›')+'</span>'
+    +'</div>';
     if(isOpen){
       html+='<div style="margin-bottom:10px;">'+groups[r].map(function(e){return renderWLEntry(e);}).join('')+'</div>';
     }
@@ -217,23 +452,25 @@ function renderWLEntry(e){
   const rm=RMAP[e.reason||'eye-catcher']||RMAP['eye-catcher'];
   const obs=e.observations||[];
   const targets=e.targets||[];
-  const lastObs=obs.length?obs[obs.length-1]:null;
+  const lastObs=obs.length?obs.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');})[0]:null;
   const latestDate=lastObs?lastObs.date:(e.raceDate||'');
-  const daysAgo=latestDate?(function(){const d=new Date(latestDate+'T00:00:00');const diff=Math.round((new Date()-d)/(1000*60*60*24));return diff===0?'Today':diff===1?'Yesterday':diff>0?diff+'d ago':'Upcoming';}()):'';  const isEmpty=!obs.length&&!targets.length&&!e.trainerIntel&&!e.conditionsNotes;
-  return'<div class="mb" data-wl-id="'+e.id+'" style="cursor:pointer;border-left:3px solid '+rm.col+';margin-bottom:8px;padding:10px 11px;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
-      +'<div style="flex:1;min-width:0;">'
-      +'<div style="margin-bottom:5px;"><span style="font-size:9px;font-family:monospace;padding:2px 7px;border-radius:20px;background:rgba(0,0,0,.2);border:1px solid '+rm.col+';color:'+rm.col+';font-weight:700;">'+rm.emoji+' '+rm.label+'</span>'+(e.reasonNote?'<span style="font-size:10px;color:var(--mut);font-style:italic;margin-left:6px;">'+e.reasonNote.slice(0,50)+(e.reasonNote.length>50?'…':'')+'</span>':'')+'</div>'
-      +'<div style="font-weight:700;font-size:15px;margin-bottom:2px;">'+e.horse+'</div>'
-      +orSummaryLine(e)
-      +(e.trainer?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">'+e.trainer+'</div>':'')
-      +(lastObs?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">📋 <span style="color:var(--txt);">'+lastObs.raceName+(lastObs.track?' · '+lastObs.track:'')+'</span> · '+daysAgo+'</div>':'')
-      +(targets.length?'<div style="margin-top:3px;">'+targets.slice(0,2).map(function(t){const tDate=t.date?(new Date(t.date+'T00:00:00')).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';return'<div style="font-size:11px;font-family:monospace;color:#fb923c;margin-bottom:1px;">🎯 '+t.race+(tDate?'<span style="color:var(--mut);"> · '+tDate+'</span>':'')+(t.track?'<span style="font-size:9px;color:var(--mut);"> · '+t.track+'</span>':'')+'</div>';}).join('')+'</div>':'')
-      +(e.trainerIntel?'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:4px;border-left:2px solid rgba(96,165,250,.3);padding-left:7px;">🗣 '+e.trainerIntel.slice(0,80)+(e.trainerIntel.length>80?'…':'')+'</div>':'')
-      +(isEmpty?'<div style="font-size:10px;color:rgba(255,255,255,.2);margin-top:4px;font-style:italic;">Tap to add notes →</div>':'')
+  const daysAgo=latestDate?(function(){const d=new Date(latestDate+'T00:00:00');const diff=Math.round((new Date()-d)/(1000*60*60*24));return diff===0?'Today':diff===1?'Yesterday':diff>0?diff+'d ago':'Upcoming';}()):'';
+  const isEmpty=!obs.length&&!targets.length&&!e.trainerIntel&&!e.conditionsNotes;
+  return'<div class="wl-entry" data-wl-id="'+e.id+'">'
+    +'<div class="wl-entry-inner" style="--entry-col:'+rm.col+';">'
+      +'<div class="wl-entry-main">'
+        +'<div><span class="wl-entry-tag" style="border:1px solid '+rm.col+'40;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</span>'
+        +(e.reasonNote?'<span style="font-size:10px;color:rgba(255,255,255,.3);font-style:italic;margin-left:6px;">'+e.reasonNote.slice(0,50)+(e.reasonNote.length>50?'…':'')+'</span>':'')+'</div>'
+        +'<div class="wl-entry-name">'+e.horse+'</div>'
+        +orSummaryLine(e)
+        +(e.trainer?'<div class="wl-entry-trainer">'+e.trainer+'</div>':'')
+        +(lastObs?'<div class="wl-entry-obs-line">📋 <span style="color:rgba(255,255,255,.55);">'+(lastObs.raceName||'')+(lastObs.track?' · '+lastObs.track:'')+'</span>'+(daysAgo?' · '+daysAgo:'')+'</div>':'')
+        +(targets.length?'<div class="wl-entry-targets">'+targets.slice(0,2).map(function(t){const tDate=t.date?(new Date(t.date+'T00:00:00')).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';return'<div class="wl-entry-target-line">🎯 '+t.race+(tDate?'<span style="color:rgba(255,255,255,.3);"> · '+tDate+'</span>':'')+(t.track?'<span style="font-size:9px;color:rgba(255,255,255,.25);"> · '+t.track+'</span>':'')+'</div>';}).join('')+'</div>':'')
+        +(e.trainerIntel?'<div class="wl-entry-intel">🗣 '+e.trainerIntel.slice(0,80)+(e.trainerIntel.length>80?'…':'')+'</div>':'')
+        +(isEmpty?'<div class="wl-entry-empty-hint">Tap to add notes →</div>':'')
       +'</div>'
-      +'<div style="text-align:right;flex-shrink:0;margin-left:10px;">'
-        +(obs.length?'<div style="font-family:monospace;font-size:9px;color:var(--mut);">'+obs.length+' obs</div>':'')
+      +'<div class="wl-entry-right">'
+        +(obs.length?'<div class="wl-entry-obscount">'+obs.length+' obs</div>':'')
       +'</div>'
     +'</div>'
   +'</div>';
@@ -254,56 +491,141 @@ function openWLForm(id,prefill){
     targets:e&&e.targets?e.targets.map(function(t){return Object.assign({},t);}):p.targets||[]
   };
   const modal=document.createElement('div');
-  modal.className='mov open';modal.id='wl-modal';
+  modal.id='wl-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:500;background:#050508;overflow-y:auto;-webkit-overflow-scrolling:touch;';
   const going=['Firm','Good to Firm','Good','Good to Soft','Soft','Heavy'];
   const goingPrefs=e?e.goingPrefs||[]:[];
   _wlDossier.goingPrefs=goingPrefs.slice();
-  const goingHtml=going.map(function(g){const sel=_wlDossier.goingPrefs.includes(g);return'<button type="button" data-going="'+g+'" onclick="wlToggleGoing(this)" style="padding:5px 10px;border-radius:20px;border:1px solid '+(sel?'#e879f9':'rgba(232,121,249,.25)')+';background:'+(sel?'rgba(232,121,249,.2)':'transparent')+';color:'+(sel?'#e879f9':'var(--mut)')+';font-family:monospace;font-size:10px;cursor:pointer;margin-right:5px;margin-bottom:5px;">'+g+'</button>';}).join('');
+  const goingHtml=going.map(function(g){const sel=_wlDossier.goingPrefs.includes(g);return'<button type="button" data-going="'+g+'" onclick="wlToggleGoing(this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid '+(sel?'#4ade80':'rgba(255,255,255,.1)')+';background:'+(sel?'rgba(74,222,128,.12)':'transparent')+';color:'+(sel?'#4ade80':'rgba(255,255,255,.3)')+';font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.5px;cursor:pointer;">'+g+'</button>';}).join('');
   const REASONS=[{value:'eye-catcher',emoji:'🔭',label:'Eye Catcher'},{value:'future-target',emoji:'📰',label:'Future Target'},{value:'trainer-intel',emoji:'🗣',label:'Trainer Intel'},{value:'form-study',emoji:'📊',label:'Form Study'},{value:'tip-source',emoji:'💡',label:'Tip / Source'}];
   const curReason=e?e.reason||'eye-catcher':'eye-catcher';
   const REASON_COLS={'eye-catcher':'#a78bfa','future-target':'#fb923c','trainer-intel':'#60a5fa','form-study':'#ef4444','tip-source':'#eab308'};
-  const reasonHtml=REASONS.map(function(r){const sel=r.value===curReason;const col=REASON_COLS[r.value]||'#e879f9';const selAlpha=col.replace('#','');return'<button type="button" data-reason="'+r.value+'" onclick="wlSelectReason(this)" style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:10px;border:1px solid '+(sel?col:'rgba(255,255,255,.1)')+';background:'+(sel?'rgba('+parseInt(selAlpha.slice(0,2),16)+','+parseInt(selAlpha.slice(2,4),16)+','+parseInt(selAlpha.slice(4,6),16)+',.15)':'transparent')+';color:'+(sel?col:'var(--mut)')+';cursor:pointer;flex:1;min-width:0;"><span style="font-size:17px;">'+r.emoji+'</span><span style="font-family:monospace;font-size:8px;font-weight:'+(sel?'700':'400')+';text-align:center;line-height:1.2;">'+r.label+'</span></button>';}).join('');
-  modal.innerHTML='<div class="mbox" style="max-width:520px;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
-    +'<div>'
-    +'<div style="font-size:18px;font-weight:700;color:#e879f9;">'+(e?e.horse:'New Profile')+'</div>'
-    +(e?'<div style="margin-top:4px;">'+orSummaryLine(e)+'</div>':'')
-    +'</div>'
-    +'<button onclick="document.getElementById(\'wl-modal\').remove()" style="background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer;">✕</button></div>'
-    +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,121,249,.5);margin-bottom:8px;">Why am I logging this horse?</div>'
-    +'<div style="display:flex;gap:5px;margin-bottom:10px;" id="wlf-reasons">'+reasonHtml+'</div>'
-    +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
-    +'<div class="fg" style="margin-bottom:14px;"><label>In a sentence...</label><input type="text" id="wlf-reason-note" placeholder="e.g. Finished well from rear at Ascot, should improve" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off"></div>'
-    +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,121,249,.5);margin-bottom:8px;">Horse</div>'
-    +'<div class="fg"><label>Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'"></div>'
-    +'<div class="g2">'
-    +'<div class="fg"><label>Current OR <span style="font-size:10px;color:var(--mut);font-weight:400;">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(e?e.currentRating||'':p.currentRating||'')+'"></div>'
-    +'<div class="fg"><label style="color:var(--gld);">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" style="border-color:rgba(251,191,36,.4);color:var(--gld);"></div>'
-    +'</div>'
-    +'<div class="fg"><label>Trainer</label><input type="text" id="wlf-trainer" value="'+(e?e.trainer||'':p.trainer||'')+'"></div>'
-    +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,121,249,.5);margin:14px 0 8px;">Race Observations</div>'
-    +'<div id="wlf-obs-list"></div>'
-    +'<button onclick="wlAddObsRow()" style="width:100%;padding:8px;border:1px dashed rgba(232,121,249,.3);border-radius:7px;background:transparent;color:#e879f9;font-family:monospace;font-size:11px;cursor:pointer;margin-bottom:4px;">+ Add Observation</button>'
-    +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,121,249,.5);margin:14px 0 8px;">Trainer / Connections Intel</div>'
-    +'<div class="fg"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="min-height:60px;">'+(e?e.trainerIntel||'':'')+'</textarea></div>'
-    +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,121,249,.5);margin:14px 0 8px;">Future Targets</div>'
-    +'<div id="wlf-targets-list"></div>'
-    +'<button onclick="wlAddTargetRow()" style="width:100%;padding:8px;border:1px dashed rgba(251,146,60,.3);border-radius:7px;background:transparent;color:#fb923c;font-family:monospace;font-size:11px;cursor:pointer;margin-bottom:4px;">+ Add Profile Race</button>'
-    +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,121,249,.5);margin:14px 0 8px;">Conditions Profile</div>'
-    +'<div class="fg"><label>Going Preferences</label><div id="wlf-going" style="padding:6px 0;display:flex;flex-wrap:wrap;">'+goingHtml+'</div></div>'
-    +'<div class="g2">'
-    +'<div class="fg"><label>Preferred Distance</label><input type="text" id="wlf-dist" placeholder="e.g. 6-7f" value="'+(e?e.distancePref||'':'')+'"></div>'
-    +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Flat, LH" value="'+(e?e.trackPref||'':'')+'"></div>'
-    +'</div>'
-    +'<div class="fg"><label>Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="min-height:52px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
-    +'<div style="display:flex;gap:8px;margin-top:16px;">'
-    +'<button class="btn bw" style="flex:1;background:#e879f9;color:#141414;font-weight:700;" onclick="saveWLEntry(\''+(e?e.id:'')+'\')">'+( e?'Save Profile':'Create Profile')+'</button>'
-    +'<button class="btn bout" onclick="document.getElementById(\'wl-modal\').remove()">Cancel</button>'
-    +'</div>'
-    +(e?'<button class="btn bdng bw" style="width:100%;margin-top:8px;" onclick="delWLEntry(\''+e.id+'\')">Delete Profile</button>':'')
+  const reasonHtml=REASONS.map(function(r){
+    const sel=r.value===curReason;const col=REASON_COLS[r.value]||'#e879f9';
+    return'<button type="button" data-reason="'+r.value+'" onclick="wlSelectReason(this)" style="'
+      +'display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:10px;'
+      +'border:1.5px solid '+(sel?col:'rgba(255,255,255,.08)')+';'
+      +'background:'+(sel?'rgba('+parseInt(col.slice(1,3),16)+','+parseInt(col.slice(3,5),16)+','+parseInt(col.slice(5,7),16)+',.12)':'#0d0d18')+';'
+      +'color:'+(sel?col:'rgba(255,255,255,.3)')+';cursor:pointer;flex:1;min-width:0;transition:all .15s;">'
+      +'<span style="font-size:18px;">'+r.emoji+'</span>'
+      +'<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:9px;font-weight:'+(sel?'800':'600')+';letter-spacing:.5px;text-transform:uppercase;text-align:center;line-height:1.2;">'+r.label+'</span>'
+    +'</button>';
+  }).join('');
+
+  // Section header helper
+  function sh(num,label,col){
+    col=col||'#c8d0df';
+    return'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'
+      +'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">'+num+'</div>'
+      +'<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:'+col+';">'+label+'</span>'
     +'</div>';
+  }
+
+  // Field styles
+  const fldStyle='width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;';
+  const lblStyle='display:block;font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;';
+
+  modal.innerHTML=
+  // Modal backdrop
+  '<div style="max-width:520px;margin:0 auto;background:#050508;min-height:100%;padding-bottom:40px;">'
+
+  // Sticky header
+  +'<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;background:rgba(5,5,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1c1c30;position:sticky;top:0;z-index:10;">'
+    +'<div style="display:flex;align-items:center;gap:7px;">'
+      +'<span style="font-size:16px;">🧩</span>'
+      +'<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#fff;">RACING <span style="color:#8b5cf6;">PUZZLE</span></span>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center;">'
+      +(e?'<button onclick="delWLEntry(\''+e.id+'\')" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.08);color:#f87171;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Delete</button>':'')
+      +'<button onclick="document.getElementById(\'wl-modal\').remove()" style="width:34px;height:34px;border-radius:50%;background:#111120;border:1px solid #1c1c30;color:#888;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>'
+    +'</div>'
+  +'</div>'
+
+  // Horse name hero
+  +'<div style="background:#0d0d18;border-bottom:1px solid #1c1c30;padding:16px 16px 14px;">'
+    +(e
+      ?'<div style="font-family:\'Bebas Neue\',\'Impact\',cursive;font-size:38px;letter-spacing:2px;color:#fff;line-height:1;margin-bottom:4px;">'+e.horse+'</div>'
+      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:#4a4a6a;text-transform:uppercase;">Editing Profile</div>'
+      :'<div style="font-family:\'Bebas Neue\',\'Impact\',cursive;font-size:32px;letter-spacing:2px;color:#8b5cf6;line-height:1;margin-bottom:4px;">New Profile</div>'
+      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:#4a4a6a;text-transform:uppercase;">Create a puzzle profiler entry</div>'
+    )
+  +'</div>'
+
+  // Body
+  +'<div style="padding:0 12px;">'
+
+  // SECTION: Why Logged
+  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:12px;overflow:hidden;">'
+    +sh(1,'Why Am I Logging This?')
+    +'<div style="display:flex;gap:5px;padding:12px 13px 13px;" id="wlf-reasons">'+reasonHtml+'</div>'
+    +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
+    +'<div style="padding:0 13px 14px;">'
+      +'<label style="'+lblStyle+'">In a sentence...</label>'
+      +'<input type="text" id="wlf-reason-note" placeholder="e.g. Finished well from rear, should improve for the run" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off" style="'+fldStyle+'">'
+    +'</div>'
+  +'</div>'
+
+  // SECTION: Horse
+  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
+    +sh(2,'Horse')
+    +'<div style="padding:12px 13px;display:flex;flex-direction:column;gap:10px;">'
+      +'<div><label style="'+lblStyle+'">Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'" style="'+fldStyle+'"></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+        +'<div><label style="'+lblStyle+'">Current OR <span style="color:#3a3a5c;font-weight:400;">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(e?e.currentRating||'':p.currentRating||'')+'" style="'+fldStyle+'"></div>'
+        +'<div><label style="'+lblStyle+';color:#f59e0b;">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" style="'+fldStyle+';border-color:rgba(245,158,11,.35);color:#f59e0b;"></div>'
+      +'</div>'
+      +'<div><label style="'+lblStyle+'">Trainer</label><input type="text" id="wlf-trainer" value="'+(e?e.trainer||'':p.trainer||'')+'" style="'+fldStyle+'"></div>'
+    +'</div>'
+  +'</div>'
+
+  // SECTION: Race Observations
+  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
+    +sh(3,'Race Observations','#c8d0df')
+    +'<div style="padding:12px 13px 4px;">'
+      +'<div id="wlf-obs-list"></div>'
+      +'<button onclick="wlAddObsRow()" style="width:100%;padding:9px;border:1px dashed rgba(232,121,249,.3);border-radius:9px;background:transparent;color:#e879f9;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:12px;">+ Add Observation</button>'
+    +'</div>'
+  +'</div>'
+
+  // SECTION: Trainer Intel
+  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
+    +sh(4,'Trainer / Connections Intel','#60a5fa')
+    +'<div style="padding:12px 13px 14px;">'
+      +'<textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="'+fldStyle+';min-height:64px;resize:vertical;">'+(e?e.trainerIntel||'':'')+'</textarea>'
+    +'</div>'
+  +'</div>'
+
+  // SECTION: Future Targets
+  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
+    +sh(5,'Future Targets','#fb923c')
+    +'<div style="padding:12px 13px 4px;">'
+      +'<div id="wlf-targets-list"></div>'
+      +'<button onclick="wlAddTargetRow()" style="width:100%;padding:9px;border:1px dashed rgba(251,146,60,.3);border-radius:9px;background:transparent;color:#fb923c;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:12px;">+ Add Target Race</button>'
+    +'</div>'
+  +'</div>'
+
+  // SECTION: Conditions Profile
+  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
+    +sh(6,'Conditions Profile','#4ade80')
+    +'<div style="padding:12px 13px;display:flex;flex-direction:column;gap:10px;">'
+      +'<div><label style="'+lblStyle+'">Going Preferences</label><div id="wlf-going" style="padding:4px 0;display:flex;flex-wrap:wrap;gap:5px;">'+goingHtml+'</div></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+        +'<div><label style="'+lblStyle+'">Preferred Distance</label><input type="text" id="wlf-dist" placeholder="e.g. 6-7f" value="'+(e?e.distancePref||'':'')+'" style="'+fldStyle+'"></div>'
+        +'<div><label style="'+lblStyle+'">Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight" value="'+(e?e.trackPref||'':'')+'" style="'+fldStyle+'"></div>'
+      +'</div>'
+      +'<div><label style="'+lblStyle+'">Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="'+fldStyle+';min-height:52px;resize:vertical;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
+    +'</div>'
+  +'</div>'
+
+  // Save / Cancel
+  +'<div style="display:flex;gap:8px;margin-top:16px;">'
+    +'<button style="flex:1;padding:13px;border-radius:10px;border:none;background:#8b5cf6;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;" onclick="saveWLEntry(\''+(e?e.id:'')+'\')">'+( e?'Save Profile':'Create Profile')+'</button>'
+    +'<button style="padding:13px 18px;border-radius:10px;border:1px solid #1c1c30;background:#111120;color:#888;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;" onclick="document.getElementById(\'wl-modal\').remove()">Cancel</button>'
+  +'</div>'
+
+  +'</div>' // body padding
+  +'</div>'; // page
   document.body.appendChild(modal);
-  modal.addEventListener('click',function(ev){if(ev.target===modal)modal.remove();});
   _renderObsList();_renderTargetsList();
   setTimeout(function(){const f=document.getElementById('wlf-horse');if(f)f.focus();},100);
   }catch(err){alert('Profile error: '+err.message);console.error(err);}
@@ -311,25 +633,27 @@ function openWLForm(id,prefill){
 
 function _renderObsList(){
   const el=document.getElementById('wlf-obs-list');if(!el)return;
-  if(!_wlDossier.obs.length){el.innerHTML='<div style="color:var(--mut);font-size:12px;font-style:italic;margin-bottom:8px;">No observations yet.</div>';return;}
+  const fldStyle='width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;';
+  const lblStyle='display:block;font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;';
+  if(!_wlDossier.obs.length){el.innerHTML='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:600;color:#3a3a5c;font-style:italic;margin-bottom:10px;text-align:center;padding:8px 0;">No observations yet — tap Add to log a run</div>';return;}
   el.innerHTML=_wlDossier.obs.map(function(o,i){
-    return'<div style="background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;padding:10px;margin-bottom:8px;">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
-      +'<span style="font-family:monospace;font-size:10px;color:var(--mut);">Observation '+(i+1)+'</span>'
-      +'<button onclick="_wlDelObs('+i+')" style="background:none;border:none;color:var(--mut);font-size:14px;cursor:pointer;padding:0;">✕</button>'
+    return'<div style="background:#111120;border:1px solid #1c1c30;border-radius:10px;padding:12px;margin-bottom:8px;border-top:2px solid rgba(232,121,249,.25);">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+        +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(232,121,249,.6);">Observation '+(i+1)+'</span>'
+        +'<button onclick="_wlDelObs('+i+')" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:6px;color:#f87171;font-size:12px;cursor:pointer;padding:2px 8px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">✕ Remove</button>'
       +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">'
-      +'<div class="fg" style="margin:0;"><label style="font-size:9px;">Date</label><input type="date" value="'+(o.date||'')+'" onchange="_wlDossier.obs['+i+'].date=this.value"></div>'
-      +'<div class="fg" style="margin:0;"><label style="font-size:9px;">Result</label><select onchange="_wlDossier.obs['+i+'].result=this.value">'
-      +'<option value=""'+((!o.result)?' selected':'')+'>—</option>'
-      +'<option value="win"'+((o.result==="win")?' selected':'')+'>Won</option>'
-      +'<option value="place"'+((o.result==="place")?' selected':'')+'>Placed</option>'
-      +'<option value="loss"'+((o.result==="loss")?' selected':'')+'>Unplaced</option>'
-      +'</select></div>'
-      +'<div class="fg" style="margin:0;"><label style="font-size:9px;">Race / Track</label><input type="text" value="'+(o.raceName||'')+'" placeholder="e.g. Windsor Maiden" onchange="_wlDossier.obs['+i+'].raceName=this.value"></div>'
-      +'<div class="fg" style="margin:0;"><label style="font-size:9px;">Going</label><input type="text" value="'+(o.going||'')+'" placeholder="e.g. Good to Firm" onchange="_wlDossier.obs['+i+'].going=this.value"></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
+        +'<div><label style="'+lblStyle+'">Date</label><input type="date" value="'+(o.date||'')+'" onchange="_wlDossier.obs['+i+'].date=this.value" style="'+fldStyle+'"></div>'
+        +'<div><label style="'+lblStyle+'">Result</label><select onchange="_wlDossier.obs['+i+'].result=this.value" style="'+fldStyle+'">'
+          +'<option value=""'+((!o.result)?' selected':'')+'>— Select</option>'
+          +'<option value="win"'+((o.result==='win')?' selected':'')+'>Won</option>'
+          +'<option value="place"'+((o.result==='place')?' selected':'')+'>Placed</option>'
+          +'<option value="loss"'+((o.result==='loss')?' selected':'')+'>Unplaced</option>'
+        +'</select></div>'
+        +'<div><label style="'+lblStyle+'">Race / Track</label><input type="text" value="'+(o.raceName||'')+'" placeholder="e.g. Newmarket Maiden" onchange="_wlDossier.obs['+i+'].raceName=this.value" style="'+fldStyle+'"></div>'
+        +'<div><label style="'+lblStyle+'">Going</label><input type="text" value="'+(o.going||'')+'" placeholder="e.g. Good to Firm" onchange="_wlDossier.obs['+i+'].going=this.value" style="'+fldStyle+'"></div>'
       +'</div>'
-      +'<div class="fg" style="margin:0;"><label style="font-size:9px;">Your Notes</label><textarea style="min-height:48px;" placeholder="What you noticed..." onchange="_wlDossier.obs['+i+'].notes=this.value">'+(o.notes||'')+'</textarea></div>'
+      +'<div><label style="'+lblStyle+'">Your Notes</label><textarea style="'+fldStyle+';min-height:52px;resize:vertical;" placeholder="What you noticed…" onchange="_wlDossier.obs['+i+'].notes=this.value">'+(o.notes||'')+'</textarea></div>'
     +'</div>';
   }).join('');
 }
@@ -343,18 +667,20 @@ function _wlDelObs(i){_wlDossier.obs.splice(i,1);_renderObsList();}
 
 function _renderTargetsList(){
   const el=document.getElementById('wlf-targets-list');if(!el)return;
-  if(!_wlDossier.targets.length){el.innerHTML='<div style="color:var(--mut);font-size:12px;font-style:italic;margin-bottom:8px;">No targets set.</div>';return;}
+  const fldStyle='width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;';
+  const lblStyle='display:block;font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;';
+  if(!_wlDossier.targets.length){el.innerHTML='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:600;color:#3a3a5c;font-style:italic;margin-bottom:10px;text-align:center;padding:8px 0;">No targets set — tap Add to plan a race</div>';return;}
   el.innerHTML=_wlDossier.targets.map(function(t,i){
-    return'<div style="background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.2);border-radius:8px;padding:10px;margin-bottom:8px;">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
-      +'<span style="font-family:monospace;font-size:10px;color:#fb923c;">🎯 Target '+(i+1)+'</span>'
-      +'<button onclick="_wlDelTarget('+i+')" style="background:none;border:none;color:var(--mut);font-size:14px;cursor:pointer;padding:0;">✕</button>'
+    return'<div style="background:#111120;border:1px solid rgba(251,146,60,.18);border-radius:10px;padding:12px;margin-bottom:8px;border-top:2px solid rgba(251,146,60,.3);">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+        +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(251,146,60,.7);">🎯 Target '+(i+1)+'</span>'
+        +'<button onclick="_wlDelTarget('+i+')" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:6px;color:#f87171;font-size:12px;cursor:pointer;padding:2px 8px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">✕ Remove</button>'
       +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'
-      +'<div class="fg" style="margin:0;"><label style="font-size:9px;">Race</label><input type="text" value="'+(t.race||'')+'" placeholder="Race name" onchange="_wlDossier.targets['+i+'].race=this.value"></div>'
-      +'<div class="fg" style="margin:0;"><label style="font-size:9px;">Track</label><input type="text" value="'+(t.track||'')+'" placeholder="e.g. Ascot" onchange="_wlDossier.targets['+i+'].track=this.value"></div>'
-      +'<div class="fg" style="margin:0;"><label style="font-size:9px;">Date</label><input type="date" value="'+(t.date||'')+'" onchange="_wlDossier.targets['+i+'].date=this.value"></div>'
-      +'<div class="fg" style="margin:0;"><label style="font-size:9px;">Condition</label><input type="text" value="'+(t.condition||'')+'" placeholder="Condition (optional)" onchange="_wlDossier.targets['+i+'].condition=this.value"></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+        +'<div><label style="'+lblStyle+'">Race</label><input type="text" value="'+(t.race||'')+'" placeholder="e.g. Sandy Lane" onchange="_wlDossier.targets['+i+'].race=this.value" style="'+fldStyle+'"></div>'
+        +'<div><label style="'+lblStyle+'">Track</label><input type="text" value="'+(t.track||'')+'" placeholder="e.g. Haydock" onchange="_wlDossier.targets['+i+'].track=this.value" style="'+fldStyle+'"></div>'
+        +'<div><label style="'+lblStyle+'">Date</label><input type="date" value="'+(t.date||'')+'" onchange="_wlDossier.targets['+i+'].date=this.value" style="'+fldStyle+'"></div>'
+        +'<div><label style="'+lblStyle+'">Condition</label><input type="text" value="'+(t.condition||'')+'" placeholder="Optional notes" onchange="_wlDossier.targets['+i+'].condition=this.value" style="'+fldStyle+'"></div>'
       +'</div>'
     +'</div>';
   }).join('');

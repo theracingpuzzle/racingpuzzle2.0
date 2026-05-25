@@ -198,7 +198,7 @@ async function _syncBets(){
     pre_notes:b.notes||null,post_notes:b.postNotes||null,
     checklist_score:b.checklistScore||0,
     result:b.result||null,returns:b.returns||0,
-    bet_banked:false,
+    bet_banked:!!b.betBanked,
     created_at:b.createdAt?new Date(b.createdAt).toISOString():new Date().toISOString()
   };});
   const all=realBets.concat(virtBets);
@@ -240,13 +240,13 @@ async function _syncProfiles(){
         obs_date:o.date||null,race_name:o.raceName||null,
         track:o.track||null,going:o.going||null,
         result:o.result||null,notes:o.notes||null,
-        created_at:new Date().toISOString()});
+        created_at:o.createdAt?new Date(o.createdAt).toISOString():new Date().toISOString()});
     });
     (e.targets||[]).forEach(function(t){
       targets.push({id:t.id,profile_id:e.id,user_id:uid,
         race:t.race||null,track:t.track||null,
         target_date:t.date||null,condition:t.condition||null,
-        created_at:new Date().toISOString()});
+        created_at:t.createdAt?new Date(t.createdAt).toISOString():new Date().toISOString()});
     });
   });
   // Upsert profiles (safe across devices — won't wipe records from other devices)
@@ -300,15 +300,12 @@ async function _syncSettings(){
   if(D.sources&&D.sources.length){
     rows.push({user_id:uid,key:'sources',value:JSON.stringify(D.sources),updated_at:new Date().toISOString()});
   }
-  if(D.cksOwn&&D.cksOwn.length){
-    rows.push({user_id:uid,key:'cksOwn',value:JSON.stringify(D.cksOwn),updated_at:new Date().toISOString()});
-  }
-  if(D.cksTip&&D.cksTip.length){
-    rows.push({user_id:uid,key:'cksTip',value:JSON.stringify(D.cksTip),updated_at:new Date().toISOString()});
-  }
+  rows.push({user_id:uid,key:'cksOwn',value:JSON.stringify(D.cksOwn||[]),updated_at:new Date().toISOString()});
+  rows.push({user_id:uid,key:'cksTip',value:JSON.stringify(D.cksTip||[]),updated_at:new Date().toISOString()});
   await _supa('DELETE','settings',null,'user_id=eq.'+SUPA_USER_ID);
   if(rows.length) await _supa('POST','settings',rows);
 }
+
 
 // ════════════════════════════════════════════════════════
 // SUPABASE LOAD — fetch all tables and assemble D
@@ -326,34 +323,18 @@ async function supaLoad(){
       fetch(SUPA_URL+'/rest/v1/profile_observations?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/profile_targets?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/rules?user_id=eq.'+uid+'&order=sort_order.asc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/daily_log?user_id=eq.'+uid+'&order=log_date.desc&limit=90',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/daily_log?user_id=eq.'+uid+'&order=log_date.desc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/settings?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();})
     ]);
 
     // ── Bank ──
     if(bankRows&&bankRows.length){
       const b=bankRows[0];
-      // Use stored starting banks
       D.bank={start:b.real_start,current:b.real_current};
       D.vBank=D.vBank||{};
       D.vBank.start=b.virtual_start;
       D.vBank.current=b.virtual_current;
     }
-    // Always get authoritative balance from DB trigger calculation
-    try{
-      const rpcResp=await fetch(SUPA_URL+'/rest/v1/rpc/rebuild_bank_balance',{
-        method:'POST',
-        headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Content-Type':'application/json'},
-        body:JSON.stringify({p_user_id:SUPA_USER_ID})
-      });
-      if(rpcResp.ok){
-        const rpcData=await rpcResp.json();
-        if(rpcData&&rpcData.length){
-          D.bank.current=parseFloat(rpcData[0].real_current)||D.bank.current;
-          D.vBank.current=parseFloat(rpcData[0].virtual_current)||D.vBank.current;
-        }
-      }
-    }catch(e){/* use stored values as fallback */}
 
     // ── Bets (split back into real and virtual) ──
     if(Array.isArray(betRows)){

@@ -112,44 +112,263 @@ function updDots(){CARDS.forEach((_,i)=>{const d=document.getElementById('d'+i);
 function renderSwCard(){const id=CARDS[cur].id;if(id==='today')renderToday();if(id==='cards')rcSwipeInit();if(id==='results')rcSwLoadResults();if(id==='coach')renderCoachCard();if(id==='bank')renderBkCard();if(id==='watch')renderWatchlist();}
 
 // ─── HEADER ───
-function updHdr(){
-  // Real bank — always blue, arrow shows profit/loss direction
-  const bankCur=D.bank.current||0, bankStart=D.bank.start||0;
-  const hb=document.getElementById('hbank');
-  const hw=document.getElementById('hbank-wrap');
-  if(hb)hb.textContent=bankCur.toFixed(2);
-  if(hw){
-    const diff=bankCur-bankStart;
-    const arrow=!bankStart?'':diff>0?' <span style="color:#34d399;font-size:10px;">▲</span>':diff<0?' <span style="color:#ef4444;font-size:10px;">▼</span>':'';
-    hw.style.color='#60a5fa';
-    // Inject arrow after the span - find or create arrow el
-    const arrowEl=document.getElementById('hbank-arrow');
-    if(arrowEl)arrowEl.innerHTML=arrow;
-  }
 
-  // Virtual bank — always orange, arrow shows profit/loss
-  const vbEl=document.getElementById('hvbank');
-  const vbWrap=document.getElementById('hvbank-wrap');
+// ── Inject new design system CSS once ──
+(function _injectDesignSystem(){
+  if(document.getElementById('rp-design-css'))return;
+  const s=document.createElement('style');
+  s.id='rp-design-css';
+  s.textContent=`
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Outfit:wght@400;500;600&display=swap');
+
+    /* ── GLOBAL OVERRIDES ── */
+    :root {
+      --bdr: #1c1c30;
+      --sur: #0d0d18;
+      --sur2: #111120;
+      --mut: #3a3a5c;
+      --txt: #d4d8e8;
+      --gld: #f59e0b;
+      --blu: #60a5fa;
+      --grn: #4ade80;
+      --red: #f87171;
+      --pur: #8b5cf6;
+    }
+
+    body {
+      background: #050508 !important;
+      font-family: 'Outfit', 'Segoe UI', sans-serif !important;
+    }
+
+    /* ── HEADER ── */
+    #hdr {
+      background: rgba(5,5,8,0.96) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+      border-bottom: 1px solid #1c1c30 !important;
+      padding: env(safe-area-inset-top, 0px) 0 0 !important;
+    }
+
+    #hdr-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px 10px;
+      gap: 10px;
+    }
+
+    /* Brand */
+    .rp-brand {
+      display: flex; align-items: center; gap: 7px;
+      font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+      font-size: 15px; font-weight: 800; letter-spacing: 2px;
+      text-transform: uppercase; color: #fff; white-space: nowrap;
+    }
+    .rp-brand-accent { color: #8b5cf6; }
+    .rp-brand-puzzle { font-size: 18px; }
+
+    /* Bank pills */
+    .rp-banks {
+      display: flex; gap: 6px; align-items: center; flex: 1; justify-content: flex-end;
+    }
+    .rp-bank-pill {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.07);
+      background: rgba(255,255,255,.03);
+    }
+    .rp-bank-dot {
+      width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    }
+    .rp-bank-lbl {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 8px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(255,255,255,.25);
+    }
+    .rp-bank-val {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 14px; font-weight: 800; letter-spacing: .5px;
+    }
+    .rp-bank-arrow { font-size: 9px; }
+
+    /* Mode toggle */
+    .rp-mode-toggle {
+      display: flex;
+      border: 1px solid #1c1c30;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .rp-mode-btn {
+      padding: 6px 11px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: transparent; border: none; cursor: pointer;
+      color: rgba(255,255,255,.25); transition: all .15s;
+    }
+    .rp-mode-btn.on {
+      background: rgba(139,92,246,.18);
+      color: #8b5cf6;
+    }
+
+    /* Supa dot */
+    #supa-dot {
+      width: 7px !important; height: 7px !important;
+      border-radius: 50% !important; flex-shrink: 0 !important;
+    }
+
+    /* ── CARD CONTAINERS ── */
+    .card {
+      background: #0d0d18 !important;
+      border-radius: 16px !important;
+      border: 1px solid #1c1c30 !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,.5) !important;
+    }
+
+    /* ── CARD HEADER LABELS ── */
+    .card-lbl {
+      font-family: 'Barlow Condensed', sans-serif !important;
+      font-size: 9px !important; font-weight: 700 !important;
+      letter-spacing: 2px !important; text-transform: uppercase !important;
+    }
+    .card-title {
+      font-family: 'Barlow Condensed', sans-serif !important;
+      font-size: 22px !important; font-weight: 800 !important;
+      letter-spacing: 1px !important;
+    }
+
+    /* ── NAV DOTS ── */
+    #snav {
+      background: rgba(5,5,8,0.96) !important;
+      backdrop-filter: blur(14px) !important;
+      border-top: 1px solid #1c1c30 !important;
+      padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    }
+    .dot {
+      background: #1c1c30 !important;
+      border-radius: 4px !important;
+      height: 5px !important;
+      width: 5px !important;
+      transition: width .2s, background .2s !important;
+      cursor: pointer !important;
+    }
+    .dot.on {
+      border-radius: 4px !important;
+    }
+    #cnlbl {
+      font-family: 'Barlow Condensed', sans-serif !important;
+      font-size: 10px !important; font-weight: 800 !important;
+      letter-spacing: 2px !important; text-transform: uppercase !important;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-family: 'Barlow Condensed', sans-serif !important;
+      font-weight: 800 !important; letter-spacing: 1px !important;
+      text-transform: uppercase !important; border-radius: 9px !important;
+    }
+
+    /* ── INPUTS & TEXTAREAS ── */
+    input[type=text], input[type=number], input[type=date],
+    input[type=email], textarea, select {
+      background: #0a0a14 !important;
+      border: 1px solid #1c1c30 !important;
+      border-radius: 8px !important;
+      color: #d4d8e8 !important;
+      font-family: 'Outfit', sans-serif !important;
+    }
+    input[type=text]:focus, input[type=number]:focus,
+    textarea:focus, select:focus {
+      border-color: rgba(139,92,246,.5) !important;
+      outline: none !important;
+    }
+
+    /* ── SECTION LABELS in cards ── */
+    .sec-hdr {
+      font-family: 'Barlow Condensed', sans-serif !important;
+      font-size: 9px !important; font-weight: 700 !important;
+      letter-spacing: 2px !important; text-transform: uppercase !important;
+    }
+
+    /* ── SPLASH ── */
+    #splash {
+      background: #050508 !important;
+    }
+    #splash .sp-title {
+      font-family: 'Bebas Neue', cursive !important;
+      font-size: 42px !important; letter-spacing: 3px !important;
+    }
+  `;
+  document.head.appendChild(s);
+})();
+
+function updHdr(){
+  // Real bank
+  const bankCur=D.bank.current||0, bankStart=D.bank.start||0;
+  const diff=bankCur-bankStart;
+  const arrow=!bankStart?'':diff>0?'<span class="rp-bank-arrow" style="color:#4ade80;">▲</span>':diff<0?'<span class="rp-bank-arrow" style="color:#f87171;">▼</span>':'';
+
+  // Virtual bank
   const vc=D.vBank&&D.vBank.current!=null?D.vBank.current:500;
   const vs=D.vBank&&D.vBank.start!=null?D.vBank.start:500;
-  if(vbEl)vbEl.textContent=vc.toFixed(2);
-  if(vbWrap){
-    const vdiff=vc-vs;
-    const varrow=vs?vdiff>0?' <span style="color:#34d399;font-size:10px;">▲</span>':vdiff<0?' <span style="color:#ef4444;font-size:10px;">▼</span>':'':'';
-    const varrowEl=document.getElementById('hvbank-arrow');
-    if(varrowEl)varrowEl.innerHTML=varrow;
-  }
+  const vdiff=vc-vs;
+  const varrow=!vs?'':vdiff>0?'<span class="rp-bank-arrow" style="color:#4ade80;">▲</span>':vdiff<0?'<span class="rp-bank-arrow" style="color:#f87171;">▼</span>':'';
 
-  // Streak calc — based purely on app visits recorded in dailyLog
+  // Streak
   const all=new Set((D.dailyLog||[]).map(d=>d.date));
   let streak=0;const t=td();const yd=new Date();yd.setDate(yd.getDate()-1);const yds=yd.toISOString().slice(0,10);
   let ch=all.has(t)?t:all.has(yds)?yds:null;
   if(ch){let d=new Date(ch);while(all.has(d.toISOString().slice(0,10))){streak++;d.setDate(d.getDate()-1);}}
   window._streak=streak;
-  const st=document.getElementById('tstreak-tile');
-  if(st){st.innerHTML='<div style="font-family:monospace;font-size:24px;font-weight:700;color:var(--gld);margin-bottom:2px;">'+streak+'<span style="font-size:18px;">🔥</span></div><div style="font-family:monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,228,220,.45);">Day Streak</div>';}
 
-  // Re-render today card so P&L tiles stay in sync
+  // Streak tile (today card)
+  const st=document.getElementById('tstreak-tile');
+  if(st){st.innerHTML='<div style="font-family:\'Bebas Neue\',cursive;font-size:26px;font-weight:700;color:var(--gld);margin-bottom:2px;letter-spacing:1px;">'+streak+'<span style="font-size:16px;">🔥</span></div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:rgba(232,228,220,.4);">Day Streak</div>';}
+
+  // Rebuild header HTML with new design
+  const hdr=document.getElementById('hdr');
+  if(!hdr)return;
+
+  // Find or create inner wrapper
+  let inner=document.getElementById('hdr-inner');
+  if(!inner){
+    hdr.innerHTML='';
+    inner=document.createElement('div');
+    inner.id='hdr-inner';
+    hdr.appendChild(inner);
+  }
+
+  inner.innerHTML=
+    // Brand
+    '<div class="rp-brand"><span class="rp-brand-puzzle">🧩</span>RACING <span class="rp-brand-accent">PUZZLE</span></div>'
+
+    // Banks
+    +'<div class="rp-banks">'
+      // Real
+      +'<div class="rp-bank-pill" id="hbank-wrap">'
+        +'<div class="rp-bank-dot" id="supa-dot" style="background:#34d399;"></div>'
+        +'<span class="rp-bank-lbl">Real</span>'
+        +'<span class="rp-bank-val" style="color:#60a5fa;">£<span id="hbank">'+bankCur.toFixed(2)+'</span></span>'
+        +'<span id="hbank-arrow">'+arrow+'</span>'
+      +'</div>'
+      // Virtual
+      +'<div class="rp-bank-pill" id="hvbank-wrap">'
+        +'<span class="rp-bank-lbl">Virtual</span>'
+        +'<span class="rp-bank-val" style="color:#fb923c;">£<span id="hvbank">'+vc.toFixed(2)+'</span></span>'
+        +'<span id="hvbank-arrow">'+varrow+'</span>'
+      +'</div>'
+    +'</div>'
+
+    // Mode toggle
+    +'<div class="rp-mode-toggle">'
+      +'<button id="bsw" class="rp-mode-btn'+(mode==='sw'?' on':'')+'" onclick="setMode(\'sw\')">Swipe</button>'
+      +'<button id="bcmd" class="rp-mode-btn'+(mode==='cmd'?' on':'')+'" onclick="setMode(\'cmd\')">CMD</button>'
+    +'</div>';
+
+  // Re-render today card P&L sync
   if(typeof renderToday === 'function') renderToday();
 }
+
 

@@ -173,7 +173,7 @@ function wlSelectDay(dateStr){
     html+='<div style="color:var(--mut);font-style:italic;font-size:13px;padding:8px 0;">No targets on '+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'.<br><span style="font-size:12px;">Tap + to add one.</span></div>';
   }
   el.innerHTML=html;
-  el.querySelectorAll('[data-wl-id]').forEach(function(el2){el2.addEventListener('click',function(){openWLForm(el2.getAttribute('data-wl-id'));});});
+  el.querySelectorAll('[data-wl-id]').forEach(function(el2){el2.addEventListener('click',function(){openWLProfile(el2.getAttribute('data-wl-id'));});});
 }
 
 // Track which profiler groups are expanded (session only — resets to all collapsed)
@@ -209,7 +209,7 @@ function renderWLList(){
     }
   });
   el.innerHTML=html;
-  el.querySelectorAll('[data-wl-id]').forEach(function(el2){el2.addEventListener('click',function(ev){ev.stopPropagation();openWLForm(el2.getAttribute('data-wl-id'));});});
+  el.querySelectorAll('[data-wl-id]').forEach(function(el2){el2.addEventListener('click',function(ev){ev.stopPropagation();openWLProfile(el2.getAttribute('data-wl-id'));});});
 }
 
 function renderWLEntry(e){
@@ -456,3 +456,603 @@ function delWLEntry(id){
 }
 
 
+
+// ══════════════════════════════════════════════════════════════
+// PUZZLE PROFILER — FULL PROFILE CARD VIEW
+// ══════════════════════════════════════════════════════════════
+
+const WLP_CSS = `
+#wlp-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: #050508;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.wlp-page {
+  max-width: 500px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+  font-family: 'Outfit','Segoe UI',sans-serif;
+  color: #d4d8e8;
+}
+/* NAV */
+.wlp-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  background: rgba(5,5,8,0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #1c1c30;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.wlp-back {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: #111120;
+  border: 1px solid #1c1c30;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 15px; color: #fff;
+}
+.wlp-brand {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 14px; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: #fff;
+  display: flex; align-items: center; gap: 7px;
+}
+.wlp-brand-accent { color: #8b5cf6; }
+.wlp-edit-btn {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: #8b5cf6;
+  padding: 6px 13px;
+  border: 1px solid rgba(139,92,246,.4);
+  border-radius: 8px;
+  background: rgba(139,92,246,.08);
+  cursor: pointer;
+}
+/* HERO */
+.wlp-hero {
+  background: #0d0d18;
+  border-bottom: 1px solid #1c1c30;
+  overflow: hidden;
+  padding: 18px 16px 0;
+  position: relative;
+}
+.wlp-hero-bg {
+  position: absolute; right: -10px; top: 0;
+  width: 180px; height: 170px;
+  opacity: .05; font-size: 140px; line-height: 1;
+  pointer-events: none; user-select: none; filter: grayscale(1);
+}
+.wlp-hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative; z-index: 1;
+}
+.wlp-name-row { display: flex; align-items: center; gap: 8px; }
+.wlp-name {
+  font-family: 'Bebas Neue','Impact',cursive;
+  font-size: 40px; letter-spacing: 2px; color: #fff; line-height: 1;
+}
+.wlp-verified {
+  width: 20px; height: 20px; background: #8b5cf6; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #fff; margin-top: 4px; flex-shrink: 0;
+}
+.wlp-reason-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 10px; font-weight: 800;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 5px; margin-top: 4px;
+}
+.wlp-or-box {
+  background: #111120;
+  border: 1.5px solid rgba(139,92,246,.35);
+  border-radius: 10px; padding: 7px 13px; text-align: center;
+}
+.wlp-or-label {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 9px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: #3a3a5c; display: block; margin-bottom: 1px;
+}
+.wlp-or-value {
+  font-family: 'Bebas Neue','Impact',cursive;
+  font-size: 32px; letter-spacing: 1px; color: #8b5cf6; line-height: 1;
+}
+.wlp-or-na {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 13px; font-weight: 700; color: #3a3a5c;
+}
+/* META STRIP */
+.wlp-meta {
+  display: flex; position: relative; z-index: 1;
+  margin-top: 14px;
+  border-top: 1px solid #1c1c30; border-bottom: 1px solid #1c1c30;
+}
+.wlp-meta-cell {
+  flex: 1; padding: 9px 11px; border-right: 1px solid #1c1c30;
+}
+.wlp-meta-cell:last-child { border-right: none; }
+.wlp-meta-label {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: #4a4a6a; display: block; margin-bottom: 3px;
+}
+.wlp-meta-val {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+/* HERO BODY */
+.wlp-hero-body {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 14px 0 14px; position: relative; z-index: 1;
+}
+.wlp-silks {
+  width: 92px; height: 92px; flex-shrink: 0; border-radius: 50%;
+  background: #0a0a14; border: 2.5px solid rgba(139,92,246,.35);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 16px rgba(139,92,246,.2);
+}
+.wlp-stats { flex: 1; display: flex; flex-direction: column; }
+.wlp-stat-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 0; border-bottom: 1px solid #1c1c30;
+}
+.wlp-stat-row:last-child { border-bottom: none; }
+.wlp-stat-left {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 12px; font-weight: 600; color: #3a3a5c;
+  display: flex; align-items: center; gap: 6px;
+}
+.wlp-stat-val {
+  font-family: 'Bebas Neue','Impact',cursive;
+  font-size: 20px; letter-spacing: 1px; line-height: 1;
+}
+.wlp-stat-sm {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 12px; font-weight: 700; color: #fff;
+}
+.wlp-edge-badge {
+  font-family: 'Bebas Neue','Impact',cursive;
+  font-size: 15px; letter-spacing: 1px; padding: 2px 8px; border-radius: 5px;
+}
+/* EDGE BAR */
+.wlp-edge-bar { padding: 2px 0 10px; position: relative; z-index: 1; }
+.wlp-edge-bar-track { height: 4px; background: #111120; border-radius: 2px; overflow: hidden; }
+.wlp-edge-bar-fill { height: 100%; border-radius: 2px; }
+/* SECTIONS */
+.wlp-section {
+  background: #0d0d18; border: 1px solid #1c1c30;
+  border-radius: 13px; margin: 10px 12px 0; overflow: hidden;
+}
+.wlp-section-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px; border-bottom: 1px solid #1c1c30;
+}
+.wlp-section-left { display: flex; align-items: center; gap: 9px; }
+.wlp-section-num {
+  width: 24px; height: 24px; background: #1a1a2e;
+  border: 1px solid #1c1c30; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 12px; font-weight: 800; color: #3a3a5c;
+}
+.wlp-section-title {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 12px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: #c8d0df;
+}
+.wlp-section-action {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #8b5cf6; cursor: pointer;
+}
+/* WHY LOGGED */
+.wlp-why-grid {
+  display: grid; grid-template-columns: repeat(5,1fr);
+  gap: 6px; padding: 11px 12px 12px;
+}
+.wlp-why-btn {
+  position: relative; background: #111120; border: 1.5px solid #1c1c30;
+  border-radius: 9px; padding: 8px 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.wlp-why-active { background: rgba(139,92,246,.1); border-color: rgba(139,92,246,.4); }
+.wlp-why-check {
+  position: absolute; top: 4px; right: 4px;
+  width: 13px; height: 13px; background: #8b5cf6; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; color: #fff;
+}
+.wlp-why-icon { font-size: 14px; }
+.wlp-why-label {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 9px; font-weight: 700; letter-spacing: .4px;
+  text-align: center; line-height: 1.2; color: #c8d0df;
+}
+.wlp-why-active .wlp-why-label { color: #fff; }
+.wlp-reason-note {
+  padding: 0 13px 11px;
+  font-family: 'Caveat',cursive; font-size: 13px;
+  color: #6a6a8a; line-height: 1.5; font-style: italic;
+}
+/* RATINGS */
+.wlp-ratings-row { display: flex; padding: 13px 12px; }
+.wlp-rating-col {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 0 4px; border-right: 1px solid #1c1c30;
+}
+.wlp-rating-col:last-child { border-right: none; }
+.wlp-rating-key {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: #4a4a6a; margin-bottom: 5px; text-align: center;
+}
+.wlp-rating-val {
+  font-family: 'Bebas Neue','Impact',cursive;
+  font-size: 28px; letter-spacing: 1px; line-height: 1; text-align: center;
+}
+.wlp-rating-na {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 14px; font-weight: 700; color: #4a4a6a;
+}
+.wlp-rating-bar { height: 2px; border-radius: 1px; margin-top: 5px; width: 80%; }
+.wlp-or-hist {
+  display: flex; gap: 5px; padding: 0 13px 12px;
+  flex-wrap: wrap; align-items: center;
+}
+.wlp-hist-label {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: #4a4a6a;
+}
+.wlp-hist-pill {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 5px;
+  background: rgba(139,92,246,.15); border: 1px solid rgba(139,92,246,.35);
+  color: #8b5cf6; display: flex; align-items: center; gap: 4px;
+}
+.wlp-hist-date { color: #3a3a5c; font-weight: 600; }
+/* SPLIT ROW */
+.wlp-split { display: flex; gap: 10px; margin: 10px 12px 0; }
+.wlp-split .wlp-section { flex: 1; margin: 0; }
+/* NOTEPAD */
+.wlp-notepad {
+  background: #f5f0d8; border-radius: 0 0 10px 10px; padding: 11px 13px 13px;
+}
+.wlp-notepad-meta {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #8a8060;
+  margin-bottom: 7px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+}
+.wlp-notepad-dot { color: #c5b87a; }
+.wlp-result-badge {
+  padding: 1px 6px; border-radius: 4px;
+  font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+}
+.wlp-notepad-text {
+  font-family: 'Caveat',cursive; font-size: 13px;
+  line-height: 1.7; color: #2a2510; white-space: pre-line;
+}
+.wlp-notepad-empty {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 11px; color: #8a8060; font-style: italic;
+  padding: 14px 13px; text-align: center; line-height: 1.6;
+}
+.wlp-obs-count {
+  border-top: 1px solid #1c1c30; padding: 9px;
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #8b5cf6; text-align: center; cursor: pointer;
+}
+/* TARGETS */
+.wlp-target-item {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 9px 13px; border-bottom: 1px solid #1c1c30; gap: 8px;
+}
+.wlp-target-item:last-child { border-bottom: none; }
+.wlp-target-icon { font-size: 14px; margin-top: 1px; flex-shrink: 0; opacity: .4; }
+.wlp-target-race {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 13px; font-weight: 800; color: #fff; letter-spacing: .3px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.wlp-target-meta {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 10px; font-weight: 600; color: #4a4a6a; letter-spacing: .3px; margin-top: 2px;
+}
+.wlp-target-date {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 11px; font-weight: 700; color: #f59e0b; letter-spacing: .5px;
+}
+.wlp-target-cond {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 9px; font-weight: 600; color: #4a4a6a;
+  text-align: right; max-width: 70px; line-height: 1.2; margin-top: 2px;
+}
+.wlp-target-empty {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 11px; color: #4a4a6a; padding: 14px 13px;
+  text-align: center; font-style: italic;
+}
+/* CONDITIONS */
+.wlp-cond-grid { display: grid; padding: 11px 10px 10px; }
+.wlp-cond-cell {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 0 4px; border-right: 1px solid #1c1c30;
+}
+.wlp-cond-cell:last-child { border-right: none; }
+.wlp-cond-icon { font-size: 16px; opacity: .7; }
+.wlp-cond-label {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 8px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #4a4a6a; text-align: center;
+}
+.wlp-cond-val {
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-size: 10px; font-weight: 800; text-align: center; line-height: 1.2;
+}
+/* INTEL */
+.wlp-intel { padding: 10px 13px 13px; display: flex; gap: 9px; align-items: flex-start; }
+.wlp-intel-icon { font-size: 16px; opacity: .6; flex-shrink: 0; margin-top: 1px; }
+.wlp-intel-text {
+  font-family: 'Caveat',cursive; font-size: 13px;
+  line-height: 1.6; color: #7a8099; white-space: pre-line;
+}
+`;
+
+function _wlpEsc(s){
+  if(s===null||s===undefined)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function _wlpFmt(d){
+  if(!d)return'—';
+  const p=String(d).split('-');
+  if(p.length!==3)return d;
+  const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return parseInt(p[2])+' '+M[parseInt(p[1])-1]+' '+p[0].slice(2);
+}
+
+function openWLProfile(id){
+  const wl=getWL();
+  const e=wl.find(function(x){return x.id===id;});
+  if(!e)return;
+
+  const existing=document.getElementById('wlp-modal');
+  if(existing)existing.remove();
+
+  // Inject Google Fonts once
+  if(!document.getElementById('wlp-fonts')){
+    const lnk=document.createElement('link');
+    lnk.id='wlp-fonts';lnk.rel='stylesheet';
+    lnk.href='https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Caveat:wght@500;600&display=swap';
+    document.head.appendChild(lnk);
+  }
+
+  // Inject styles once
+  if(!document.getElementById('wlp-styles')){
+    const s=document.createElement('style');
+    s.id='wlp-styles';s.textContent=WLP_CSS;
+    document.head.appendChild(s);
+  }
+
+  const modal=document.createElement('div');
+  modal.id='wlp-modal';
+  modal.innerHTML=_wlpBuildHTML(e);
+  document.body.appendChild(modal);
+}
+
+function _wlpBuildHTML(e){
+  const esc=_wlpEsc;
+  const fmt=_wlpFmt;
+
+  const REASONS={
+    'eye-catcher':  {emoji:'🔭',label:'Eye Catcher',  col:'#4ade80'},
+    'future-target':{emoji:'🎯',label:'Future Target', col:'#f59e0b'},
+    'trainer-intel':{emoji:'🎓',label:'Trainer Intel', col:'#38bdf8'},
+    'form-study':   {emoji:'📈',label:'Form Study',    col:'#8b5cf6'},
+    'tip-source':   {emoji:'💬',label:'Tip Source',    col:'#e879f9'},
+  };
+  const WHY_ORDER=['eye-catcher','future-target','trainer-intel','form-study','tip-source'];
+  const RESULT_COLS={win:'#4ade80',place:'#f59e0b',loss:'#f87171'};
+
+  const reason=REASONS[e.reason||'eye-catcher']||REASONS['eye-catcher'];
+  const or=parseFloat(e.currentRating)||null;
+  const mr=parseFloat(e.myRating)||null;
+  const edge=(or&&mr)?(mr-or):null;
+  const edgeCol=edge===null?'#888':edge>0?'#4ade80':edge<0?'#f87171':'#888';
+
+  const obs=e.observations||[];
+  const targets=e.targets||[];
+  const sortedObs=obs.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+  const latestObs=sortedObs[0]||null;
+  const lastDate=latestObs?latestObs.date:(e.createdAt?new Date(e.createdAt).toISOString().slice(0,10):'');
+  const nextTarget=targets[0]||null;
+
+  const condItems=[
+    {icon:'💧',label:'Going',    value:(e.goingPrefs&&e.goingPrefs.length)?e.goingPrefs[0]:'Any',   color:(e.goingPrefs&&e.goingPrefs.length)?'#4ade80':'#3a3a5c'},
+    {icon:'📏',label:'Distance', value:e.distancePref||'—',  color:e.distancePref?'#38bdf8':'#3a3a5c'},
+    {icon:'⭕',label:'Track',    value:e.trackPref||'—',     color:e.trackPref?'#8b5cf6':'#3a3a5c'},
+  ];
+
+  const editFn="document.getElementById('wlp-modal').remove();openWLForm('"+e.id+"')";
+
+  let h='<div class="wlp-page">';
+
+  // NAV
+  h+='<div class="wlp-nav">';
+  h+='<div class="wlp-back" onclick="document.getElementById(\'wlp-modal\').remove()">←</div>';
+  h+='<div class="wlp-brand"><span style="font-size:16px;">🧩</span>RACING <span class="wlp-brand-accent">PUZZLE</span></div>';
+  h+='<div class="wlp-edit-btn" onclick="'+editFn+'">Edit ✏️</div>';
+  h+='</div>';
+
+  // HERO
+  h+='<div class="wlp-hero">';
+  h+='<div class="wlp-hero-bg">🐎</div>';
+  h+='<div class="wlp-hero-top">';
+  h+='<div>';
+  h+='<div class="wlp-name-row"><span class="wlp-name">'+esc(e.horse)+'</span><div class="wlp-verified">✓</div></div>';
+  h+='<div><span class="wlp-reason-badge" style="background:'+reason.col+'20;border:1px solid '+reason.col+'40;color:'+reason.col+';">'+reason.emoji+' '+reason.label+'</span></div>';
+  h+='</div>';
+  h+='<div class="wlp-or-box"><span class="wlp-or-label">OR</span>';
+  h+=or?'<span class="wlp-or-value">'+or+'</span>':'<span class="wlp-or-na">—</span>';
+  h+='</div>';
+  h+='</div>';
+
+  // Meta strip
+  h+='<div class="wlp-meta">';
+  h+='<div class="wlp-meta-cell"><span class="wlp-meta-label">Trainer</span><span class="wlp-meta-val">'+esc(e.trainer||'—')+'</span></div>';
+  h+='<div class="wlp-meta-cell"><span class="wlp-meta-label">Observations</span><span class="wlp-meta-val">'+obs.length+' logged</span></div>';
+  h+='<div class="wlp-meta-cell"><span class="wlp-meta-label">Targets</span><span class="wlp-meta-val">'+targets.length+' races</span></div>';
+  h+='</div>';
+
+  // Silks + stats
+  h+='<div class="wlp-hero-body">';
+  h+='<div class="wlp-silks">';
+  h+='<svg width="64" height="74" viewBox="0 0 70 80" fill="none">';
+  h+='<path d="M20 20 Q35 16 50 20 L54 62 Q35 66 16 62 Z" fill="#7c3aed"/>';
+  h+='<path d="M28 19 L28 63" stroke="#f59e0b" stroke-width="5"/>';
+  h+='<path d="M42 19 L42 63" stroke="#f59e0b" stroke-width="5"/>';
+  h+='<path d="M20 20 Q10 24 6 38 Q10 42 16 40 L20 28 Z" fill="#7c3aed"/>';
+  h+='<line x1="8" y1="24" x2="15" y2="40" stroke="#f59e0b" stroke-width="4"/>';
+  h+='<path d="M50 20 Q60 24 64 38 Q60 42 54 40 L50 28 Z" fill="#7c3aed"/>';
+  h+='<line x1="62" y1="24" x2="55" y2="40" stroke="#f59e0b" stroke-width="4"/>';
+  h+='<path d="M26 20 Q35 15 44 20 Q35 26 26 20 Z" fill="#f59e0b"/>';
+  h+='<ellipse cx="35" cy="12" rx="13" ry="6" fill="#f59e0b"/>';
+  h+='<ellipse cx="35" cy="10" rx="10" ry="7" fill="#7c3aed"/>';
+  h+='<rect x="22" y="11" width="26" height="3" fill="#f59e0b" rx="1"/>';
+  h+='<circle cx="35" cy="7" r="2" fill="#f59e0b"/>';
+  h+='</svg></div>';
+
+  h+='<div class="wlp-stats">';
+  // My Rating
+  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">⭐ My Rating</span>';
+  h+=mr?'<span class="wlp-stat-val" style="color:#f97316;">'+mr+'</span>':'<span class="wlp-stat-sm" style="color:#3a3a5c;">Not set</span>';
+  h+='</div>';
+  // OR Edge
+  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🏆 OR Edge</span>';
+  h+=edge!==null?'<span class="wlp-edge-badge" style="background:'+edgeCol+'20;color:'+edgeCol+';">'+(edge>0?'+':'')+edge+' pts</span>':'<span class="wlp-stat-sm" style="color:#3a3a5c;">—</span>';
+  h+='</div>';
+  // Last Entry
+  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">📅 Last Entry</span>';
+  h+='<span class="wlp-stat-sm">'+fmt(lastDate)+'</span></div>';
+  // Next Target
+  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🎯 Next Target</span>';
+  if(nextTarget){const tw=(nextTarget.race||'').split(' ').slice(0,2).join(' ');h+='<span class="wlp-stat-sm" style="color:#f59e0b;font-size:11px;">'+esc(tw)+'</span>';}
+  else h+='<span class="wlp-stat-sm" style="color:#3a3a5c;">None set</span>';
+  h+='</div>';
+  h+='</div></div>'; // stats + hero-body
+
+  // Edge bar
+  if(edge!==null){
+    const barW=Math.min(Math.abs(edge)/20*100,100);
+    h+='<div class="wlp-edge-bar"><div class="wlp-edge-bar-track"><div class="wlp-edge-bar-fill" style="width:'+barW+'%;background:'+edgeCol+';"></div></div></div>';
+  }
+  h+='</div>'; // hero
+
+  // SECTION 1: WHY LOGGED
+  h+='<div class="wlp-section">';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">1</div><span class="wlp-section-title">Why Logged</span></div>';
+  h+='<span class="wlp-section-action" onclick="'+editFn+'">Edit ✏️</span></div>';
+  h+='<div class="wlp-why-grid">';
+  WHY_ORDER.forEach(function(rid){
+    const r=REASONS[rid];const isActive=(e.reason||'eye-catcher')===rid;
+    h+='<div class="wlp-why-btn'+(isActive?' wlp-why-active':'')+'">';
+    if(isActive)h+='<div class="wlp-why-check">✓</div>';
+    h+='<span class="wlp-why-icon">'+r.emoji+'</span><span class="wlp-why-label">'+r.label+'</span></div>';
+  });
+  h+='</div>';
+  if(e.reasonNote)h+='<div class="wlp-reason-note">"'+esc(e.reasonNote)+'"</div>';
+  h+='</div>';
+
+  // SECTION 2: RATINGS
+  h+='<div class="wlp-section">';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">2</div><span class="wlp-section-title">Ratings</span></div>';
+  if((e.orHistory||[]).length>1)h+='<span class="wlp-section-action">History ›</span>';
+  h+='</div>';
+  h+='<div class="wlp-ratings-row">';
+  [{key:'Official Rating',val:e.currentRating,col:'#8b5cf6'},{key:'My Rating',val:e.myRating,col:'#f97316'}].forEach(function(r){
+    const v=parseFloat(r.val)||null;
+    h+='<div class="wlp-rating-col"><span class="wlp-rating-key">'+r.key+'</span>';
+    if(v){h+='<span class="wlp-rating-val" style="color:'+r.col+';">'+v+'</span>';
+      h+='<div class="wlp-rating-bar" style="background:'+r.col+'20;"><div style="height:100%;border-radius:1px;background:'+r.col+';width:'+Math.min(v/130*100,100)+'%;"></div></div>';}
+    else{h+='<span class="wlp-rating-na">—</span><div class="wlp-rating-bar" style="background:#1c1c30;"></div>';}
+    h+='</div>';
+  });
+  h+='</div>';
+  if((e.orHistory||[]).length>0){
+    h+='<div class="wlp-or-hist"><span class="wlp-hist-label">OR LOG</span>';
+    e.orHistory.forEach(function(o){h+='<div class="wlp-hist-pill"><span>'+esc(o.or)+'</span><span class="wlp-hist-date">'+fmt(o.date)+'</span></div>';});
+    h+='</div>';
+  }
+  h+='</div>';
+
+  // SECTIONS 3+4 SPLIT
+  h+='<div class="wlp-split">';
+
+  // Section 3: Observations
+  h+='<div class="wlp-section" style="flex:1.05;">';
+  h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">3</div><span class="wlp-section-title" style="font-size:11px;">Observations</span></div>';
+  h+='<span class="wlp-section-action" style="font-size:11px;" onclick="'+editFn+'">Add +</span></div>';
+  if(latestObs){
+    const rc=RESULT_COLS[latestObs.result||'']||'#888';
+    h+='<div class="wlp-notepad"><div class="wlp-notepad-meta">';
+    h+='<span>'+fmt(latestObs.date)+'</span>';
+    if(latestObs.raceName)h+='<span class="wlp-notepad-dot">·</span><span>'+esc(latestObs.raceName)+'</span>';
+    if(latestObs.going)h+='<span class="wlp-notepad-dot">·</span><span>'+esc(latestObs.going)+'</span>';
+    if(latestObs.result)h+='<span class="wlp-result-badge" style="background:'+rc+'22;color:'+rc+';">'+latestObs.result.toUpperCase()+'</span>';
+    h+='</div><div class="wlp-notepad-text">'+esc(latestObs.notes||'No notes')+'</div></div>';
+  }else{
+    h+='<div class="wlp-notepad-empty">No observations yet<br>Tap Add to log a run</div>';
+  }
+  if(obs.length>1)h+='<div class="wlp-obs-count">📋 '+obs.length+' total ›</div>';
+  h+='</div>';
+
+  // Section 4: Targets
+  h+='<div class="wlp-section" style="flex:1;">';
+  h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">4</div><span class="wlp-section-title" style="font-size:11px;">Targets</span></div>';
+  h+='<span class="wlp-section-action" style="font-size:16px;" onclick="'+editFn+'">+</span></div>';
+  if(targets.length){
+    targets.forEach(function(t){
+      h+='<div class="wlp-target-item"><span class="wlp-target-icon">🏇</span>';
+      h+='<div style="flex:1;min-width:0;"><div class="wlp-target-race">'+esc(t.race||'—')+'</div><div class="wlp-target-meta">'+esc(t.track||'—')+'</div></div>';
+      h+='<div style="text-align:right;flex-shrink:0;"><div class="wlp-target-date">'+(t.date?fmt(t.date):'TBC')+'</div>';
+      if(t.condition)h+='<div class="wlp-target-cond">'+esc(t.condition)+'</div>';
+      h+='</div></div>';
+    });
+  }else{
+    h+='<div class="wlp-target-empty">No targets yet</div>';
+  }
+  h+='</div>';
+
+  h+='</div>'; // split
+
+  // SECTION 5: CONDITIONS
+  h+='<div class="wlp-section">';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Conditions Profile</span></div></div>';
+  h+='<div class="wlp-cond-grid" style="grid-template-columns:repeat('+condItems.length+',1fr);border-bottom:1px solid #1c1c30;">';
+  condItems.forEach(function(c){
+    const isDash=c.value==='—'||c.value==='Any';
+    h+='<div class="wlp-cond-cell"><span class="wlp-cond-icon">'+c.icon+'</span><span class="wlp-cond-label">'+c.label+'</span><span class="wlp-cond-val" style="color:'+(isDash?'#3a3a5c':c.color)+';">'+esc(c.value)+'</span></div>';
+  });
+  h+='</div>';
+  const intelText=e.trainerIntel||e.conditionsNotes||'';
+  if(intelText){
+    h+='<div class="wlp-intel"><span class="wlp-intel-icon">🎓</span><div class="wlp-intel-text">'+esc(intelText)+'</div></div>';
+  }
+  h+='</div>';
+
+  h+='<div style="height:30px;"></div>';
+  h+='</div>'; // page
+  return h;
+}

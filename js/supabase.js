@@ -249,20 +249,33 @@ async function _syncProfiles(){
         created_at:t.createdAt?new Date(t.createdAt).toISOString():new Date().toISOString()});
     });
   });
-  // Upsert profiles (safe across devices — won't wipe records from other devices)
-  if(profiles.length) await _supaUpsert('horse_profiles',profiles);
-  // For observations/targets: delete only this profile's records then reinsert
   const profileIds=profiles.map(function(p){return p.id;});
-  if(profileIds.length){
-    await _supa('DELETE','profile_observations',null,'user_id=eq.'+uid+'&profile_id=in.('+profileIds.join(',')+')');
-    await _supa('DELETE','profile_targets',null,'user_id=eq.'+uid+'&profile_id=in.('+profileIds.join(',')+')');
-  }
-  if(obs.length) await _supa('POST','profile_observations',obs);
-  if(targets.length) await _supa('POST','profile_targets',targets);
-  // Remove any profiles deleted locally
+  // Upsert profiles
+  if(profiles.length) await _supaUpsert('horse_profiles',profiles);
+  // UPSERT ONLY — never auto-delete observations or targets during passive sync.
+  // Multi-device safety: Device B does not know about observations added on Device A
+  // since it last loaded. Deletions are handled explicitly in saveWLEntry/delWLEntry.
+  if(obs.length) await _supaUpsert('profile_observations',obs);
+  if(targets.length) await _supaUpsert('profile_targets',targets);
+  // Remove profiles explicitly deleted locally (profile IDs are stable across devices)
   if(profileIds.length){
     await _supa('DELETE','horse_profiles',null,'user_id=eq.'+uid+'&id=not.in.('+profileIds.join(',')+')');
   }
+}
+
+// ── Explicit observation / target deletion (called from watchlist UI actions) ──
+async function supaDeleteObsByIds(obsIds){
+  if(!SUPA_URL||!SUPA_ANON||!obsIds||!obsIds.length)return;
+  await _supa('DELETE','profile_observations',null,'user_id=eq.'+SUPA_USER_ID+'&id=in.('+obsIds.join(',')+')');
+}
+async function supaDeleteTargetsByIds(targetIds){
+  if(!SUPA_URL||!SUPA_ANON||!targetIds||!targetIds.length)return;
+  await _supa('DELETE','profile_targets',null,'user_id=eq.'+SUPA_USER_ID+'&id=in.('+targetIds.join(',')+')');
+}
+async function supaDeleteProfileObsAndTargets(profileId){
+  if(!SUPA_URL||!SUPA_ANON||!profileId)return;
+  await _supa('DELETE','profile_observations',null,'user_id=eq.'+SUPA_USER_ID+'&profile_id=eq.'+profileId);
+  await _supa('DELETE','profile_targets',null,'user_id=eq.'+SUPA_USER_ID+'&profile_id=eq.'+profileId);
 }
 
 // ── Rules ──

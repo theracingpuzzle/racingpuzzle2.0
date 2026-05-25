@@ -31,254 +31,17 @@ function orSummaryLine(entry){
 
 function getWL(){if(!D.watchlist)D.watchlist=[];return D.watchlist;}
 
-// ── WL CARD SHELL CSS ──
-const WL_SHELL_CSS = `
-.wl-shell { display:flex;flex-direction:column;height:100%;font-family:'Outfit','Segoe UI',sans-serif; }
-
-/* ── TOOLBAR ── */
-.wl-toolbar {
-  display:flex;align-items:center;gap:8px;
-  padding:10px 12px 8px;
-  border-bottom:1px solid rgba(255,255,255,.06);
-  flex-shrink:0;
-}
-.wl-view-pills {
-  display:flex;border:1px solid rgba(232,121,249,.2);border-radius:8px;overflow:hidden;flex-shrink:0;
-}
-.wl-vpill {
-  padding:6px 12px;
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
-  color:rgba(232,121,249,.45);background:transparent;border:none;cursor:pointer;
-  transition:background .15s,color .15s;white-space:nowrap;
-}
-.wl-vpill.active { background:rgba(232,121,249,.18);color:#e879f9; }
-.wl-search-wrap {
-  flex:1;position:relative;
-}
-.wl-search {
-  width:100%;padding:6px 10px 6px 28px;
-  background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);
-  border-radius:8px;color:#d4d8e8;font-size:12px;
-  font-family:'Outfit','Segoe UI',sans-serif;outline:none;
-}
-.wl-search::placeholder{color:rgba(255,255,255,.25);}
-.wl-search-icon {
-  position:absolute;left:8px;top:50%;transform:translateY(-50%);
-  font-size:11px;opacity:.4;pointer-events:none;
-}
-.wl-add-btn {
-  width:32px;height:32px;border-radius:8px;
-  background:rgba(232,121,249,.15);border:1px solid rgba(232,121,249,.35);
-  color:#e879f9;font-size:20px;line-height:1;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  font-weight:300;
-}
-
-/* ── CALENDAR ── */
-.wl-cal-wrap { display:flex;flex-direction:column;flex:1;overflow:hidden; }
-.wl-cal-header {
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 12px 6px;flex-shrink:0;
-}
-.wl-cal-nav {
-  width:28px;height:28px;border-radius:6px;
-  background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.07);
-  color:#d4d8e8;font-size:14px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-}
-.wl-cal-month-lbl {
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
-  color:#e879f9;
-}
-.wl-cal-grid {
-  display:grid;grid-template-columns:repeat(7,1fr);
-  gap:1px;padding:0 8px 6px;flex-shrink:0;
-}
-.wl-cal-day-entries {
-  flex:1;overflow-y:auto;padding:8px 12px 12px;
-  -webkit-overflow-scrolling:touch;
-}
-
-/* ── LIST ── */
-.wl-list-wrap { flex:1;overflow-y:auto;padding:8px 12px 16px;-webkit-overflow-scrolling:touch; }
-
-/* ── GROUP HEADERS ── */
-.wl-group-hdr {
-  display:flex;align-items:center;gap:8px;
-  padding:9px 12px;border-radius:10px;
-  background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);
-  cursor:pointer;user-select:none;margin-bottom:4px;
-}
-.wl-group-emoji { font-size:14px; }
-.wl-group-label {
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;flex:1;
-}
-.wl-group-count {
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:10px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.3);
-  padding:2px 8px;border-radius:20px;
-}
-.wl-group-chevron { font-size:13px; }
-
-/* ── ENTRY CARDS ── */
-.wl-entry {
-  cursor:pointer;border-radius:10px;
-  background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.06);
-  margin-bottom:6px;overflow:hidden;
-  transition:border-color .15s;
-}
-.wl-entry:active { border-color:rgba(255,255,255,.15); }
-.wl-entry-inner {
-  display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
-  border-left:3px solid var(--entry-col,#a78bfa);
-}
-.wl-entry-main { flex:1;min-width:0; }
-.wl-entry-tag {
-  display:inline-flex;align-items:center;gap:3px;
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
-  padding:2px 7px;border-radius:20px;
-  background:rgba(0,0,0,.2);margin-bottom:5px;
-}
-.wl-entry-name {
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:17px;font-weight:800;letter-spacing:.5px;color:#fff;
-  margin-bottom:2px;line-height:1.1;
-}
-.wl-entry-trainer {
-  font-size:11px;color:rgba(255,255,255,.35);margin-bottom:4px;
-}
-.wl-entry-meta { display:flex;flex-wrap:wrap;gap:4px;align-items:center; }
-.wl-entry-obs-line {
-  font-size:11px;color:rgba(255,255,255,.35);margin-top:3px;
-}
-.wl-entry-targets { margin-top:4px; }
-.wl-entry-target-line {
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:11px;color:#fb923c;margin-bottom:1px;
-}
-.wl-entry-intel {
-  font-size:11px;color:rgba(255,255,255,.3);font-style:italic;
-  margin-top:4px;border-left:2px solid rgba(96,165,250,.25);padding-left:7px;
-}
-.wl-entry-empty-hint {
-  font-size:10px;color:rgba(255,255,255,.15);margin-top:4px;font-style:italic;
-}
-.wl-entry-right { text-align:right;flex-shrink:0; }
-.wl-entry-obscount {
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:9px;color:rgba(255,255,255,.25);white-space:nowrap;
-}
-
-/* ── CAL DAY CARDS ── */
-.wl-day-section-lbl {
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
-  margin-bottom:6px;
-}
-.wl-day-card {
-  cursor:pointer;border-radius:10px;margin-bottom:8px;
-  padding:10px 12px;overflow:hidden;
-}
-.wl-day-card-horse {
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:16px;font-weight:800;color:#fff;letter-spacing:.3px;margin-bottom:2px;
-}
-.wl-day-card-race { font-size:12px;font-weight:600;margin-top:3px; }
-.wl-day-card-chips { display:flex;gap:6px;flex-wrap:wrap;margin-top:4px; }
-.wl-chip {
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;
-}
-.wl-day-empty {
-  color:rgba(255,255,255,.3);font-style:italic;font-size:13px;padding:8px 0;line-height:1.6;
-}
-
-/* ── FIXTURE BANNER ── */
-.wl-fixture-banner {
-  display:flex;align-items:center;gap:8px;
-  padding:8px 12px;border-radius:9px;
-  background:rgba(0,0,0,.2);margin-bottom:8px;
-}
-
-/* ── DAY LABEL ── */
-.wl-day-label {
-  font-family:'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
-  color:rgba(232,121,249,.5);margin-bottom:10px;
-}
-`;
-
-function _injectWLShellCSS(){
-  if(document.getElementById('wl-shell-css'))return;
-  const s=document.createElement('style');
-  s.id='wl-shell-css';s.textContent=WL_SHELL_CSS;
-  document.head.appendChild(s);
-}
-
-function _getWatchCard(){
-  // Find the watch card container by CARDS index
-  const idx=CARDS.findIndex(function(c){return c.id==='watch';});
-  return idx>=0?document.getElementById('c'+idx):null;
-}
-
-function _buildWLShell(){
-  const card=_getWatchCard();if(!card)return;
-  if(document.getElementById('wl-cal-view'))return; // already built
-  card.innerHTML=
-    '<div class="wl-shell">'+
-      // TOOLBAR
-      '<div class="wl-toolbar">'+
-        '<div class="wl-view-pills">'+
-          '<button id="wl-cal-btn" class="wl-vpill active" onclick="setWLView(\'cal\')">📅 Cal</button>'+
-          '<button id="wl-list-btn" class="wl-vpill" onclick="setWLView(\'list\')">☰ List</button>'+
-        '</div>'+
-        '<div class="wl-search-wrap">'+
-          '<span class="wl-search-icon">🔍</span>'+
-          '<input id="wl-search" class="wl-search" type="text" placeholder="Search horses, trainers…" oninput="renderWLList()" autocomplete="off">'+
-        '</div>'+
-        '<div class="wl-add-btn" onclick="openWLForm()">+</div>'+
-      '</div>'+
-      // CALENDAR VIEW
-      '<div id="wl-cal-view" class="wl-cal-wrap">'+
-        '<div class="wl-cal-header">'+
-          '<div class="wl-cal-nav" onclick="wlCalPrev()">‹</div>'+
-          '<div id="wl-cal-month" class="wl-cal-month-lbl"></div>'+
-          '<div class="wl-cal-nav" onclick="wlCalNext()">›</div>'+
-        '</div>'+
-        '<div id="wl-cal-grid" class="wl-cal-grid"></div>'+
-        '<div id="wl-cal-day-entries" class="wl-cal-day-entries"></div>'+
-      '</div>'+
-      // LIST VIEW
-      '<div id="wl-list-view" style="display:none;" class="wl-list-wrap">'+
-        '<div id="wl-list"></div>'+
-      '</div>'+
-    '</div>';
-}
-
 function setWLView(v){
-  _injectWLShellCSS();
-  _buildWLShell();
   wlView=v;
-  const calV=document.getElementById('wl-cal-view');
-  const listV=document.getElementById('wl-list-view');
-  if(calV)calV.style.display=v==='cal'?'flex':'none';
-  if(listV)listV.style.display=v==='list'?'block':'none';
-  const cb=document.getElementById('wl-cal-btn');
-  const lb=document.getElementById('wl-list-btn');
-  if(cb){cb.classList.toggle('active',v==='cal');}
-  if(lb){lb.classList.toggle('active',v==='list');}
+  document.getElementById('wl-cal-view').style.display=v==='cal'?'block':'none';
+  document.getElementById('wl-list-view').style.display=v==='list'?'block':'none';
+  const cb=document.getElementById('wl-cal-btn'),lb=document.getElementById('wl-list-btn');
+  if(cb){cb.style.background=v==='cal'?'rgba(232,121,249,.2)':'transparent';cb.style.borderColor=v==='cal'?'rgba(232,121,249,.4)':'var(--bdr)';cb.style.color=v==='cal'?'#e879f9':'var(--mut)';}
+  if(lb){lb.style.background=v==='list'?'rgba(232,121,249,.2)':'transparent';lb.style.borderColor=v==='list'?'rgba(232,121,249,.4)':'var(--bdr)';lb.style.color=v==='list'?'#e879f9':'var(--mut)';}
   if(v==='cal')renderWLCal();else renderWLList();
 }
 
-function renderWatchlist(){
-  _injectWLShellCSS();
-  _buildWLShell();
-  setWLView(wlView);
-}
+function renderWatchlist(){setWLView(wlView);}
 
 function wlCalPrev(){wlCalDate=new Date(wlCalDate.getFullYear(),wlCalDate.getMonth()-1,1);renderWLCal();}
 function wlCalNext(){wlCalDate=new Date(wlCalDate.getFullYear(),wlCalDate.getMonth()+1,1);renderWLCal();}
@@ -316,9 +79,9 @@ function renderWLCal(){
   });
   // Day headers
   const dayNames=['S','M','T','W','T','F','S'];
-  let html=dayNames.map(function(d){return'<div style="color:rgba(255,255,255,.25);font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 0;text-align:center;">'+d+'</div>';}).join('');
+  let html=dayNames.map(d=>'<div style="color:var(--mut);font-size:9px;padding:3px 0;font-weight:700;">'+d+'</div>').join('');
   // Empty cells before first day
-  const start=firstDay;
+  const start=firstDay; // Sun=0
   for(let i=0;i<start;i++)html+='<div></div>';
   for(let d=1;d<=daysInMonth;d++){
     const dateStr=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
@@ -330,14 +93,16 @@ function renderWLCal(){
     const hasBet=entries.length>0||dayTargets.length>0||dayObs.length>0;
     const fixtures=getFixtureForDate(dateStr);
     const hasFixture=fixtures.length>0;
+    const dotCol=dayTargets.length&&!entries.length&&!dayObs.length?'#fb923c':dayObs.length&&!entries.length&&!dayTargets.length?'#4ade80':'#e879f9';
+    const fixtureBar=hasFixture?'<div style="height:3px;border-radius:2px;background:'+fixtures[0].colour+';margin:1px 2px 0;" title="'+fixtures[0].name+'"></div>':'';
+    // Show up to 3 coloured dots for different event types
     const dots=[];
-    if(entries.length)dots.push('<div style="width:4px;height:4px;border-radius:50%;background:#e879f9;display:inline-block;margin:0 1px;"></div>');
-    if(dayTargets.length)dots.push('<div style="width:4px;height:4px;border-radius:50%;background:#fb923c;display:inline-block;margin:0 1px;"></div>');
-    if(dayObs.length)dots.push('<div style="width:4px;height:4px;border-radius:50%;background:#4ade80;display:inline-block;margin:0 1px;"></div>');
-    const fixtureBar=hasFixture?'<div style="height:2px;border-radius:2px;background:'+fixtures[0].colour+';margin:2px 3px 0;"></div>':'';
-    html+='<div onclick="wlSelectDay(\''+dateStr+'\')" style="cursor:pointer;padding:4px 2px;border-radius:7px;'+(isToday?'background:rgba(232,121,249,.15);':'')+' text-align:center;">'
-      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:'+(hasBet?'800':'400')+';color:'+(isToday?'#e879f9':hasBet?'#fff':'rgba(255,255,255,.3)')+';">'+d+'</div>'
-      +(hasBet?'<div style="display:flex;justify-content:center;margin:1px 0 0;">'+dots.join('')+'</div>':'<div style="height:6px;"></div>')+fixtureBar
+    if(entries.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#e879f9;display:inline-block;margin:0 1px;"></div>');
+    if(dayTargets.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#fb923c;display:inline-block;margin:0 1px;"></div>');
+    if(dayObs.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#4ade80;display:inline-block;margin:0 1px;"></div>');
+    html+='<div onclick="wlSelectDay(\''+dateStr+'\')" style="cursor:pointer;padding:5px 2px;border-radius:6px;'+(isToday?'background:rgba(232,121,249,.15);':'')+'text-align:center;">'
+      +'<div style="font-size:11px;color:'+(isToday?'#e879f9':hasBet?'var(--txt)':'var(--mut)')+(hasBet?';font-weight:700':';font-weight:400')+';">'+d+'</div>'
+      +(hasBet?'<div style="display:flex;justify-content:center;margin:1px 0 0;">'+dots.join('')+'</div>':'<div style="height:7px;"></div>')+fixtureBar
     +'</div>';
   }
   grid.innerHTML=html;
@@ -361,47 +126,51 @@ function wlSelectDay(dateStr){
   });
   const el=document.getElementById('wl-cal-day-entries');if(!el)return;
   const dayFixtures=getFixtureForDate(dateStr);
-  const fixtureBanner=dayFixtures.map(function(f){return'<div class="wl-fixture-banner" style="border-left:3px solid '+f.colour+';"><span>'+f.emoji+'</span><div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:'+f.colour+';">'+f.name+'</div><div style="font-size:11px;color:rgba(255,255,255,.35);">'+f.course+'</div></div></div>';}).join('');
-  const dayLabel='<div class="wl-day-label">'+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+'</div>';
+  const fixtureBanner=dayFixtures.map(f=>'<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;background:rgba(0,0,0,.2);border-left:3px solid '+f.colour+';margin-bottom:8px;"><span>'+f.emoji+'</span><div><div style="font-weight:700;font-size:13px;color:'+f.colour+';">'+f.name+'</div><div style="font-size:11px;color:var(--mut);">'+f.course+'</div></div></div>').join('');
+  const dayLabel='<div style="font-family:monospace;font-size:9px;color:rgba(232,121,249,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+'</div>';
   let html=fixtureBanner+dayLabel;
   // Target race cards
   if(dayTargets.length){
-    html+='<div class="wl-day-section-lbl" style="color:rgba(251,146,60,.7);">🎯 Target Races</div>';
+    html+='<div style="font-family:monospace;font-size:9px;color:rgba(251,146,60,.6);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">🎯 Target Races</div>';
     html+=dayTargets.map(function(d){
       const t=d.target;
-      return'<div data-wl-id="'+d.horseId+'" class="wl-day-card" style="background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.15);border-left:3px solid #fb923c;">'
-        +'<div class="wl-day-card-horse">'+d.horse+'</div>'
-        +orSummaryLine(d)
-        +(d.trainer?'<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:2px;">'+d.trainer+'</div>':'')
-        +'<div class="wl-day-card-race" style="color:#fb923c;">'+t.race+(t.track?' · '+t.track:'')+'</div>'
-        +(t.condition?'<div style="font-size:11px;color:rgba(255,255,255,.3);font-style:italic;margin-top:2px;">'+t.condition+'</div>':'')
+      return'<div data-wl-id="'+d.horseId+'" style="cursor:pointer;border-left:3px solid #fb923c;margin-bottom:8px;padding:10px 11px;background:rgba(251,146,60,.05);border-radius:0 8px 8px 0;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+          +'<div style="flex:1;min-width:0;">'
+            +'<div style="font-weight:700;font-size:14px;margin-bottom:2px;">'+d.horse+'</div>'
+            +orSummaryLine(d)
+            +(d.trainer?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">'+d.trainer+'</div>':'')
+            +'<div style="font-size:12px;color:#fb923c;font-weight:600;">'+t.race+(t.track?' · '+t.track:'')+'</div>'
+            +(t.condition?'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:2px;">'+t.condition+'</div>':'')
+          +'</div>'
+        +'</div>'
       +'</div>';
     }).join('');
   }
   // Observations
   if(dayObs.length){
-    html+='<div class="wl-day-section-lbl" style="color:rgba(74,222,128,.7);'+(dayTargets.length?'margin-top:10px;':'')+'">📋 Observations</div>';
+    html+='<div style="font-family:monospace;font-size:9px;color:rgba(74,222,128,.6);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;'+(dayTargets.length?'margin-top:10px;':'')+'">📋 Observations</div>';
     html+=dayObs.map(function(d){
       const o=d.obs;
-      const resultCol=o.result&&o.result.toLowerCase().includes('win')?'#4ade80':o.result?'#fb923c':'rgba(255,255,255,.4)';
-      return'<div data-wl-id="'+d.horseId+'" class="wl-day-card" style="background:rgba(74,222,128,.04);border:1px solid rgba(74,222,128,.12);border-left:3px solid #4ade80;">'
-        +'<div class="wl-day-card-horse">'+d.horse+'</div>'
-        +(o.raceName?'<div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:4px;">'+o.raceName+'</div>':'')
-        +'<div class="wl-day-card-chips">'
-          +(o.result?'<span class="wl-chip" style="background:'+resultCol+'20;border:1px solid '+resultCol+'40;color:'+resultCol+';">'+o.result+'</span>':'')
-          +(o.going?'<span class="wl-chip" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);">'+o.going+'</span>':'')
+      const resultCol=o.result&&o.result.toLowerCase().includes('win')?'#4ade80':o.result?'#fb923c':'var(--mut)';
+      return'<div data-wl-id="'+d.horseId+'" style="cursor:pointer;border-left:3px solid #4ade80;margin-bottom:8px;padding:10px 11px;background:rgba(74,222,128,.04);border-radius:0 8px 8px 0;">'
+        +'<div style="font-weight:700;font-size:14px;margin-bottom:3px;">'+d.horse+'</div>'
+        +(o.raceName?'<div style="font-size:12px;color:var(--mut);margin-bottom:3px;">'+o.raceName+'</div>':'')
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;">'
+          +(o.result?'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:'+resultCol+';">'+o.result+'</span>':'')
+          +(o.going?'<span style="font-family:monospace;font-size:10px;color:var(--mut);padding:1px 6px;border-radius:4px;background:var(--sur2);border:1px solid var(--bdr);">'+o.going+'</span>':'')
         +'</div>'
-        +(o.notes?'<div style="font-size:11px;color:rgba(255,255,255,.35);font-style:italic;margin-top:4px;line-height:1.45;">'+o.notes+'</div>':'')
+        +(o.notes?'<div style="font-size:12px;color:var(--mut);font-style:italic;line-height:1.45;">'+o.notes+'</div>':'')
       +'</div>';
     }).join('');
   }
   // Regular watchlist entries
   if(entries.length){
-    if(dayTargets.length||dayObs.length)html+='<div class="wl-day-section-lbl" style="color:rgba(232,121,249,.5);margin-top:10px;">Puzzle Profiler</div>';
+    if(dayTargets.length||dayObs.length)html+='<div style="font-family:monospace;font-size:9px;color:rgba(232,121,249,.5);text-transform:uppercase;letter-spacing:.1em;margin:10px 0 6px;">Puzzle Profiler</div>';
     html+=entries.map(function(e){return renderWLEntry(e);}).join('');
   }
   if(!entries.length&&!dayTargets.length&&!dayObs.length){
-    html+='<div class="wl-day-empty">No targets on '+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'.<br><span style="font-size:12px;">Tap + to add a horse.</span></div>';
+    html+='<div style="color:var(--mut);font-style:italic;font-size:13px;padding:8px 0;">No targets on '+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'.<br><span style="font-size:12px;">Tap + to add one.</span></div>';
   }
   el.innerHTML=html;
   el.querySelectorAll('[data-wl-id]').forEach(function(el2){el2.addEventListener('click',function(){openWLProfile(el2.getAttribute('data-wl-id'));});});
@@ -433,12 +202,8 @@ function renderWLList(){
     if(!groups[r]||!groups[r].length)return;
     const rm=REASON_META[r];
     const isOpen=isSearching||!!_wlGroupOpen[r];
-    html+='<div class="wl-group-hdr" onclick="wlToggleGroup(this.dataset.wlg)" data-wlg="'+r+'" style="border-color:rgba(255,255,255,.07);">'
-      +'<span class="wl-group-emoji">'+rm.emoji+'</span>'
-      +'<span class="wl-group-label" style="color:'+rm.col+';">'+rm.label+'</span>'
-      +'<span class="wl-group-count">'+groups[r].length+'</span>'
-      +'<span class="wl-group-chevron" style="color:'+rm.col+';">'+(isOpen?'▾':'›')+'</span>'
-    +'</div>';
+    const chevron=isOpen?'▾':'›';
+    html+='<div onclick="wlToggleGroup(this.dataset.wlg)" data-wlg="'+r+'" style="display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:'+(isOpen?'2':'8')+'px;border-radius:10px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.06);cursor:pointer;user-select:none;">'      +'<span style="font-size:14px;">'+rm.emoji+'</span>'      +'<span style="font-family:monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:'+rm.col+';flex:1;">'+rm.label+'</span>'      +'<span style="font-family:monospace;font-size:10px;background:rgba(255,255,255,.07);color:var(--mut);padding:2px 8px;border-radius:20px;">'+groups[r].length+'</span>'      +'<span style="color:'+rm.col+';font-size:14px;transition:transform .15s;">'+chevron+'</span>'    +'</div>';
     if(isOpen){
       html+='<div style="margin-bottom:10px;">'+groups[r].map(function(e){return renderWLEntry(e);}).join('')+'</div>';
     }
@@ -452,25 +217,23 @@ function renderWLEntry(e){
   const rm=RMAP[e.reason||'eye-catcher']||RMAP['eye-catcher'];
   const obs=e.observations||[];
   const targets=e.targets||[];
-  const lastObs=obs.length?obs.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');})[0]:null;
+  const lastObs=obs.length?obs[obs.length-1]:null;
   const latestDate=lastObs?lastObs.date:(e.raceDate||'');
-  const daysAgo=latestDate?(function(){const d=new Date(latestDate+'T00:00:00');const diff=Math.round((new Date()-d)/(1000*60*60*24));return diff===0?'Today':diff===1?'Yesterday':diff>0?diff+'d ago':'Upcoming';}()):'';
-  const isEmpty=!obs.length&&!targets.length&&!e.trainerIntel&&!e.conditionsNotes;
-  return'<div class="wl-entry" data-wl-id="'+e.id+'">'
-    +'<div class="wl-entry-inner" style="--entry-col:'+rm.col+';">'
-      +'<div class="wl-entry-main">'
-        +'<div><span class="wl-entry-tag" style="border:1px solid '+rm.col+'40;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</span>'
-        +(e.reasonNote?'<span style="font-size:10px;color:rgba(255,255,255,.3);font-style:italic;margin-left:6px;">'+e.reasonNote.slice(0,50)+(e.reasonNote.length>50?'…':'')+'</span>':'')+'</div>'
-        +'<div class="wl-entry-name">'+e.horse+'</div>'
-        +orSummaryLine(e)
-        +(e.trainer?'<div class="wl-entry-trainer">'+e.trainer+'</div>':'')
-        +(lastObs?'<div class="wl-entry-obs-line">📋 <span style="color:rgba(255,255,255,.55);">'+(lastObs.raceName||'')+(lastObs.track?' · '+lastObs.track:'')+'</span>'+(daysAgo?' · '+daysAgo:'')+'</div>':'')
-        +(targets.length?'<div class="wl-entry-targets">'+targets.slice(0,2).map(function(t){const tDate=t.date?(new Date(t.date+'T00:00:00')).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';return'<div class="wl-entry-target-line">🎯 '+t.race+(tDate?'<span style="color:rgba(255,255,255,.3);"> · '+tDate+'</span>':'')+(t.track?'<span style="font-size:9px;color:rgba(255,255,255,.25);"> · '+t.track+'</span>':'')+'</div>';}).join('')+'</div>':'')
-        +(e.trainerIntel?'<div class="wl-entry-intel">🗣 '+e.trainerIntel.slice(0,80)+(e.trainerIntel.length>80?'…':'')+'</div>':'')
-        +(isEmpty?'<div class="wl-entry-empty-hint">Tap to add notes →</div>':'')
+  const daysAgo=latestDate?(function(){const d=new Date(latestDate+'T00:00:00');const diff=Math.round((new Date()-d)/(1000*60*60*24));return diff===0?'Today':diff===1?'Yesterday':diff>0?diff+'d ago':'Upcoming';}()):'';  const isEmpty=!obs.length&&!targets.length&&!e.trainerIntel&&!e.conditionsNotes;
+  return'<div class="mb" data-wl-id="'+e.id+'" style="cursor:pointer;border-left:3px solid '+rm.col+';margin-bottom:8px;padding:10px 11px;">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="margin-bottom:5px;"><span style="font-size:9px;font-family:monospace;padding:2px 7px;border-radius:20px;background:rgba(0,0,0,.2);border:1px solid '+rm.col+';color:'+rm.col+';font-weight:700;">'+rm.emoji+' '+rm.label+'</span>'+(e.reasonNote?'<span style="font-size:10px;color:var(--mut);font-style:italic;margin-left:6px;">'+e.reasonNote.slice(0,50)+(e.reasonNote.length>50?'…':'')+'</span>':'')+'</div>'
+      +'<div style="font-weight:700;font-size:15px;margin-bottom:2px;">'+e.horse+'</div>'
+      +orSummaryLine(e)
+      +(e.trainer?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">'+e.trainer+'</div>':'')
+      +(lastObs?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">📋 <span style="color:var(--txt);">'+lastObs.raceName+(lastObs.track?' · '+lastObs.track:'')+'</span> · '+daysAgo+'</div>':'')
+      +(targets.length?'<div style="margin-top:3px;">'+targets.slice(0,2).map(function(t){const tDate=t.date?(new Date(t.date+'T00:00:00')).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';return'<div style="font-size:11px;font-family:monospace;color:#fb923c;margin-bottom:1px;">🎯 '+t.race+(tDate?'<span style="color:var(--mut);"> · '+tDate+'</span>':'')+(t.track?'<span style="font-size:9px;color:var(--mut);"> · '+t.track+'</span>':'')+'</div>';}).join('')+'</div>':'')
+      +(e.trainerIntel?'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:4px;border-left:2px solid rgba(96,165,250,.3);padding-left:7px;">🗣 '+e.trainerIntel.slice(0,80)+(e.trainerIntel.length>80?'…':'')+'</div>':'')
+      +(isEmpty?'<div style="font-size:10px;color:rgba(255,255,255,.2);margin-top:4px;font-style:italic;">Tap to add notes →</div>':'')
       +'</div>'
-      +'<div class="wl-entry-right">'
-        +(obs.length?'<div class="wl-entry-obscount">'+obs.length+' obs</div>':'')
+      +'<div style="text-align:right;flex-shrink:0;margin-left:10px;">'
+        +(obs.length?'<div style="font-family:monospace;font-size:9px;color:var(--mut);">'+obs.length+' obs</div>':'')
       +'</div>'
     +'</div>'
   +'</div>';

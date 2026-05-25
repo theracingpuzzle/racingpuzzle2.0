@@ -240,14 +240,14 @@ function rcSwToggleFlatRace(idx){
 }
 
 
-
-
-
 // Country detection helpers
 const ENG_COURSES=['aintree','ascot','bath','beverley','brighton','carlisle','cartmel','catterick','chelmsford','cheltenham','chester','doncaster','epsom','exeter','fakenham','fontwell','goodwood','haydock','hereford','hexham','huntingdon','kempton','leicester','lingfield','ludlow','market rasen','newbury','newcastle','newmarket','newton abbot','nottingham','plumpton','pontefract','redcar','ripon','salisbury','sandown','sedgefield','southwell','stratford','taunton','thirsk','uttoxeter','warwick','wetherby','wincanton','windsor','wolverhampton','worcester','yarmouth','york'];
 const SCO_COURSES=['ayr','hamilton','kelso','musselburgh','perth'];
 const WAL_COURSES=['bangor','bangor-on-dee','chepstow','ffos las'];
-const IRE_COURSES=['the curragh','leopardstown','naas','navan','gowran park','galway','tipperary','cork','killarney','listowel','down royal','downpatrick','dundalk','fairyhouse','kilbeggan','laytown','limerick','roscommon','sligo','tramore','thurles','punchestown','ballinrobe','bellewstown','clonmel','mullingar','wexford','kilmalloch'];
+const IRE_COURSES=['curragh','leopardstown','naas','navan','gowran park','galway','tipperary','cork','killarney','listowel','down royal','downpatrick','dundalk','fairyhouse','kilbeggan','laytown','limerick','roscommon','sligo','tramore','thurles','punchestown','ballinrobe','bellewstown','clonmel','mullingar','wexford','kilmalloch'];
+const GER_COURSES=['cologne'];
+const USA_COURSES=['santa anita'];
+const FRA_COURSES=['longchamp'];
 
 function rcCourseCountry(course){
   const c=(course||'').toLowerCase().trim();
@@ -255,6 +255,9 @@ function rcCourseCountry(course){
   if(WAL_COURSES.some(k=>c.includes(k)))return'wal';
   if(ENG_COURSES.some(k=>c.includes(k)))return'eng';
   if(IRE_COURSES.some(k=>c.includes(k)))return'ie';
+  if(GER_COURSES.some(k=>c.includes(k)))return'ger';
+  if(USA_COURSES.some(k=>c.includes(k)))return'usa';
+  if(FRA_COURSES.some(k=>c.includes(k)))return'fra';
   if(c.includes('(aw)'))return'eng';
   return'intl';
 }
@@ -264,6 +267,9 @@ function rcCountryFlag(code){
   if(code==='sco')return'🏴󠁧󠁢󠁳󠁣󠁴󠁿';
   if(code==='wal')return'🏴󠁧󠁢󠁷󠁬󠁳󠁿';
   if(code==='ie')return'🇮🇪';
+  if(code==='ger')return'🇩🇪';
+  if(code==='usa')return'🇺🇸';
+  if(code==='fra')return'🇫🇷';
   return'🌍';
 }
 

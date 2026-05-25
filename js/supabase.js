@@ -297,7 +297,9 @@ async function _syncDailyLog(){
 async function _syncSettings(){
   const uid=SUPA_USER_ID;
   const s=D.settings||{};
-  const rows=Object.keys(s).map(function(k){
+  // Exclude special keys handled separately — prevents duplicate key in same batch
+  const specialKeys=new Set(['sources','cksOwn','cksTip']);
+  const rows=Object.keys(s).filter(function(k){return !specialKeys.has(k);}).map(function(k){
     return{user_id:uid,key:k,value:s[k],updated_at:new Date().toISOString()};
   });
   if(D.sources&&D.sources.length){

@@ -482,8 +482,8 @@ const WLP_CSS = `
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 12px;
-  background: rgba(5,5,8,0.94);
+  padding: max(14px, env(safe-area-inset-top, 14px)) 16px 12px;
+  background: rgba(5,5,8,0.96);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid #1c1c30;
   position: sticky;
@@ -491,12 +491,16 @@ const WLP_CSS = `
   z-index: 20;
 }
 .wlp-back {
-  width: 34px; height: 34px;
-  border-radius: 50%;
+  display: flex; align-items: center; gap: 5px;
+  height: 34px;
+  border-radius: 8px;
   background: #111120;
   border: 1px solid #1c1c30;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 15px; color: #fff;
+  padding: 0 12px;
+  cursor: pointer; font-size: 14px; color: #fff;
+  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-weight: 700; letter-spacing: .5px;
+  white-space: nowrap;
 }
 .wlp-brand {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
@@ -857,11 +861,11 @@ function _wlpBuildHTML(e){
   const fmt=_wlpFmt;
 
   const REASONS={
-    'eye-catcher':  {emoji:'🔭',label:'Eye Catcher',  col:'#4ade80'},
-    'future-target':{emoji:'🎯',label:'Future Target', col:'#f59e0b'},
-    'trainer-intel':{emoji:'🎓',label:'Trainer Intel', col:'#38bdf8'},
-    'form-study':   {emoji:'📈',label:'Form Study',    col:'#8b5cf6'},
-    'tip-source':   {emoji:'💬',label:'Tip Source',    col:'#e879f9'},
+    'eye-catcher':  {emoji:'🔭',label:'Eye Catcher',  col:'#a78bfa'},
+    'future-target':{emoji:'📰',label:'Future Target', col:'#fb923c'},
+    'trainer-intel':{emoji:'🗣',label:'Trainer Intel', col:'#60a5fa'},
+    'form-study':   {emoji:'📊',label:'Form Study',    col:'#ef4444'},
+    'tip-source':   {emoji:'💡',label:'Tip / Source',  col:'#eab308'},
   };
   const WHY_ORDER=['eye-catcher','future-target','trainer-intel','form-study','tip-source'];
   const RESULT_COLS={win:'#4ade80',place:'#f59e0b',loss:'#f87171'};
@@ -891,7 +895,7 @@ function _wlpBuildHTML(e){
 
   // NAV
   h+='<div class="wlp-nav">';
-  h+='<div class="wlp-back" onclick="document.getElementById(\'wlp-modal\').remove()">←</div>';
+  h+='<div class="wlp-back" onclick="document.getElementById(\'wlp-modal\').remove()">← Profiles</div>';
   h+='<div class="wlp-brand"><span style="font-size:16px;">🧩</span>RACING <span class="wlp-brand-accent">PUZZLE</span></div>';
   h+='<div class="wlp-edit-btn" onclick="'+editFn+'">Edit ✏️</div>';
   h+='</div>';

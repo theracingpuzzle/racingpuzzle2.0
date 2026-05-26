@@ -419,7 +419,8 @@ function _betFlowSelectSource(source){
     let html='<div style="font-family:monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;">Who is the tip from?</div>';
     // Build source buttons using data attributes — avoids all quote escaping
     sources.forEach(function(src,si){
-      html+='<button data-tip-idx="'+si+'" style="width:100%;text-align:left;padding:13px 16px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px;box-sizing:border-box;display:block;">💬 '+src+'</button>';
+      const label=typeof src==='object'?src.label:src;
+      html+='<button data-tip-idx="'+si+'" style="width:100%;text-align:left;padding:13px 16px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px;box-sizing:border-box;display:block;">💬 '+label+'</button>';
     });
     html+='<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;color:var(--mut);margin:12px 0 8px;">OR TYPE A NEW SOURCE</div>'
       +'<input id="_bflow-tip-src" type="text" placeholder="e.g. Racing Post, Twitter, friend…" autocomplete="off"'
@@ -429,7 +430,8 @@ function _betFlowSelectSource(source){
     content.innerHTML=html;
     // Wire up listeners after render (no inline onclick = no quote issues)
     content.querySelectorAll('[data-tip-idx]').forEach(function(btn,si){
-      btn.addEventListener('click',function(){_betFlowConfirmTipName(sources[si]);});
+      const label=typeof sources[si]==='object'?sources[si].label:sources[si];
+      btn.addEventListener('click',function(){_betFlowConfirmTipName(label);});
     });
     const goBtn=document.getElementById('_bflow-tip-go');
     if(goBtn)goBtn.addEventListener('click',_betFlowConfirmTip);

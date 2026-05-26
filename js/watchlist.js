@@ -219,17 +219,17 @@ function _injectAlbumCSS(){
   const s=document.createElement('style');
   s.id='wl-album-css';
   s.textContent=`
-    .alb-wrap{padding:10px 10px 24px;font-family:'Outfit','Segoe UI',sans-serif;}
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&display=swap');
+    .alb-wrap{padding:10px 10px 24px;font-family:'Segoe UI', system-ui, -apple-system, sans-serif;}
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&display=swap');
     .alb-hdr{background:#0d0d1a;border:1px solid rgba(255,255,255,.06);border-radius:13px;padding:13px 14px;margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;}
-    .alb-title{font-family:'Bebas Neue','Impact',cursive;font-size:24px;letter-spacing:3px;color:#fff;line-height:1;}
+    .alb-title{font-family:'Barlow Condensed','Impact',cursive;font-size:24px;letter-spacing:3px;color:#fff;line-height:1;}
     .alb-sub{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:3px;}
-    .alb-n{font-family:'Bebas Neue','Impact',cursive;font-size:32px;letter-spacing:1px;color:#8b5cf6;line-height:1;text-align:right;}
+    .alb-n{font-family:'Barlow Condensed','Impact',cursive;font-size:32px;letter-spacing:1px;color:#8b5cf6;line-height:1;text-align:right;}
     .alb-nlbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.2);text-align:right;}
     .alb-prog{background:#0a0a14;border-radius:10px;padding:9px 12px;margin-bottom:14px;border:1px solid rgba(255,255,255,.04);}
     .alb-prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
     .alb-prog-lbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.22);}
-    .alb-prog-val{font-family:'Bebas Neue','Impact',cursive;font-size:13px;letter-spacing:1px;color:#8b5cf6;}
+    .alb-prog-val{font-family:'Barlow Condensed','Impact',cursive;font-size:13px;letter-spacing:1px;color:#8b5cf6;}
     .alb-prog-track{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
     .alb-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#7c3aed,#a78bfa);}
     .alb-sec{display:flex;align-items:center;gap:9px;margin:16px 0 9px;}
@@ -244,10 +244,10 @@ function _injectAlbumCSS(){
     .alb-card-num{position:absolute;top:7px;right:7px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;color:rgba(255,255,255,.22);}
     .alb-card-silks{width:36px;height:42px;border-radius:50%;background:#0a0a14;border:2px solid rgba(139,92,246,.18);display:flex;align-items:center;justify-content:center;margin-bottom:6px;}
     .alb-card-tag{display:inline-flex;align-items:center;gap:3px;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-bottom:5px;}
-    .alb-card-name{font-family:'Bebas Neue','Impact',cursive;font-size:17px;letter-spacing:1.5px;color:#fff;line-height:1;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .alb-card-name{font-family:'Barlow Condensed','Impact',cursive;font-size:17px;letter-spacing:1.5px;color:#fff;line-height:1;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .alb-card-trainer{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:600;color:rgba(255,255,255,.27);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .alb-card-stats{display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,.05);padding-top:6px;margin-top:2px;}
-    .alb-card-or{font-family:'Bebas Neue','Impact',cursive;font-size:21px;letter-spacing:1px;line-height:1;}
+    .alb-card-or{font-family:'Barlow Condensed','Impact',cursive;font-size:21px;letter-spacing:1px;line-height:1;}
     .alb-card-orlbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.2);display:block;margin-bottom:1px;}
     .alb-card-meta{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:600;color:rgba(255,255,255,.22);text-align:right;line-height:1.5;}
     .alb-empty{border-radius:10px;background:rgba(255,255,255,.012);border:1.5px dashed rgba(255,255,255,.06);height:148px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:background .15s,border-color .15s;}
@@ -430,7 +430,7 @@ function openWLForm(id,prefill){
   +'<button onclick="document.getElementById(\'wl-modal\').remove()" style="width:34px;height:34px;border-radius:50%;background:#111120;border:1px solid #1c1c30;color:#888;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>'
   +'</div></div>'
   +'<div style="background:#0d0d18;border-bottom:1px solid #1c1c30;padding:16px;">'
-  +(e?'<div style="font-family:\'Bebas Neue\',cursive;font-size:38px;letter-spacing:2px;color:#fff;line-height:1;margin-bottom:2px;">'+e.horse+'</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a4a6a;">Editing Profile</div>':'<div style="font-family:\'Bebas Neue\',cursive;font-size:32px;letter-spacing:2px;color:#8b5cf6;line-height:1;margin-bottom:2px;">New Profile</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a4a6a;">Create a puzzle profiler entry</div>')
+  +(e?'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:38px;letter-spacing:2px;color:#fff;line-height:1;margin-bottom:2px;">'+e.horse+'</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a4a6a;">Editing Profile</div>':'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:32px;letter-spacing:2px;color:#8b5cf6;line-height:1;margin-bottom:2px;">New Profile</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a4a6a;">Create a puzzle profiler entry</div>')
   +'</div>'
   +'<div style="padding:0 12px;">'
   +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:12px;overflow:hidden;">'
@@ -439,16 +439,16 @@ function openWLForm(id,prefill){
   +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
   +'<div style="padding:0 13px 14px;">'
   +'<label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">In a sentence...</label>'
-  +'<input type="text" id="wlf-reason-note" placeholder="e.g. Finished well from rear at Ascot, should improve" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;">'
+  +'<input type="text" id="wlf-reason-note" placeholder="e.g. Finished well from rear at Ascot, should improve" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;">'
   +'</div></div>'
   +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
   +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">2</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#c8d0df;">Horse</span>'+'</div>'
   +'<div style="padding:12px 13px;display:flex;flex-direction:column;gap:10px;">'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Current OR <span style="color:#3a3a5c;font-weight:400;">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(e?e.currentRating||'':p.currentRating||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#f59e0b;margin-bottom:5px;">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid rgba(245,158,11,.35);border-radius:8px;color:#f59e0b;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'</div><div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Trainer</label><input type="text" id="wlf-trainer" value="'+(e?e.trainer||'':p.trainer||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Current OR <span style="color:#3a3a5c;font-weight:400;">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(e?e.currentRating||'':p.currentRating||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#f59e0b;margin-bottom:5px;">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid rgba(245,158,11,.35);border-radius:8px;color:#f59e0b;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'</div><div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Trainer</label><input type="text" id="wlf-trainer" value="'+(e?e.trainer||'':p.trainer||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
   +'</div></div>'
   +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
   +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">3</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#c8d0df;">Race Observations</span>'+'</div>'
@@ -457,7 +457,7 @@ function openWLForm(id,prefill){
   +'</div></div>'
   +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
   +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">4</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#60a5fa;">Trainer / Connections Intel</span>'+'</div>'
-  +'<div style="padding:12px 13px 14px;"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;resize:vertical;min-height:64px;">'+(e?e.trainerIntel||'':'')+'</textarea></div>'
+  +'<div style="padding:12px 13px 14px;"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;resize:vertical;min-height:64px;">'+(e?e.trainerIntel||'':'')+'</textarea></div>'
   +'</div>'
   +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
   +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">5</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#fb923c;">Future Targets</span>'+'</div>'
@@ -469,9 +469,9 @@ function openWLForm(id,prefill){
   +'<div style="padding:12px 13px;display:flex;flex-direction:column;gap:10px;">'
   +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Preferred Distance</label><input type="text" id="wlf-dist" placeholder="e.g. 6-7f" value="'+(e?e.distancePref||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight" value="'+(e?e.trackPref||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'</div><div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;resize:vertical;min-height:52px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
+  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Preferred Distance</label><input type="text" id="wlf-dist" placeholder="e.g. 6-7f" value="'+(e?e.distancePref||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight" value="'+(e?e.trackPref||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'</div><div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;resize:vertical;min-height:52px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
   +'</div></div>'
   +'<div style="display:flex;gap:8px;margin-top:16px;">'
   +'<button style="flex:1;padding:13px;border-radius:10px;border:none;background:#8b5cf6;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;" onclick="saveWLEntry(\''+( e?e.id:'')+'\')">'+(e?'Save Profile':'Create Profile')+'</button>'
@@ -495,17 +495,17 @@ function _renderObsList(){
       +'<button onclick="_wlDelObs('+i+')" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:6px;color:#f87171;font-size:11px;cursor:pointer;padding:2px 8px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">✕ Remove</button>'
       +'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Date</label><input type="date" value="'+(o.date||'')+'" onchange="_wlDossier.obs['+i+'].date=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Result</label><select onchange="_wlDossier.obs['+i+'].result=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;">'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Date</label><input type="date" value="'+(o.date||'')+'" onchange="_wlDossier.obs['+i+'].date=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Result</label><select onchange="_wlDossier.obs['+i+'].result=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;">'
       +'<option value=""'+((!o.result)?' selected':'')+'>— Select</option>'
       +'<option value="win"'+((o.result==="win")?' selected':'')+'>Won</option>'
       +'<option value="place"'+((o.result==="place")?' selected':'')+'>Placed</option>'
       +'<option value="loss"'+((o.result==="loss")?' selected':'')+'>Unplaced</option>'
       +'</select></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Race / Track</label><input type="text" value="'+(o.raceName||'')+'" placeholder="e.g. Newmarket Maiden" onchange="_wlDossier.obs['+i+'].raceName=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Going</label><input type="text" value="'+(o.going||'')+'" placeholder="e.g. Good to Firm" onchange="_wlDossier.obs['+i+'].going=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Race / Track</label><input type="text" value="'+(o.raceName||'')+'" placeholder="e.g. Newmarket Maiden" onchange="_wlDossier.obs['+i+'].raceName=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Going</label><input type="text" value="'+(o.going||'')+'" placeholder="e.g. Good to Firm" onchange="_wlDossier.obs['+i+'].going=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
       +'</div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Your Notes</label><textarea style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;min-height:52px;resize:vertical;" placeholder="What you noticed…" onchange="_wlDossier.obs['+i+'].notes=this.value">'+(o.notes||'')+'</textarea></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Your Notes</label><textarea style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;min-height:52px;resize:vertical;" placeholder="What you noticed…" onchange="_wlDossier.obs['+i+'].notes=this.value">'+(o.notes||'')+'</textarea></div>'
     +'</div>';
   }).join('');
 }
@@ -527,10 +527,10 @@ function _renderTargetsList(){
       +'<button onclick="_wlDelTarget('+i+')" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:6px;color:#f87171;font-size:11px;cursor:pointer;padding:2px 8px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">✕ Remove</button>'
       +'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Race</label><input type="text" value="'+(t.race||'')+'" placeholder="e.g. Sandy Lane" onchange="_wlDossier.targets['+i+'].race=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Track</label><input type="text" value="'+(t.track||'')+'" placeholder="e.g. Haydock" onchange="_wlDossier.targets['+i+'].track=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Date</label><input type="date" value="'+(t.date||'')+'" onchange="_wlDossier.targets['+i+'].date=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Condition</label><input type="text" value="'+(t.condition||'')+'" placeholder="Optional notes" onchange="_wlDossier.targets['+i+'].condition=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Race</label><input type="text" value="'+(t.race||'')+'" placeholder="e.g. Sandy Lane" onchange="_wlDossier.targets['+i+'].race=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Track</label><input type="text" value="'+(t.track||'')+'" placeholder="e.g. Haydock" onchange="_wlDossier.targets['+i+'].track=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Date</label><input type="date" value="'+(t.date||'')+'" onchange="_wlDossier.targets['+i+'].date=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Condition</label><input type="text" value="'+(t.condition||'')+'" placeholder="Optional notes" onchange="_wlDossier.targets['+i+'].condition=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
       +'</div>'
     +'</div>';
   }).join('');
@@ -650,7 +650,7 @@ const WLP_CSS = `
   max-width: 500px;
   margin: 0 auto;
   padding-bottom: 40px;
-  font-family: 'Outfit','Segoe UI',sans-serif;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   color: #d4d8e8;
 }
 /* NAV */
@@ -719,7 +719,7 @@ const WLP_CSS = `
 }
 .wlp-name-row { display: flex; align-items: center; gap: 8px; }
 .wlp-name {
-  font-family: 'Bebas Neue','Impact',cursive;
+  font-family: 'Barlow Condensed','Impact',cursive;
   font-size: 40px; letter-spacing: 2px; color: #fff; line-height: 1;
 }
 .wlp-verified {
@@ -745,7 +745,7 @@ const WLP_CSS = `
   text-transform: uppercase; color: #3a3a5c; display: block; margin-bottom: 1px;
 }
 .wlp-or-value {
-  font-family: 'Bebas Neue','Impact',cursive;
+  font-family: 'Barlow Condensed','Impact',cursive;
   font-size: 32px; letter-spacing: 1px; color: #8b5cf6; line-height: 1;
 }
 .wlp-or-na {
@@ -794,7 +794,7 @@ const WLP_CSS = `
   display: flex; align-items: center; gap: 6px;
 }
 .wlp-stat-val {
-  font-family: 'Bebas Neue','Impact',cursive;
+  font-family: 'Barlow Condensed','Impact',cursive;
   font-size: 20px; letter-spacing: 1px; line-height: 1;
 }
 .wlp-stat-sm {
@@ -802,7 +802,7 @@ const WLP_CSS = `
   font-size: 12px; font-weight: 700; color: #fff;
 }
 .wlp-edge-badge {
-  font-family: 'Bebas Neue','Impact',cursive;
+  font-family: 'Barlow Condensed','Impact',cursive;
   font-size: 15px; letter-spacing: 1px; padding: 2px 8px; border-radius: 5px;
 }
 /* EDGE BAR */
@@ -878,7 +878,7 @@ const WLP_CSS = `
   text-transform: uppercase; color: #4a4a6a; margin-bottom: 5px; text-align: center;
 }
 .wlp-rating-val {
-  font-family: 'Bebas Neue','Impact',cursive;
+  font-family: 'Barlow Condensed','Impact',cursive;
   font-size: 28px; letter-spacing: 1px; line-height: 1; text-align: center;
 }
 .wlp-rating-na {
@@ -1015,7 +1015,7 @@ function openWLProfile(id){
   if(!document.getElementById('wlp-fonts')){
     const lnk=document.createElement('link');
     lnk.id='wlp-fonts';lnk.rel='stylesheet';
-    lnk.href='https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Caveat:wght@500;600&display=swap';
+    lnk.href='https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Caveat:wght@500;600&display=swap';
     document.head.appendChild(lnk);
   }
 

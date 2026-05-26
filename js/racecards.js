@@ -426,10 +426,10 @@ function rcSwRenderRunners(idx, course, el){
             +(rpr?'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:#60a5fa;">'+rpr+'</span>':'')
             +_badge
             +(draw?'<span style="font-family:monospace;font-size:11px;color:var(--mut);">'+draw+'</span>':'')
-            +(form?'<span style="font-family:monospace;font-size:10px;color:var(--mut);letter-spacing:.06em;text-decoration:underline;text-underline-offset:2px;">'+form+'</span>':'')
+            +(form?'<span style="font-family:monospace;font-size:10px;color:var(--mut);letter-spacing:.06em;">'+form+'</span>':'')
           +'</div>';
         }())
-        +'<div style="font-size:12px;color:var(--gld);margin-bottom:1px;">J: '+jock+'</div>'
+        +'<div style="font-size:12px;color:var(--mut);margin-bottom:1px;">J: '+jock+'</div>'
         +'<div style="font-size:11px;color:var(--mut);">T: '+trainer+(age?' · '+age:'')+'</div>'
       +'</div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'

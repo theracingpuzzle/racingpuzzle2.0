@@ -10,7 +10,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font
 /* HEADER */
 .hdr{min-height:56px;padding-top:env(safe-area-inset-top,0px);display:flex;flex-direction:column;align-items:stretch;justify-content:center;padding-left:14px;padding-right:14px;padding-bottom:10px;background:var(--sur);border-bottom:1px solid var(--bdr);position:relative;z-index:80;flex-shrink:0;box-sizing:content-box;}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;}
-.logo{font-size:17px;font-weight:700;color:var(--gld);cursor:pointer;letter-spacing:.02em;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.logo{font-size:17px;font-weight:700;;cursor:pointer;letter-spacing:.02em;display:flex;align-items:center;gap:6px;white-space:nowrap;}
 .logo-dot{width:8px;height:8px;border-radius:50%;background:#e8e4dc;opacity:.9;}
 .hdr-r{display:flex;align-items:center;gap:8px;}
 .hdr-bal{display:flex;align-items:center;gap:5px;margin-top:7px;}
@@ -22,7 +22,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font
 .bpill span{color:var(--txt);font-weight:600;}
 .mtog{display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;gap:1px;}
 .mbtn{font-family:'Courier New',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:6px 11px;border:none;background:transparent;color:var(--mut);cursor:pointer;transition:all .15s;}
-.mbtn.on{background:var(--gld);color:#141414;font-weight:700;}
+.mbtn.on{background:#e8e4dc;color:#141414;font-weight:700;}
 
 /* ── SHELLS — height set by JS via --shell-h ── */
 .sw-shell{height:var(--shell-h);display:flex!important;flex-direction:column;overflow:hidden;user-select:none;}

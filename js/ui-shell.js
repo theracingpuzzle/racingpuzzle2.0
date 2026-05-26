@@ -120,58 +120,37 @@ function updHdr(){
   const bankCur=D.bank&&D.bank.current!=null?D.bank.current:0;
   const bankStart=D.bank&&D.bank.start!=null?D.bank.start:0;
   const diff=bankCur-bankStart;
-  const arrow=!bankStart?'':diff>0?'<span class="rp-bank-arrow" style="color:#4ade80;">▲</span>':diff<0?'<span class="rp-bank-arrow" style="color:#f87171;">▼</span>':'';
+  const arrow=!bankStart?'':diff>0?'<span style="color:#4ade80;font-size:9px;">▲</span>':diff<0?'<span style="color:#f87171;font-size:9px;">▼</span>':'';
+  const hbank=document.getElementById('hbank');
+  const hbankArrow=document.getElementById('hbank-arrow');
+  if(hbank)hbank.textContent=bankCur.toFixed(2);
+  if(hbankArrow)hbankArrow.innerHTML=arrow;
 
   // ── Virtual bank ──
   const vc=D.vBank&&D.vBank.current!=null?D.vBank.current:500;
   const vs=D.vBank&&D.vBank.start!=null?D.vBank.start:500;
   const vdiff=vc-vs;
-  const varrow=!vs?'':vdiff>0?'<span class="rp-bank-arrow" style="color:#4ade80;">▲</span>':vdiff<0?'<span class="rp-bank-arrow" style="color:#f87171;">▼</span>':'';
+  const varrow=!vs?'':vdiff>0?'<span style="color:#4ade80;font-size:9px;">▲</span>':vdiff<0?'<span style="color:#f87171;font-size:9px;">▼</span>':'';
+  const hvbank=document.getElementById('hvbank');
+  const hvbankArrow=document.getElementById('hvbank-arrow');
+  if(hvbank)hvbank.textContent=vc.toFixed(2);
+  if(hvbankArrow)hvbankArrow.innerHTML=varrow;
+
+  // ── Mode toggle active state ──
+  const bsw=document.getElementById('bsw');
+  const bcmd=document.getElementById('bcmd');
+  if(bsw)bsw.classList.toggle('on',mode==='sw');
+  if(bcmd)bcmd.classList.toggle('on',mode==='cmd');
 
   // ── Streak ──
   const all=new Set((D.dailyLog||[]).map(function(d){return d.date;}));
-  let streak=0;const t=td();const yd=new Date();yd.setDate(yd.getDate()-1);const yds=yd.toISOString().slice(0,10);
+  let streak=0;const t=td();
+  const yd=new Date();yd.setDate(yd.getDate()-1);const yds=yd.toISOString().slice(0,10);
   let ch=all.has(t)?t:all.has(yds)?yds:null;
   if(ch){let d=new Date(ch);while(all.has(d.toISOString().slice(0,10))){streak++;d.setDate(d.getDate()-1);}}
   window._streak=streak;
   const st=document.getElementById('tstreak-tile');
   if(st){st.innerHTML='<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:800;color:var(--gld);margin-bottom:2px;letter-spacing:1px;">'+streak+'<span style="font-size:16px;">🔥</span></div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:rgba(232,228,220,.4);">Day Streak</div>';}
-
-  // ── Rebuild header ──
-  const hdr=document.getElementById('hdr');
-  if(!hdr)return;
-
-  // Preserve supa-dot colour set by init.js before rebuild
-  const existingDot=document.getElementById('supa-dot');
-  const dotBg=existingDot?existingDot.style.background:'#6b7280';
-
-  let inner=document.getElementById('hdr-inner');
-  if(!inner){
-    hdr.innerHTML='';
-    inner=document.createElement('div');
-    inner.id='hdr-inner';
-    hdr.appendChild(inner);
-  }
-
-  inner.innerHTML=
-    '<div class="rp-brand">RACING <span class="rp-brand-accent">PUZZLE</span></div>'
-    +'<div class="rp-banks">'
-      +'<div class="rp-bank-pill">'
-        +'<div class="rp-bank-dot" id="supa-dot" onclick="supaTestSync()" style="background:'+dotBg+';cursor:pointer;" title="Supabase status"></div>'
-        +'<span class="rp-bank-lbl">Real</span>'
-        +'<span class="rp-bank-val" style="color:#60a5fa;">£<span id="hbank">'+bankCur.toFixed(2)+'</span></span>'
-        +'<span id="hbank-arrow">'+arrow+'</span>'
-      +'</div>'
-      +'<div class="rp-bank-pill">'
-        +'<span class="rp-bank-lbl">Virtual</span>'
-        +'<span class="rp-bank-val" style="color:#fb923c;">£<span id="hvbank">'+vc.toFixed(2)+'</span></span>'
-        +'<span id="hvbank-arrow">'+varrow+'</span>'
-      +'</div>'
-    +'</div>'
-    +'<div class="rp-mode-toggle">'
-      +'<button id="bsw" class="rp-mode-btn'+(mode==='sw'?' on':'')+'" onclick="setMode(\'sw\')">Swipe</button>'
-      +'<button id="bcmd" class="rp-mode-btn'+(mode==='cmd'?' on':'')+'" onclick="setMode(\'cmd\')">CMD</button>'
-    +'</div>';
 
   if(typeof renderToday==='function')renderToday();
 }

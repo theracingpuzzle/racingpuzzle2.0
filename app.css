@@ -232,7 +232,6 @@ tr:hover td{background:rgba(232,228,220,.04);}
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--bdr);
-  padding: env(safe-area-inset-top, 0px) 0 0;
 }
 #hdr-inner {
   display: flex;

@@ -13,7 +13,7 @@ function renderCompare(set,p,roi,sr){
     const vRets=vset.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
     const vP=vRets-vStaked;
     const vROI=vStaked>0?(vP/vStaked*100):0;
-    const vW=vset.filter(b=>b.result==='win'||b.result==='place').length;
+    const vW=vset.filter(b=>b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'))).length;
     const vSR=vset.length>0?(vW/vset.length*100):0;
     const vBankDiff=vb.current-vb.start;
 
@@ -184,7 +184,8 @@ function renderStats(){
   const vbBets=getVBank().bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='nr';});
   const realBets=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
   const set=scope==='real'?realBets:scope==='virt'?vbBets:[...realBets,...vbBets.map(function(b){return Object.assign({},b,{_virt:true});})];
-  const wins=set.filter(b=>b.result==='win'),places=set.filter(b=>b.result==='place');
+  const wins=set.filter(b=>b.result==='win');
+  const places=set.filter(b=>b.result==='place'&&(b.betType==='ew'||b.betType==='place'));
   const staked=set.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
   const rets=set.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
   const p=rets-staked,roi=staked>0?(p/staked*100):0;
@@ -294,7 +295,7 @@ function renderStats(){
         if(!bb.length)return'<tr><td style="padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);">'+band.lbl+'</td><td colspan="4" style="text-align:center;font-style:italic;color:var(--mut);padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);">no data</td></tr>';
         const bst=bb.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
         const bp=bb.reduce((a,b)=>a+((parseFloat(b.returns)||0)-(parseFloat(b.stake)||0)),0);
-        const bw=bb.filter(b=>b.result==='win'||b.result==='place').length;
+        const bw=bb.filter(b=>b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'))).length;
         const bsr=bb.length>0?(bw/bb.length*100):0;
         const broi=bst>0?(bp/bst*100):0;
         const col=band.min>=9?'rgba(38,168,101,.08)':band.min>=6?'rgba(232,228,220,.06)':'rgba(196,58,58,.06)';
@@ -312,7 +313,7 @@ function renderStats(){
     for(let c=1;c<=5;c++){
       const cb=disciplineSet.filter(b=>(b.conf||3)===c);
       if(!cb.length)continue;
-      const cW=cb.filter(b=>b.result==='win'||b.result==='place').length;
+      const cW=cb.filter(b=>b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'))).length;
       const cSt=cb.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
       const cP=cb.reduce((a,b)=>a+(pnl(b)||0),0);
       const cROI=cSt>0?(cP/cSt*100):0;
@@ -368,7 +369,9 @@ function renderStats(){
       if(!map[k])map[k]={p:0,n:0,staked:0,w:0};
       const p2=(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);
       map[k].p+=p2;map[k].n++;map[k].staked+=(parseFloat(b.stake)||0);
-      if(b.result==='win'||b.result==='place')map[k].w++;
+      const isWin=b.result==='win';
+      const isPlace=b.result==='place'&&(b.betType==='ew'||b.betType==='place');
+      if(isWin||isPlace)map[k].w++;
     });
     const rows=Object.entries(map).filter(([,v])=>v.n>=1)
       .map(([k,v])=>({k,roi:v.staked>0?v.p/v.staked*100:0,p:v.p,n:v.n,sr:v.w/v.n*100}))
@@ -444,9 +447,7 @@ function _openModal(b,type){
   document.getElementById('em-type-sel').value=b.betType||'win';
   document.getElementById('em-jockey').value=b.jockey||'';
   document.getElementById('em-trainer').value=b.trainer||'';
-  const emSrc=document.getElementById('em-source');
-  if(emSrc&&typeof getSourceOptions==='function')emSrc.innerHTML=getSourceOptions();
-  if(emSrc)emSrc.value=b.source||'Own Form Study';
+  document.getElementById('em-source').value=b.source||'Own Form Study';
   document.getElementById('em-prenotes').value=b.notes||'';
   document.getElementById('emres').value=b.result||'pending';
   document.getElementById('emret').value=b.returns||'';

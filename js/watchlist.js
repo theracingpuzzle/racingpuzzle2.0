@@ -199,12 +199,12 @@ function _silkColors(str){
 }
 
 function _silkSVG(horse,size){
-  size=size||26;
+  size=size||18;
   const c=_silkColors(horse||'?');
   return'<svg width="'+size+'" height="'+(size*1.15).toFixed(0)+'" viewBox="0 0 70 80" fill="none">'
     +'<path d="M20 20 Q35 16 50 20 L54 62 Q35 66 16 62 Z" fill="'+c.body+'"/>'
-    +'<path d="M28 19 L28 63" stroke="'+c.accent+'" stroke-width="6"/>'
-    +'<path d="M42 19 L42 63" stroke="'+c.accent+'" stroke-width="6"/>'
+    +'<path d="M28 19 L28 63" stroke="'+c.accent+'" stroke-width="8"/>'
+    +'<path d="M42 19 L42 63" stroke="'+c.accent+'" stroke-width="8"/>'
     +'<path d="M20 20 Q10 24 6 38 Q10 42 16 40 L20 28 Z" fill="'+c.body+'"/>'
     +'<path d="M50 20 Q60 24 64 38 Q60 42 54 40 L50 28 Z" fill="'+c.body+'"/>'
     +'<ellipse cx="35" cy="12" rx="13" ry="6" fill="'+c.accent+'"/>'
@@ -213,48 +213,33 @@ function _silkSVG(horse,size){
   +'</svg>';
 }
 
-// ── Album CSS — injected once ──
+// ── List CSS — injected once ──
 function _injectAlbumCSS(){
   if(document.getElementById('wl-album-css'))return;
   const s=document.createElement('style');
   s.id='wl-album-css';
   s.textContent=`
-    .alb-wrap{padding:10px 10px 24px;font-family:'Segoe UI', system-ui, -apple-system, sans-serif;}
-    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&display=swap');
-    .alb-hdr{background:#0d0d1a;border:1px solid rgba(255,255,255,.06);border-radius:13px;padding:13px 14px;margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;}
-    .alb-title{font-family:'Barlow Condensed','Impact',cursive;font-size:24px;letter-spacing:3px;color:#fff;line-height:1;}
-    .alb-sub{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:3px;}
-    .alb-n{font-family:'Barlow Condensed','Impact',cursive;font-size:32px;letter-spacing:1px;color:#8b5cf6;line-height:1;text-align:right;}
-    .alb-nlbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.2);text-align:right;}
-    .alb-prog{background:#0a0a14;border-radius:10px;padding:9px 12px;margin-bottom:14px;border:1px solid rgba(255,255,255,.04);}
-    .alb-prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-    .alb-prog-lbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.22);}
-    .alb-prog-val{font-family:'Barlow Condensed','Impact',cursive;font-size:13px;letter-spacing:1px;color:#8b5cf6;}
-    .alb-prog-track{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
-    .alb-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#7c3aed,#a78bfa);}
-    .alb-sec{display:flex;align-items:center;gap:9px;margin:16px 0 9px;}
-    .alb-sec-spine{height:26px;width:4px;border-radius:3px;flex-shrink:0;}
-    .alb-sec-lbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:11px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;flex:1;}
-    .alb-sec-count{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.25);}
-    .alb-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-    .alb-card{position:relative;border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:2px 3px 14px rgba(0,0,0,.55);transition:transform .12s,box-shadow .12s;}
-    .alb-card:active{transform:scale(.96);box-shadow:1px 2px 8px rgba(0,0,0,.4);}
-    .alb-card-band{height:4px;width:100%;}
-    .alb-card-body{background:#0e0e1a;border:1px solid rgba(255,255,255,.07);border-top:none;border-radius:0 0 10px 10px;padding:9px 10px 10px;}
-    .alb-card-num{position:absolute;top:7px;right:7px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;color:rgba(255,255,255,.22);}
-    .alb-card-silks{width:36px;height:42px;border-radius:50%;background:#0a0a14;border:2px solid rgba(139,92,246,.18);display:flex;align-items:center;justify-content:center;margin-bottom:6px;}
-    .alb-card-tag{display:inline-flex;align-items:center;gap:3px;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-bottom:5px;}
-    .alb-card-name{font-family:'Barlow Condensed','Impact',cursive;font-size:17px;letter-spacing:1.5px;color:#fff;line-height:1;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .alb-card-trainer{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:600;color:rgba(255,255,255,.27);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .alb-card-stats{display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,.05);padding-top:6px;margin-top:2px;}
-    .alb-card-or{font-family:'Barlow Condensed','Impact',cursive;font-size:21px;letter-spacing:1px;line-height:1;}
-    .alb-card-orlbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.2);display:block;margin-bottom:1px;}
-    .alb-card-meta{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:600;color:rgba(255,255,255,.22);text-align:right;line-height:1.5;}
-    .alb-empty{border-radius:10px;background:rgba(255,255,255,.012);border:1.5px dashed rgba(255,255,255,.06);height:148px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:background .15s,border-color .15s;}
-    .alb-empty:active{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.12);}
-    .alb-empty-icon{font-size:20px;opacity:.13;}
-    .alb-empty-lbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.12);}
-    .alb-es{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;color:rgba(255,255,255,.25);font-style:italic;text-align:center;padding:40px 20px;}
+    .wll-wrap{padding:0 0 24px;}
+    .wll-stats{display:flex;gap:6px;margin:0 0 14px;}
+    .wll-stat{flex:1;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;padding:8px 10px;text-align:center;}
+    .wll-stat-n{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:20px;font-weight:800;letter-spacing:.5px;color:var(--txt);}
+    .wll-stat-l{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);margin-top:1px;}
+    .wll-sec{display:flex;align-items:center;gap:8px;padding:10px 0 6px;border-bottom:1px solid var(--bdr);margin-bottom:4px;}
+    .wll-sec-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .wll-sec-lbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;flex:1;}
+    .wll-sec-cnt{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;color:var(--mut);}
+    .wll-row{display:flex;align-items:center;border-left:3px solid;padding:10px 10px 10px 12px;margin-bottom:6px;background:var(--sur2);border-radius:0 9px 9px 0;cursor:pointer;transition:background .12s;}
+    .wll-row:active{background:var(--dim);}
+    .wll-silks{width:30px;height:30px;border-radius:50%;background:var(--sur);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;}
+    .wll-main{flex:1;min-width:0;}
+    .wll-name{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:16px;font-weight:800;letter-spacing:.5px;color:var(--txt);line-height:1;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .wll-sub{font-size:11px;color:var(--mut);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .wll-tag{display:inline-flex;align-items:center;gap:3px;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;}
+    .wll-right{display:flex;gap:5px;align-items:center;flex-shrink:0;margin-left:10px;}
+    .wll-rating{display:flex;flex-direction:column;align-items:center;background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:4px 7px;min-width:38px;}
+    .wll-rating-lbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);}
+    .wll-rating-val{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:15px;font-weight:800;letter-spacing:.5px;line-height:1.1;}
+    .wll-empty{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;color:var(--mut);font-style:italic;text-align:center;padding:40px 20px;}
   `;
   document.head.appendChild(s);
 }
@@ -268,41 +253,33 @@ function renderWLList(){
   const el=document.getElementById('wl-list');if(!el)return;
 
   if(!entries.length){
-    el.innerHTML='<div class="alb-es">'+(search?'No profiles match "'+search+'"':'No profiles yet — tap + to add your first horse.')+'</div>';
+    el.innerHTML='<div class="wll-empty">'+(search?'No profiles match "'+search+'"':'No profiles yet — tap + to add your first horse.')+'</div>';
     return;
   }
 
   const REASON_ORDER=['eye-catcher','future-target','trainer-intel','form-study','tip-source'];
   const REASON_META={
-    'eye-catcher': {emoji:'🔭',label:'Eye Catchers',  col:'#a78bfa',grad:'#6d28d9,#a78bfa'},
-    'future-target':{emoji:'📰',label:'Future Targets',col:'#fb923c',grad:'#c2410c,#fb923c'},
-    'trainer-intel':{emoji:'🗣',label:'Trainer Intel', col:'#60a5fa',grad:'#1d4ed8,#60a5fa'},
-    'form-study':   {emoji:'📊',label:'Form Study',    col:'#ef4444',grad:'#991b1b,#ef4444'},
-    'tip-source':   {emoji:'💡',label:'Tips & Sources',col:'#eab308',grad:'#92400e,#eab308'},
+    'eye-catcher': {emoji:'🔭',label:'Eye Catcher',  labelPlural:'Eye Catchers',  col:'#a78bfa'},
+    'future-target':{emoji:'📰',label:'Future Target',labelPlural:'Future Targets',col:'#fb923c'},
+    'trainer-intel':{emoji:'🗣',label:'Trainer Intel',labelPlural:'Trainer Intel', col:'#60a5fa'},
+    'form-study':   {emoji:'📊',label:'Form Study',   labelPlural:'Form Study',    col:'#ef4444'},
+    'tip-source':   {emoji:'💡',label:'Tip / Source', labelPlural:'Tips & Sources',col:'#eab308'},
   };
 
   const groups={};
   entries.forEach(function(e){const r=e.reason||'eye-catcher';if(!groups[r])groups[r]=[];groups[r].push(e);});
 
   const total=entries.length;
-  // Running card number across all groups
-  let cardNum=0;
+  const totalObs=entries.reduce(function(a,e){return a+(e.observations||[]).length;},0);
+  const totalTargets=entries.reduce(function(a,e){return a+(e.targets||[]).length;},0);
 
-  let html='<div class="alb-wrap">';
+  let html='<div class="wll-wrap">';
 
-  // ── Album header ──
-  html+='<div class="alb-hdr">'
-    +'<div><div class="alb-title">🧩 Puzzle Profiler</div>'
-    +'<div class="alb-sub">2025/26 Season Collection</div></div>'
-    +'<div><div class="alb-n">'+total+'</div><div class="alb-nlbl">Profiles</div></div>'
-  +'</div>';
-
-  // ── Progress bar ──
-  const target=Math.max(total+5, 20);
-  const pct=Math.min(Math.round(total/target*100),100);
-  html+='<div class="alb-prog">'
-    +'<div class="alb-prog-row"><span class="alb-prog-lbl">Collection</span><span class="alb-prog-val">'+total+' profiles logged</span></div>'
-    +'<div class="alb-prog-track"><div class="alb-prog-fill" style="width:'+pct+'%;"></div></div>'
+  // ── Stats strip ──
+  html+='<div class="wll-stats">'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#e879f9;">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#4ade80;">'+totalObs+'</div><div class="wll-stat-l">Observations</div></div>'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#fb923c;">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
   +'</div>';
 
   // ── Groups ──
@@ -311,86 +288,74 @@ function renderWLList(){
     const rm=REASON_META[r];
     const grp=groups[r];
 
-    // Section divider
-    html+='<div class="alb-sec">'
-      +'<div class="alb-sec-spine" style="background:'+rm.col+';"></div>'
-      +'<span class="alb-sec-lbl" style="color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</span>'
-      +'<span class="alb-sec-count">'+grp.length+'</span>'
+    html+='<div class="wll-sec">'
+      +'<div class="wll-sec-dot" style="background:'+rm.col+';"></div>'
+      +'<span class="wll-sec-lbl" style="color:'+rm.col+';">'+rm.emoji+' '+rm.labelPlural+'</span>'
+      +'<span class="wll-sec-cnt">'+grp.length+'</span>'
     +'</div>';
 
-    html+='<div class="alb-grid">';
-
     grp.forEach(function(e){
-      cardNum++;
       const obs=e.observations||[];
       const targets=e.targets||[];
       const or=parseFloat(e.currentRating)||null;
       const mr=parseFloat(e.myRating)||null;
-      const showMR=!or&&mr;
-      const ratingVal=or||mr||null;
-      const ratingLbl=or?'OR':mr?'MR':'OR';
-      const ratingCol=or?'#8b5cf6':mr?'#f59e0b':'#3a3a5c';
-      const numStr=String(cardNum).padStart(2,'0');
+      const lastObs=obs.length?obs.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');})[0]:null;
+      const subParts=[];
+      if(e.trainer)subParts.push(e.trainer);
+      if(obs.length)subParts.push(obs.length+' obs');
+      if(targets.length)subParts.push(targets.length+' target'+(targets.length>1?'s':''));
+      if(!obs.length&&!targets.length)subParts.push('No obs or targets yet');
 
-      html+='<div class="alb-card" data-wl-id="'+e.id+'">'
-        +'<div class="alb-card-band" style="background:linear-gradient(90deg,'+rm.grad+');"></div>'
-        +'<div class="alb-card-body">'
-          +'<div class="alb-card-num">'+numStr+'</div>'
-          +'<div class="alb-card-silks">'+_silkSVG(e.horse||'?',26)+'</div>'
-          +'<div class="alb-card-tag" style="background:'+rm.col+'18;border:1px solid '+rm.col+'30;color:'+rm.col+';">'+rm.emoji+' '+REASON_META[r].label.replace(/s$/,'')+'</div>'
-          +'<div class="alb-card-name">'+(e.horse||'Unknown')+'</div>'
-          +'<div class="alb-card-trainer">'+(e.trainer||'—')+'</div>'
-          +'<div class="alb-card-stats">'
-            +'<div><span class="alb-card-orlbl">'+ratingLbl+'</span><span class="alb-card-or" style="color:'+ratingCol+';">'+(ratingVal||'—')+'</span></div>'
-            +'<div class="alb-card-meta">'+(obs.length?obs.length+' obs':'no obs')+'<br>'+(targets.length?targets.length+' target'+(targets.length>1?'s':''):'no targets')+'</div>'
-          +'</div>'
+      html+='<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
+        +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
+        +'<div class="wll-main">'
+          +'<div class="wll-name">'+(e.horse||'Unknown')+'</div>'
+          +'<div class="wll-sub">'+subParts.join(' · ')+'</div>'
+          +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
+        +'</div>'
+        +'<div class="wll-right">'
+          +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'#a78bfa':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+          +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'#f59e0b':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
         +'</div>'
       +'</div>';
     });
-
-    // Empty add slot at end of each group
-    html+='<div class="alb-empty" onclick="openWLForm()">'
-      +'<div class="alb-empty-icon">＋</div>'
-      +'<div class="alb-empty-lbl">Add Profile</div>'
-    +'</div>';
-
-    html+='</div>'; // grid
   });
 
-  html+='</div>'; // alb-wrap
+  html+='</div>'; // wll-wrap
   el.innerHTML=html;
 
-  // Wire up card clicks
-  el.querySelectorAll('[data-wl-id]').forEach(function(card){
-    card.addEventListener('click',function(ev){
+  el.querySelectorAll('[data-wl-id]').forEach(function(row){
+    row.addEventListener('click',function(ev){
       ev.stopPropagation();
-      openWLProfile(card.getAttribute('data-wl-id'));
+      openWLProfile(row.getAttribute('data-wl-id'));
     });
   });
 }
 
 function renderWLEntry(e){
-  // renderWLEntry is used by the calendar day panel — keep a compact version
+  // Used by calendar day panel
   const RMAP={'eye-catcher':{emoji:'🔭',col:'#a78bfa',label:'Eye Catcher'},'future-target':{emoji:'📰',col:'#fb923c',label:'Future Target'},'trainer-intel':{emoji:'🗣',col:'#60a5fa',label:'Trainer Intel'},'form-study':{emoji:'📊',col:'#ef4444',label:'Form Study'},'tip-source':{emoji:'💡',col:'#eab308',label:'Tip / Source'}};
   const rm=RMAP[e.reason||'eye-catcher']||RMAP['eye-catcher'];
   const obs=e.observations||[];
   const targets=e.targets||[];
+  const or=parseFloat(e.currentRating)||null;
+  const mr=parseFloat(e.myRating)||null;
   const lastObs=obs.length?obs.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');})[0]:null;
-  const latestDate=lastObs?lastObs.date:(e.raceDate||'');
-  const daysAgo=latestDate?(function(){const d=new Date(latestDate+'T00:00:00');const diff=Math.round((new Date()-d)/(1000*60*60*24));return diff===0?'Today':diff===1?'Yesterday':diff>0?diff+'d ago':'Upcoming';}()):'';
-  const isEmpty=!obs.length&&!targets.length&&!e.trainerIntel&&!e.conditionsNotes;
-  return'<div class="mb" data-wl-id="'+e.id+'" style="cursor:pointer;border-left:3px solid '+rm.col+';margin-bottom:8px;padding:10px 11px;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
-      +'<div style="flex:1;min-width:0;">'
-        +'<div style="margin-bottom:5px;"><span style="font-size:9px;font-family:monospace;padding:2px 7px;border-radius:20px;background:rgba(0,0,0,.2);border:1px solid '+rm.col+';color:'+rm.col+';font-weight:700;">'+rm.emoji+' '+rm.label+'</span>'+(e.reasonNote?'<span style="font-size:10px;color:var(--mut);font-style:italic;margin-left:6px;">'+e.reasonNote.slice(0,50)+(e.reasonNote.length>50?'…':'')+'</span>':'')+'</div>'
-        +'<div style="font-weight:700;font-size:15px;margin-bottom:2px;">'+e.horse+'</div>'
-        +orSummaryLine(e)
-        +(e.trainer?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">'+e.trainer+'</div>':'')
-        +(lastObs?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">📋 <span style="color:var(--txt);">'+(lastObs.raceName||'')+(lastObs.track?' · '+lastObs.track:'')+'</span>'+(daysAgo?' · '+daysAgo:'')+'</div>':'')
-        +(targets.length?'<div style="margin-top:3px;">'+targets.slice(0,2).map(function(t){const tDate=t.date?(new Date(t.date+'T00:00:00')).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';return'<div style="font-size:11px;font-family:monospace;color:#fb923c;margin-bottom:1px;">🎯 '+t.race+(tDate?'<span style="color:var(--mut);"> · '+tDate+'</span>':'')+(t.track?'<span style="font-size:9px;color:var(--mut);"> · '+t.track+'</span>':'')+'</div>';}).join('')+'</div>':'')
-        +(isEmpty?'<div style="font-size:10px;color:rgba(255,255,255,.2);margin-top:4px;font-style:italic;">Tap to add notes →</div>':'')
-      +'</div>'
-      +'<div style="text-align:right;flex-shrink:0;margin-left:10px;">'+(obs.length?'<div style="font-family:monospace;font-size:9px;color:var(--mut);">'+obs.length+' obs</div>':'')+'</div>'
+  const daysAgo=lastObs&&lastObs.date?(function(){const d=new Date(lastObs.date+'T00:00:00');const diff=Math.round((new Date()-d)/(1000*60*60*24));return diff===0?'Today':diff===1?'Yesterday':diff>0?diff+'d ago':'Upcoming';}()):'';
+  const subParts=[];
+  if(e.trainer)subParts.push(e.trainer);
+  if(obs.length)subParts.push(obs.length+' obs');
+  if(targets.length)subParts.push(targets.length+' target'+(targets.length>1?'s':''));
+  return'<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
+    +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
+    +'<div class="wll-main">'
+      +'<div class="wll-name">'+(e.horse||'Unknown')+'</div>'
+      +'<div class="wll-sub">'+subParts.join(' · ')+(daysAgo?' · '+daysAgo:'')+'</div>'
+      +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
+    +'</div>'
+    +'<div class="wll-right">'
+      +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'#a78bfa':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+      +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'#f59e0b':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
     +'</div>'
   +'</div>';
 }
@@ -430,7 +395,7 @@ function openWLForm(id,prefill){
   +'<button onclick="document.getElementById(\'wl-modal\').remove()" style="width:34px;height:34px;border-radius:50%;background:#111120;border:1px solid #1c1c30;color:#888;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>'
   +'</div></div>'
   +'<div style="background:#0d0d18;border-bottom:1px solid #1c1c30;padding:16px;">'
-  +(e?'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:38px;letter-spacing:2px;color:#fff;line-height:1;margin-bottom:2px;">'+e.horse+'</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a4a6a;">Editing Profile</div>':'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:32px;letter-spacing:2px;color:#8b5cf6;line-height:1;margin-bottom:2px;">New Profile</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a4a6a;">Create a puzzle profiler entry</div>')
+  +(e?'<div style="font-family:\'Bebas Neue\',cursive;font-size:38px;letter-spacing:2px;color:#fff;line-height:1;margin-bottom:2px;">'+e.horse+'</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a4a6a;">Editing Profile</div>':'<div style="font-family:\'Bebas Neue\',cursive;font-size:32px;letter-spacing:2px;color:#8b5cf6;line-height:1;margin-bottom:2px;">New Profile</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a4a6a;">Create a puzzle profiler entry</div>')
   +'</div>'
   +'<div style="padding:0 12px;">'
   +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:12px;overflow:hidden;">'
@@ -439,16 +404,16 @@ function openWLForm(id,prefill){
   +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
   +'<div style="padding:0 13px 14px;">'
   +'<label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">In a sentence...</label>'
-  +'<input type="text" id="wlf-reason-note" placeholder="e.g. Finished well from rear at Ascot, should improve" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;">'
+  +'<input type="text" id="wlf-reason-note" placeholder="e.g. Finished well from rear at Ascot, should improve" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;">'
   +'</div></div>'
   +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
   +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">2</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#c8d0df;">Horse</span>'+'</div>'
   +'<div style="padding:12px 13px;display:flex;flex-direction:column;gap:10px;">'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Current OR <span style="color:#3a3a5c;font-weight:400;">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(e?e.currentRating||'':p.currentRating||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#f59e0b;margin-bottom:5px;">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid rgba(245,158,11,.35);border-radius:8px;color:#f59e0b;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'</div><div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Trainer</label><input type="text" id="wlf-trainer" value="'+(e?e.trainer||'':p.trainer||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Current OR <span style="color:#3a3a5c;font-weight:400;">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(e?e.currentRating||'':p.currentRating||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#f59e0b;margin-bottom:5px;">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid rgba(245,158,11,.35);border-radius:8px;color:#f59e0b;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'</div><div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Trainer</label><input type="text" id="wlf-trainer" value="'+(e?e.trainer||'':p.trainer||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
   +'</div></div>'
   +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
   +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">3</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#c8d0df;">Race Observations</span>'+'</div>'
@@ -457,7 +422,7 @@ function openWLForm(id,prefill){
   +'</div></div>'
   +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
   +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">4</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#60a5fa;">Trainer / Connections Intel</span>'+'</div>'
-  +'<div style="padding:12px 13px 14px;"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;resize:vertical;min-height:64px;">'+(e?e.trainerIntel||'':'')+'</textarea></div>'
+  +'<div style="padding:12px 13px 14px;"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;resize:vertical;min-height:64px;">'+(e?e.trainerIntel||'':'')+'</textarea></div>'
   +'</div>'
   +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
   +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">5</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#fb923c;">Future Targets</span>'+'</div>'
@@ -469,9 +434,9 @@ function openWLForm(id,prefill){
   +'<div style="padding:12px 13px;display:flex;flex-direction:column;gap:10px;">'
   +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Preferred Distance</label><input type="text" id="wlf-dist" placeholder="e.g. 6-7f" value="'+(e?e.distancePref||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight" value="'+(e?e.trackPref||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'</div><div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;resize:vertical;min-height:52px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
+  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Preferred Distance</label><input type="text" id="wlf-dist" placeholder="e.g. 6-7f" value="'+(e?e.distancePref||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight" value="'+(e?e.trackPref||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+  +'</div><div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;resize:vertical;min-height:52px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
   +'</div></div>'
   +'<div style="display:flex;gap:8px;margin-top:16px;">'
   +'<button style="flex:1;padding:13px;border-radius:10px;border:none;background:#8b5cf6;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;" onclick="saveWLEntry(\''+( e?e.id:'')+'\')">'+(e?'Save Profile':'Create Profile')+'</button>'
@@ -495,17 +460,17 @@ function _renderObsList(){
       +'<button onclick="_wlDelObs('+i+')" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:6px;color:#f87171;font-size:11px;cursor:pointer;padding:2px 8px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">✕ Remove</button>'
       +'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Date</label><input type="date" value="'+(o.date||'')+'" onchange="_wlDossier.obs['+i+'].date=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Result</label><select onchange="_wlDossier.obs['+i+'].result=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;">'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Date</label><input type="date" value="'+(o.date||'')+'" onchange="_wlDossier.obs['+i+'].date=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Result</label><select onchange="_wlDossier.obs['+i+'].result=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;">'
       +'<option value=""'+((!o.result)?' selected':'')+'>— Select</option>'
       +'<option value="win"'+((o.result==="win")?' selected':'')+'>Won</option>'
       +'<option value="place"'+((o.result==="place")?' selected':'')+'>Placed</option>'
       +'<option value="loss"'+((o.result==="loss")?' selected':'')+'>Unplaced</option>'
       +'</select></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Race / Track</label><input type="text" value="'+(o.raceName||'')+'" placeholder="e.g. Newmarket Maiden" onchange="_wlDossier.obs['+i+'].raceName=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Going</label><input type="text" value="'+(o.going||'')+'" placeholder="e.g. Good to Firm" onchange="_wlDossier.obs['+i+'].going=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Race / Track</label><input type="text" value="'+(o.raceName||'')+'" placeholder="e.g. Newmarket Maiden" onchange="_wlDossier.obs['+i+'].raceName=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Going</label><input type="text" value="'+(o.going||'')+'" placeholder="e.g. Good to Firm" onchange="_wlDossier.obs['+i+'].going=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
       +'</div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Your Notes</label><textarea style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;min-height:52px;resize:vertical;" placeholder="What you noticed…" onchange="_wlDossier.obs['+i+'].notes=this.value">'+(o.notes||'')+'</textarea></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Your Notes</label><textarea style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;min-height:52px;resize:vertical;" placeholder="What you noticed…" onchange="_wlDossier.obs['+i+'].notes=this.value">'+(o.notes||'')+'</textarea></div>'
     +'</div>';
   }).join('');
 }
@@ -527,10 +492,10 @@ function _renderTargetsList(){
       +'<button onclick="_wlDelTarget('+i+')" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:6px;color:#f87171;font-size:11px;cursor:pointer;padding:2px 8px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">✕ Remove</button>'
       +'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Race</label><input type="text" value="'+(t.race||'')+'" placeholder="e.g. Sandy Lane" onchange="_wlDossier.targets['+i+'].race=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Track</label><input type="text" value="'+(t.track||'')+'" placeholder="e.g. Haydock" onchange="_wlDossier.targets['+i+'].track=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Date</label><input type="date" value="'+(t.date||'')+'" onchange="_wlDossier.targets['+i+'].date=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Condition</label><input type="text" value="'+(t.condition||'')+'" placeholder="Optional notes" onchange="_wlDossier.targets['+i+'].condition=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Segoe UI\',system-ui,sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Race</label><input type="text" value="'+(t.race||'')+'" placeholder="e.g. Sandy Lane" onchange="_wlDossier.targets['+i+'].race=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Track</label><input type="text" value="'+(t.track||'')+'" placeholder="e.g. Haydock" onchange="_wlDossier.targets['+i+'].track=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Date</label><input type="date" value="'+(t.date||'')+'" onchange="_wlDossier.targets['+i+'].date=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Condition</label><input type="text" value="'+(t.condition||'')+'" placeholder="Optional notes" onchange="_wlDossier.targets['+i+'].condition=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
       +'</div>'
     +'</div>';
   }).join('');
@@ -650,7 +615,7 @@ const WLP_CSS = `
   max-width: 500px;
   margin: 0 auto;
   padding-bottom: 40px;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Outfit','Segoe UI',sans-serif;
   color: #d4d8e8;
 }
 /* NAV */
@@ -719,7 +684,7 @@ const WLP_CSS = `
 }
 .wlp-name-row { display: flex; align-items: center; gap: 8px; }
 .wlp-name {
-  font-family: 'Barlow Condensed','Impact',cursive;
+  font-family: 'Bebas Neue','Impact',cursive;
   font-size: 40px; letter-spacing: 2px; color: #fff; line-height: 1;
 }
 .wlp-verified {
@@ -745,7 +710,7 @@ const WLP_CSS = `
   text-transform: uppercase; color: #3a3a5c; display: block; margin-bottom: 1px;
 }
 .wlp-or-value {
-  font-family: 'Barlow Condensed','Impact',cursive;
+  font-family: 'Bebas Neue','Impact',cursive;
   font-size: 32px; letter-spacing: 1px; color: #8b5cf6; line-height: 1;
 }
 .wlp-or-na {
@@ -794,7 +759,7 @@ const WLP_CSS = `
   display: flex; align-items: center; gap: 6px;
 }
 .wlp-stat-val {
-  font-family: 'Barlow Condensed','Impact',cursive;
+  font-family: 'Bebas Neue','Impact',cursive;
   font-size: 20px; letter-spacing: 1px; line-height: 1;
 }
 .wlp-stat-sm {
@@ -802,7 +767,7 @@ const WLP_CSS = `
   font-size: 12px; font-weight: 700; color: #fff;
 }
 .wlp-edge-badge {
-  font-family: 'Barlow Condensed','Impact',cursive;
+  font-family: 'Bebas Neue','Impact',cursive;
   font-size: 15px; letter-spacing: 1px; padding: 2px 8px; border-radius: 5px;
 }
 /* EDGE BAR */
@@ -878,7 +843,7 @@ const WLP_CSS = `
   text-transform: uppercase; color: #4a4a6a; margin-bottom: 5px; text-align: center;
 }
 .wlp-rating-val {
-  font-family: 'Barlow Condensed','Impact',cursive;
+  font-family: 'Bebas Neue','Impact',cursive;
   font-size: 28px; letter-spacing: 1px; line-height: 1; text-align: center;
 }
 .wlp-rating-na {
@@ -1015,7 +980,7 @@ function openWLProfile(id){
   if(!document.getElementById('wlp-fonts')){
     const lnk=document.createElement('link');
     lnk.id='wlp-fonts';lnk.rel='stylesheet';
-    lnk.href='https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Caveat:wght@500;600&display=swap';
+    lnk.href='https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Caveat:wght@500;600&display=swap';
     document.head.appendChild(lnk);
   }
 

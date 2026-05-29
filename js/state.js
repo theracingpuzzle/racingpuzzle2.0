@@ -2,7 +2,7 @@
 // Central data object — single source of truth
 let D = {
   bets: [], bank: {start:0, current:0}, rules: [], dailyLog: [],
-  impulse: [], vBank: {start:500, current:500, bets:[]}, watchlist: []
+  impulse: [], vBank: {start:500, current:500, bets:[]}, watchlist: [], reviews: []
 };
 
 function load() {
@@ -11,7 +11,7 @@ function load() {
     if (s) {
       const p = JSON.parse(s);
       D = {...D, ...p};
-      ['bets','rules','dailyLog','impulse','watchlist'].forEach(k => {
+      ['bets','rules','dailyLog','impulse','watchlist','reviews'].forEach(k => {
         if (!Array.isArray(D[k])) D[k] = [];
       });
       if (!D.bank || typeof D.bank !== 'object') D.bank = {start:0, current:0};

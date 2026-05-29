@@ -254,23 +254,50 @@ async function checkWatchlistRunners(races){
   const alertEl=document.getElementById('t-wl-alerts');if(!alertEl)return;
   if(!alerts.length){alertEl.style.display='none';return;}
   alertEl.style.display='block';
+  const todayStr=td();
   alertEl.innerHTML='<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:11px;padding:12px 14px;">'
-    +'<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:8px;">🔔 Watchlist Running Today</div>'
+    +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#a78bfa;margin-bottom:8px;">🔔 Watchlist Running Today</div>'
     +alerts.map(function(a){
       const wid=(a.wlEntry&&a.wlEntry.id)?a.wlEntry.id:'';
-      return'<div data-wlid="'+wid+'" class="t-wl-item" style="padding:7px 0;border-bottom:1px solid rgba(167,139,250,.12);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;">'
-        +'<div>'
-          +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+a.horse+'</div>'
-          +'<div style="font-size:11px;color:var(--mut);">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
-          +(a.jockey?'<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div>':'')
+      const alreadyReviewed=(D.reviews||[]).some(function(r){
+        return r.profileId===wid&&r.date===todayStr;
+      });
+      return'<div style="padding:8px 0;border-bottom:1px solid rgba(167,139,250,.1);">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
+          +'<div style="flex:1;min-width:0;">'
+            +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:800;letter-spacing:.5px;color:var(--txt);">'+a.horse+'</div>'
+            +'<div style="font-size:11px;color:var(--mut);">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
+            +(a.jockey?'<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div>':'')
+          +'</div>'
+          +'<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;align-items:flex-end;">'
+            +(alreadyReviewed
+              ?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;background:rgba(74,222,128,.12);color:#4ade80;padding:3px 9px;border-radius:6px;border:1px solid rgba(74,222,128,.2);">✓ Reviewed</span>'
+              :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" class="t-wl-review-btn" style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:rgba(167,139,250,.15);color:#a78bfa;padding:4px 10px;border-radius:6px;border:1px solid rgba(167,139,250,.3);cursor:pointer;white-space:nowrap;">Review ✍️</button>'
+            )
+            +'<button data-wlid="'+wid+'" class="t-wl-profile-btn" style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:transparent;color:var(--mut);padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);cursor:pointer;white-space:nowrap;">Profile →</button>'
+          +'</div>'
         +'</div>'
-        +'<span style="font-family:monospace;font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;">Profile →</span>'
       +'</div>';
     }).join('')
   +'</div>';
   setTimeout(function(){
-    alertEl.querySelectorAll('.t-wl-item').forEach(function(el){
-      el.addEventListener('click',function(){var id=this.getAttribute('data-wlid');if(id)openWLForm(id);});
+    alertEl.querySelectorAll('.t-wl-review-btn').forEach(function(btn){
+      btn.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        openWLPostRaceReview(
+          btn.getAttribute('data-wlid'),
+          btn.getAttribute('data-horse'),
+          btn.getAttribute('data-course'),
+          btn.getAttribute('data-time'),
+          btn.getAttribute('data-race')
+        );
+      });
+    });
+    alertEl.querySelectorAll('.t-wl-profile-btn').forEach(function(btn){
+      btn.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        var id=btn.getAttribute('data-wlid');if(id)openWLProfile(id);
+      });
     });
   },0);
 }
@@ -306,178 +333,6 @@ function renderThisWeek(){
       +'<div style="font-family:monospace;font-size:10px;color:'+item.col+';flex-shrink:0;">'+dayLbl+'</div>'
     +'</div>';
   }).join('');
-}
-
-function renderRunningToday(){
-  const todayStr=td();
-  const el=document.getElementById('t-running-today');
-  if(!el)return;
-  // Find watchlist entries whose raceDate is today
-  const running=getWL().filter(function(e){return e.raceDate===todayStr;});
-  if(!running.length){el.style.display='none';return;}
-  el.style.display='block';
-  el.innerHTML='<div style="font-family:monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#a78bfa;margin-bottom:10px;">🏇 Running Today</div>'
-    +running.map(function(e){
-      const isTarget=(e.targets||[]).some(function(t){
-        return t.date===todayStr&&t.track&&e.track&&t.track.toLowerCase()===e.track.toLowerCase();
-      });
-      const hasResult=(e.raceResults||[]).some(function(r){return r.date===todayStr;});
-      const badge=isTarget
-        ?'<span style="font-family:monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(251,191,36,.15);color:#f59e0b;border:1px solid rgba(251,191,36,.3);">🎯 TARGET RACE</span>'
-        :'<span style="font-family:monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3);">👁 WATCHED</span>';
-      const btn=hasResult
-        ?'<button data-pid="'+e.id+'" class="_pl-btn" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.08);color:#a78bfa;font-family:monospace;font-size:10px;cursor:pointer;">Edit ✓</button>'
-        :'<button data-pid="'+e.id+'" class="_pl-btn" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.08);color:#f59e0b;font-family:monospace;font-size:10px;font-weight:700;cursor:pointer;">Log Performance</button>';
-      return'<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--sur2);border:1px solid var(--bdr);margin-bottom:8px;">'
-        +'<div style="flex:1;min-width:0;">'
-          +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">'+badge+'</div>'
-          +'<div style="font-size:14px;font-weight:700;color:var(--txt);">'+e.horse+'</div>'
-          +(e.track?'<div style="font-size:11px;color:var(--mut);">'+e.track+(e.raceDate?' · '+e.raceDate:'')+'</div>':'')
-        +'</div>'
-        +btn
-      +'</div>';
-    }).join('');
-  // Wire up buttons via delegation to avoid inline onclick quote issues
-  el.querySelectorAll('._pl-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){openPerfLog(btn.getAttribute('data-pid'));});
-  });
-}
-
-function openPerfLog(profileId){
-  const todayStr=td();
-  const entry=getWL().find(function(e){return e.id===profileId;});
-  if(!entry)return;
-  const existing=(entry.raceResults||[]).find(function(r){return r.date===todayStr;})||null;
-  const isTarget=(entry.targets||[]).some(function(t){
-    return t.date===todayStr&&t.track&&entry.track&&t.track.toLowerCase()===entry.track.toLowerCase();
-  });
-  // Find any bet logged today on this horse
-  const allBets=[...(D.bets||[]),...((D.vBank&&D.vBank.bets)||[])];
-  const linkedBet=allBets.find(function(b){
-    return b.date===todayStr&&(b.horse||'').toLowerCase()===(entry.horse||'').toLowerCase();
-  });
-
-  const existing_ran=existing?existing.ran:true;
-  const existing_pos=existing?existing.position:'';
-  const existing_trav=existing?existing.travelling:3;
-  const existing_going=existing?existing.goingSuited:null;
-  const existing_notes=existing?existing.notes:'';
-
-  const ov=document.createElement('div');
-  ov.id='_perf-log-ov';
-  ov.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.7);display:flex;flex-direction:column;justify-content:flex-end;';
-  ov.innerHTML=
-    '<div style="background:var(--sur);border-radius:20px 20px 0 0;padding:20px 18px env(safe-area-inset-bottom,24px);max-height:85vh;overflow-y:auto;">'
-      +'<div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);margin:0 auto 16px;"></div>'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">'
-        +(isTarget?'<span style="font-family:monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(251,191,36,.15);color:#f59e0b;border:1px solid rgba(251,191,36,.3);">🎯 TARGET RACE</span>':'')
-        +'<span style="font-size:16px;font-weight:700;color:var(--txt);">'+entry.horse+'</span>'
-      +'</div>'
-      +(linkedBet?'<div style="font-family:monospace;font-size:10px;color:var(--grn);margin-bottom:14px;">✓ Bet logged: '+linkedBet.odds+' · £'+linkedBet.stake+'</div>':'')
-
-      // Did it run?
-      +'<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">Did it run?</div>'
-      +'<div style="display:flex;gap:8px;margin-bottom:16px;">'
-        +'<button id="_pl-ran-yes" onclick="_plSetRan(true)" style="flex:1;padding:10px;border-radius:9px;border:1px solid '+(existing_ran?'var(--grn)':'var(--bdr)')+';background:'+(existing_ran?'rgba(38,168,101,.12)':'var(--sur2)')+';color:'+(existing_ran?'var(--grn)':'var(--mut)')+';font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;">Yes</button>'
-        +'<button id="_pl-ran-no" onclick="_plSetRan(false)" style="flex:1;padding:10px;border-radius:9px;border:1px solid '+(!existing_ran?'#fb923c':'var(--bdr)')+';background:'+(!existing_ran?'rgba(251,146,60,.1)':'var(--sur2)')+';color:'+(!existing_ran?'#fb923c':'var(--mut)')+';font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;">NR / Scratched</button>'
-      +'</div>'
-
-      // Position
-      +'<div id="_pl-ran-fields">'
-      +'<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">Finishing position</div>'
-      +'<div id="_pl-pos-btns" style="display:flex;gap:6px;margin-bottom:16px;">'+['1st','2nd','3rd','4th','5+'].map(function(p){
-        const sel=existing_pos===p;
-        return'<button data-pos="'+p+'" class="_pl-pos-btn" style="flex:1;padding:9px 4px;border-radius:8px;border:1px solid '+(sel?'var(--gld)':'var(--bdr)')+';background:'+(sel?'rgba(232,228,220,.12)':'var(--sur2)')+';color:'+(sel?'var(--gld)':'var(--mut)')+';font-family:monospace;font-size:11px;font-weight:700;cursor:pointer;">'+p+'</button>';
-      }).join('')+'</div>'
-
-      // Travelling
-      +'<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;">How did it travel?</div>'
-      +'<div style="display:flex;justify-content:space-between;font-family:monospace;font-size:9px;color:var(--mut);margin-bottom:4px;"><span>Never going</span><span>Won easily</span></div>'
-      +'<input id="_pl-trav" type="range" min="1" max="5" value="'+existing_trav+'" oninput="_plUpdTrav(this.value)" style="width:100%;accent-color:#a78bfa;margin-bottom:6px;">'
-      +'<div id="_pl-trav-lbl" style="font-family:monospace;font-size:11px;color:#a78bfa;text-align:center;margin-bottom:16px;">'+['','Never going','Outpaced','OK','Travelled well','Won in a canter'][existing_trav]+'</div>'
-
-      // Going suited
-      +'<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">Did going suit as expected?</div>'
-      +'<div style="display:flex;gap:8px;margin-bottom:16px;">'
-        +'<button id="_pl-gs-yes" onclick="_plSetGoing(true)" style="flex:1;padding:9px;border-radius:8px;border:1px solid '+(existing_going===true?'var(--grn)':'var(--bdr)')+';background:'+(existing_going===true?'rgba(38,168,101,.12)':'var(--sur2)')+';color:'+(existing_going===true?'var(--grn)':'var(--mut)')+';font-family:monospace;font-size:11px;cursor:pointer;">Yes</button>'
-        +'<button id="_pl-gs-no" onclick="_plSetGoing(false)" style="flex:1;padding:9px;border-radius:8px;border:1px solid '+(existing_going===false?'var(--red)':'var(--bdr)')+';background:'+(existing_going===false?'rgba(196,58,58,.08)':'var(--sur2)')+';color:'+(existing_going===false?'var(--red)':'var(--mut)')+';font-family:monospace;font-size:11px;cursor:pointer;">No</button>'
-        +'<button id="_pl-gs-uns" onclick="_plSetGoing(null)" style="flex:1;padding:9px;border-radius:8px;border:1px solid '+(existing_going===null?'var(--gld)':'var(--bdr)')+';background:'+(existing_going===null?'rgba(232,228,220,.08)':'var(--sur2)')+';color:'+(existing_going===null?'var(--gld)':'var(--mut)')+';font-family:monospace;font-size:11px;cursor:pointer;">Unsure</button>'
-      +'</div>'
-      +'</div>'
-
-      // Notes
-      +'<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">What did I learn?</div>'
-      +'<textarea id="_pl-notes" placeholder="One sentence observation…" style="width:100%;box-sizing:border-box;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:12px;font-size:14px;color:var(--txt);outline:none;resize:none;min-height:60px;margin-bottom:16px;">'+existing_notes+'</textarea>'
-
-      +'<button id="_pl-save-btn" style="width:100%;padding:15px;border-radius:12px;border:none;background:#a78bfa;color:#141414;font-family:monospace;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;margin-bottom:10px;">Save Performance</button>'
-      +'<button id="_pl-cancel-btn" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:monospace;font-size:11px;cursor:pointer;">Cancel</button>'
-    +'</div>';
-
-  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
-  document.body.appendChild(ov);
-  ov.querySelectorAll('._pl-pos-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){_plSetPos(btn,btn.getAttribute('data-pos'));});
-  });
-  const saveBtn=document.getElementById('_pl-save-btn');
-  if(saveBtn)saveBtn.addEventListener('click',function(){_plSave(profileId,todayStr,isTarget,linkedBet?linkedBet.id:null);});
-  const cancelBtn=document.getElementById('_pl-cancel-btn');
-  if(cancelBtn)cancelBtn.addEventListener('click',function(){ov.remove();});
-
-  // State
-  window._plState={ran:existing_ran,position:existing_pos,travelling:existing_trav,goingSuited:existing_going};
-  if(!existing_ran)document.getElementById('_pl-ran-fields').style.display='none';
-}
-
-function _plSetRan(v){
-  window._plState.ran=v;
-  const yBtn=document.getElementById('_pl-ran-yes');
-  const nBtn=document.getElementById('_pl-ran-no');
-  const fields=document.getElementById('_pl-ran-fields');
-  if(yBtn){yBtn.style.borderColor=v?'var(--grn)':'var(--bdr)';yBtn.style.background=v?'rgba(38,168,101,.12)':'var(--sur2)';yBtn.style.color=v?'var(--grn)':'var(--mut)';}
-  if(nBtn){nBtn.style.borderColor=!v?'#fb923c':'var(--bdr)';nBtn.style.background=!v?'rgba(251,146,60,.1)':'var(--sur2)';nBtn.style.color=!v?'#fb923c':'var(--mut)';}
-  if(fields)fields.style.display=v?'block':'none';
-}
-function _plSetPos(btn,pos){
-  window._plState.position=pos;
-  btn.closest('div').querySelectorAll('button').forEach(function(b){b.style.borderColor='var(--bdr)';b.style.background='var(--sur2)';b.style.color='var(--mut)';});
-  btn.style.borderColor='var(--gld)';btn.style.background='rgba(232,228,220,.12)';btn.style.color='var(--gld)';
-}
-function _plUpdTrav(v){
-  window._plState.travelling=parseInt(v);
-  const lbl=document.getElementById('_pl-trav-lbl');
-  const labels=['','Never going','Outpaced','OK','Travelled well','Won in a canter'];
-  if(lbl){lbl.textContent=labels[v]||'';}
-}
-function _plSetGoing(v){
-  window._plState.goingSuited=v;
-  const yBtn=document.getElementById('_pl-gs-yes');
-  const nBtn=document.getElementById('_pl-gs-no');
-  const uBtn=document.getElementById('_pl-gs-uns');
-  if(yBtn){yBtn.style.borderColor=v===true?'var(--grn)':'var(--bdr)';yBtn.style.background=v===true?'rgba(38,168,101,.12)':'var(--sur2)';yBtn.style.color=v===true?'var(--grn)':'var(--mut)';}
-  if(nBtn){nBtn.style.borderColor=v===false?'var(--red)':'var(--bdr)';nBtn.style.background=v===false?'rgba(196,58,58,.08)':'var(--sur2)';nBtn.style.color=v===false?'var(--red)':'var(--mut)';}
-  if(uBtn){uBtn.style.borderColor=v===null?'var(--gld)':'var(--bdr)';uBtn.style.background=v===null?'rgba(232,228,220,.08)':'var(--sur2)';uBtn.style.color=v===null?'var(--gld)':'var(--mut)';}
-}
-function _plSave(profileId,date,isTargetRace,betId){
-  const s=window._plState||{};
-  const notes=(document.getElementById('_pl-notes')||{value:''}).value.trim();
-  const entry=getWL().find(function(e){return e.id===profileId;});
-  if(!entry)return;
-  if(!entry.raceResults)entry.raceResults=[];
-  // Remove any existing result for today
-  entry.raceResults=entry.raceResults.filter(function(r){return r.date!==date;});
-  entry.raceResults.push({
-    id:gid(),date:date,track:entry.track||'',raceName:entry.raceName||'',
-    ran:s.ran!==false,position:s.ran?s.position||'':'',
-    travelling:s.ran?s.travelling||3:null,
-    goingSuited:s.ran?s.goingSuited:null,
-    isTargetRace:isTargetRace||false,
-    betId:betId||null,notes:notes
-  });
-  entry.updatedAt=Date.now();
-  D.watchlist=(D.watchlist||[]).map(function(e){return e.id===profileId?entry:e;});
-  save();
-  const ov=document.getElementById('_perf-log-ov');if(ov)ov.remove();
-  renderRunningToday();
 }
 
 function renderChips(){
@@ -526,7 +381,6 @@ function renderToday(){
 
   // ── Today's bets ──
   renderTodayBets(tb, vtb);
-  renderRunningToday();
 
   // ── Outstanding ──
   renderOutstanding();

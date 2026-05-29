@@ -141,7 +141,7 @@ async function _supaFlushSilent(){
   const errors=[];
   try{await _supa('POST','profiles',[{id:SUPA_USER_ID,display_name:'Racing Puzzle User',updated_at:new Date().toISOString()}]);}
   catch(e){errors.push('profiles: '+e.message);}
-  const steps=[['bank',_syncBank],['bets',_syncBets],['horse_profiles',_syncProfiles],['rules',_syncRules],['daily_log',_syncDailyLog],['settings',_syncSettings]];
+  const steps=[['bank',_syncBank],['bets',_syncBets],['horse_profiles',_syncProfiles],['rules',_syncRules],['daily_log',_syncDailyLog],['settings',_syncSettings],['horse_reviews',_syncReviews]];
   for(let i=0;i<steps.length;i++){
     try{await steps[i][1]();}
     catch(e){errors.push(steps[i][0]+': '+e.message);console.warn('[Supabase]',steps[i][0],e.message);}
@@ -230,6 +230,7 @@ async function _syncProfiles(){
     distance_pref:e.distancePref||null,
     track_pref:e.trackPref||null,
     conditions_notes:e.conditionsNotes||null,
+    needs_review:e.needsReview||false,
     created_at:e.createdAt?new Date(e.createdAt).toISOString():new Date().toISOString(),
     updated_at:e.updatedAt?new Date(e.updatedAt).toISOString():new Date().toISOString()
   };});
@@ -334,7 +335,7 @@ async function supaLoad(){
   const uid=SUPA_USER_ID;
   try{
     // Fetch all tables in parallel
-    const [bankRows,betRows,profileRows,obsRows,targetRows,ruleRows,logRows,settingRows]=await Promise.all([
+    const [bankRows,betRows,profileRows,obsRows,targetRows,ruleRows,logRows,settingRows,reviewRows]=await Promise.all([
       fetch(SUPA_URL+'/rest/v1/bank?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/bets?user_id=eq.'+uid+'&order=created_at.asc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/horse_profiles?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
@@ -342,7 +343,8 @@ async function supaLoad(){
       fetch(SUPA_URL+'/rest/v1/profile_targets?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/rules?user_id=eq.'+uid+'&order=sort_order.asc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/daily_log?user_id=eq.'+uid+'&order=log_date.desc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/settings?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();})
+      fetch(SUPA_URL+'/rest/v1/settings?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/horse_reviews?user_id=eq.'+uid+'&order=date.desc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();})
     ]);
 
     // ── Bank ──
@@ -438,6 +440,26 @@ async function supaLoad(){
       });
     }
 
+    // ── Reviews ──
+    if(Array.isArray(reviewRows)){
+      D.reviews=reviewRows.map(function(r){return{
+        id:r.id,profileId:r.profile_id,
+        date:r.date||'',raceName:r.race_name||'',course:r.course||'',
+        result:r.result||'',position:r.position||'',beatenDistance:r.beaten_distance||'',
+        verdict:r.verdict||'',mrAdjustment:r.mr_adjustment||0,
+        goingConfirmed:r.going_confirmed||'',backNextTime:r.back_next_time||'',
+        notes:r.notes||'',source:r.source||'manual',
+        needsReview:r.needs_review||false,
+        createdAt:new Date(r.created_at).getTime()
+      };});
+    }
+    // ── needsReview flag onto watchlist entries ──
+    if(Array.isArray(D.watchlist)&&Array.isArray(profileRows)){
+      const nrMap={};
+      profileRows.forEach(function(p){nrMap[p.id]=p.needs_review||false;});
+      D.watchlist.forEach(function(w){w.needsReview=nrMap[w.id]||false;});
+    }
+
     saveLocal();
     return true;
   }catch(e){console.warn('[Supabase] load error:',e.message);return false;}
@@ -480,6 +502,32 @@ function loadAILimitField(){
   updateAIUsageDisplay();
 }
 
+
+// ── Horse Reviews ──
+async function _syncReviews(){
+  const uid=SUPA_USER_ID;
+  const reviews=D.reviews||[];
+  if(!reviews.length){
+    await _supa('DELETE','horse_reviews',null,'user_id=eq.'+uid);
+    return;
+  }
+  const rows=reviews.map(function(r){return{
+    id:r.id,user_id:uid,profile_id:r.profileId,
+    date:r.date||null,race_name:r.raceName||null,course:r.course||null,
+    result:r.result||null,position:r.position||null,beaten_distance:r.beatenDistance||null,
+    verdict:r.verdict||null,mr_adjustment:r.mrAdjustment||0,
+    going_confirmed:r.goingConfirmed||null,back_next_time:r.backNextTime||null,
+    notes:r.notes||null,source:r.source||'manual',
+    needs_review:r.needsReview||false,
+    created_at:r.createdAt?new Date(r.createdAt).toISOString():new Date().toISOString()
+  };});
+  const ids=rows.map(function(r){return r.id;});
+  if(ids.length){
+    await _supa('DELETE','horse_reviews',null,'user_id=eq.'+uid+'&id=not.in.('+ids.join(',')+')');
+  }
+  await _supaUpsert('horse_reviews',rows);
+}
+
 function exportData(){
   const payload={
     exportedAt:new Date().toISOString(),
@@ -489,6 +537,7 @@ function exportData(){
     bank:D.bank||{},
     vBank:{start:(D.vBank&&D.vBank.start)||500,current:(D.vBank&&D.vBank.current)||500},
     watchlist:(D.watchlist||[]),
+    reviews:(D.reviews||[]),
     rules:(D.rules||[]),
     dailyLog:(D.dailyLog||[]),
     settings:(D.settings||{})
@@ -521,6 +570,7 @@ function importDataPrompt(){
         if(p.vBank){D.vBank=D.vBank||{};D.vBank.start=p.vBank.start;D.vBank.current=p.vBank.current;}
         if(Array.isArray(p.virtualBets)){D.vBank=D.vBank||{};D.vBank.bets=p.virtualBets;}
         if(Array.isArray(p.watchlist))D.watchlist=p.watchlist;
+        if(Array.isArray(p.reviews))D.reviews=p.reviews;
         if(Array.isArray(p.rules))D.rules=p.rules;
         if(Array.isArray(p.dailyLog))D.dailyLog=p.dailyLog;
         if(p.settings)D.settings=p.settings;

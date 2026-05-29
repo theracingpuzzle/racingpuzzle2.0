@@ -309,7 +309,7 @@ function renderWLList(){
       html+='<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
         +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
         +'<div class="wll-main">'
-          +'<div class="wll-name">'+(e.horse||'Unknown')+'</div>'
+          +'<div class="wll-name">'+(e.horse||'Unknown')+(e.needsReview?'<span style="font-size:9px;font-weight:800;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:1px;background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.25);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:middle;">REVIEW</span>':'')+'</div>'
           +'<div class="wll-sub">'+subParts.join(' · ')+'</div>'
           +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
         +'</div>'
@@ -361,6 +361,117 @@ function renderWLEntry(e){
 }
 
 
+
+
+// ── POST-RACE REVIEW SHEET ──
+function openWLPostRaceReview(profileId,horse,course,time,raceName){
+  const existing=document.getElementById('wl-review-modal');if(existing)existing.remove();
+  const wl=getWL();
+  const entry=wl.find(function(x){return x.id===profileId;});
+  const currentMR=entry?parseFloat(entry.myRating)||null:null;
+  const modal=document.createElement('div');
+  modal.id='wl-review-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;';
+  const F='width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',sans-serif;outline:none;box-sizing:border-box;';
+  const L='display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;';
+  modal.innerHTML=
+    '<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:16px 16px 0 0;padding:0;width:100%;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">'
+    +'<div style="display:flex;justify-content:center;padding:10px 0 0;"><div style="width:36px;height:4px;border-radius:2px;background:#1c1c30;"></div></div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid #1c1c30;">'
+      +'<div>'
+        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:800;letter-spacing:.5px;color:#fff;">✍️ Race Review</div>'
+        +'<div style="font-size:11px;color:#3a3a5c;">'+(horse||'')+(course?' · '+course:'')+(time?' · '+time:'')+'</div>'
+      +'</div>'
+      +'<button onclick="document.getElementById(\'wl-review-modal\').remove()" style="width:30px;height:30px;border-radius:50%;background:#111120;border:1px solid #1c1c30;color:#888;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>'
+    +'</div>'
+    +'<div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px;">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+      +'<div><label style="'+L+'">Date</label><input type="date" id="rvw-date" value="'+td()+'" style="'+F+'"></div>'
+      +'<div><label style="'+L+'">Course</label><input type="text" id="rvw-course" value="'+(course||'')+'" placeholder="e.g. Haydock" style="'+F+'"></div>'
+    +'</div>'
+    +'<div><label style="'+L+'">Race Name</label><input type="text" id="rvw-race" value="'+(raceName||'')+'" placeholder="e.g. Sandy Lane Stakes" style="'+F+'"></div>'
+    +'<div><label style="'+L+'">Result</label><div style="display:flex;gap:6px;">'
+    +['win','place','unplaced','nr'].map(function(r){const cols={win:'#4ade80',place:'#f59e0b',unplaced:'#f87171',nr:'#3a3a5c'};return'<button data-result="'+r+'" data-grp="result" class="rvw-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid '+cols[r]+'40;background:'+cols[r]+'10;color:'+cols[r]+';font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;" onclick="wlRvwToggle(this)">'+r+'</button>';}).join('')
+    +'</div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
+      +'<div><label style="'+L+'">Finish Position</label><input type="text" id="rvw-pos" placeholder="e.g. 3rd" style="'+F+'"></div>'
+      +'<div><label style="'+L+'">Beaten Distance</label><input type="text" id="rvw-beaten" placeholder="e.g. 2.5L" style="'+F+'"></div>'
+    +'</div>'
+    +'<div><label style="'+L+'">Verdict</label><div style="display:flex;gap:6px;">'
+    +[{k:'upgrade',col:'#4ade80',lbl:'Upgrade ↑'},{k:'hold',col:'#60a5fa',lbl:'Hold →'},{k:'downgrade',col:'#f87171',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid '+v.col+'40;background:'+v.col+'10;color:'+v.col+';font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
+    +'</div></div>'
+    +(currentMR?'<div><label style="'+L+'">MR Adjustment <span style="color:#3a3a5c;">(current: '+currentMR+')</span></label><input type="number" id="rvw-mr-adj" placeholder="e.g. 5 or -3" style="'+F+'"></div>':'<input type="hidden" id="rvw-mr-adj" value="0">')
+    +'<div><label style="'+L+'">Conditions Handled?</label><div style="display:flex;gap:6px;">'
+    +[{k:'confirmed',lbl:'✓ Confirmed'},{k:'mixed',lbl:'~ Mixed'},{k:'against',lbl:'✗ Against'}].map(function(g){return'<button data-going="'+g.k+'" data-grp="going" class="rvw-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:rgba(255,255,255,.4);font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.5px;cursor:pointer;" onclick="wlRvwToggle(this)">'+g.lbl+'</button>';}).join('')
+    +'</div></div>'
+    +'<div><label style="'+L+'">Back Next Time?</label><div style="display:flex;gap:6px;">'
+    +[{k:'yes',col:'#4ade80',lbl:'Yes'},{k:'depends',col:'#f59e0b',lbl:'Depends'},{k:'no',col:'#f87171',lbl:'No'}].map(function(b){return'<button data-back="'+b.k+'" data-grp="back" class="rvw-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid '+b.col+'40;background:'+b.col+'10;color:'+b.col+';font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;" onclick="wlRvwToggle(this)">'+b.lbl+'</button>';}).join('')
+    +'</div></div>'
+    +'<div><label style="'+L+'">Notes</label><textarea id="rvw-notes" placeholder="What you saw, sectionals, paddock notes…" style="'+F+'min-height:64px;resize:vertical;"></textarea></div>'
+    +'<button onclick="saveWLReview(\''+profileId+'\',\''+horse+'\',\''+course+'\')" style="width:100%;padding:13px;border-radius:10px;border:none;background:#8b5cf6;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-bottom:4px;">Save Review</button>'
+    +'</div></div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click',function(ev){if(ev.target===modal)modal.remove();});
+}
+
+function wlRvwToggle(btn){
+  const grp=btn.dataset.grp;
+  document.querySelectorAll('.rvw-btn[data-grp="'+grp+'"]').forEach(function(b){
+    const isThis=b===btn;
+    b.style.opacity=isThis?'1':'0.4';
+    b.dataset.selected=isThis?'1':'';
+  });
+}
+
+function _rvwGet(grp){
+  const sel=document.querySelector('.rvw-btn[data-grp="'+grp+'"][data-selected="1"]');
+  if(!sel)return'';
+  return sel.dataset[grp]||sel.dataset.result||sel.dataset.verdict||sel.dataset.going||sel.dataset.back||'';
+}
+
+function saveWLReview(profileId,horse,course){
+  const wl=getWL();
+  const date=document.getElementById('rvw-date').value||td();
+  const rvwCourse=(document.getElementById('rvw-course').value||course||'').trim();
+  const raceName=document.getElementById('rvw-race').value||'';
+  const mrAdjEl=document.getElementById('rvw-mr-adj');
+  const mrAdj=mrAdjEl?parseInt(mrAdjEl.value)||0:0;
+
+  const review={
+    id:gid(),profileId:profileId,
+    date:date,raceName:raceName,course:rvwCourse,
+    result:_rvwGet('result'),
+    position:(document.getElementById('rvw-pos').value||'').trim(),
+    beatenDistance:(document.getElementById('rvw-beaten').value||'').trim(),
+    verdict:_rvwGet('verdict'),
+    mrAdjustment:mrAdj,
+    goingConfirmed:_rvwGet('going'),
+    backNextTime:_rvwGet('back'),
+    notes:(document.getElementById('rvw-notes').value||'').trim(),
+    source:'manual',createdAt:Date.now()
+  };
+
+  if(!D.reviews)D.reviews=[];
+  D.reviews.push(review);
+
+  // Apply MR adjustment
+  if(mrAdj){
+    const idx=D.watchlist.findIndex(function(x){return x.id===profileId;});
+    if(idx>-1){
+      const cur=parseFloat(D.watchlist[idx].myRating)||0;
+      D.watchlist[idx].myRating=String(cur+mrAdj);
+      D.watchlist[idx].updatedAt=Date.now();
+    }
+  }
+  // Clear needsReview flag
+  const idx2=D.watchlist.findIndex(function(x){return x.id===profileId;});
+  if(idx2>-1&&D.watchlist[idx2].needsReview)D.watchlist[idx2].needsReview=false;
+
+  save();
+  document.getElementById('wl-review-modal').remove();
+  if(typeof checkWatchlistRunners==='function'&&window._cachedRaces)checkWatchlistRunners(window._cachedRaces);
+  if(document.getElementById('wlp-modal'))openWLProfile(profileId);
+}
 
 // ── WATCHLIST DOSSIER MODAL ──
 let _wlDossier={obs:[],targets:[],goingPrefs:[]};
@@ -1182,7 +1293,41 @@ function _wlpBuildHTML(e){
 
   h+='</div>'; // split
 
-  // SECTION 5: CONDITIONS
+  // SECTION 5: REVIEWS
+  const profileReviews=(D.reviews||[]).filter(function(r){return r.profileId===e.id;}).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+  const VERDICT_META={upgrade:{col:'#4ade80',label:'Upgrade ↑'},hold:{col:'#60a5fa',label:'Hold →'},downgrade:{col:'#f87171',label:'Downgrade ↓'}};
+  const RESULT_COL={win:'#4ade80',place:'#f59e0b',unplaced:'#f87171',nr:'#3a3a5c'};
+  h+='<div class="wlp-section">';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Race Reviews</span></div>';
+  h+='<span class="wlp-section-action" onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\'\')">Add +</span></div>';
+  if(profileReviews.length){
+    profileReviews.forEach(function(r){
+      const vm=VERDICT_META[r.verdict]||null;
+      const rc=RESULT_COL[r.result]||'#3a3a5c';
+      h+='<div style="padding:11px 13px;border-bottom:1px solid #1c1c30;">';
+      h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">';
+      h+='<div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(r.raceName||r.course||'Race')+'</div>';
+      h+='<div style="font-size:11px;color:#3a3a5c;">'+[r.date?_wlpFmt(r.date):'',r.course].filter(Boolean).join(' · ')+'</div></div>';
+      h+='<div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">';
+      if(r.result)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>';
+      if(vm)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;padding:2px 8px;border-radius:5px;background:'+vm.col+'15;border:1px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';
+      h+='</div></div>';
+      const chips=[];
+      if(r.position)chips.push('Pos: '+r.position);
+      if(r.beatenDistance)chips.push(r.beatenDistance);
+      if(r.mrAdjustment)chips.push((r.mrAdjustment>0?'+':'')+r.mrAdjustment+' MR');
+      if(r.goingConfirmed)chips.push('Going: '+r.goingConfirmed);
+      if(r.backNextTime)chips.push('Back: '+r.backNextTime);
+      if(chips.length)h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">'+chips.map(function(c){return'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#3a3a5c;">'+c+'</span>';}).join('')+'</div>';
+      if(r.notes)h+='<div style="font-size:12px;color:#7a8099;font-style:italic;line-height:1.5;">'+esc(r.notes)+'</div>';
+      h+='</div>';
+    });
+  } else {
+    h+='<div style="padding:14px 13px;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;color:#3a3a5c;font-style:italic;text-align:center;">No reviews yet — tap Add after a run</div>';
+  }
+  h+='</div>';
+
+  // SECTION 6: CONDITIONS
   h+='<div class="wlp-section">';
   h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Conditions Profile</span></div></div>';
   h+='<div class="wlp-cond-grid" style="grid-template-columns:repeat('+condItems.length+',1fr);border-bottom:1px solid #1c1c30;">';

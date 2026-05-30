@@ -311,164 +311,186 @@ function generateWatchlistPDF(){
   const alerts=window._wlAlerts||[];
   if(!alerts.length){alert('No watchlist horses running today.');return;}
 
-  // Load jsPDF dynamically if not already loaded
   function _buildPDF(){
     const {jsPDF}=window.jspdf;
     const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    const PW=210, PH=297, M=14, CW=PW-M*2;
-    const today=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const PW=210,PH=297,M=12,CW=PW-M*2;
+    const dateStr=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-    // ── Colour palette ──
-    const C={
-      bg:[5,5,8], sur:[13,13,24], bdr:[28,28,48],
-      txt:[212,216,232], mut:[58,58,92],
-      pur:[139,92,246], purL:[167,139,250],
-      gld:[245,158,11], grn:[74,222,128],
-      blu:[96,165,250], ora:[251,146,60],
+    // ── Colours ──
+    const BLACK=[15,23,36];
+    const NAVY=[15,23,36];
+    const WHITE=[255,255,255];
+    const LGREY=[245,246,248];
+    const MGREY=[200,205,215];
+    const DGREY=[100,110,130];
+    const BLUE=[59,130,246];
+    const GREEN=[22,163,74];
+    const ORANGE=[234,88,12];
+    const PURPLE=[124,58,237];
+    const GOLD=[217,119,6];
+    const RED=[220,38,38];
+
+    const REASON_COL={
+      'eye-catcher':PURPLE,'future-target':ORANGE,
+      'trainer-intel':BLUE,'form-study':RED,'tip-source':GOLD
+    };
+    const REASON_LBL={
+      'eye-catcher':'Eye Catcher','future-target':'Future Target',
+      'trainer-intel':'Trainer Intel','form-study':'Form Study','tip-source':'Tip Source'
     };
 
-    // ── Helpers ──
-    function rgb(c){return{r:c[0],g:c[1],b:c[2]};}
-    function setFill(c){doc.setFillColor(c[0],c[1],c[2]);}
-    function setStroke(c){doc.setDrawColor(c[0],c[1],c[2]);}
-    function setTxt(c){doc.setTextColor(c[0],c[1],c[2]);}
-    function roundRect(x,y,w,h,r,fill,stroke){
-      doc.roundedRect(x,y,w,h,r,r,fill&&stroke?'FD':fill?'F':'D');
-    }
+    function sf(...c){doc.setFillColor(...c);}
+    function ss(...c){doc.setDrawColor(...c);}
+    function st(...c){doc.setTextColor(...c);}
+    function rr(x,y,w,h,r,mode){doc.roundedRect(x,y,w,h,r,r,mode||'F');}
 
-    // ── Background ──
-    setFill(C.bg); doc.rect(0,0,PW,PH,'F');
+    // ── Page background ──
+    sf(...LGREY); doc.rect(0,0,PW,PH,'F');
 
     // ── Header bar ──
-    setFill([18,10,40]); doc.rect(0,0,PW,22,'F');
-    // purple accent line
-    setFill(C.pur); doc.rect(0,21.5,PW,.5,'F');
-    // 🧩 brand
+    sf(...NAVY); doc.rect(0,0,PW,20,'F');
     doc.setFont('helvetica','bold');
-    doc.setFontSize(13);
-    setTxt([255,255,255]);
-    doc.text('RACING',M,14);
-    doc.setTextColor(C.pur[0],C.pur[1],C.pur[2]);
-    doc.text('PUZZLE',M+26,14);
-    // Date right-aligned
+    doc.setFontSize(14);
+    st(...WHITE);
+    doc.text('Racing Puzzle',M,13);
     doc.setFont('helvetica','normal');
     doc.setFontSize(7);
-    setTxt(C.mut);
-    doc.text(today,PW-M,14,{align:'right'});
+    st(180,185,195);
+    doc.text('Watchlist Briefing',M+36,13);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(7);
+    st(150,155,170);
+    doc.text(dateStr,PW-M,13,{align:'right'});
 
     // ── Sub-header ──
+    sf(...WHITE); rr(M,24,CW,12,2,'F');
+    ss(...MGREY); doc.setLineWidth(.2); rr(M,24,CW,12,2,'D');
     doc.setFont('helvetica','bold');
     doc.setFontSize(8);
-    setTxt(C.purL);
-    doc.text('WATCHLIST RUNNING TODAY',M,32);
-    doc.setFontSize(7);
+    st(...NAVY);
+    doc.text(alerts.length+' horse'+(alerts.length===1?'':'s')+' from your watchlist running today',M+4,31.5);
     doc.setFont('helvetica','normal');
-    setTxt(C.mut);
-    doc.text(alerts.length+' horse'+(alerts.length>1?'s':'')+' from your Puzzle Profiler',M,37);
-    // divider
-    setStroke(C.bdr); doc.setLineWidth(.2); doc.line(M,40,PW-M,40);
+    doc.setFontSize(7);
+    st(...DGREY);
+    doc.text('theracingpuzzle.github.io',PW-M-4,31.5,{align:'right'});
 
-    let y=45;
-    const GAP=4;
+    let y=40;
 
-    alerts.forEach(function(a,idx){
+    alerts.forEach(function(a){
       const w=a.wlEntry||{};
-      const obs=(w.observations||[]).sort(function(x,z){return(z.date||'').localeCompare(x.date||'');});
+      const obs=(w.observations||[]).slice().sort(function(x,z){return(z.date||'').localeCompare(x.date||'');});
       const tgts=w.targets||[];
-      const revs=(D.reviews||[]).filter(function(r){return r.profileId===w.id;}).sort(function(x,z){return(z.date||'').localeCompare(x.date||'');});
+      const revs=(D.reviews||[]).filter(function(r){return r.profileId===w.id;}).slice().sort(function(x,z){return(z.date||'').localeCompare(x.date||'');});
       const lastRev=revs[0]||null;
       const mr=w.myRating?parseFloat(w.myRating):null;
       const or=w.currentRating?parseFloat(w.currentRating):null;
+      const hasObs=obs.length>0;
+      const hasTgt=tgts.length>0;
+      const hasRev=!!lastRev;
+      const hasIntel=!!(w.trainerIntel);
 
       // Estimate card height
-      let cardH=36;
-      if(w.reasonNote)cardH+=5;
-      if(obs.length)cardH+=5+(Math.min(obs.length,2)*12);
-      if(tgts.length)cardH+=5+8;
-      if(lastRev)cardH+=5+8;
-      if(w.conditionsNotes||w.trainerIntel)cardH+=5+8;
-      cardH+=6;
+      let ch=28; // header section always
+      if(w.reasonNote)ch+=5;
+      if(hasObs)ch+=6+(Math.min(obs.length,2)*10);
+      if(hasRev)ch+=6+8;
+      if(hasTgt)ch+=6+6;
+      if(hasIntel)ch+=6+6;
+      ch+=4; // bottom padding
 
-      // Page break
-      if(y+cardH>PH-16){
+      // Page break check
+      if(y+ch>PH-14){
         doc.addPage();
-        setFill(C.bg); doc.rect(0,0,PW,PH,'F');
-        y=16;
+        sf(...LGREY); doc.rect(0,0,PW,PH,'F');
+        y=14;
       }
 
+      const accentCol=REASON_COL[w.reason||'eye-catcher']||PURPLE;
+
+      // ── Card shadow (simulate) ──
+      sf(220,222,228); rr(M+.5,y+.8,CW,ch,2,'F');
+
       // ── Card background ──
-      setFill(C.sur);
-      setStroke(C.bdr);
-      doc.setLineWidth(.2);
-      roundRect(M,y,CW,cardH,2,true,true);
+      sf(...WHITE); rr(M,y,CW,ch,2,'F');
 
-      // ── Category colour bar (left edge) ──
-      const REASON_COL={
-        'eye-catcher':C.purL,'future-target':C.ora,
-        'trainer-intel':C.blu,'form-study':[239,68,68],'tip-source':[234,179,8]
-      };
-      const barCol=REASON_COL[w.reason||'eye-catcher']||C.purL;
-      setFill(barCol); doc.rect(M,y,1.5,cardH,'F');
+      // ── Left accent bar ──
+      sf(...accentCol); doc.rect(M,y,2,ch,'F');
+      // round the left corners of accent bar
+      sf(...accentCol); rr(M,y,3,3,1.5,'F');
+      sf(...accentCol); rr(M,y+ch-3,3,3,1.5,'F');
 
+      const TX=M+6, TW=CW-10;
       let cy=y+7;
-      const TX=M+5;
-      const TW=CW-8;
+
+      // ── Race badge top-right ──
+      const raceStr=a.time+(a.course?' · '+a.course:'');
+      sf(...LGREY); rr(PW-M-4-doc.getTextWidth(raceStr)*1.8,y+3,doc.getTextWidth(raceStr)+8,5.5,1.5,'F');
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(7);
+      st(...DGREY);
+      doc.text(raceStr,PW-M-4,y+7.2,{align:'right'});
 
       // ── Horse name ──
       doc.setFont('helvetica','bold');
-      doc.setFontSize(12);
-      setTxt([255,255,255]);
+      doc.setFontSize(13);
+      st(...BLACK);
       doc.text(a.horse,TX,cy);
+      cy+=5;
 
-      // ── Race info right-aligned ──
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(7.5);
-      setTxt(C.mut);
-      const raceStr=a.time+(a.course?' · '+a.course:'')+(a.raceName?' · '+a.raceName:'');
-      doc.text(raceStr,PW-M-2,cy,{align:'right'});
-      cy+=4.5;
-
-      // ── Trainer + jockey ──
-      const sub=[];
-      if(w.trainer)sub.push(w.trainer);
-      if(a.jockey)sub.push('J: '+a.jockey);
-      if(sub.length){
-        doc.setFontSize(7.5);
-        setTxt(C.mut);
-        doc.text(sub.join('  ·  '),TX,cy);
-        cy+=4.5;
+      // ── Race name ──
+      if(a.raceName){
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(7);
+        st(...DGREY);
+        doc.text(a.raceName,TX,cy,{maxWidth:TW-40});
+        cy+=4;
       }
 
-      // ── Reason tag + OR/MR pills ──
-      const REASON_LBL={'eye-catcher':'Eye Catcher','future-target':'Future Target','trainer-intel':'Trainer Intel','form-study':'Form Study','tip-source':'Tip Source'};
-      const rlbl=REASON_LBL[w.reason]||'Eye Catcher';
+      // ── Trainer & jockey ──
+      const jt=[];
+      if(a.jockey)jt.push({lbl:'J: '+a.jockey,col:GREEN});
+      if(w.trainer)jt.push({lbl:'T: '+w.trainer,col:ORANGE});
+      if(jt.length){
+        let px=TX;
+        jt.forEach(function(item){
+          doc.setFont('helvetica','normal');
+          doc.setFontSize(7.5);
+          st(...item.col);
+          doc.text(item.lbl,px,cy);
+          px+=doc.getTextWidth(item.lbl)+6;
+        });
+        cy+=5;
+      }
+
+      // ── Pills row: reason tag + OR + MR ──
+      let px=TX;
+      // Reason tag
+      const rlbl=REASON_LBL[w.reason]||'Watchlist';
+      const rw2=doc.getTextWidth(rlbl)+6;
       doc.setFontSize(6.5);
       doc.setFont('helvetica','bold');
-      const rw=doc.getTextWidth(rlbl)+4;
-      setFill([barCol[0],barCol[1],barCol[2],0.15]);
-      doc.setGState(new doc.GState({opacity:.12}));
-      roundRect(TX,cy-2.5,rw+2,4.5,1,true,false);
-      doc.setGState(new doc.GState({opacity:1}));
-      setTxt(barCol);
-      doc.text(rlbl,TX+1,cy+.5);
-      let pillX=TX+rw+5;
+      // background
+      doc.setFillColor(accentCol[0],accentCol[1],accentCol[2],.12);
+      sf(accentCol[0]+(255-accentCol[0])*.85,accentCol[1]+(255-accentCol[1])*.85,accentCol[2]+(255-accentCol[2])*.85);
+      rr(px,cy-3,rw2,5,1.5,'F');
+      st(...accentCol);
+      doc.text(rlbl,px+3,cy+.5);
+      px+=rw2+4;
 
       if(or){
-        const orStr='OR '+or;
-        const ow=doc.getTextWidth(orStr)+4;
-        doc.setGState(new doc.GState({opacity:.12}));
-        setFill(C.purL); roundRect(pillX,cy-2.5,ow+2,4.5,1,true,false);
-        doc.setGState(new doc.GState({opacity:1}));
-        setTxt(C.purL); doc.text(orStr,pillX+1,cy+.5);
-        pillX+=ow+6;
+        const lbl='OR '+or;
+        const pw2=doc.getTextWidth(lbl)+6;
+        sf(219,234,254); rr(px,cy-3,pw2,5,1.5,'F');
+        st(...BLUE); doc.text(lbl,px+3,cy+.5);
+        px+=pw2+4;
       }
       if(mr){
-        const mrStr='MR '+mr;
-        const mw=doc.getTextWidth(mrStr)+4;
-        doc.setGState(new doc.GState({opacity:.12}));
-        setFill(C.gld); roundRect(pillX,cy-2.5,mw+2,4.5,1,true,false);
-        doc.setGState(new doc.GState({opacity:1}));
-        setTxt(C.gld); doc.text(mrStr,pillX+1,cy+.5);
+        const lbl='MR '+mr;
+        const pw2=doc.getTextWidth(lbl)+6;
+        sf(254,243,199); rr(px,cy-3,pw2,5,1.5,'F');
+        st(...GOLD); doc.text(lbl,px+3,cy+.5);
+        px+=pw2+4;
       }
       cy+=6;
 
@@ -476,120 +498,119 @@ function generateWatchlistPDF(){
       if(w.reasonNote){
         doc.setFont('helvetica','italic');
         doc.setFontSize(7);
-        setTxt(C.mut);
-        doc.text('"'+w.reasonNote+'"',TX,cy,{maxWidth:TW-2});
+        st(...DGREY);
+        doc.text('"'+w.reasonNote+'"',TX,cy,{maxWidth:TW});
         cy+=5;
       }
 
       // ── Divider ──
-      setStroke(C.bdr); doc.setLineWidth(.15); doc.line(TX,cy,M+CW-3,cy);
+      ss(...MGREY); doc.setLineWidth(.15);
+      doc.line(TX,cy,M+CW-4,cy);
       cy+=4;
 
-      // ── Observations (last 2) ──
-      if(obs.length){
+      // ── Observations ──
+      if(hasObs){
         doc.setFont('helvetica','bold');
         doc.setFontSize(6.5);
-        setTxt(C.purL);
+        st(...NAVY);
         doc.text('OBSERVATIONS ('+obs.length+')',TX,cy);
-        cy+=4;
+        cy+=3.5;
         obs.slice(0,2).forEach(function(o){
           const res=o.result||'';
-          const resCol=res==='win'?C.grn:res==='place'?C.gld:res==='loss'?[248,113,113]:C.mut;
+          const rc=res==='win'?GREEN:res==='place'?GOLD:res==='loss'?RED:DGREY;
+          const resBg=res==='win'?[220,252,231]:res==='place'?[254,243,199]:res==='loss'?[254,226,226]:[243,244,246];
+          // result pill
+          doc.setFontSize(6.5);
           doc.setFont('helvetica','bold');
-          doc.setFontSize(7);
-          setTxt(resCol);
-          const resLbl=res?res.toUpperCase():'—';
-          doc.text(resLbl,TX,cy);
-          const resW=doc.getTextWidth(resLbl)+3;
+          const rl=(res||'—').toUpperCase();
+          const rw3=doc.getTextWidth(rl)+5;
+          sf(...resBg); rr(TX,cy-2.5,rw3,4.5,1,'F');
+          st(...rc); doc.text(rl,TX+2.5,cy+.5);
+          // meta
           doc.setFont('helvetica','normal');
-          setTxt(C.mut);
-          const obsMeta=[(o.date||''),(o.raceName||o.going?[o.raceName,o.going].filter(Boolean).join(' · '):'')].filter(Boolean).join(' · ');
-          doc.text(obsMeta,TX+resW,cy,{maxWidth:TW-resW});
-          cy+=3.5;
+          doc.setFontSize(7);
+          st(...DGREY);
+          const meta=[(o.date||''),(o.raceName||''),(o.going||'')].filter(Boolean).join(' · ');
+          doc.text(meta,TX+rw3+2,cy+.5,{maxWidth:TW-rw3-2});
+          cy+=4;
           if(o.notes){
             doc.setFont('helvetica','italic');
             doc.setFontSize(6.5);
-            setTxt(C.mut);
-            const noteLines=doc.splitTextToSize(o.notes,TW-4);
-            doc.text(noteLines.slice(0,2),TX+2,cy);
-            cy+=noteLines.slice(0,2).length*3;
+            st(...DGREY);
+            const lines=doc.splitTextToSize(o.notes,TW-4);
+            doc.text(lines.slice(0,2),TX+2,cy);
+            cy+=lines.slice(0,2).length*3+1;
           }
-          cy+=1.5;
         });
+        cy+=2;
       }
 
       // ── Last review ──
-      if(lastRev){
+      if(hasRev){
         doc.setFont('helvetica','bold');
         doc.setFontSize(6.5);
-        setTxt([74,222,128]);
+        st(...NAVY);
         doc.text('LAST REVIEW',TX,cy);
         cy+=3.5;
-        const vCol=lastRev.verdict==='upgrade'?C.grn:lastRev.verdict==='downgrade'?[248,113,113]:C.blu;
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(7);
-        setTxt(C.mut);
-        const rvStr=[(lastRev.result||'').toUpperCase(),(lastRev.verdict||'').toUpperCase(),(lastRev.date||'')].filter(Boolean).join(' · ');
-        doc.text(rvStr,TX,cy,{maxWidth:TW});
-        cy+=3.5;
+        const vc=lastRev.verdict==='upgrade'?GREEN:lastRev.verdict==='downgrade'?RED:BLUE;
+        const vBg=lastRev.verdict==='upgrade'?[220,252,231]:lastRev.verdict==='downgrade'?[254,226,226]:[219,234,254];
+        const vl=(lastRev.verdict||'—').toUpperCase();
+        const vw=doc.getTextWidth(vl)+5;
+        sf(...vBg); rr(TX,cy-2.5,vw,4.5,1,'F');
+        st(...vc); doc.setFontSize(6.5); doc.setFont('helvetica','bold');
+        doc.text(vl,TX+2.5,cy+.5);
+        doc.setFont('helvetica','normal'); doc.setFontSize(7); st(...DGREY);
+        const rl2=[(lastRev.result||''),(lastRev.date||'')].filter(Boolean).join(' · ');
+        doc.text(rl2,TX+vw+3,cy+.5);
+        cy+=4;
         if(lastRev.notes){
-          doc.setFont('helvetica','italic');
-          doc.setFontSize(6.5);
-          setTxt(C.mut);
+          doc.setFont('helvetica','italic'); doc.setFontSize(6.5); st(...DGREY);
           doc.text(doc.splitTextToSize(lastRev.notes,TW-4).slice(0,2),TX+2,cy);
-          cy+=6;
-        }
+          cy+=7;
+        } else { cy+=2; }
       }
 
       // ── Next target ──
-      if(tgts.length){
-        doc.setFont('helvetica','bold');
-        doc.setFontSize(6.5);
-        setTxt(C.ora);
+      if(hasTgt){
+        doc.setFont('helvetica','bold'); doc.setFontSize(6.5); st(...NAVY);
         doc.text('NEXT TARGET',TX,cy);
         cy+=3.5;
         const tgt=tgts[0];
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(7);
-        setTxt(C.mut);
-        doc.text([tgt.race,tgt.track,tgt.date].filter(Boolean).join(' · '),TX,cy,{maxWidth:TW});
-        cy+=4;
-      }
-
-      // ── Trainer intel snippet ──
-      if(w.trainerIntel){
-        doc.setFont('helvetica','bold');
-        doc.setFontSize(6.5);
-        setTxt(C.blu);
-        doc.text('TRAINER INTEL',TX,cy);
-        cy+=3.5;
-        doc.setFont('helvetica','italic');
-        doc.setFontSize(6.5);
-        setTxt(C.mut);
-        doc.text(doc.splitTextToSize(w.trainerIntel,TW-4).slice(0,2),TX+2,cy);
+        const tStr=[tgt.race,tgt.track,tgt.date].filter(Boolean).join(' · ');
+        const tw2=doc.getTextWidth(tStr)+6;
+        sf(255,237,213); rr(TX,cy-2.5,tw2,4.5,1,'F');
+        st(...ORANGE); doc.setFont('helvetica','normal'); doc.setFontSize(7);
+        doc.text(tStr,TX+3,cy+.5,{maxWidth:TW});
         cy+=6;
       }
 
-      y+=cardH+GAP;
+      // ── Trainer intel ──
+      if(hasIntel){
+        doc.setFont('helvetica','bold'); doc.setFontSize(6.5); st(...NAVY);
+        doc.text('TRAINER INTEL',TX,cy);
+        cy+=3.5;
+        doc.setFont('helvetica','italic'); doc.setFontSize(6.5); st(...DGREY);
+        doc.text(doc.splitTextToSize(w.trainerIntel,TW-4).slice(0,2),TX+2,cy);
+        cy+=7;
+      }
+
+      y+=ch+5;
     });
 
     // ── Footer ──
-    setFill(C.bg); doc.rect(0,PH-10,PW,10,'F');
-    setStroke(C.bdr); doc.setLineWidth(.2); doc.line(M,PH-10,PW-M,PH-10);
-    doc.setFont('helvetica','normal');
-    doc.setFontSize(6);
-    setTxt(C.mut);
-    doc.text('Generated by Racing Puzzle · theracingpuzzle.github.io',M,PH-5);
-    doc.text(today,PW-M,PH-5,{align:'right'});
+    sf(...NAVY); doc.rect(0,PH-10,PW,10,'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(6); st(...[150,155,170]);
+    doc.text('Racing Puzzle · theracingpuzzle.github.io',M,PH-4);
+    doc.text(dateStr,PW-M,PH-4,{align:'right'});
 
     // ── Save / Share ──
-    const fname='racing-puzzle-watchlist-'+new Date().toISOString().slice(0,10)+'.pdf';
-    if(navigator.share&&navigator.canShare){
+    const fname='racing-puzzle-'+new Date().toISOString().slice(0,10)+'.pdf';
+    if(navigator.share&&typeof navigator.canShare==='function'){
       try{
         const blob=doc.output('blob');
         const file=new File([blob],fname,{type:'application/pdf'});
         if(navigator.canShare({files:[file]})){
-          navigator.share({files:[file],title:'Watchlist — '+today});
+          navigator.share({files:[file],title:'Racing Puzzle Watchlist'});
           return;
         }
       }catch(e){}
@@ -597,15 +618,14 @@ function generateWatchlistPDF(){
     doc.save(fname);
   }
 
-  // Load jsPDF from CDN if needed
   if(window.jspdf&&window.jspdf.jsPDF){
     _buildPDF();
   } else {
-    var script=document.createElement('script');
-    script.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    script.onload=function(){_buildPDF();};
-    script.onerror=function(){alert('Could not load PDF library. Check your connection.');};
-    document.head.appendChild(script);
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=_buildPDF;
+    s.onerror=function(){alert('Could not load PDF library.');};
+    document.head.appendChild(s);
   }
 }
 

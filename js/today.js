@@ -29,14 +29,14 @@ function _showTodayDemo(){
 
   // ── Bet limit tile ──
   const bl = document.getElementById('tbetlimit');
-  if(bl) bl.innerHTML = '<div style="font-family:monospace;font-size:9px;color:rgba(232,228,220,.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Bets Today</div>'
-    + '<div style="font-family:monospace;font-size:17px;font-weight:700;color:var(--gld);">2 <span style="font-size:11px;color:var(--mut);">/ 3</span></div>';
+  if(bl) bl.innerHTML = '<div style="font-family:var(--font-ui);font-size:9px;color:rgba(232,228,220,.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Bets Today</div>'
+    + '<div style="font-family:var(--font-ui);font-size:17px;font-weight:700;color:var(--gld);">2 <span class="t-muted">/ 3</span></div>';
 
   // ── Check-in ──
   const ci = document.getElementById('tcin');
   if(ci) ci.innerHTML = '<div style="background:rgba(45,184,122,.08);border:1px solid rgba(45,184,122,.25);border-radius:11px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;">'
-    + '<div><div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grn);margin-bottom:3px;">✓ Checked in</div>'
-    + '<div style="font-size:13px;color:var(--txt);">Looking for a well-treated handicapper on decent ground</div></div>'
+    + '<div><div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grn);margin-bottom:3px;">✓ Checked in</div>'
+    + '<div class="t-body">Looking for a well-treated handicapper on decent ground</div></div>'
     + '<span style="font-size:22px;">🙂</span></div>';
 
   // ── Edge alerts ──
@@ -44,15 +44,15 @@ function _showTodayDemo(){
   if(ea){
     ea.style.display = 'block';
     ea.innerHTML = '<div style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);border-radius:11px;padding:12px 14px;">'
-      + '<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#4ade80;margin-bottom:8px;">⭐ Edge Running Today</div>'
+      + '<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grn);margin-bottom:8px;">⭐ Edge Running Today</div>'
       + [
           {horse:'Midnight Envoy', course:'Ascot', time:'14:30', mr:92, or:88, edge:4},
           {horse:'Thistle Down',   course:'York',  time:'16:10', mr:85, or:82, edge:3},
         ].map(function(e){
           return '<div style="padding:7px 0;border-bottom:1px solid rgba(74,222,128,.1);display:flex;align-items:center;justify-content:space-between;">'
-            + '<div><div style="font-size:13px;font-weight:700;color:var(--txt);">'+e.horse+'</div>'
-            + '<div style="font-family:monospace;font-size:10px;color:var(--mut);">'+e.time+' · '+e.course+'</div></div>'
-            + '<span style="font-family:monospace;font-size:11px;font-weight:700;color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:3px 8px;border-radius:8px;white-space:nowrap;">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
+            + '<div><div class="t-heading">'+e.horse+'</div>'
+            + '<div style="font-family:var(--font-ui);font-size:10px;color:var(--mut);">'+e.time+' · '+e.course+'</div></div>'
+            + '<span style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--grn);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:3px 8px;border-radius:8px;white-space:nowrap;">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
             + '</div>';
         }).join('')
       + '</div>';
@@ -62,17 +62,17 @@ function _showTodayDemo(){
   const wa = document.getElementById('t-wl-alerts');
   if(wa){
     wa.style.display = 'block';
-    wa.innerHTML = '<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:11px;padding:12px 14px;">'
-      + '<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:8px;">🔔 Watchlist Running Today</div>'
+    wa.innerHTML = '<div class="wl-alert-wrap">'
+      + '<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:8px;">🔔 Watchlist Running Today</div>'
       + [
           {horse:'Midnight Envoy', course:'Ascot', time:'14:30', jockey:'F. Dettori', race:'Copper Horse Stakes'},
           {horse:'Velvet Sunrise',  course:'Newmarket', time:'15:45', jockey:'R. Moore', race:'July Stakes'},
         ].map(function(a){
           return '<div style="padding:7px 0;border-bottom:1px solid rgba(167,139,250,.12);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
-            + '<div><div style="font-size:13px;font-weight:700;color:var(--txt);">'+a.horse+'</div>'
-            + '<div style="font-size:11px;color:var(--mut);">'+a.time+' · '+a.course+' · '+a.race+'</div>'
+            + '<div><div class="t-heading">'+a.horse+'</div>'
+            + '<div class="t-muted">'+a.time+' · '+a.course+' · '+a.race+'</div>'
             + '<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div></div>'
-            + '<span style="font-family:monospace;font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;">Profile →</span>'
+            + '<span style="font-family:var(--font-ui);font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;">Profile →</span>'
             + '</div>';
         }).join('')
       + '</div>';
@@ -84,11 +84,11 @@ function _showTodayDemo(){
   if(nr && nrc){
     nr.style.display = 'block';
     nrc.innerHTML = '<div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:11px;padding:12px 14px;">'
-      + '<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#60a5fa;margin-bottom:6px;">⏰ Next Race</div>'
+      + '<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--blu);margin-bottom:6px;">⏰ Next Race</div>'
       + '<div style="display:flex;align-items:center;justify-content:space-between;">'
       + '<div><div style="font-size:14px;font-weight:700;color:var(--txt);">Ascot — 14:30</div>'
-      + '<div style="font-size:11px;color:var(--mut);">Copper Horse Stakes · 12 runners</div></div>'
-      + '<div style="font-family:monospace;font-size:20px;font-weight:700;color:#60a5fa;">8m</div>'
+      + '<div class="t-muted">Copper Horse Stakes · 12 runners</div></div>'
+      + '<div style="font-family:var(--font-ui);font-size:20px;font-weight:700;color:var(--blu);">8m</div>'
       + '</div></div>';
   }
 
@@ -104,8 +104,8 @@ function _showTodayDemo(){
       const p=b.result==='win'?b.returns-b.stake:b.result==='loss'?-b.stake:null;
       const bgMap={win:'bw1',loss:'bl1',pending:'bpend'};
       return '<div class="mb '+(b.result)+'" style="border-left-color:'+(isV?'#fb923c':'')+';cursor:pointer;">'
-        +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-size:9px;color:#fb923c;font-family:monospace;">VIRT</span>':'')+'</div>'
-        +'<div class="mm">'+b.track+' · '+b.time+' · <span style="font-family:monospace;">'+b.odds+'</span></div></div>'
+        +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-size:9px;color:var(--ora);font-family:var(--font-ui);">VIRT</span>':'')+'</div>'
+        +'<div class="mm">'+b.track+' · '+b.time+' · <span style="font-family:var(--font-ui);">'+b.odds+'</span></div></div>'
         +'<div class="mbr"><span class="bdg '+(bgMap[b.result]||'bpend')+'">'+b.result+'</span>'
         +'<div class="mp '+(p===null?'':p>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p===null?'—':fmt(p))+'</div></div>'
         +'</div>';
@@ -194,8 +194,8 @@ function renderNextRace(){
   el.style.display='block';
   content.innerHTML='<div style="background:rgba(0,0,0,.2);border:1px solid var(--bdr);border-left:3px solid '+urgency+';border-radius:10px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;" onclick="goTo(1)">'
     +'<div><div style="font-size:14px;font-weight:700;color:var(--txt);">'+(next.race.off||next.race.time||'')+' '+course+'</div>'
-    +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'+name+(runners?' · '+runners+' runners':'')+'</div></div>'
-    +'<div style="text-align:right;flex-shrink:0;"><div style="font-family:monospace;font-size:15px;font-weight:700;color:'+urgency+';">'+countdown+'</div>'
+    +'<div class="t-muted">'+name+(runners?' · '+runners+' runners':'')+'</div></div>'
+    +'<div style="text-align:right;flex-shrink:0;"><div style="font-family:var(--font-ui);font-size:15px;font-weight:700;color:'+urgency+';">'+countdown+'</div>'
     +'<div style="font-size:9px;color:var(--mut);">Racecards →</div></div>'
     +'</div>';
   // Refresh every minute
@@ -214,12 +214,12 @@ function renderStudyReminder(){
   el.innerHTML='<div style="background:rgba(0,0,0,.2);border:1px solid '+(done?'rgba(52,211,153,.2)':'rgba(245,158,11,.2)')+';border-radius:10px;padding:11px 13px;">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">'
       +'<div>'
-        +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:'+(done?'var(--grn)':'#f59e0b')+';margin-bottom:3px;">📋 Form Study</div>'
-        +'<div style="font-size:13px;color:var(--txt);">'+(done?'Done for today — good discipline.':hasBets?'You\'ve bet today. Form studied?':'Have you studied today\'s form before betting?')+'</div>'
+        +'<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:'+(done?'var(--grn)':'#f59e0b')+';margin-bottom:3px;">📋 Form Study</div>'
+        +'<div class="t-body">'+(done?'Done for today — good discipline.':hasBets?'You\'ve bet today. Form studied?':'Have you studied today\'s form before betting?')+'</div>'
       +'</div>'
       +(done
         ?'<span style="font-size:20px;">✅</span>'
-        :'<button onclick="markStudyDone()" style="flex-shrink:0;font-family:monospace;font-size:10px;font-weight:700;padding:6px 12px;border-radius:8px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:#f59e0b;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Mark done</button>'
+        :'<button onclick="markStudyDone()" style="flex-shrink:0;font-family:var(--font-ui);font-size:10px;font-weight:700;padding:6px 12px;border-radius:8px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:var(--gld);cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Mark done</button>'
       )
     +'</div>'
   +'</div>';
@@ -252,11 +252,15 @@ async function checkWatchlistRunners(races){
     });
   });
   const alertEl=document.getElementById('t-wl-alerts');if(!alertEl)return;
-  if(!alerts.length){alertEl.style.display='none';return;}
+  if(!alerts.length){alertEl.style.display='none';window._wlAlerts=[];return;}
+  window._wlAlerts=alerts; // stored for PDF generation
   alertEl.style.display='block';
   const todayStr=td();
-  alertEl.innerHTML='<div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:11px;padding:12px 14px;">'
-    +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#a78bfa;margin-bottom:8px;">🔔 Watchlist Running Today</div>'
+  alertEl.innerHTML='<div class="wl-alert-wrap">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+      +'<div style="font-family:var(--font-ui);font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#a78bfa;">🔔 Watchlist Running Today</div>'
+      +'<button onclick="generateWatchlistPDF()" style="font-family:var(--font-ui);font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:6px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;white-space:nowrap;">↓ PDF</button>'
+    +'</div>'
     +alerts.map(function(a){
       const wid=(a.wlEntry&&a.wlEntry.id)?a.wlEntry.id:'';
       const alreadyReviewed=(D.reviews||[]).some(function(r){
@@ -265,16 +269,16 @@ async function checkWatchlistRunners(races){
       return'<div style="padding:8px 0;border-bottom:1px solid rgba(167,139,250,.1);">'
         +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
           +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:800;letter-spacing:.5px;color:var(--txt);">'+a.horse+'</div>'
-            +'<div style="font-size:11px;color:var(--mut);">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
+            +'<div style="font-family:var(--font-ui);font-size:15px;font-weight:800;letter-spacing:.5px;color:var(--txt);">'+a.horse+'</div>'
+            +'<div class="t-muted">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
             +(a.jockey?'<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div>':'')
           +'</div>'
           +'<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;align-items:flex-end;">'
             +(alreadyReviewed
-              ?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;background:rgba(74,222,128,.12);color:#4ade80;padding:3px 9px;border-radius:6px;border:1px solid rgba(74,222,128,.2);">✓ Reviewed</span>'
-              :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" class="t-wl-review-btn" style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:rgba(167,139,250,.15);color:#a78bfa;padding:4px 10px;border-radius:6px;border:1px solid rgba(167,139,250,.3);cursor:pointer;white-space:nowrap;">Review ✍️</button>'
+              ?'<span style="font-family:var(--font-ui);font-size:9px;font-weight:800;letter-spacing:1px;background:rgba(74,222,128,.12);color:var(--grn);padding:3px 9px;border-radius:6px;border:1px solid rgba(74,222,128,.2);">✓ Reviewed</span>'
+              :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" class="t-wl-review-btn" style="font-family:var(--font-ui);font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:rgba(167,139,250,.15);color:#a78bfa;padding:4px 10px;border-radius:6px;border:1px solid rgba(167,139,250,.3);cursor:pointer;white-space:nowrap;">Review ✍️</button>'
             )
-            +'<button data-wlid="'+wid+'" class="t-wl-profile-btn" style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:transparent;color:var(--mut);padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);cursor:pointer;white-space:nowrap;">Profile →</button>'
+            +'<button data-wlid="'+wid+'" class="t-wl-profile-btn" style="font-family:var(--font-ui);font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:transparent;color:var(--mut);padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);cursor:pointer;white-space:nowrap;">Profile →</button>'
           +'</div>'
         +'</div>'
       +'</div>';
@@ -300,6 +304,309 @@ async function checkWatchlistRunners(races){
       });
     });
   },0);
+}
+
+// ── WATCHLIST PDF EXPORT ──
+function generateWatchlistPDF(){
+  const alerts=window._wlAlerts||[];
+  if(!alerts.length){alert('No watchlist horses running today.');return;}
+
+  // Load jsPDF dynamically if not already loaded
+  function _buildPDF(){
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const PW=210, PH=297, M=14, CW=PW-M*2;
+    const today=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+    // ── Colour palette ──
+    const C={
+      bg:[5,5,8], sur:[13,13,24], bdr:[28,28,48],
+      txt:[212,216,232], mut:[58,58,92],
+      pur:[139,92,246], purL:[167,139,250],
+      gld:[245,158,11], grn:[74,222,128],
+      blu:[96,165,250], ora:[251,146,60],
+    };
+
+    // ── Helpers ──
+    function rgb(c){return{r:c[0],g:c[1],b:c[2]};}
+    function setFill(c){doc.setFillColor(c[0],c[1],c[2]);}
+    function setStroke(c){doc.setDrawColor(c[0],c[1],c[2]);}
+    function setTxt(c){doc.setTextColor(c[0],c[1],c[2]);}
+    function roundRect(x,y,w,h,r,fill,stroke){
+      doc.roundedRect(x,y,w,h,r,r,fill&&stroke?'FD':fill?'F':'D');
+    }
+
+    // ── Background ──
+    setFill(C.bg); doc.rect(0,0,PW,PH,'F');
+
+    // ── Header bar ──
+    setFill([18,10,40]); doc.rect(0,0,PW,22,'F');
+    // purple accent line
+    setFill(C.pur); doc.rect(0,21.5,PW,.5,'F');
+    // 🧩 brand
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(13);
+    setTxt([255,255,255]);
+    doc.text('RACING',M,14);
+    doc.setTextColor(C.pur[0],C.pur[1],C.pur[2]);
+    doc.text('PUZZLE',M+26,14);
+    // Date right-aligned
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(7);
+    setTxt(C.mut);
+    doc.text(today,PW-M,14,{align:'right'});
+
+    // ── Sub-header ──
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(8);
+    setTxt(C.purL);
+    doc.text('WATCHLIST RUNNING TODAY',M,32);
+    doc.setFontSize(7);
+    doc.setFont('helvetica','normal');
+    setTxt(C.mut);
+    doc.text(alerts.length+' horse'+(alerts.length>1?'s':'')+' from your Puzzle Profiler',M,37);
+    // divider
+    setStroke(C.bdr); doc.setLineWidth(.2); doc.line(M,40,PW-M,40);
+
+    let y=45;
+    const GAP=4;
+
+    alerts.forEach(function(a,idx){
+      const w=a.wlEntry||{};
+      const obs=(w.observations||[]).sort(function(x,z){return(z.date||'').localeCompare(x.date||'');});
+      const tgts=w.targets||[];
+      const revs=(D.reviews||[]).filter(function(r){return r.profileId===w.id;}).sort(function(x,z){return(z.date||'').localeCompare(x.date||'');});
+      const lastRev=revs[0]||null;
+      const mr=w.myRating?parseFloat(w.myRating):null;
+      const or=w.currentRating?parseFloat(w.currentRating):null;
+
+      // Estimate card height
+      let cardH=36;
+      if(w.reasonNote)cardH+=5;
+      if(obs.length)cardH+=5+(Math.min(obs.length,2)*12);
+      if(tgts.length)cardH+=5+8;
+      if(lastRev)cardH+=5+8;
+      if(w.conditionsNotes||w.trainerIntel)cardH+=5+8;
+      cardH+=6;
+
+      // Page break
+      if(y+cardH>PH-16){
+        doc.addPage();
+        setFill(C.bg); doc.rect(0,0,PW,PH,'F');
+        y=16;
+      }
+
+      // ── Card background ──
+      setFill(C.sur);
+      setStroke(C.bdr);
+      doc.setLineWidth(.2);
+      roundRect(M,y,CW,cardH,2,true,true);
+
+      // ── Category colour bar (left edge) ──
+      const REASON_COL={
+        'eye-catcher':C.purL,'future-target':C.ora,
+        'trainer-intel':C.blu,'form-study':[239,68,68],'tip-source':[234,179,8]
+      };
+      const barCol=REASON_COL[w.reason||'eye-catcher']||C.purL;
+      setFill(barCol); doc.rect(M,y,1.5,cardH,'F');
+
+      let cy=y+7;
+      const TX=M+5;
+      const TW=CW-8;
+
+      // ── Horse name ──
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(12);
+      setTxt([255,255,255]);
+      doc.text(a.horse,TX,cy);
+
+      // ── Race info right-aligned ──
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(7.5);
+      setTxt(C.mut);
+      const raceStr=a.time+(a.course?' · '+a.course:'')+(a.raceName?' · '+a.raceName:'');
+      doc.text(raceStr,PW-M-2,cy,{align:'right'});
+      cy+=4.5;
+
+      // ── Trainer + jockey ──
+      const sub=[];
+      if(w.trainer)sub.push(w.trainer);
+      if(a.jockey)sub.push('J: '+a.jockey);
+      if(sub.length){
+        doc.setFontSize(7.5);
+        setTxt(C.mut);
+        doc.text(sub.join('  ·  '),TX,cy);
+        cy+=4.5;
+      }
+
+      // ── Reason tag + OR/MR pills ──
+      const REASON_LBL={'eye-catcher':'Eye Catcher','future-target':'Future Target','trainer-intel':'Trainer Intel','form-study':'Form Study','tip-source':'Tip Source'};
+      const rlbl=REASON_LBL[w.reason]||'Eye Catcher';
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica','bold');
+      const rw=doc.getTextWidth(rlbl)+4;
+      setFill([barCol[0],barCol[1],barCol[2],0.15]);
+      doc.setGState(new doc.GState({opacity:.12}));
+      roundRect(TX,cy-2.5,rw+2,4.5,1,true,false);
+      doc.setGState(new doc.GState({opacity:1}));
+      setTxt(barCol);
+      doc.text(rlbl,TX+1,cy+.5);
+      let pillX=TX+rw+5;
+
+      if(or){
+        const orStr='OR '+or;
+        const ow=doc.getTextWidth(orStr)+4;
+        doc.setGState(new doc.GState({opacity:.12}));
+        setFill(C.purL); roundRect(pillX,cy-2.5,ow+2,4.5,1,true,false);
+        doc.setGState(new doc.GState({opacity:1}));
+        setTxt(C.purL); doc.text(orStr,pillX+1,cy+.5);
+        pillX+=ow+6;
+      }
+      if(mr){
+        const mrStr='MR '+mr;
+        const mw=doc.getTextWidth(mrStr)+4;
+        doc.setGState(new doc.GState({opacity:.12}));
+        setFill(C.gld); roundRect(pillX,cy-2.5,mw+2,4.5,1,true,false);
+        doc.setGState(new doc.GState({opacity:1}));
+        setTxt(C.gld); doc.text(mrStr,pillX+1,cy+.5);
+      }
+      cy+=6;
+
+      // ── Reason note ──
+      if(w.reasonNote){
+        doc.setFont('helvetica','italic');
+        doc.setFontSize(7);
+        setTxt(C.mut);
+        doc.text('"'+w.reasonNote+'"',TX,cy,{maxWidth:TW-2});
+        cy+=5;
+      }
+
+      // ── Divider ──
+      setStroke(C.bdr); doc.setLineWidth(.15); doc.line(TX,cy,M+CW-3,cy);
+      cy+=4;
+
+      // ── Observations (last 2) ──
+      if(obs.length){
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(6.5);
+        setTxt(C.purL);
+        doc.text('OBSERVATIONS ('+obs.length+')',TX,cy);
+        cy+=4;
+        obs.slice(0,2).forEach(function(o){
+          const res=o.result||'';
+          const resCol=res==='win'?C.grn:res==='place'?C.gld:res==='loss'?[248,113,113]:C.mut;
+          doc.setFont('helvetica','bold');
+          doc.setFontSize(7);
+          setTxt(resCol);
+          const resLbl=res?res.toUpperCase():'—';
+          doc.text(resLbl,TX,cy);
+          const resW=doc.getTextWidth(resLbl)+3;
+          doc.setFont('helvetica','normal');
+          setTxt(C.mut);
+          const obsMeta=[(o.date||''),(o.raceName||o.going?[o.raceName,o.going].filter(Boolean).join(' · '):'')].filter(Boolean).join(' · ');
+          doc.text(obsMeta,TX+resW,cy,{maxWidth:TW-resW});
+          cy+=3.5;
+          if(o.notes){
+            doc.setFont('helvetica','italic');
+            doc.setFontSize(6.5);
+            setTxt(C.mut);
+            const noteLines=doc.splitTextToSize(o.notes,TW-4);
+            doc.text(noteLines.slice(0,2),TX+2,cy);
+            cy+=noteLines.slice(0,2).length*3;
+          }
+          cy+=1.5;
+        });
+      }
+
+      // ── Last review ──
+      if(lastRev){
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(6.5);
+        setTxt([74,222,128]);
+        doc.text('LAST REVIEW',TX,cy);
+        cy+=3.5;
+        const vCol=lastRev.verdict==='upgrade'?C.grn:lastRev.verdict==='downgrade'?[248,113,113]:C.blu;
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(7);
+        setTxt(C.mut);
+        const rvStr=[(lastRev.result||'').toUpperCase(),(lastRev.verdict||'').toUpperCase(),(lastRev.date||'')].filter(Boolean).join(' · ');
+        doc.text(rvStr,TX,cy,{maxWidth:TW});
+        cy+=3.5;
+        if(lastRev.notes){
+          doc.setFont('helvetica','italic');
+          doc.setFontSize(6.5);
+          setTxt(C.mut);
+          doc.text(doc.splitTextToSize(lastRev.notes,TW-4).slice(0,2),TX+2,cy);
+          cy+=6;
+        }
+      }
+
+      // ── Next target ──
+      if(tgts.length){
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(6.5);
+        setTxt(C.ora);
+        doc.text('NEXT TARGET',TX,cy);
+        cy+=3.5;
+        const tgt=tgts[0];
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(7);
+        setTxt(C.mut);
+        doc.text([tgt.race,tgt.track,tgt.date].filter(Boolean).join(' · '),TX,cy,{maxWidth:TW});
+        cy+=4;
+      }
+
+      // ── Trainer intel snippet ──
+      if(w.trainerIntel){
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(6.5);
+        setTxt(C.blu);
+        doc.text('TRAINER INTEL',TX,cy);
+        cy+=3.5;
+        doc.setFont('helvetica','italic');
+        doc.setFontSize(6.5);
+        setTxt(C.mut);
+        doc.text(doc.splitTextToSize(w.trainerIntel,TW-4).slice(0,2),TX+2,cy);
+        cy+=6;
+      }
+
+      y+=cardH+GAP;
+    });
+
+    // ── Footer ──
+    setFill(C.bg); doc.rect(0,PH-10,PW,10,'F');
+    setStroke(C.bdr); doc.setLineWidth(.2); doc.line(M,PH-10,PW-M,PH-10);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(6);
+    setTxt(C.mut);
+    doc.text('Generated by Racing Puzzle · theracingpuzzle.github.io',M,PH-5);
+    doc.text(today,PW-M,PH-5,{align:'right'});
+
+    // ── Save / Share ──
+    const fname='racing-puzzle-watchlist-'+new Date().toISOString().slice(0,10)+'.pdf';
+    if(navigator.share&&navigator.canShare){
+      try{
+        const blob=doc.output('blob');
+        const file=new File([blob],fname,{type:'application/pdf'});
+        if(navigator.canShare({files:[file]})){
+          navigator.share({files:[file],title:'Watchlist — '+today});
+          return;
+        }
+      }catch(e){}
+    }
+    doc.save(fname);
+  }
+
+  // Load jsPDF from CDN if needed
+  if(window.jspdf&&window.jspdf.jsPDF){
+    _buildPDF();
+  } else {
+    var script=document.createElement('script');
+    script.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload=function(){_buildPDF();};
+    script.onerror=function(){alert('Could not load PDF library. Check your connection.');};
+    document.head.appendChild(script);
+  }
 }
 
 function renderThisWeek(){
@@ -329,8 +636,8 @@ function renderThisWeek(){
     const dayLbl=diff===1?'Tomorrow':d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
     return'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr);">'
       +'<div style="width:3px;height:34px;border-radius:2px;background:'+item.col+';flex-shrink:0;"></div>'
-      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--txt);">'+item.label+'</div>'+(item.sub?'<div style="font-size:11px;color:var(--mut);">'+item.sub+'</div>':'')+'</div>'
-      +'<div style="font-family:monospace;font-size:10px;color:'+item.col+';flex-shrink:0;">'+dayLbl+'</div>'
+      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--txt);">'+item.label+'</div>'+(item.sub?'<div class="t-muted">'+item.sub+'</div>':'')+'</div>'
+      +'<div style="font-family:var(--font-ui);font-size:10px;color:'+item.col+';flex-shrink:0;">'+dayLbl+'</div>'
     +'</div>';
   }).join('');
 }
@@ -398,8 +705,8 @@ function renderCheckIn(){
     const moodEmoji={poor:'😔',neutral:'😐',good:'🙂',great:'😄'}[log.mood||'neutral']||'😐';
     ci.innerHTML='<div style="background:rgba(45,184,122,.08);border:1px solid rgba(45,184,122,.25);border-radius:11px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;">'
       +'<div>'
-        +'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grn);margin-bottom:3px;">✓ Checked in</div>'
-        +(log.focus?'<div style="font-size:13px;color:var(--txt);">'+log.focus+'</div>':'<div style="font-size:12px;color:var(--mut);font-style:italic;">No focus set</div>')
+        +'<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grn);margin-bottom:3px;">✓ Checked in</div>'
+        +(log.focus?'<div class="t-body">'+log.focus+'</div>':'<div style="font-size:12px;color:var(--mut);font-style:italic;">No focus set</div>')
       +'</div>'
       +'<span style="font-size:22px;">'+moodEmoji+'</span>'
       +'</div>';
@@ -483,14 +790,14 @@ function renderEdgeAlerts(races){
   edges.sort(function(a,b){return b.edge-a.edge;});
   el.style.display='block';
   el.innerHTML='<div style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);border-radius:11px;padding:12px 14px;">'
-    +'<div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#4ade80;margin-bottom:8px;">⭐ Edge Running Today</div>'
+    +'<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grn);margin-bottom:8px;">⭐ Edge Running Today</div>'
     +edges.map(function(e){
       return'<div style="padding:7px 0;border-bottom:1px solid rgba(74,222,128,.1);display:flex;align-items:center;justify-content:space-between;" onclick="goTo(5)">'
         +'<div>'
-          +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+e.horse+'</div>'
-          +'<div style="font-family:monospace;font-size:10px;color:var(--mut);">'+e.time+' · '+e.course+'</div>'
+          +'<div class="t-heading">'+e.horse+'</div>'
+          +'<div style="font-family:var(--font-ui);font-size:10px;color:var(--mut);">'+e.time+' · '+e.course+'</div>'
         +'</div>'
-        +'<span style="font-family:monospace;font-size:11px;font-weight:700;color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:3px 8px;border-radius:8px;white-space:nowrap;">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
+        +'<span style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--grn);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:3px 8px;border-radius:8px;white-space:nowrap;">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
         +'</div>';
     }).join('')
   +'</div>';
@@ -511,8 +818,8 @@ function renderTodayBets(tb, vtb){
     el.style.borderLeftColor=isV?'#fb923c':'';
     el.style.cursor='pointer';
     el.setAttribute('onclick',isV?'openVEM("'+b.id+'")':'openEM("'+b.id+'")');
-    el.innerHTML='<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-size:9px;color:#fb923c;font-family:monospace;">VIRT</span>':'')+'</div>'
-      +'<div class="mm">'+(b.track||'—')+(b.time?' · '+b.time:'')+' · <span style="font-family:monospace;">'+os+'</span></div></div>'
+    el.innerHTML='<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-size:9px;color:var(--ora);font-family:var(--font-ui);">VIRT</span>':'')+'</div>'
+      +'<div class="mm">'+(b.track||'—')+(b.time?' · '+b.time:'')+' · <span style="font-family:var(--font-ui);">'+os+'</span></div></div>'
       +'<div class="mbr"><span class="bdg '+(bg[b.result]||'bpend')+'">'+(b.result||'pending')+'</span>'
       +'<div class="mp '+(p2===null?'':p2>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p2===null?'—':fmt(p2))+'</div></div>';
     return el.outerHTML;
@@ -536,8 +843,8 @@ function renderOutstanding(){
       const fn=isV?'openVEM':'openEM';
       const os=b.oddsDisplay||(b.odds||'—');
       return'<div class="mb pending" onclick="'+fn+'(\''+b.id+'\')" style="cursor:pointer;border-left-color:'+(isV?'#fb923c':'var(--red)')+';">'
-        +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-family:monospace;font-size:9px;color:#fb923c;">VIRT</span>':'')+'</div>'
-        +'<div class="mm">'+b.date+' · '+(b.track||'—')+' · <span style="font-family:monospace;">'+os+'</span> · '+fp(b.stake)+'</div></div>'
+        +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-family:var(--font-ui);font-size:9px;color:var(--ora);">VIRT</span>':'')+'</div>'
+        +'<div class="mm">'+b.date+' · '+(b.track||'—')+' · <span style="font-family:var(--font-ui);">'+os+'</span> · '+fp(b.stake)+'</div></div>'
         +'<div class="mbr"><span class="bdg bpend" style="background:rgba(196,58,58,.15);color:var(--red);">settle</span></div></div>';
     }).join('');
   }

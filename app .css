@@ -136,7 +136,7 @@ input, select, textarea, button { font-family: inherit; }
   font-family: var(--font-ui); font-size: 24px; font-weight: 800;
   margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase;
 }
-.cT .cttl  { color: var(--gld); }
+.cT .cttl  { color: #ef4444; }
 .cP .cttl  { color: var(--grn); }
 .cL .cttl  { color: var(--blu); }
 .cB .cttl  { color: var(--gld); }
@@ -636,8 +636,8 @@ label {
 .dot.on { border-radius: 3px; }
 .dots { display: flex; gap: 6px; align-items: center; }
 .cnlbl {
-  font-family: var(--font-ui); font-size: 10px; font-weight: 800;
-  letter-spacing: 2px; text-transform: uppercase; color: #6b7280;
+  font-family: var(--font-ui); font-size: 13px; font-weight: 800;
+  letter-spacing: 1.5px; text-transform: uppercase; color: #374151;
 }
 
 /* ═══════════════════════════════════════

@@ -1003,3 +1003,20 @@ label {
   border-top: 1px solid #e5e7eb;
   background: #fafbff; padding: 10px 13px 12px;
 }
+
+/* ── Racecard & Results card shell — light background override ── */
+.cRC, .cRC .cin {
+  background: #f5f6f8 !important;
+}
+.cRC::before {
+  background: #93c5fd !important;
+  z-index: 3;
+}
+/* Results card */
+.cRES, .cRES .cin {
+  background: #f5f6f8 !important;
+}
+.cRES::before {
+  background: #fb923c !important;
+  z-index: 3;
+}

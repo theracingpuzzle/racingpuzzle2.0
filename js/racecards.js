@@ -42,13 +42,9 @@ function rcSwRenderUI(){
   if(!uiEl)return;
 
   const onTime=rcSwView==='time';
-  const btnBase='font-family:monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 18px;border:none;cursor:pointer;font-weight:700;transition:all .12s;';
-
-  const timeActive = onTime?'background:#60a5fa;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;';
-  const courseActive = !onTime?'background:#60a5fa;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;';
-  let html='<div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-bottom:12px;">'
-    +'<button style="'+btnBase+courseActive+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
-    +'<button style="'+btnBase+timeActive+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
+  let html='<div class="rc-sort-bar">'
+    +'<button class="rc-sort-btn'+(onTime?'':' on')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
+    +'<button class="rc-sort-btn'+(onTime?' on':'')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
     +'</div>';
 
   uiEl.innerHTML=html;
@@ -82,13 +78,13 @@ function rcSwRenderTime(listEl){
     if(mins===9999||(mins-nowMins)>-30) upcoming.push(r);
     else past.push(r);
   });
-  if(!allRaces.length){ listEl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">No races today.</div>'; return; }
+  if(!allRaces.length){ listEl.innerHTML='<div class="es" style="padding:20px;">No races today.</div>'; return; }
 
   listEl.innerHTML=upcoming.map(function(r,i){
     return rcSwRaceCardPreview(r, r._course||r.course||'', i===0);
   }).join('')
   +(past.length
-    ? '<div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;padding:14px 0 6px;border-top:1px solid var(--bdr);margin-top:4px;">Earlier today</div>'
+    ? '<div class="clbl" style="padding:14px 0 6px;border-top:1px solid #e5e7eb;margin-top:4px;color:#9ca3af;">Earlier today</div>'
       + past.map(function(r){ return rcSwRaceCardPreview(r, r._course||r.course||'', false, true); }).join('')
     : '');
 }
@@ -142,17 +138,17 @@ function rcSwRenderCourse(listEl){
     const span=rcTimeSpan(races);
     const count=races.length;
     const escapedCourse=course.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    return '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;margin-bottom:8px;overflow:hidden;">'
-      +'<div data-course="'+escapedCourse+'" onclick="rcSwToggleCourse(this)" style="display:flex;align-items:center;gap:12px;padding:13px;cursor:pointer;background:'+(isOpen?'rgba(96,165,250,.05)':'transparent')+';">'
-        +'<span style="font-size:20px;flex-shrink:0;">'+flag+'</span>'
-        +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:15px;font-weight:700;color:'+(isOpen?'#60a5fa':'var(--txt)')+';">'+course+'</div>'
-          +'<div style="font-family:monospace;font-size:10px;color:var(--mut);margin-top:2px;">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
+    return '<div class="rc-meeting">'
+      +'<div class="rc-meeting-hdr" data-course="'+escapedCourse+'" onclick="rcSwToggleCourse(this)">'
+        +'<span class="rc-meeting-flag">'+flag+'</span>'
+        +'<div class="rc-meeting-info">'
+          +'<div class="rc-meeting-name rc-meeting-name-blue">'+course+'</div>'
+          +'<div class="rc-meeting-meta">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
         +'</div>'
-        +'<span style="color:'+(isOpen?'#60a5fa':'var(--mut)')+';font-size:18px;display:inline-block;transform:'+(isOpen?'rotate(90deg)':'none')+';">›</span>'
+        +'<span class="rc-meeting-chevron'+(isOpen?' open':'')+'" >›</span>'
       +'</div>'
       +(isOpen
-        ? '<div style="border-top:1px solid var(--bdr);padding:10px 10px 2px;">'
+        ? '<div style="border-radius:0 0 10px 10px;overflow:hidden;">'
             +races.map(function(r){return rcSwFullRaceCard(r,course);}).join('')
           +'</div>'
         : '')
@@ -179,18 +175,15 @@ function rcSwRaceCardPreview(r, course, isNext, isPast){
   const idx=_rcSwFlatRaces.length;
   _rcSwFlatRaces.push({race:r, course:course});
   const uid='rcr-'+idx;
-  return '<div style="background:var(--sur);border:1px solid '+(isNext?'rgba(96,165,250,.35)':'var(--bdr)')+';border-radius:12px;margin-bottom:8px;overflow:hidden;'+(isPast?'opacity:0.38;':'')+'">'
-    +'<div onclick="rcSwToggleFlatRace('+idx+')" style="padding:11px 13px;'+(isNext?'background:rgba(96,165,250,.05);':'')+'display:flex;align-items:center;gap:8px;cursor:pointer;">'
-      +'<span style="font-family:monospace;font-size:14px;font-weight:700;color:'+(isNext?'#60a5fa':'var(--gld)')+';">'+time+'</span>'
-      +flag
-      +(isNext?'<span style="font-size:9px;font-weight:700;background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3);padding:1px 5px;border-radius:4px;letter-spacing:.05em;flex-shrink:0;">NEXT</span>':'')
-      +'<span style="font-size:14px;font-weight:'+(isNext?'700':'600')+';color:var(--txt);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+course+'</span>'
-      +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
-        +'<span style="font-family:monospace;font-size:11px;color:var(--mut);">'+activeRunners+' runners</span>'
-        +'<span id="rcfc-chev-'+idx+'" style="color:var(--mut);font-size:18px;display:inline-block;">›</span>'
+  return '<div class="rc-meeting" style="'+(isPast?'opacity:.38;':'')+'">'  // MARKER_PREVIEW
+    +'<div class="rc-meeting-hdr" onclick="rcSwToggleFlatRace('+idx+')">'
+      +'<span class="rc-meeting-flag">'+flag+'</span>'
+      +'<div class="rc-meeting-info">'
+        +'<div class="rc-meeting-name rc-meeting-name-blue">'+course+'</div>'
+        +'<div class="rc-meeting-meta">'+(isNext?'<span style="background:#dbeafe;color:#1d4ed8;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:800;margin-right:5px;">NEXT</span>':'')+time+' · '+activeRunners+' runners'+(name?' · '+name:'')+'</div>'
       +'</div>'
+      +'<span id="rcfc-chev-'+idx+'" style="color:#9ca3af;font-size:14px;">›</span>'
     +'</div>'
-    +(name?'<div style="padding:0 13px 6px;font-size:11px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+name+'</div>':'')
     +'<div id="'+uid+'" style="display:none;"></div>'
     +'</div>';
 }
@@ -204,16 +197,14 @@ function rcSwFullRaceCard(r, course){
   const idx=_rcSwFlatRaces.length;
   _rcSwFlatRaces.push({race:r, course:course});
   const uid='rcr-'+idx;
-  return '<div style="background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:8px;overflow:hidden;">'
-    +'<div data-race-idx="'+idx+'" onclick="rcSwToggleFlatRace('+idx+')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;">'
-      +'<div>'
-        +'<div style="font-family:monospace;font-size:12px;font-weight:700;color:#60a5fa;">'+time+'</div>'
-        +'<div style="font-size:13px;font-weight:600;color:var(--txt);margin-top:1px;">'+name+'</div>'
+  return '<div style="overflow:hidden;border-bottom:1px solid #e5e7eb;">'
+    +'<div class="rc-race-hdr" data-race-idx="'+idx+'" onclick="rcSwToggleFlatRace('+idx+')" style="background:#fff;">'
+      +'<div class="rc-race-hdr-left">'
+        +'<div class="rc-race-time">'+time+'</div>'
+        +'<div class="rc-race-name">'+name+'</div>'
+        +'<div class="rc-race-meta"><span class="rc-race-count">'+runnerCount+' runners'+(nrCount?' ('+nrCount+' NR)':'')+'</span></div>'
       +'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px;">'
-        +'<span style="font-family:monospace;font-size:10px;color:var(--mut);">'+runnerCount+' runners'+(nrCount?' ('+nrCount+' NR)':'')+'</span>'
-        +'<span id="rcfc-chev-'+idx+'" style="color:var(--mut);font-size:18px;display:inline-block;">›</span>'
-      +'</div>'
+      +'<span id="rcfc-chev-'+idx+'" style="color:#9ca3af;font-size:14px;">›</span>'
     +'</div>'
     +'<div id="'+uid+'" style="display:none;"></div>'
     +'</div>';
@@ -225,7 +216,7 @@ function rcSwToggleFlatRace(idx){
   if(!el)return;
   const open=el.style.display!=='none';
   el.style.display=open?'none':'block';
-  if(chev){chev.style.transform=open?'':'rotate(90deg)';chev.style.color=open?'var(--mut)':'#60a5fa';}
+  if(chev){chev.style.transform=open?'':'rotate(90deg)';chev.style.color=open?'#9ca3af':'#3b82f6';}
   if(!open&&!el.dataset.rendered){
     const entry=_rcSwFlatRaces[idx];
     if(entry){
@@ -301,7 +292,7 @@ function rcSwToggleMeeting(course){
   // Open this
   rcSwOpenMeeting=course;
   racesEl.style.display='block';
-  chevEl.style.transform='rotate(180deg)';chevEl.style.color='#60a5fa';
+  chevEl.style.transform='rotate(180deg)';chevEl.style.color='#93c5fd';
   if(!racesEl.dataset.rendered){
     rcSwRenderMeetingRaces(course, racesEl);
     racesEl.dataset.rendered='1';
@@ -325,7 +316,17 @@ function rcSwRenderMeetingRaces(course, el){
     const isG1=rname.includes('group 1');const isG2=rname.includes('group 2');
     const isG3=rname.includes('group 3');const isListed=rname.includes('listed');
     const nameCol=isG1||isG2?'#f59e0b':isG3?'#a78bfa':isListed?'#a78bfa':'var(--txt)';
-    return'<div id="sw-row-'+safeId+'-'+i+'" style="border-top:1px solid rgba(255,255,255,.04);">'      +'<div onclick="rcSwToggle('+i+',\''+course.replace(/\'/g,"\\'")+'\',' +"'"+safeId+"'"+',true)" style="display:flex;align-items:center;gap:12px;padding:10px 0 10px 8px;cursor:pointer;">'        +'<div style="font-size:15px;font-weight:700;color:var(--gld);flex-shrink:0;min-width:46px;font-family:monospace;">'+time+'</div>'        +'<div style="flex:1;min-width:0;">'          +'<div style="font-size:12px;color:var(--mut);margin-bottom:2px;">'+(dist?dist+' \u00b7 ':'')+runners+' Runners</div>'          +'<div style="font-size:13px;font-weight:600;color:'+nameCol+';line-height:1.3;">'+name+'</div>'        +'</div>'        +'<span id="sw-chev-'+safeId+'-'+i+'" style="color:var(--mut);font-size:13px;flex-shrink:0;transition:transform .15s;">\u203a</span>'      +'</div>'      +'<div class="rc-runners-inline" id="sw-runners-'+safeId+'-'+i+'" data-course="'+course+'" data-idx="'+i+'" style="display:none;"></div>'    +'</div>';
+    return'<div id="sw-row-'+safeId+'-'+i+'" style="border-bottom:1px solid #e5e7eb;background:#fff;">'
+      +'<div class="rc-race-hdr" onclick="rcSwToggle('+i+',\''+course.replace(/\'/g,"\\'")+'\',\''+safeId+'\',true)">'
+        +'<div class="rc-race-hdr-left">'
+          +'<div class="rc-race-time">'+time+'</div>'
+          +'<div class="rc-race-meta">'+(dist?'<span class="rc-chip">'+dist+'</span>':'')+runners+' runners</div>'
+          +'<div class="rc-race-name">'+name+'</div>'
+        +'</div>'
+        +'<span id="sw-chev-'+safeId+'-'+i+'" style="color:#9ca3af;font-size:14px;transition:transform .15s;">›</span>'
+      +'</div>'
+      +'<div class="rc-runners-inline" id="sw-runners-'+safeId+'-'+i+'" data-course="'+course+'" data-idx="'+i+'" style="display:none;"></div>'
+    +'</div>';
   }).join('');
 }
 
@@ -344,7 +345,7 @@ function rcSwToggle(idx, course, safeId, inMeeting){
   document.querySelectorAll('[id^="sw-chev-'+safeId+'-"]').forEach(function(el){el.style.transform='';el.style.color='var(--mut)';});
   if(open)return;
   rEl.style.display='block';
-  if(cEl){cEl.style.transform='rotate(90deg)';cEl.style.color='var(--gld)';}
+  if(cEl){cEl.style.transform='rotate(90deg)';cEl.style.color='#3b82f6';}
   if(!rEl.dataset.rendered){rcSwRenderRunners(idx,course,rEl);rEl.dataset.rendered='1';}
   const row=document.getElementById('sw-row-'+safeId+'-'+idx);
   if(row)setTimeout(function(){row.scrollIntoView({behavior:'smooth',block:'start'});},50);
@@ -389,7 +390,7 @@ function rcSwRenderRunners(idx, course, el){
   const dist=race.distance_round||race.distance_f||race.distance||race.dist||'';
   const prize=race.prize||race.total_prize_money||'';
   const infoBar=[race.going,dist,prize].filter(Boolean).join(' · ');
-  let html='<div style="background:var(--sur2);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);padding:7px 13px;font-family:monospace;font-size:10px;color:var(--mut);margin-bottom:6px;">'+infoBar+'</div>';
+  let html=infoBar?'<div style="display:flex;gap:5px;flex-wrap:wrap;padding:7px 13px 6px;background:#fafafa;border-bottom:1px solid #f3f4f6;">'+infoBar.split(' · ').map(function(c){return'<span class="rc-chip">'+c+'</span>';}).join('')+'</div>':'';
   if(!runners.length){el.innerHTML=html+'<div style="padding:8px 13px;color:var(--mut);font-style:italic;font-size:13px;">No runners listed yet.</div>';return;}
   html+=runners.map(function(r,i){
     const name=stripCountrySuffix(r.horse||r.name||'—');
@@ -407,38 +408,33 @@ function rcSwRenderRunners(idx, course, el){
     const _PM2={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#fb923c'},'trainer-intel':{emoji:'🗣',col:'#60a5fa'},'form-study':{emoji:'📊',col:'#ef4444'},'tip-source':{emoji:'💡',col:'#eab308'}};
     const _pm2=_pr2?_PM2[_pr2.reason||'eye-catcher']:null;
     const pid='sw-profile-'+course.replace(/\W/g,'_')+'-'+i;
-    return'<div style="border-bottom:1px solid var(--bdr);">'
-      +'<div style="padding:9px 13px;'+(isNR?'opacity:0.38;':_bh)+'display:flex;align-items:flex-start;gap:9px;">'
-      +'<div style="width:22px;text-align:center;flex-shrink:0;padding-top:2px;">'
-        +(isNR?'<span style="font-size:9px;font-weight:700;background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);padding:1px 4px;border-radius:4px;">NR</span>'
-          :'<span style="font-family:monospace;font-size:13px;font-weight:700;color:var(--mut);">'+no+'</span>')
-      +'</div>'
+    return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'" style="background:#fff;">'
+      +'<div class="rc-cloth">'+(isNR?'<span class="rc-nr-chip">NR</span>':'<span>'+no+'</span>')+'</div>'
       +'<div style="flex:1;min-width:0;">'
         +(function(){
           const _wl=getWL();const _nl=(name||'').toLowerCase().trim();
           const _pr=_wl.find(function(w){return(w.horse||'').toLowerCase().trim()===_nl;});
           const _PM={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#fb923c'},'trainer-intel':{emoji:'🗣',col:'#60a5fa'},'form-study':{emoji:'📊',col:'#ef4444'},'tip-source':{emoji:'💡',col:'#eab308'}};
           const _pm=_pr?_PM[_pr.reason||'eye-catcher']:null;
-          const _badge=_pr?'<span style="font-size:9px;font-family:monospace;padding:1px 5px;border-radius:10px;border:1px solid '+_pm.col+';color:'+_pm.col+';background:rgba(0,0,0,.35);margin-left:3px;">'+_pm.emoji+'</span>':'';
+          const _badge=_pr?'<span style="font-size:9px;font-family:var(--font-ui);padding:1px 5px;border-radius:10px;border:1px solid '+_pm.col+';color:'+_pm.col+';background:rgba(0,0,0,.35);margin-left:3px;">'+_pm.emoji+'</span>':'';
           const _nc=isNR?'var(--mut)':_pr?_pm.col:'var(--txt)';
-          return'<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:2px;flex-wrap:wrap;">'
-            +'<span style="font-size:14px;font-weight:700;color:'+_nc+';">'+(isNR?'<s>'+name+'</s>':name)+'</span>'
-            +(rpr?'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:#60a5fa;">'+rpr+'</span>':'')
-            +_badge
-            +(draw?'<span style="font-family:monospace;font-size:11px;color:var(--mut);">'+draw+'</span>':'')
-            +(form?'<span style="font-family:monospace;font-size:10px;color:var(--mut);letter-spacing:.06em;">'+form+'</span>':'')
-          +'</div>';
+          return'<div class="rc-runner-name-row">'
+            +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'
+            +(rpr?'<span class="rc-or">'+rpr+'</span>':'')
+            +(_badge?'<span class="rc-wl-pill">'+_pm.emoji+'</span>':'')
+            +(draw?'<span class="rc-runner-age">'+draw+'</span>':'')
+          +'</div>'
+          +(form?'<span class="rc-runner-form">'+form+'</span>':'');
         }())
-        +'<div style="font-size:12px;color:var(--mut);margin-bottom:1px;">J: '+jock+'</div>'
-        +'<div style="font-size:11px;color:var(--mut);">T: '+trainer+(age?' · '+age:'')+'</div>'
+        +'<div class="rc-runner-jt">'+jock+(age?' · '+age:'')+'  ·  '+trainer+'</div>'
       +'</div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'
         +(isNR?''
-          :'<button onclick="rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\')\" style="font-family:monospace;font-size:10px;font-weight:700;padding:5px 12px;border-radius:7px;border:1px solid rgba(232,228,220,.25);background:rgba(232,228,220,.08);color:var(--txt);cursor:pointer;">Bet</button>')
-        +(_pr2&&!isNR?'<button onclick="rcToggleProfile(\''+pid+'\',this)" style="font-family:monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:5px;border:1px solid '+_pm2.col+';background:transparent;color:'+_pm2.col+';cursor:pointer;">\u25bc</button>':'')
+          :'<button onclick="rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\')\" class="rc-bet-btn">Bet</button>')
+        +(_pr2&&!isNR?'<button onclick="rcToggleProfile(\''+pid+'\',this)" style="font-family:var(--font-ui);font-size:9px;font-weight:700;padding:3px 8px;border-radius:5px;border:1px solid '+_pm2.col+';background:transparent;color:'+_pm2.col+';cursor:pointer;">\u25bc</button>':'')
       +'</div>'
     +'</div>'
-    +(_pr2?'<div id="'+pid+'" style="display:none;">'+rcProfilePanelHtml(_pr2,pid)+'</div>':'')
+    +(_pr2?'<div id="'+pid+'" class="rc-profile-panel" style="display:none;">'+rcProfilePanelHtml(_pr2,pid)+'</div>':'')
     +'</div>';
   }).join('');
   el.innerHTML=html;
@@ -538,7 +534,7 @@ function openLogbetOverlay(mode, prefill){
     closeBar=document.createElement('div');
     closeBar.id='lbo-close-bar';
     closeBar.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:202;padding:12px 17px env(safe-area-inset-bottom,16px);background:var(--bg);border-top:1px solid var(--bdr);';
-    closeBar.innerHTML='<button onclick="_lboBackToChecklist()" style="width:100%;padding:14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">← Back to Checklist</button>';
+    closeBar.innerHTML='<button onclick="_lboBackToChecklist()" style="width:100%;padding:14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">← Back to Checklist</button>';
     document.body.appendChild(closeBar);
   }
   closeBar.style.display='block';
@@ -645,13 +641,13 @@ function rcSwRenderResultsUI(){
   if(!filterEl) return;
 
   const onT = rcSwResultsView==='time';
-  const btnBase = 'font-family:monospace;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 18px;border:none;cursor:pointer;font-weight:700;transition:all .12s;';
+  const btnBase = 'font-family:var(--font-ui);font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 18px;border:none;cursor:pointer;font-weight:700;transition:all .12s;';
 
   filterEl.style.display = 'block';
   filterEl.innerHTML =
-    '<div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-bottom:12px;">'
-    + '<button style="'+btnBase+(!onT?'background:#fb923c;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
-    + '<button style="'+btnBase+(onT?'background:#fb923c;color:#141414;flex:1;':'background:transparent;color:var(--mut);flex:1;')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
+    '<div class="rc-sort-bar">'
+    + '<button class="rc-sort-btn'+(!onT?' on':'')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
+    + '<button class="rc-sort-btn'+(onT?' on':'')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
     + '</div>';
 
   const listEl = document.getElementById('sw-results-list');
@@ -665,38 +661,58 @@ function rcSwRenderResultsUI(){
 }
 
 function rcSwRaceCard(race, course){
-  const time = race.off_time||race.off||race.time||'\u2014';
+  const time = race.off_time||race.off||race.time||'—';
   const name = race.race_name||race.name||'Race';
   const places = (race.runners||[]).slice(0,5);
-  return '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;margin-bottom:8px;overflow:hidden;">'
-    + '<div style="padding:10px 13px;border-bottom:1px solid var(--bdr);background:rgba(251,146,60,.04);">'
-      + '<div style="font-size:13px;font-weight:700;color:var(--txt);">'+time+' '+course+'</div>'
-      + '<div style="font-size:11px;color:var(--mut);">'+name+'</div>'
+  const todayBets=[...D.bets,...((D.vBank&&D.vBank.bets)||[])];
+  const esc = function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"  );};
+  return '<div class="rc-race-block" style="border-radius:10px;border:1px solid #e5e7eb;margin-bottom:8px;">'
+    + '<div class="rc-race-hdr" style="border-radius:10px 10px 0 0;background:#fafafa;">'
+      + '<div class="rc-race-hdr-left">'
+        + '<div class="rc-race-time">'+time+'</div>'
+        + '<div class="rc-race-name">'+name+'</div>'
+      + '</div>'
+      + '<span class="rc-race-count">'+places.length+' shown</span>'
     + '</div>'
     + places.map(function(r,i){
         const pos = r.position||r.place||(i+1);
-        const horse = stripCountrySuffix(r.horse||r.name||'\u2014');
-        const jock = r.jockey||'\u2014';
-        const trainer = r.trainer||'\u2014';
-        const sp = r.sp||'\u2014';
+        const horse = stripCountrySuffix(r.horse||r.name||'—');
+        const jock = r.jockey||'';
+        const trainer = r.trainer||'';
+        const sp = r.sp||'—';
         const ofr = r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||rcGetOFR(horse)||'';
-        const posCol = pos==1?'var(--grn)':pos==2?'#60a5fa':pos==3?'#fb923c':'var(--mut)';
-        const esc = s => (s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 13px;border-bottom:1px solid var(--bdr);">'
-          + '<span style="font-family:monospace;font-weight:700;font-size:14px;color:'+posCol+';min-width:18px;">'+pos+'</span>'
-          + '<div style="flex:1;min-width:0;">'
-            + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
-              + '<span style="font-weight:600;font-size:13px;">'+horse+'</span>'
-              + (ofr?'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:#60a5fa;">'+ofr+'</span>':'')
+        const posClass = pos==1?'rc-pos-1':pos==2?'rc-pos-2':pos==3?'rc-pos-3':'rc-pos-n';
+        const hn = horse.toLowerCase().trim();
+        const myBet = todayBets.find(function(b){return (b.horse||'').toLowerCase().trim()===hn&&b.result&&b.result!=='pending';});
+        const pnl = myBet?(parseFloat(myBet.returns||0)-parseFloat(myBet.stake||0)):0;
+        const betBadge = myBet
+          ? (myBet.result==='win'||myBet.result==='place'
+              ? '<span class="rc-your-bet rc-your-bet-win">Your Bet +'+(pnl>0?fp(pnl):'')+'</span>'
+              : '<span class="rc-your-bet rc-your-bet-loss">Your Bet</span>')
+          : '';
+        const wlEntry = getWL().find(function(w){return(w.horse||'').toLowerCase().trim()===hn;});
+        const watchBtn = wlEntry
+          ? '<button class="rc-watch-btn rc-watch-btn-watching">✓ Watching</button>'
+          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\'\',\''+esc(course)+'\'\',\''+esc(jock)+'\'\',\''+esc(trainer)+'\'\',\''+esc(name)+'\'\',\''+esc(ofr)+'\'\')" class="rc-watch-btn rc-watch-btn-add">+ Watch</button>';
+        return '<div class="rc-runner" style="background:#fff;">'
+          + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
+          + '<div class="rc-runner-main">'
+            + '<div class="rc-runner-name-row">'
+              + '<span class="rc-runner-name">'+horse+'</span>'
+              + (ofr?'<span class="rc-or">'+ofr+'</span>':'')
+              + betBadge
             + '</div>'
-            + '<div style="font-size:11px;color:var(--mut);">'+jock+'</div>'
+            + '<div class="rc-runner-jt">'+(jock||'')+(trainer?' · '+trainer:'')+'</div>'
           + '</div>'
-          + '<span style="font-family:monospace;font-size:12px;font-weight:700;color:var(--gld);flex-shrink:0;">'+sp+'</span>'
-          + '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\')" style="font-family:monospace;font-size:10px;font-weight:700;padding:4px 8px;border-radius:7px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;flex-shrink:0;">W</button>'
+          + '<div class="rc-runner-right">'
+            + '<span class="rc-sp">'+sp+'</span>'
+            + watchBtn
+          + '</div>'
         + '</div>';
       }).join('')
     + '</div>';
 }
+
 
 function rcSwRenderResultsTime(listEl){
   const domestic = rcSwResultsData.filter(function(r){
@@ -719,7 +735,7 @@ function rcSwRenderResultsTime(listEl){
     return rcSwRaceCard(race, race.course||race.venue||'Unknown');
   }).join('');
   if(intl.length){
-    html += '<div style="font-family:monospace;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);padding:10px 4px 6px;">\U0001f30d International</div>';
+    html += '<div style="font-family:var(--font-ui);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);padding:10px 4px 6px;">\U0001f30d International</div>';
     html += intl.map(function(race){
       return rcSwRaceCard(race, race.course||race.venue||'Unknown');
     }).join('');
@@ -744,17 +760,17 @@ function rcSwRenderResultsCourse(listEl){
     const isOpen = rcSwResultsOpenCourse === course;
     const count = races.length;
     const flag=rcCountryFlag(rcCourseCountry(course));
-    return '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;margin-bottom:8px;overflow:hidden;">'
-      + '<div onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':\''+course+'\';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));" style="display:flex;align-items:center;gap:12px;padding:13px;cursor:pointer;background:'+(isOpen?'rgba(251,146,60,.05)':'transparent')+';">'
-        + '<span style="font-size:18px;flex-shrink:0;">'+flag+'</span>'
-        + '<div style="flex:1;">'
-          + '<div style="font-size:15px;font-weight:700;color:'+(isOpen?'#fb923c':'var(--txt)')+';">'+course+'</div>'
-          + '<div style="font-family:monospace;font-size:10px;color:var(--mut);margin-top:2px;">'+count+' race'+(count!==1?'s':'')+'</div>'
+    return '<div class="rc-meeting">'
+      + '<div class="rc-meeting-hdr" onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':' +"'"+course+"'"+ ';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));">'
+        + '<span class="rc-meeting-flag">'+flag+'</span>'
+        + '<div class="rc-meeting-info">'
+          + '<div class="rc-meeting-name rc-meeting-name-orange">'+course+'</div>'
+          + '<div class="rc-meeting-meta">'+count+' race'+(count!==1?'s':'')+'</div>'
         + '</div>'
-        + '<span style="color:'+(isOpen?'#fb923c':'var(--mut)')+';font-size:16px;transition:transform .15s;transform:'+(isOpen?'rotate(90deg)':'none')+';">\u203a</span>'
+        + '<span class="rc-meeting-chevron'+(isOpen?' open':'')+'" >›</span>'
       + '</div>'
       + (isOpen
-          ? '<div style="border-top:1px solid var(--bdr);padding:10px 10px 2px;">'
+          ? '<div style="border-radius:0 0 10px 10px;overflow:hidden;">'
               + races.map(function(race){ return rcSwRaceCard(race, course); }).join('')
             + '</div>'
           : '')
@@ -770,16 +786,16 @@ function rcProfilePanelHtml(profiled,panelId){
   const meta=rm[profiled.reason||'eye-catcher']||rm['eye-catcher'];
   const edge=(function(){const mr=parseFloat(profiled.myRating),or=parseFloat(profiled.currentRating);if(!mr||!or)return null;return mr-or;}());
   const edgeHtml=edge===null?''
-    :edge>0?'<span style="font-family:monospace;font-size:10px;font-weight:700;color:#4ade80;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);padding:2px 6px;border-radius:4px;">▲ +'+edge+' edge</span>'
-    :edge<0?'<span style="font-family:monospace;font-size:10px;font-weight:700;color:#f87171;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);padding:2px 6px;border-radius:4px;">▼ '+edge+' edge</span>'
-    :'<span style="font-family:monospace;font-size:10px;color:var(--mut);border:1px solid var(--bdr);padding:2px 6px;border-radius:4px;">→ on mark</span>';
+    :edge>0?'<span style="font-family:var(--font-ui);font-size:10px;font-weight:700;color:var(--grn);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);padding:2px 6px;border-radius:4px;">▲ +'+edge+' edge</span>'
+    :edge<0?'<span style="font-family:var(--font-ui);font-size:10px;font-weight:700;color:var(--red);background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);padding:2px 6px;border-radius:4px;">▼ '+edge+' edge</span>'
+    :'<span style="font-family:var(--font-ui);font-size:10px;color:var(--mut);border:1px solid var(--bdr);padding:2px 6px;border-radius:4px;">→ on mark</span>';
   const obs=(profiled.observations||[]).slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');}).slice(0,3);
   const targets=(profiled.targets||[]).slice(0,3);
   let html='<div style="border-top:1px solid var(--bdr);background:rgba(167,139,250,.04);padding:10px 13px 12px;">';
   html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">'
-    +'<span style="font-size:9px;font-family:monospace;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(0,0,0,.2);border:1px solid '+meta.col+';color:'+meta.col+';">'+meta.emoji+' '+meta.label+'</span>'
-    +(profiled.myRating?'<span style="font-family:monospace;font-size:10px;color:var(--gld);">MR '+profiled.myRating+'</span>':'')
-    +(profiled.currentRating?'<span style="font-family:monospace;font-size:10px;color:var(--mut);">OR '+profiled.currentRating+'</span>':'')
+    +'<span style="font-size:9px;font-family:var(--font-ui);font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(0,0,0,.2);border:1px solid '+meta.col+';color:'+meta.col+';">'+meta.emoji+' '+meta.label+'</span>'
+    +(profiled.myRating?'<span style="font-family:var(--font-ui);font-size:10px;color:var(--gld);">MR '+profiled.myRating+'</span>':'')
+    +(profiled.currentRating?'<span style="font-family:var(--font-ui);font-size:10px;color:var(--mut);">OR '+profiled.currentRating+'</span>':'')
     +edgeHtml
   +'</div>';
   if(profiled.reasonNote)html+='<div style="font-size:12px;color:var(--txt);line-height:1.5;margin-bottom:7px;font-style:italic;">“'+profiled.reasonNote+'”</div>';
@@ -787,23 +803,23 @@ function rcProfilePanelHtml(profiled,panelId){
   if(profiled.goingPrefs&&profiled.goingPrefs.length)conditions.push('⛳ '+profiled.goingPrefs.join(', '));
   if(profiled.distancePref)conditions.push('⇔ '+profiled.distancePref);
   if(profiled.trackPref)conditions.push('🏇 '+profiled.trackPref);
-  if(conditions.length)html+='<div style="font-family:monospace;font-size:10px;color:var(--mut);margin-bottom:7px;">'+conditions.join(' · ')+'</div>';
+  if(conditions.length)html+='<div style="font-family:var(--font-ui);font-size:10px;color:var(--mut);margin-bottom:7px;">'+conditions.join(' · ')+'</div>';
   if(profiled.trainerIntel)html+='<div style="font-size:11px;color:var(--mut);border-left:2px solid rgba(96,165,250,.4);padding-left:7px;margin-bottom:7px;line-height:1.45;">🗣 '+profiled.trainerIntel+'</div>';
   if(profiled.conditionsNotes)html+='<div style="font-size:11px;color:var(--mut);border-left:2px solid rgba(251,146,60,.4);padding-left:7px;margin-bottom:7px;line-height:1.45;">📋 '+profiled.conditionsNotes+'</div>';
   if(obs.length){
-    html+='<div style="font-family:monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin-bottom:5px;">Recent observations</div>';
+    html+='<div style="font-family:var(--font-ui);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin-bottom:5px;">Recent observations</div>';
     obs.forEach(function(o){
       html+='<div style="font-size:11px;color:var(--mut);margin-bottom:4px;line-height:1.4;">'
-        +(o.date?'<span style="font-family:monospace;font-size:9px;color:var(--mut);margin-right:5px;">'+o.date+'</span>':'')
-        +(o.result?'<span style="font-family:monospace;font-size:9px;font-weight:700;color:'+(o.result.toLowerCase().includes('win')?'var(--grn)':'var(--mut)')+';margin-right:5px;">'+o.result+'</span>':'')
+        +(o.date?'<span style="font-family:var(--font-ui);font-size:9px;color:var(--mut);margin-right:5px;">'+o.date+'</span>':'')
+        +(o.result?'<span style="font-family:var(--font-ui);font-size:9px;font-weight:700;color:'+(o.result.toLowerCase().includes('win')?'var(--grn)':'var(--mut)')+';margin-right:5px;">'+o.result+'</span>':'')
         +(o.notes||o.raceName||'')
       +'</div>';
     });
   }
   if(targets.length){
-    html+='<div style="font-family:monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin-top:6px;margin-bottom:5px;">Targets</div>';
+    html+='<div style="font-family:var(--font-ui);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin-top:6px;margin-bottom:5px;">Targets</div>';
     targets.forEach(function(t){
-      html+='<div style="font-size:11px;color:#fb923c;font-family:monospace;margin-bottom:2px;">🎯 '+t.race+(t.date?' · '+t.date:'')+(t.track?' · '+t.track:'')+'</div>';
+      html+='<div style="font-size:11px;color:var(--ora);font-family:var(--font-ui);margin-bottom:2px;">🎯 '+t.race+(t.date?' · '+t.date:'')+(t.track?' · '+t.track:'')+'</div>';
     });
   }
   html+='</div>';
@@ -889,7 +905,7 @@ function autoMatchBetResults(resultsData){
     if(!toast){
       toast=document.createElement('div');
       toast.id='_auto-result-toast';
-      toast.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#34d399;color:#141414;font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.06em;padding:8px 16px;border-radius:20px;z-index:9999;transition:opacity .4s;pointer-events:none;';
+      toast.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#34d399;color:#141414;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.06em;padding:8px 16px;border-radius:20px;z-index:9999;transition:opacity .4s;pointer-events:none;';
       document.body.appendChild(toast);
     }
     toast.textContent='✓ '+updated+' bet'+(updated===1?'':'s')+' auto-updated from results';
@@ -938,16 +954,16 @@ async function rcLoadResults(){
             const posCol=pos==1?'var(--grn)':pos==2?'#60a5fa':pos==3?'#fb923c':'var(--mut)';
             const esc2=function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");};
             return'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bdr);">'
-              +'<span style="font-family:monospace;font-weight:700;font-size:14px;color:'+posCol+';min-width:20px;">'+pos+'</span>'
+              +'<span style="font-family:var(--font-ui);font-weight:700;font-size:14px;color:'+posCol+';min-width:20px;">'+pos+'</span>'
               +'<div style="flex:1;min-width:0;">'
                 +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
                   +'<span style="font-weight:600;font-size:13px;">'+horse+'</span>'
-                  +(ofr?'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:#60a5fa;">'+ofr+'</span>':'')
+                  +(ofr?'<span style="font-family:var(--font-ui);font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:var(--blu);">'+ofr+'</span>':'')
                 +'</div>'
                 +'<div style="font-size:11px;color:var(--mut);">'+jock+'</div>'
               +'</div>'
-              +'<span style="font-family:monospace;font-size:13px;color:var(--gld);flex-shrink:0;">'+sp+'</span>'
-              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\')" style="font-family:monospace;font-size:10px;font-weight:700;padding:4px 8px;border-radius:7px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;flex-shrink:0;">W</button>'
+              +'<span style="font-family:var(--font-ui);font-size:13px;color:var(--gld);flex-shrink:0;">'+sp+'</span>'
+              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\')" style="font-family:var(--font-ui);font-size:10px;font-weight:700;padding:4px 8px;border-radius:7px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;flex-shrink:0;">W</button>'
               +'</div>';
           }).join('')
           +'</div>';

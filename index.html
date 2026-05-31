@@ -324,39 +324,39 @@ RACING <span class="logo-accent">PUZZLE</span>
   <div class="deck" id="deck">
 
     <!-- TODAY -->
-    <div class="card cT" id="c0">
+    <div class="card cT" id="c0" style="background:#f5f6f8;">
       <div class="cin" style="touch-action:pan-y;">
 
         <!-- ── TOP LINE: Date + P&L ── -->
         <div style="margin:-18px -17px 0;padding:14px 17px 13px;border-bottom:1px solid rgba(232,228,220,.08);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
             <div>
-              <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(232,228,220,.35);margin-bottom:3px;">Race Day</div>
+              <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Race Day</div>
               <div style="font-size:20px;font-weight:700;color:#fff" id="tdlbl">Today</div>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
-              <button onclick="runTodayDemo()" id="t-demo-btn" style="font-family:monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:4px 9px;border-radius:6px;border:1px solid rgba(232,228,220,.15);background:rgba(232,228,220,.05);color:rgba(232,228,220,.4);cursor:pointer;">Demo ›</button>
+              <button onclick="runTodayDemo()" id="t-demo-btn" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:5px 11px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;color:#9ca3af;cursor:pointer;">Demo ›</button>
               <div style="text-align:right;" id="tstreak-tile"></div>
             </div>
           </div>
           <!-- P&L row: Real · Virtual · Bet count -->
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-            <div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.15);border-radius:10px;padding:9px 11px;">
-              <div style="font-family:monospace;font-size:9px;color:rgba(96,165,250,.6);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Real P&L</div>
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:9px 11px;">
+              <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Real P&amp;L</div>
               <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:17px;font-weight:700;" id="tpnl" class="gld">£0.00</div>
             </div>
-            <div style="background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.15);border-radius:10px;padding:9px 11px;">
-              <div style="font-family:monospace;font-size:9px;color:rgba(251,146,60,.6);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Virtual P&L</div>
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:9px 11px;">
+              <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Virtual P&amp;L</div>
               <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:17px;font-weight:700;color:#fb923c;" id="t-virt-pnl">£0.00</div>
             </div>
-            <div style="background:rgba(0,0,0,.2);border:1px solid var(--bdr);border-radius:10px;padding:9px 11px;" id="tbetlimit"></div>
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:9px 11px;" id="tbetlimit"></div>
           </div>
         </div>
 
         <!-- ── CHECK-IN ── -->
-        <div style="margin-top:14px;" id="tcin">
+        <div style="margin-top:14px;padding:0 0 24px;" id="tcin">
           <div style="background:rgba(232,228,220,.04);border:1px solid rgba(232,228,220,.1);border-radius:11px;padding:12px 14px;">
-            <div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(232,228,220,.4);margin-bottom:8px;">Daily Check-in</div>
+            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:8px;">Daily Check-in</div>
             <div style="display:flex;gap:6px;margin-bottom:8px;" id="tmood-btns">
               <button onclick="setMood('poor')"   id="mood-poor"   style="flex:1;padding:7px 4px;border-radius:8px;border:1px solid var(--bdr);background:transparent;font-size:15px;cursor:pointer;">😔</button>
               <button onclick="setMood('neutral')" id="mood-neutral" style="flex:1;padding:7px 4px;border-radius:8px;border:1px solid var(--bdr);background:transparent;font-size:15px;cursor:pointer;">😐</button>
@@ -384,7 +384,7 @@ RACING <span class="logo-accent">PUZZLE</span>
         <!-- ── OUTSTANDING BETS ── -->
         <div id="t-outstanding-wrap" style="display:none;margin-top:14px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--red);opacity:.7;">Needs Settling</div>
+            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#dc2626;opacity:.8;">Needs Settling</div>
             <div id="t-outstanding-count" style="font-family:monospace;font-size:9px;background:rgba(196,58,58,.15);color:var(--red);padding:2px 7px;border-radius:10px;"></div>
           </div>
           <div id="t-outstanding"></div>
@@ -392,14 +392,14 @@ RACING <span class="logo-accent">PUZZLE</span>
 
         <!-- ── TODAY'S BETS ── -->
         <div style="margin-top:14px;">
-          <div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(232,228,220,.4);margin-bottom:8px;">Today's Bets</div>
+          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:8px;">Today's Bets</div>
           <div id="tbets"><div style="font-style:italic;font-size:13px;color:var(--mut);padding:6px 0;">No bets logged today.</div></div>
         </div>
 
         <!-- ── THIS WEEK ── -->
         <div id="t-running-today" style="display:none;margin-bottom:14px;"></div>
     <div id="t-this-week" style="margin-top:14px;display:none;">
-          <div style="font-family:monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(232,228,220,.4);margin-bottom:8px;">Coming Up</div>
+          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:8px;">Coming Up</div>
           <div id="t-this-week-list"></div>
         </div>
 
@@ -522,7 +522,7 @@ RACING <span class="logo-accent">PUZZLE</span>
     </div>
 
     <!-- COACH -->
-    <div class="card cC" id="c5" style="position:relative;">
+    <div class="card cC" id="c5" style="position:relative;background:#f5f6f8;">
       <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,20,.85);backdrop-filter:blur(4px);border-radius:inherit;">
         <div style="font-size:32px;margin-bottom:12px;">🧠</div>
         <div style="font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#cc44aa;border:1px solid #cc44aa;padding:5px 16px;border-radius:20px;margin-bottom:10px;">Coming Soon</div>
@@ -551,8 +551,8 @@ RACING <span class="logo-accent">PUZZLE</span>
     </div>
 
     <!-- BANK -->
-    <div class="card cB" id="c3">
-      <div class="cin" style="touch-action:pan-y;">
+    <div class="card cB" id="c3" style="background:#f5f6f8;">
+      <div class="cin" style="background:#f5f6f8;" style="touch-action:pan-y;">
         <div style="margin:-18px -17px 16px;padding:14px 17px;background:transparent;border-bottom:1px solid rgba(245,158,11,.2);">
           <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(232,228,220,.6);margin-bottom:2px;">Bankroll</div>
           <div style="font-size:20px;font-weight:700;color:#f59e0b;">Bankroll</div>
@@ -586,7 +586,7 @@ RACING <span class="logo-accent">PUZZLE</span>
     </div>
 
     <!-- WATCHLIST -->
-    <div class="card cW" id="c4">
+    <div class="card cW" id="c4" style="background:#f5f6f8;">
       <div class="cin" style="touch-action:pan-y;">
         <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid rgba(232,121,249,.2);">
           <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(232,121,249,.5);margin-bottom:2px;">Puzzle Profiler</div>

@@ -192,7 +192,7 @@ function renderNextRace(){
   const runners=(next.race.runners||[]).length;
   const urgency=mins<=0?'var(--mut)':mins<30?'var(--red)':mins<60?'#f59e0b':'var(--grn)';
   el.style.display='block';
-  content.innerHTML='<div style="background:rgba(0,0,0,.2);border:1px solid var(--bdr);border-left:3px solid '+urgency+';border-radius:10px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;" onclick="goTo(1)">'
+  content.innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-left:3px solid '+urgency+';border-radius:10px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;" onclick="goTo(1)">'
     +'<div><div style="font-size:14px;font-weight:700;color:var(--txt);">'+(next.race.off||next.race.time||'')+' '+course+'</div>'
     +'<div class="t-muted">'+name+(runners?' · '+runners+' runners':'')+'</div></div>'
     +'<div style="text-align:right;flex-shrink:0;"><div style="font-family:var(--font-ui);font-size:15px;font-weight:700;color:'+urgency+';">'+countdown+'</div>'
@@ -211,7 +211,7 @@ function renderStudyReminder(){
   const todayBets=D.bets.filter(b=>b.date===td());
   const hasBets=todayBets.length>0;
   el.style.display='block';
-  el.innerHTML='<div style="background:rgba(0,0,0,.2);border:1px solid '+(done?'rgba(52,211,153,.2)':'rgba(245,158,11,.2)')+';border-radius:10px;padding:11px 13px;">'
+  el.innerHTML='<div style="background:#fff;border:1px solid '+(done?'#bbf7d0':'#fde68a')+';border-left:3px solid '+(done?'#4ade80':'#f59e0b')+';border-radius:10px;padding:11px 13px;">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">'
       +'<div>'
         +'<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:'+(done?'var(--grn)':'#f59e0b')+';margin-bottom:3px;">📋 Form Study</div>'
@@ -283,7 +283,7 @@ async function checkWatchlistRunners(races){
         +'</div>'
       +'</div>';
     }).join('')
-  +'</div>';
+  +'</div></div>';
   setTimeout(function(){
     alertEl.querySelectorAll('.t-wl-review-btn').forEach(function(btn){
       btn.addEventListener('click',function(ev){
@@ -654,9 +654,9 @@ function renderThisWeek(){
     const d=new Date(item.date+'T00:00:00');
     const diff=Math.round((d-today)/(1000*60*60*24));
     const dayLbl=diff===1?'Tomorrow':d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-    return'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr);">'
+    return'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f3f4f6;">''
       +'<div style="width:3px;height:34px;border-radius:2px;background:'+item.col+';flex-shrink:0;"></div>'
-      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--txt);">'+item.label+'</div>'+(item.sub?'<div class="t-muted">'+item.sub+'</div>':'')+'</div>'
+      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#111827;">''+item.label+'</div>'+(item.sub?'<div class="t-muted">'+item.sub+'</div>':'')+'</div>'
       +'<div style="font-family:var(--font-ui);font-size:10px;color:'+item.col+';flex-shrink:0;">'+dayLbl+'</div>'
     +'</div>';
   }).join('');

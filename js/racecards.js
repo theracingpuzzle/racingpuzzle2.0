@@ -42,9 +42,10 @@ function rcSwRenderUI(){
   if(!uiEl)return;
 
   const onTime=rcSwView==='time';
-  let html='<div class="rc-sort-bar">'
-    +'<button class="rc-sort-btn'+(onTime?'':' on')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
-    +'<button class="rc-sort-btn'+(onTime?' on':'')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
+  const _sb_base='font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;transition:all .12s;';
+  let html='<div style="display:flex;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff;margin-bottom:10px;">'
+    +'<button style="'+_sb_base+(onTime?'background:transparent;color:#9ca3af;':'background:#1e293b;color:#fff;')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
+    +'<button style="'+_sb_base+(onTime?'background:#1e293b;color:#fff;':'background:transparent;color:#9ca3af;')+'border-left:1px solid #e5e7eb;" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
     +'</div>';
 
   uiEl.innerHTML=html;
@@ -142,8 +143,8 @@ function rcSwRenderCourse(listEl){
       +'<div class="rc-meeting-hdr" data-course="'+escapedCourse+'" onclick="rcSwToggleCourse(this)" style="background:#2d3f55;">'
         +'<span class="rc-meeting-flag">'+flag+'</span>'
         +'<div class="rc-meeting-info">'
-          +'<div class="rc-meeting-name rc-meeting-name-blue">'+course+'</div>'
-          +'<div class="rc-meeting-meta">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
+          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#93c5fd;letter-spacing:-.2px;">'+course+'</div>'
+          +'<div style="font-size:10px;color:#94a3b8;margin-top:2px;">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
         +'</div>'
         +'<span class="rc-meeting-chevron'+(isOpen?' open':'')+'" >›</span>'
       +'</div>'
@@ -179,8 +180,8 @@ function rcSwRaceCardPreview(r, course, isNext, isPast){
     +'<div class="rc-meeting-hdr" onclick="rcSwToggleFlatRace('+idx+')" style="background:#2d3f55;">'
       +'<span class="rc-meeting-flag">'+flag+'</span>'
       +'<div class="rc-meeting-info">'
-        +'<div class="rc-meeting-name rc-meeting-name-blue">'+course+'</div>'
-        +'<div class="rc-meeting-meta">'+(isNext?'<span style="background:#dbeafe;color:#1d4ed8;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:800;margin-right:5px;">NEXT</span>':'')+time+' · '+activeRunners+' runners'+(name?' · '+name:'')+'</div>'
+        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#93c5fd;letter-spacing:-.2px;">'+course+'</div>'
+        +'<div style="font-size:10px;color:#94a3b8;margin-top:2px;">'+(isNext?'<span style="background:#dbeafe;color:#1d4ed8;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:800;margin-right:5px;">NEXT</span>':'')+time+' · '+activeRunners+' runners'+(name?' · '+name:'')+'</div>'
       +'</div>'
       +'<span id="rcfc-chev-'+idx+'" style="color:#9ca3af;font-size:14px;">›</span>'
     +'</div>'
@@ -198,10 +199,10 @@ function rcSwFullRaceCard(r, course){
   _rcSwFlatRaces.push({race:r, course:course});
   const uid='rcr-'+idx;
   return '<div style="overflow:hidden;border-bottom:1px solid #e5e7eb;">'
-    +'<div class="rc-race-hdr" data-race-idx="'+idx+'" onclick="rcSwToggleFlatRace('+idx+')" style="background:#fff;">'
-      +'<div class="rc-race-hdr-left">'
-        +'<div class="rc-race-time">'+time+'</div>'
-        +'<div class="rc-race-name">'+name+'</div>'
+    +'<div onclick="rcSwToggleFlatRace('+idx+')" style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 13px 8px;background:#fafafa;cursor:pointer;border-bottom:1px solid #f3f4f6;">'
+      +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#374151;margin-bottom:2px;">'+time+'</div>'
+        +'<div style="font-size:13px;font-weight:600;color:#6b7280;line-height:1.3;margin-bottom:3px;">'+name+'</div>'
         +'<div class="rc-race-meta"><span class="rc-race-count">'+runnerCount+' runners'+(nrCount?' ('+nrCount+' NR)':'')+'</span></div>'
       +'</div>'
       +'<span id="rcfc-chev-'+idx+'" style="color:#9ca3af;font-size:14px;">›</span>'
@@ -317,11 +318,11 @@ function rcSwRenderMeetingRaces(course, el){
     const isG3=rname.includes('group 3');const isListed=rname.includes('listed');
     const nameCol=isG1||isG2?'#f59e0b':isG3?'#a78bfa':isListed?'#a78bfa':'var(--txt)';
     return'<div id="sw-row-'+safeId+'-'+i+'" style="border-bottom:1px solid #e5e7eb;background:#fff;">'
-      +'<div class="rc-race-hdr" onclick="rcSwToggle('+i+',\''+course.replace(/\'/g,"\\'")+'\',\''+safeId+'\',true)">'
-        +'<div class="rc-race-hdr-left">'
-          +'<div class="rc-race-time">'+time+'</div>'
-          +'<div class="rc-race-meta">'+(dist?'<span class="rc-chip">'+dist+'</span>':'')+runners+' runners</div>'
-          +'<div class="rc-race-name">'+name+'</div>'
+      +'<div onclick="rcSwToggle('+i+',\''+course.replace(/\'/g,"\\'")+'\',\''+safeId+'\',true)" style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 13px 8px;background:#fafafa;cursor:pointer;">'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#374151;margin-bottom:2px;">'+time+'</div>'
+          +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:10px;color:#9ca3af;">'+(dist?'<span style="background:#f3f4f6;color:#9ca3af;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:600;">'+dist+'</span>':'')+runners+' runners</div>'
+          +'<div style="font-size:13px;font-weight:600;color:#6b7280;line-height:1.3;margin-bottom:3px;">'+name+'</div>'
         +'</div>'
         +'<span id="sw-chev-'+safeId+'-'+i+'" style="color:#9ca3af;font-size:14px;transition:transform .15s;">›</span>'
       +'</div>'
@@ -644,10 +645,11 @@ function rcSwRenderResultsUI(){
   const btnBase = 'font-family:var(--font-ui);font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 18px;border:none;cursor:pointer;font-weight:700;transition:all .12s;';
 
   filterEl.style.display = 'block';
+  const _rsb='font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;';
   filterEl.innerHTML =
-    '<div class="rc-sort-bar">'
-    + '<button class="rc-sort-btn'+(!onT?' on':'')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
-    + '<button class="rc-sort-btn'+(onT?' on':'')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
+    '<div style="display:flex;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff;margin-bottom:10px;">'
+    + '<button style="'+_rsb+(!onT?'background:#1e293b;color:#fff;':'background:transparent;color:#9ca3af;')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
+    + '<button style="'+_rsb+(onT?'background:#1e293b;color:#fff;':'background:transparent;color:#9ca3af;')+'border-left:1px solid #e5e7eb;" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
     + '</div>';
 
   const listEl = document.getElementById('sw-results-list');
@@ -669,8 +671,8 @@ function rcSwRaceCard(race, course){
   return '<div class="rc-race-block" style="border-radius:10px;border:1px solid #e5e7eb;margin-bottom:8px;">'
     + '<div class="rc-race-hdr" style="border-radius:10px 10px 0 0;background:#fafafa;">'
       + '<div class="rc-race-hdr-left">'
-        + '<div class="rc-race-time">'+time+'</div>'
-        + '<div class="rc-race-name">'+name+'</div>'
+        + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#374151;margin-bottom:2px;">'+time+'</div>'
+        + '<div style="font-size:13px;font-weight:600;color:#6b7280;line-height:1.3;margin-bottom:3px;">'+name+'</div>'
       + '</div>'
       + '<span class="rc-race-count">'+places.length+' shown</span>'
     + '</div>'
@@ -692,8 +694,8 @@ function rcSwRaceCard(race, course){
           : '';
         const wlEntry = getWL().find(function(w){return(w.horse||'').toLowerCase().trim()===hn;});
         const watchBtn = wlEntry
-          ? '<button class="rc-watch-btn rc-watch-btn-watching">✓ Watching</button>'
-          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\'\',\''+esc(course)+'\'\',\''+esc(jock)+'\'\',\''+esc(trainer)+'\'\',\''+esc(name)+'\'\',\''+esc(ofr)+'\'\')" class="rc-watch-btn rc-watch-btn-add">+ Watch</button>';
+          ? '<button style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 9px;border-radius:5px;border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;cursor:pointer;white-space:nowrap;">✓ Watching</button>'
+          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\'\',\''+esc(course)+'\'\',\''+esc(jock)+'\'\',\''+esc(trainer)+'\'\',\''+esc(name)+'\'\',\''+esc(ofr)+'\'\')" style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 9px;border-radius:5px;border:1px solid #c4b5fd;background:#ede9fe;color:#7c3aed;cursor:pointer;white-space:nowrap;">+ Watch</button>';
         return '<div class="rc-runner" style="background:#fff;">'
           + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
           + '<div class="rc-runner-main">'
@@ -764,7 +766,7 @@ function rcSwRenderResultsCourse(listEl){
       + '<div class="rc-meeting-hdr" onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':' +"'"+course+"'"+ ';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));" style="background:#2d3f55;">'
         + '<span class="rc-meeting-flag">'+flag+'</span>'
         + '<div class="rc-meeting-info">'
-          + '<div class="rc-meeting-name rc-meeting-name-orange">'+course+'</div>'
+          + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#fdba74;">'+course+'</div>'
           + '<div class="rc-meeting-meta">'+count+' race'+(count!==1?'s':'')+'</div>'
         + '</div>'
         + '<span class="rc-meeting-chevron'+(isOpen?' open':'')+'" >›</span>'

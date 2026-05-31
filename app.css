@@ -5,7 +5,7 @@
 ═══════════════════════════════════════ */
 :root {
   --sat: env(safe-area-inset-top, 0px);
-  --bg:   #050508;
+  --bg:   #e8eaed;
   --sur:  #0d0d18;
   --sur2: #111120;
   --bdr:  #1c1c30;
@@ -30,7 +30,7 @@
 ═══════════════════════════════════════ */
 html, body {
   height: 100%; overflow: hidden;
-  background: var(--bg); color: var(--txt);
+  background: #e8eaed; color: var(--txt);
   font-family: var(--font-body);
   font-size: 16px; -webkit-font-smoothing: antialiased;
 }
@@ -637,7 +637,7 @@ label {
 .dots { display: flex; gap: 6px; align-items: center; }
 .cnlbl {
   font-family: var(--font-ui); font-size: 10px; font-weight: 800;
-  letter-spacing: 2px; text-transform: uppercase; color: var(--mut);
+  letter-spacing: 2px; text-transform: uppercase; color: #6b7280;
 }
 
 /* ═══════════════════════════════════════

@@ -107,7 +107,7 @@ input, select, textarea, button { font-family: inherit; }
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 2;
 }
 /* Card colour accents */
-.cT::before  { background: var(--gld); }
+.cT::before  { background: #ef4444; }
 .cP::before  { background: var(--grn); }
 .cRC::before { background: var(--blu); }
 .cR::before  { background: var(--ora); }

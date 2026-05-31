@@ -694,8 +694,8 @@ function rcSwRaceCard(race, course){
           : '';
         const wlEntry = getWL().find(function(w){return(w.horse||'').toLowerCase().trim()===hn;});
         const watchBtn = wlEntry
-          ? '<button style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 9px;border-radius:5px;border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;cursor:pointer;white-space:nowrap;">✓ Watching</button>'
-          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\'\',\''+esc(course)+'\'\',\''+esc(jock)+'\'\',\''+esc(trainer)+'\'\',\''+esc(name)+'\'\',\''+esc(ofr)+'\'\')" style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 9px;border-radius:5px;border:1px solid #c4b5fd;background:#ede9fe;color:#7c3aed;cursor:pointer;white-space:nowrap;">+ Watch</button>';
+          ? '<button style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 9px;border-radius:5px;border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;cursor:pointer;white-space:nowrap;">\u2713 Watching</button>'
+          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\')" style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 9px;border-radius:5px;border:1px solid #c4b5fd;background:#ede9fe;color:#7c3aed;cursor:pointer;white-space:nowrap;">+ Watch</button>';
         return '<div class="rc-runner" style="background:#fff;">'
           + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
           + '<div class="rc-runner-main">'

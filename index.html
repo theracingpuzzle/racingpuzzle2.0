@@ -337,41 +337,33 @@ RACING <span class="logo-accent">PUZZLE</span>
     </div>
 
     <!-- RACECARDS SWIPE CARD -->
-    <div class="card cRC" id="c1">
-      <div class="cin" style="touch-action:pan-y;">
-        <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid rgba(96,165,250,.2);">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div>
-              <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(96,165,250,.5);margin-bottom:3px;">Today's Racing</div>
-              <div style="font-size:20px;font-weight:700;color:#60a5fa;">Racecards</div>
-            </div>
-            <button onclick="rcSwCurrentRaces=[];rcSwLoadMeetings();" style="font-family:monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:7px;border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.08);color:#60a5fa;cursor:pointer;">↻ Refresh</button>
+    <div class="card cRC" id="c1" style="background:#f5f6f8;">
+      <div class="cin" style="touch-action:pan-y;background:#f5f6f8;padding:14px 14px 24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div>
+            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Today's Racing</div>
+            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:800;color:#3b82f6;letter-spacing:-.3px;">Racecards</div>
           </div>
+          <button onclick="rcSwCurrentRaces=[];rcSwLoadMeetings();" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;color:#6b7280;cursor:pointer;">↻ Refresh</button>
         </div>
-        <div style="padding-top:12px;">
-          <div id="sw-rc-status" style="color:var(--mut);font-style:italic;font-size:13px;display:none;padding:4px 0 8px;"></div>
-          <div id="sw-rc-ui"></div>
-        </div>
+        <div id="sw-rc-status" style="color:#9ca3af;font-style:italic;font-size:13px;display:none;padding:4px 0 8px;"></div>
+        <div id="sw-rc-ui"></div>
       </div>
     </div>
 
     <!-- RESULTS SWIPE CARD -->
-    <div class="card cRS" id="c2">
-      <div class="cin" style="touch-action:pan-y;">
-        <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid rgba(251,146,60,.2);">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div class="card cRS" id="c2" style="background:#f5f6f8;">
+      <div class="cin" style="touch-action:pan-y;background:#f5f6f8;padding:14px 14px 24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
           <div>
-          <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(251,146,60,.5);margin-bottom:3px;">Today's Racing</div>
-          <div style="font-size:20px;font-weight:700;color:#fb923c;">Results</div>
+            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Today's Racing</div>
+            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:800;color:#f97316;letter-spacing:-.3px;">Results</div>
           </div>
-          <button onclick="rcSwResultsData=[];rcSwResultsOpenCourse='';rcSwLoadResults();" style="font-family:monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:7px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.08);color:#fb923c;cursor:pointer;">↻ Refresh</button>
-          </div>
+          <button onclick="rcSwResultsData=[];rcSwResultsOpenCourse='';rcSwLoadResults();" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;color:#6b7280;cursor:pointer;">↻ Refresh</button>
         </div>
-        <div style="padding-top:12px;">
-          <div id="sw-results-filters" style="display:none;margin-bottom:10px;"></div>
-          <div id="sw-results-list"><div style="color:var(--mut);font-style:italic;font-size:13px;">Swipe to this card to load today's results.</div></div>
-          <div id="sw-results-status" style="color:var(--mut);font-style:italic;font-size:13px;display:none;padding:4px 0;"></div>
-        </div>
+        <div id="sw-results-filters" style="display:none;margin-bottom:10px;"></div>
+        <div id="sw-results-list"><div style="color:#9ca3af;font-style:italic;font-size:13px;">Swipe to this card to load today's results.</div></div>
+        <div id="sw-results-status" style="color:#9ca3af;font-style:italic;font-size:13px;display:none;padding:4px 0;"></div>
       </div>
     </div>
 

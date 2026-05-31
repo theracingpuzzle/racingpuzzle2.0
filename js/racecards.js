@@ -139,7 +139,7 @@ function rcSwRenderCourse(listEl){
     const count=races.length;
     const escapedCourse=course.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
     return '<div class="rc-meeting">'
-      +'<div class="rc-meeting-hdr" data-course="'+escapedCourse+'" onclick="rcSwToggleCourse(this)">'
+      +'<div class="rc-meeting-hdr" data-course="'+escapedCourse+'" onclick="rcSwToggleCourse(this)" style="background:#2d3f55;">'
         +'<span class="rc-meeting-flag">'+flag+'</span>'
         +'<div class="rc-meeting-info">'
           +'<div class="rc-meeting-name rc-meeting-name-blue">'+course+'</div>'
@@ -176,7 +176,7 @@ function rcSwRaceCardPreview(r, course, isNext, isPast){
   _rcSwFlatRaces.push({race:r, course:course});
   const uid='rcr-'+idx;
   return '<div class="rc-meeting" style="'+(isPast?'opacity:.38;':'')+'">'  // MARKER_PREVIEW
-    +'<div class="rc-meeting-hdr" onclick="rcSwToggleFlatRace('+idx+')">'
+    +'<div class="rc-meeting-hdr" onclick="rcSwToggleFlatRace('+idx+')" style="background:#2d3f55;">'
       +'<span class="rc-meeting-flag">'+flag+'</span>'
       +'<div class="rc-meeting-info">'
         +'<div class="rc-meeting-name rc-meeting-name-blue">'+course+'</div>'
@@ -761,7 +761,7 @@ function rcSwRenderResultsCourse(listEl){
     const count = races.length;
     const flag=rcCountryFlag(rcCourseCountry(course));
     return '<div class="rc-meeting">'
-      + '<div class="rc-meeting-hdr" onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':' +"'"+course+"'"+ ';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));">'
+      + '<div class="rc-meeting-hdr" onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':' +"'"+course+"'"+ ';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));" style="background:#2d3f55;">'
         + '<span class="rc-meeting-flag">'+flag+'</span>'
         + '<div class="rc-meeting-info">'
           + '<div class="rc-meeting-name rc-meeting-name-orange">'+course+'</div>'

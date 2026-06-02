@@ -4,8 +4,8 @@
   "description": "Professional punter's tool",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#1a1a1a",
-  "theme_color": "#1a1a1a",
+  "background_color": "#f0f2f5",
+  "theme_color": "#1e3a5f",
   "orientation": "portrait",
   "icons": []
 }

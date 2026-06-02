@@ -52,7 +52,7 @@
 }
 .rc-meeting-hdr {
   display: flex; align-items: center; gap: 10px;
-  background: #2d3f55; border-radius: 10px 10px 0 0;
+  background: #1576ec; border-radius: 10px 10px 0 0;
   padding: 10px 13px; cursor: pointer;
 }
 .rc-meeting-flag { font-size: 18px; flex-shrink: 0; }
@@ -61,7 +61,7 @@
   font-family: var(--font-ui); font-size: 14px; font-weight: 800;
   letter-spacing: .3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.rc-meeting-name-blue  { color: #93c5fd; }
+.rc-meeting-name-blue  { color: #ffffff; }
 .rc-meeting-name-orange{ color: #fdba74; }
 .rc-meeting-meta { font-size: 10px; color: #94a3b8; margin-top: 2px; }
 .rc-meeting-chevron { color: #64748b; font-size: 14px; flex-shrink: 0; transition: transform .15s; }

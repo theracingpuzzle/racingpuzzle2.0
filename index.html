@@ -17,11 +17,11 @@
 
 <link rel="stylesheet" href="css/racecards.css">
 </head>
-<body class="swipe-mode" style="background:#e8eaed;">
+<body class="swipe-mode">
 
 <!-- HEADER -->
 <div id="supa-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999;padding:8px 14px;font-family:monospace;font-size:11px;text-align:center;font-weight:700;"></div>
-<div class="hdr" id="hdr" style="border-bottom:1px solid #e5e7eb;">
+<div class="hdr" id="hdr">
   <div class="hdr-top">
     <div class="logo" onclick="goHome()">
       
@@ -33,58 +33,58 @@ RACING <span class="logo-accent">PUZZLE</span>
     </div>
   </div>
   <div class="hdr-bal">
-    <div id="supa-dot" onclick="supaTestSync()" style="width:7px;height:7px;border-radius:50%;background:#6b7280;flex-shrink:0;cursor:pointer;" title="Supabase status"></div>
+    <div id="supa-dot" class="supa-dot" onclick="supaTestSync()" title="Supabase status"></div>
     <span class="hdr-bal-lbl">Real</span>
-    <span id="hbank-wrap" class="hdr-bal-val" style="color:#60a5fa;">£<span id="hbank">0.00</span><span id="hbank-arrow"></span></span>
-    <span class="hdr-bal-sep" style="color:#1c1c30;">·</span>
+    <span id="hbank-wrap" class="hdr-bal-val">£<span id="hbank">0.00</span><span id="hbank-arrow"></span></span>
+    <span class="hdr-bal-sep">·</span>
     <span class="hdr-bal-lbl">Virtual</span>
-    <span id="hvbank-wrap" class="hdr-bal-val" style="color:#fb923c;">£<span id="hvbank">0.00</span><span id="hvbank-arrow"></span></span>
+    <span id="hvbank-wrap" class="hdr-bal-val">£<span id="hvbank">0.00</span><span id="hvbank-arrow"></span></span>
   </div>
 </div>
 
 <!-- SWIPE -->
-<div class="sw-shell" id="sw-shell" style="background:#e8eaed;">
+<div class="sw-shell" id="sw-shell">
   <div class="deck" id="deck">
 
     <!-- TODAY -->
-    <div class="card cT" id="c0" style="background:#f5f6f8;">
-      <div class="cin" style="touch-action:pan-y;">
+    <div class="card cT" id="c0">
+      <div class="cin cin-touch">
 
         <!-- ── TOP LINE: Date + P&L ── -->
-        <div style="margin:-18px -17px 0;padding:14px 17px 13px;border-bottom:1px solid rgba(232,228,220,.08);">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="card-hdr">
+          <div class="card-hdr-row">
             <div>
-              <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Race Day</div>
-              <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:800;color:#ef4444;letter-spacing:-.3px;" id="tdlbl">Today</div>
+              <div class="lbl">Race Day</div>
+              <div class="card-title" style="color:var(--red);" id="tdlbl">Today</div>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <button onclick="runTodayDemo()" id="t-demo-btn" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:5px 11px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;color:#9ca3af;cursor:pointer;">Demo ›</button>
+            <div class="row-g8">
+              <button class="btn-refresh" onclick="runTodayDemo()" id="t-demo-btn">Demo ›</button>
               <div style="text-align:right;" id="tstreak-tile"></div>
             </div>
           </div>
           <!-- P&L row: Real · Virtual · Bet count -->
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:9px 11px;">
-              <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Real P&amp;L</div>
+          <div class="g3">
+            <div class="tile">
+              <div class="tile-lbl">Real P&amp;L</div>
               <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:17px;font-weight:700;" id="tpnl" class="gld">£0.00</div>
             </div>
-            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:9px 11px;">
-              <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Virtual P&amp;L</div>
+            <div class="tile">
+              <div class="tile-lbl">Virtual P&amp;L</div>
               <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:17px;font-weight:700;color:#fb923c;" id="t-virt-pnl">£0.00</div>
             </div>
-            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:9px 11px;" id="tbetlimit"></div>
+            <div class="tile" id="tbetlimit"></div>
           </div>
         </div>
 
         <!-- ── CHECK-IN ── -->
         <div style="margin-top:14px;padding:0 0 24px;" id="tcin">
-          <div style="background:rgba(232,228,220,.04);border:1px solid rgba(232,228,220,.1);border-radius:11px;padding:12px 14px;">
-            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:8px;">Daily Check-in</div>
-            <div style="display:flex;gap:6px;margin-bottom:8px;" id="tmood-btns">
-              <button onclick="setMood('poor')"   id="mood-poor"   style="flex:1;padding:7px 4px;border-radius:8px;border:1px solid var(--bdr);background:transparent;font-size:15px;cursor:pointer;">😔</button>
-              <button onclick="setMood('neutral')" id="mood-neutral" style="flex:1;padding:7px 4px;border-radius:8px;border:1px solid var(--bdr);background:transparent;font-size:15px;cursor:pointer;">😐</button>
-              <button onclick="setMood('good')"   id="mood-good"   style="flex:1;padding:7px 4px;border-radius:8px;border:1px solid var(--bdr);background:transparent;font-size:15px;cursor:pointer;">🙂</button>
-              <button onclick="setMood('great')"  id="mood-great"  style="flex:1;padding:7px 4px;border-radius:8px;border:1px solid var(--bdr);background:transparent;font-size:15px;cursor:pointer;">😄</button>
+          <div class="alert-box" style="background:rgba(0,0,0,.03);border:1px solid var(--bdr);">
+            <div class="lbl" class="mb12" style="margin-bottom:8px;">Daily Check-in</div>
+            <div class="row-g8" style="gap:6px;margin-bottom:8px;" id="tmood-btns">
+              <button class="mood-btn" onclick="setMood('poor')" id="mood-poor">😔</button>
+              <button class="mood-btn" onclick="setMood('neutral')" id="mood-neutral">😐</button>
+              <button class="mood-btn" onclick="setMood('good')" id="mood-good">🙂</button>
+              <button class="mood-btn" onclick="setMood('great')" id="mood-great">😄</button>
             </div>
             <input type="text" id="t-focus" placeholder="Today I'm looking for…" autocomplete="off"
               style="width:100%;box-sizing:border-box;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--txt);margin-bottom:8px;"
@@ -94,29 +94,29 @@ RACING <span class="logo-accent">PUZZLE</span>
         </div>
 
         <!-- ── WATCHLIST RUNNING TODAY ── -->
-        <div id="t-wl-alerts" style="display:none;margin-top:14px;"></div>
+        <div id="t-wl-alerts" class="mt20" style="display:none;"></div>
 
         <!-- ── EDGE ALERTS (profiler horses where MR > OR) ── -->
-        <div id="t-edge-alerts" style="display:none;margin-top:14px;"></div>
+        <div id="t-edge-alerts" class="mt20" style="display:none;"></div>
 
         <!-- ── NEXT RACE ── -->
-        <div id="t-next-race" style="display:none;margin-top:14px;">
+        <div id="t-next-race" class="mt20" style="display:none;">
           <div id="t-next-race-content"></div>
         </div>
 
         <!-- ── OUTSTANDING BETS ── -->
-        <div id="t-outstanding-wrap" style="display:none;margin-top:14px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#dc2626;opacity:.8;">Needs Settling</div>
-            <div id="t-outstanding-count" style="font-family:monospace;font-size:9px;background:rgba(196,58,58,.15);color:var(--red);padding:2px 7px;border-radius:10px;"></div>
+        <div id="t-outstanding-wrap" class="mt20" style="display:none;">
+          <div class="row-g8 mb12">
+            <div class="lbl" style="color:var(--red);opacity:.8;">Needs Settling</div>
+            <div id="t-outstanding-count" style="font-size:9px;background:rgba(196,58,58,.15);color:var(--red);padding:2px 7px;border-radius:10px;"></div>
           </div>
           <div id="t-outstanding"></div>
         </div>
 
         <!-- ── TODAY'S BETS ── -->
-        <div style="margin-top:14px;">
-          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:8px;">Today's Bets</div>
-          <div id="tbets"><div style="font-style:italic;font-size:13px;color:var(--mut);padding:6px 0;">No bets logged today.</div></div>
+        <div class="mt20">
+          <div class="lbl" class="mb12" style="margin-bottom:8px;">Today's Bets</div>
+          <div id="tbets"><div class="status-txt" style="padding:6px 0;">No bets logged today.</div></div>
         </div>
 
         <!-- ── THIS WEEK ── -->
@@ -131,7 +131,7 @@ RACING <span class="logo-accent">PUZZLE</span>
 
     <!-- PRE-BET -->
     <div class="card cP" id="c_PREBET_OLD" style="display:none;">
-      <div class="cin" style="touch-action:pan-y;">
+      <div class="cin cin-touch">
 
         <!-- Score -->
         <div id="csbox" style="display:flex;align-items:center;gap:12px;background:rgba(38,168,101,.06);border:1px solid rgba(38,168,101,.12);border-radius:9px;padding:8px 12px;margin-bottom:10px;">
@@ -147,14 +147,14 @@ RACING <span class="logo-accent">PUZZLE</span>
         <div style="display:flex;gap:9px;margin-top:4px;">
           <div id="ck-rec" style="display:none;padding:9px 12px;border-radius:8px;border:1px solid;font-size:13px;font-weight:600;margin-bottom:2px;"></div>
         <button class="btn bout" style="flex:0 0 auto;padding:12px 16px;" onclick="resetCks()">Reset</button>
-          <button class="btn bgrn" style="flex:1;" id="ckgo" onclick="goFromChecklist()">Tick the checklist above</button>
+          <button class="btn bgrn" style="flex:1" id="ckgo" onclick="goFromChecklist()">Tick the checklist above</button>
         </div>
       </div>
     </div>
 
     <!-- LOG BET + VIRTUAL -->
     <div class="card cL" id="c_LOGBET_OLD" style="display:none;">
-      <div class="cin" style="touch-action:pan-y;">
+      <div class="cin cin-touch">
         <!-- Header with toggle -->
         <div style="margin:-18px -17px 16px;padding:14px 17px;background:linear-gradient(160deg,rgba(58,127,212,.1) 0%,transparent 60%);border-bottom:1px solid rgba(58,127,212,.15);">
           <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(96,165,250,.6);margin-bottom:8px;">Record</div>
@@ -172,7 +172,7 @@ RACING <span class="logo-accent">PUZZLE</span>
           <div id="lbok" class="aok">✓ Real bet saved.</div>
           <div id="lb-limit-warn" style="display:none;background:rgba(196,58,58,.08);border:1px solid rgba(196,58,58,.2);border-radius:9px;padding:9px 12px;font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:11px;color:var(--red);margin-bottom:10px;"></div>
           <!-- Bank tile -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div class="g2-8">
             <div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:9px;padding:10px 13px;">
               <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;color:rgba(96,165,250,.7);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px;">Real Bank</div>
               <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:20px;font-weight:700;color:#60a5fa;" id="lb-real-bank-amt">£0.00</div>
@@ -186,16 +186,16 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="fg"><label>Time</label><input type="text" id="lbtime" placeholder=""></div>
             <div class="fg"><label>Jockey</label><input type="text" id="lbjockey" placeholder="" autocomplete="off"></div>
             <div class="fg"><label>Trainer</label><input type="text" id="lbtrainer" placeholder="" autocomplete="off"></div>
-            <div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="lbo" placeholder="" list="oddsl" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;" oninput="calcLiveStake()"><datalist id="oddsl"><option value="EVS"><option value="1/2"><option value="4/6"><option value="4/5"><option value="5/4"><option value="6/4"><option value="7/4"><option value="2/1"><option value="9/4"><option value="5/2"><option value="11/4"><option value="3/1"><option value="7/2"><option value="4/1"><option value="9/2"><option value="5/1"><option value="11/2"><option value="6/1"><option value="7/1"><option value="8/1"><option value="10/1"><option value="12/1"><option value="14/1"><option value="16/1"><option value="20/1"><option value="25/1"><option value="33/1"><option value="50/1"><option value="100/1"></datalist></div>
+            <div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="lbo" placeholder="" list="oddsl"  oninput="calcLiveStake()"><datalist id="oddsl"><option value="EVS"><option value="1/2"><option value="4/6"><option value="4/5"><option value="5/4"><option value="6/4"><option value="7/4"><option value="2/1"><option value="9/4"><option value="5/2"><option value="11/4"><option value="3/1"><option value="7/2"><option value="4/1"><option value="9/2"><option value="5/1"><option value="11/2"><option value="6/1"><option value="7/1"><option value="8/1"><option value="10/1"><option value="12/1"><option value="14/1"><option value="16/1"><option value="20/1"><option value="25/1"><option value="33/1"><option value="50/1"><option value="100/1"></datalist></div>
             <div class="fg"><label>Stake (£)</label><input type="number" id="lbs" step="0.5" min="0" placeholder="" oninput="calcLiveStake()"></div>
             <div class="fg"><label>Type</label><select id="lbtype"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>
             <div class="fg"><label>Confidence</label><select id="lbconf" onchange="calcLiveStake()"><option value="1">1 — Speculative</option><option value="2">2 — Interested</option><option value="3" selected>3 — Solid</option><option value="4">4 — Strong</option><option value="5">5 — Best Bet</option></select></div>
           </div>
           <div id="lb-stake-guide" style="display:none;background:rgba(232,228,220,.07);border:1px solid rgba(232,228,220,.18);border-radius:9px;padding:10px 13px;margin-bottom:10px;">
-            <div id="lb-stake-guide-content" style="font-size:13px;color:var(--txt);line-height:1.7;"></div>
+            <div id="lb-stake-guide-content" class="body-txt"></div>
           </div>
           <div class="fg"><label>Source</label><select id="lbsrc"></select></div>
-          <div class="fg"><label>Edge in one sentence</label><textarea id="lbnotes" placeholder="Why this horse, why this price…" style="min-height:48px;"></textarea></div>
+          <div class="fg"><label>Edge in one sentence</label><textarea id="lbnotes" placeholder="Why this horse, why this price…" style="min-height:48px"></textarea></div>
           <div class="sdiv">Result (fill after race)</div>
           <div class="g2">
             <div class="fg"><label>Result</label><select id="lbres" onchange="onSwResChange()"><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>
@@ -208,7 +208,7 @@ RACING <span class="logo-accent">PUZZLE</span>
         <div id="lb-virt-form" style="display:none;">
           <div id="vbok" class="aok" style="border-color:#fb923c;color:#fb923c;background:rgba(251,146,60,.1);">✓ Virtual bet saved.</div>
           <!-- Bank tile — matches real form structure -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div class="g2-8">
             <div style="background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);border-radius:9px;padding:10px 13px;">
               <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;color:rgba(251,146,60,.7);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px;">Virtual Bank</div>
               <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:20px;font-weight:700;color:#fb923c;" id="vb-mini-amt">£500.00</div>
@@ -222,17 +222,17 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="fg"><label>Time</label><input type="text" id="vbtime" placeholder=""></div>
             <div class="fg"><label>Jockey</label><input type="text" id="vbjockey" placeholder="" autocomplete="off"></div>
             <div class="fg"><label>Trainer</label><input type="text" id="vbtrainer" placeholder="" autocomplete="off"></div>
-            <div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="vbo" placeholder="" list="oddsl" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;" oninput="onVResChange();calcVirtStake()"></div>
+            <div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="vbo" placeholder="" list="oddsl"  oninput="onVResChange();calcVirtStake()"></div>
             <div class="fg"><label>Stake (£)</label><input type="number" id="vbs" step="0.5" min="0" placeholder="" oninput="calcVirtStake()"></div>
             <div class="fg"><label>Type</label><select id="vbtype" onchange="calcVirtStake()"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>
             <div class="fg"><label>Confidence</label><select id="vbconf" onchange="calcVirtStake()"><option value="1">1 — Speculative</option><option value="2">2 — Interested</option><option value="3" selected>3 — Solid</option><option value="4">4 — Strong</option><option value="5">5 — Best Bet</option></select></div>
           </div>
           <!-- Stake guidance panel — mirrors real form -->
           <div id="vb-stake-guide" style="display:none;background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.18);border-radius:9px;padding:10px 13px;margin-bottom:10px;cursor:pointer;" title="Tap to use suggested stake">
-            <div id="vb-stake-guide-content" style="font-size:13px;color:var(--txt);line-height:1.7;"></div>
+            <div id="vb-stake-guide-content" class="body-txt"></div>
           </div>
           <div class="fg"><label>Source</label><select id="vbsrc"><option>Own Form Study</option><option>Albatross2.0</option><option>Pricewise (Tom Segal)</option><option>Signpost (RP)</option><option>Templegate</option><option>RFO Nap</option><option>Handicapper's Nap</option><option>Eye Catcher</option><option>Timeform</option><option>At The Races</option><option>Other</option></select></div>
-          <div class="fg"><label>Reasoning</label><textarea id="vbnotes" placeholder="Why this horse, why this price…" style="min-height:48px;"></textarea></div>
+          <div class="fg"><label>Reasoning</label><textarea id="vbnotes" placeholder="Why this horse, why this price…" style="min-height:48px"></textarea></div>
           <div class="sdiv">Result (fill after race)</div>
           <div class="g2">
             <div class="fg"><label>Result</label><select id="vbres" onchange="onVResChange()"><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="nr">Non-Runner</option></select></div>
@@ -246,15 +246,15 @@ RACING <span class="logo-accent">PUZZLE</span>
 
     <!-- COACH -->
     <div class="card cC" id="c5" style="position:relative;background:#f5f6f8;">
-      <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,20,.85);backdrop-filter:blur(4px);border-radius:inherit;">
-        <div style="font-size:32px;margin-bottom:12px;">🧠</div>
-        <div style="font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#cc44aa;border:1px solid #cc44aa;padding:5px 16px;border-radius:20px;margin-bottom:10px;">Coming Soon</div>
-        <div style="font-size:13px;color:var(--mut);text-align:center;max-width:220px;line-height:1.6;">The AI Coach is in development.<br>Check back soon.</div>
+      <div class="card-overlay">
+        <div class="ico-xl">🧠</div>
+        <div class="pill-pur">Coming Soon</div>
+        <div class="body-c">The AI Coach is in development.<br>Check back soon.</div>
       </div>
-      <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,20,.85);backdrop-filter:blur(4px);border-radius:inherit;">
-        <div style="font-size:32px;margin-bottom:12px;">🧠</div>
-        <div style="font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#cc44aa;border:1px solid #cc44aa;padding:5px 16px;border-radius:20px;margin-bottom:10px;">Coming Soon</div>
-        <div style="font-size:13px;color:var(--mut);text-align:center;max-width:220px;line-height:1.6;">The AI Coach is in development.<br>Check back soon.</div>
+      <div class="card-overlay">
+        <div class="ico-xl">🧠</div>
+        <div class="pill-pur">Coming Soon</div>
+        <div class="body-c">The AI Coach is in development.<br>Check back soon.</div>
       </div>
       <div class="cin" style="touch-action:pan-y;display:flex;flex-direction:column;height:100%;padding-bottom:0;">
         <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid rgba(167,139,250,.2);flex-shrink:0;">
@@ -265,7 +265,7 @@ RACING <span class="logo-accent">PUZZLE</span>
         <div id="coach-msgs" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:12px 0 8px;-webkit-overflow-scrolling:touch;min-height:0;"></div>
         <div style="padding:8px 0 16px;flex-shrink:0;border-top:1px solid var(--bdr);">
           <div style="display:flex;gap:7px;overflow-x:auto;margin-bottom:9px;padding-bottom:2px;" id="coach-quick"></div>
-          <div style="display:flex;gap:8px;">
+          <div class="row-g8">
             <input type="text" id="coach-inp" placeholder="Ask the coach…" style="flex:1;border-radius:22px;padding:11px 16px;" onkeydown="if(event.key==='Enter'){event.preventDefault();sendCoach();}">
             <button type="button" onclick="sendCoach()" style="flex-shrink:0;width:44px;height:44px;border-radius:22px;border:none;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">→</button>
           </div>
@@ -274,8 +274,8 @@ RACING <span class="logo-accent">PUZZLE</span>
     </div>
 
     <!-- BANK -->
-    <div class="card cB" id="c3" style="background:#f5f6f8;">
-      <div class="cin" style="background:#f5f6f8;" style="touch-action:pan-y;">
+    <div class="card cB" id="c3" >
+      <div class="cin"  style="touch-action:pan-y;">
         <div style="margin:-18px -17px 16px;padding:14px 17px;background:transparent;border-bottom:1px solid rgba(245,158,11,.2);">
           <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(232,228,220,.6);margin-bottom:2px;">Bankroll</div>
           <div style="font-size:20px;font-weight:700;color:#f59e0b;">Bankroll</div>
@@ -285,32 +285,32 @@ RACING <span class="logo-accent">PUZZLE</span>
         <div class="fg"><label>Current Bank (£)</label><input type="number" id="bkcu" step="0.01" placeholder="487.50"></div>
         <button class="btn bgld bw" onclick="saveBank()">Update Bank</button>
         <div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:8px;">To change your starting bank, go to Command → Settings.</div>
-        <div class="sdiv" style="margin-top:20px;">🔄 Recalculate</div>
-        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">If your balance looks wrong after editing or deleting bets, this rebuilds both banks from scratch using your full bet history.</div>
+        <div class="sdiv" class="mt20">🔄 Recalculate</div>
+        <div class="body-mut">If your balance looks wrong after editing or deleting bets, this rebuilds both banks from scratch using your full bet history.</div>
         <button class="btn bout bw" onclick="recalcBanks()">Recalculate Banks from Bets</button>
 
-        <div class="sdiv" style="margin-top:20px;">🎯 Staking Plan</div>
-        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Points-based staking. Set your <strong style="color:var(--txt);">point value</strong> once — your confidence level determines the stake automatically.</div>
+        <div class="sdiv" class="mt20">🎯 Staking Plan</div>
+        <div class="body-mut">Points-based staking. Set your <strong class="gld">point value</strong> once — your confidence level determines the stake automatically.</div>
         <div class="fg"><label>Point Value — £ per point</label><input type="number" id="set-pv" step="0.5" min="0.5" placeholder="5.00" style="max-width:140px;" oninput="renderPVPreview()"></div>
         <div id="pv-preview" style="margin:10px 0;"></div>
         <button class="btn bgld bw" onclick="savePointValue()">Save Point Value</button>
-        <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:11px;color:var(--mut);margin-top:8px;" id="set-pv-status"></div>
+        <div class="body-sm" style="margin-top:8px;" id="set-pv-status"></div>
 
         <!-- SOURCES -->
         <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--bdr);">
           <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Tip Sources</div>
-          <div id="sources-list" style="margin-bottom:12px;"></div>
-          <div style="display:flex;gap:8px;">
+          <div id="sources-list" class="mb12"></div>
+          <div class="row-g8">
             <input id="source-input" type="text" placeholder="e.g. Racing Post, Telegram, Friend…" autocomplete="off" style="flex:1;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;padding:10px 13px;font-size:14px;color:var(--txt);outline:none;" onkeydown="if(event.key==='Enter')addSource()">
-            <button class="btn bgld" onclick="addSource()" style="flex:0 0 auto;">Add</button>
+            <button class="btn bgld" onclick="addSource()" style="flex:0 0 auto">Add</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- WATCHLIST -->
-    <div class="card cW" id="c4" style="background:#f5f6f8;">
-      <div class="cin" style="touch-action:pan-y;">
+    <div class="card cW" id="c4" >
+      <div class="cin cin-touch">
         <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid rgba(232,121,249,.2);">
           <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(232,121,249,.5);margin-bottom:2px;">Puzzle Profiler</div>
           <div style="font-size:20px;font-weight:700;color:#e879f9;margin-bottom:10px;">Puzzle Profiler</div>
@@ -324,7 +324,7 @@ RACING <span class="logo-accent">PUZZLE</span>
 
         <!-- Calendar view -->
         <div id="wl-cal-view" style="padding-top:14px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div class="row-sb mb12">
             <button onclick="wlCalPrev()" style="background:none;border:none;color:var(--mut);font-size:18px;cursor:pointer;padding:4px 8px;">‹</button>
             <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-weight:700;font-size:14px;" id="wl-cal-month"></div>
             <button onclick="wlCalNext()" style="background:none;border:none;color:var(--mut);font-size:18px;cursor:pointer;padding:4px 8px;">›</button>
@@ -342,33 +342,33 @@ RACING <span class="logo-accent">PUZZLE</span>
     </div>
 
     <!-- RACECARDS SWIPE CARD -->
-    <div class="card cRC" id="c1" style="background:#f5f6f8;">
-      <div class="cin" style="touch-action:pan-y;background:#f5f6f8;padding:14px 14px 24px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div class="card cRC" id="c1">
+      <div class="cin rc-cin">
+        <div class="row-sb mb12">
           <div>
-            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Today's Racing</div>
-            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:800;color:#3b82f6;letter-spacing:-.3px;">Racecards</div>
+            <div class="lbl">Today's Racing</div>
+            <div class="card-title" style="color:var(--blu);">Racecards</div>
           </div>
-          <button onclick="rcSwCurrentRaces=[];rcSwLoadMeetings();" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;color:#6b7280;cursor:pointer;">↻ Refresh</button>
+          <button class="btn-refresh" onclick="rcSwCurrentRaces=[];rcSwLoadMeetings();">↻ Refresh</button>
         </div>
-        <div id="sw-rc-status" style="color:#9ca3af;font-style:italic;font-size:13px;display:none;padding:4px 0 8px;"></div>
+        <div id="sw-rc-status" class="status-txt" style="display:none;padding:4px 0 8px;"></div>
         <div id="sw-rc-ui"></div>
       </div>
     </div>
 
     <!-- RESULTS SWIPE CARD -->
-    <div class="card cRS" id="c2" style="background:#f5f6f8;">
-      <div class="cin" style="touch-action:pan-y;background:#f5f6f8;padding:14px 14px 24px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div class="card cRS" id="c2">
+      <div class="cin rc-cin">
+        <div class="row-sb mb12">
           <div>
-            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Today's Racing</div>
-            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:800;color:#f97316;letter-spacing:-.3px;">Results</div>
+            <div class="lbl">Today's Racing</div>
+            <div class="card-title" style="color:var(--ora);">Results</div>
           </div>
-          <button onclick="rcSwResultsData=[];rcSwResultsOpenCourse='';rcSwLoadResults();" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;color:#6b7280;cursor:pointer;">↻ Refresh</button>
+          <button class="btn-refresh" onclick="rcSwResultsData=[];rcSwResultsOpenCourse='';rcSwLoadResults();">↻ Refresh</button>
         </div>
         <div id="sw-results-filters" style="display:none;margin-bottom:10px;"></div>
-        <div id="sw-results-list"><div style="color:#9ca3af;font-style:italic;font-size:13px;">Swipe to this card to load today's results.</div></div>
-        <div id="sw-results-status" style="color:#9ca3af;font-style:italic;font-size:13px;display:none;padding:4px 0;"></div>
+        <div id="sw-results-list"><div class="status-txt">Swipe to this card to load today's results.</div></div>
+        <div id="sw-results-status" class="status-txt" style="display:none;padding:4px 0;"></div>
       </div>
     </div>
 
@@ -378,7 +378,7 @@ RACING <span class="logo-accent">PUZZLE</span>
 
 
 <!-- COMMAND CENTRE -->
-<div class="cmd-shell" id="cmd-shell" style="background:#f5f6f8;">
+<div class="cmd-shell" id="cmd-shell" >
   <nav class="ctabs">
     <button class="ctab on" onclick="cTab('stats',this)">Stats</button>
     <button class="ctab" onclick="cTab('hist',this)">History</button>
@@ -393,9 +393,9 @@ RACING <span class="logo-accent">PUZZLE</span>
       <div class="psub">Update results, search your bets, track virtual.</div>
 
       <!-- Real/Virtual toggle -->
-      <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;overflow:hidden;margin-bottom:16px;width:fit-content;">
-        <button id="hist-tog-real" onclick="setHistMode('real')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:8px 18px;border:none;cursor:pointer;background:var(--blu);color:white;font-weight:700;">Real</button>
-        <button id="hist-tog-virt" onclick="setHistMode('virt')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:8px 18px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Virtual</button>
+      <div class="hist-tog">
+        <button id="hist-tog-real" class="hist-tog-btn on" onclick="setHistMode('real')">Real</button>
+        <button id="hist-tog-virt" class="hist-tog-btn off" onclick="setHistMode('virt')">Virtual</button>
       </div>
 
       <!-- REAL -->
@@ -409,9 +409,9 @@ RACING <span class="logo-accent">PUZZLE</span>
         <!-- Search + settled record -->
         <div class="blk">
           <div class="bttl">All Bets</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;">
-            <input type="text" id="hfs" oninput="renderHist()" placeholder="Search horse or track…" style="flex:1;min-width:140px;font-size:13px;">
-            <select id="hfr" onchange="renderHist()" style="width:110px;font-size:12px;"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">NR</option></select>
+          <div class="row-g7">
+            <input type="text" id="hfs" class="inp-flex" oninput="renderHist()" placeholder="Search horse or track…">
+            <select id="hfr" onchange="renderHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">NR</option></select>
             <button class="btn bout bsm" onclick="clrHF()">Clear</button>
             <span style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:10px;color:var(--mut);align-self:center;" id="hcnt"></span>
           </div>
@@ -428,9 +428,9 @@ RACING <span class="logo-accent">PUZZLE</span>
         </div>
         <div class="blk">
           <div class="bttl">All Virtual Bets</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;">
+          <div class="row-g7">
             <input type="text" id="hvfs" oninput="renderVirtHist()" placeholder="Search horse or track…" style="flex:1;min-width:140px;font-size:13px;">
-            <select id="hvfr" onchange="renderVirtHist()" style="width:110px;font-size:12px;"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
+            <select id="hvfr" onchange="renderVirtHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
             <button class="btn bout bsm" onclick="clrVHF()">Clear</button>
             <span style="font-family:monospace;font-size:10px;color:var(--mut);align-self:center;" id="hvcnt"></span>
           </div>
@@ -448,8 +448,8 @@ RACING <span class="logo-accent">PUZZLE</span>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center;">
         <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;overflow:hidden;">
           <button id="st-tog-both" onclick="setStatsScope('both')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:7px 14px;border:none;cursor:pointer;background:var(--gld);color:#141414;font-weight:700;">Both</button>
-          <button id="st-tog-real" onclick="setStatsScope('real')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:7px 14px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Real</button>
-          <button id="st-tog-virt" onclick="setStatsScope('virt')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:7px 14px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Virtual</button>
+          <button id="st-tog-real" onclick="setStatsScope('real')" class="hist-tog-btn off">Real</button>
+          <button id="st-tog-virt" onclick="setStatsScope('virt')" class="hist-tog-btn off">Virtual</button>
         </div>
         <button id="st-tog-own" onclick="toggleOwnStudy()" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:7px 12px;border-radius:9px;border:1px solid var(--bdr);cursor:pointer;background:transparent;color:var(--mut);">Own Study Only: Off</button>
       </div>
@@ -466,13 +466,13 @@ RACING <span class="logo-accent">PUZZLE</span>
 
       <div class="blk">
         <div class="bttl">Checklist Score vs Outcome</div>
-        <div style="font-size:12px;color:var(--mut);font-style:italic;margin-bottom:10px;">Does a higher checklist score actually mean better results?</div>
+        <div class="body-it">Does a higher checklist score actually mean better results?</div>
         <div id="st-ck-table"></div>
       </div>
 
       <div class="blk">
         <div class="bttl">Confidence vs Reality</div>
-        <div style="font-size:12px;color:var(--mut);font-style:italic;margin-bottom:10px;">Do your high-confidence bets actually outperform?</div>
+        <div class="body-it">Do your high-confidence bets actually outperform?</div>
         <div id="st-conf-table"></div>
       </div>
 
@@ -507,16 +507,16 @@ RACING <span class="logo-accent">PUZZLE</span>
       <!-- Racecards section -->
       <div id="rc-cards-section">
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
-          <div style="flex:0 0 auto;">
+          <div style="flex:0 0 auto">
             <!-- Course / Time view toggle -->
-            <div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;">View</div>
+            <div class="lbl-mut">View</div>
             <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;">
               <button id="rc-btn-course" onclick="rcSetView('course')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;background:#60a5fa;color:#141414;font-weight:700;">Course</button>
               <button id="rc-btn-time" onclick="rcSetView('time')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Time</button>
             </div>
           </div>
           <div id="rc-meeting-wrap" style="flex:1;min-width:140px;">
-            <div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;">Meeting</div>
+            <div class="lbl-mut">Meeting</div>
             <select id="rc-meeting" onchange="rcLoadRaces()" style="width:100%;font-size:13px;"><option value="">— Select meeting —</option></select>
           </div>
           <button class="btn" style="flex-shrink:0;height:44px;padding:0 16px;background:#60a5fa;color:#141414;font-weight:700;border-radius:9px;" onclick="rcLoad()">Load</button>
@@ -541,15 +541,15 @@ RACING <span class="logo-accent">PUZZLE</span>
 
       <div class="blk">
         <div class="bttl">📋 Bet Sources</div>
-        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Manage the sources available when logging a bet. Tag each as <strong style="color:#60a5fa;">Own</strong> (own-study checklist) or <strong style="color:#e879f9;">Tip</strong> (tip checklist).</div>
-        <div id="set-sources-list" style="margin-bottom:12px;"></div>
+        <div class="body-mut">Manage the sources available when logging a bet. Tag each as <strong style="color:var(--blu);">Own</strong> (own-study checklist) or <strong style="color:#e879f9;">Tip</strong> (tip checklist).</div>
+        <div id="set-sources-list" class="mb12"></div>
         <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
           <div style="flex:1;min-width:160px;">
-            <label style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);display:block;margin-bottom:5px;">Label</label>
+            <label class="pill-lbl">Label</label>
             <input type="text" id="set-src-new-label" placeholder="e.g. Racing Post" autocomplete="off" style="width:100%;box-sizing:border-box;">
           </div>
           <div>
-            <label style="font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);display:block;margin-bottom:5px;">Type</label>
+            <label class="pill-lbl">Type</label>
             <select id="set-src-new-type" style="padding:10px 14px;border-radius:8px;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);font-size:13px;">
               <option value="tip">Tip</option>
               <option value="own">Own</option>
@@ -562,17 +562,17 @@ RACING <span class="logo-accent">PUZZLE</span>
 
       <div class="blk">
         <div class="bttl">💰 Starting Bank</div>
-        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Set your starting bankroll. This is used to calculate ROI and growth percentage. Your current bank is updated from the Bank card.</div>
+        <div class="body-mut">Set your starting bankroll. This is used to calculate ROI and growth percentage. Your current bank is updated from the Bank card.</div>
         <div class="fg"><label>Starting Bank (£)</label><input type="number" id="set-bk-start" step="10" placeholder="500" style="max-width:200px;"></div>
         <button class="btn bgld" onclick="saveStartBank()">Save Starting Bank</button>
-        <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:11px;color:var(--mut);margin-top:8px;" id="set-bk-status"></div>
+        <div class="body-sm" style="margin-top:8px;" id="set-bk-status"></div>
       </div>
 
 
 
       <div class="blk">
         <div class="bttl">🟢 Virtual Bank</div>
-        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Set your virtual paper trading bank. Adjust the starting amount or reset the current balance at any time.</div>
+        <div class="body-mut">Set your virtual paper trading bank. Adjust the starting amount or reset the current balance at any time.</div>
         <div class="fg2">
           <div class="fg"><label>Starting Virtual Bank (£)</label><input type="number" id="set-vbk-start" step="10" placeholder="500"></div>
           <div class="fg"><label>Current Virtual Bank (£)</label><input type="number" id="set-vbk-cur" step="0.01" placeholder="500.00"></div>
@@ -581,12 +581,12 @@ RACING <span class="logo-accent">PUZZLE</span>
           <button class="btn" style="background:#fb923c;color:#141414;font-weight:700;" onclick="saveVBankSettings()">Save Virtual Bank</button>
           <button class="btn bout" onclick="resetVBank()">Reset to Starting Amount</button>
         </div>
-        <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:11px;color:var(--mut);margin-top:8px;" id="set-vbk-status"></div>
+        <div class="body-sm" style="margin-top:8px;" id="set-vbk-status"></div>
       </div>
 
       <div class="blk">
         <div class="bttl">🏇 Racing API</div>
-        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Connect to <strong style="color:var(--txt);">theracingapi.com</strong> to search horse profiles, auto-fill trainer and jockey, and pull today's entries. Use your account username and password.</div>
+        <div class="body-mut">Connect to <strong class="gld">theracingapi.com</strong> to search horse profiles, auto-fill trainer and jockey, and pull today's entries. Use your account username and password.</div>
         <div class="fg"><label>Username (email)</label><input type="text" id="racing-api-user" placeholder="" autocomplete="off" autocapitalize="none"></div>
         <div class="fg"><label>Password</label><input type="password" id="racing-api-pass" autocomplete="off"></div>
         <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;">
@@ -600,7 +600,7 @@ RACING <span class="logo-accent">PUZZLE</span>
 
       <div class="blk">
         <div class="bttl">🤖 AI Coach</div>
-        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">The Coach uses Claude AI to give you personalised advice based on your actual betting data. It knows your bank, your recent bets, your rules and your P&L.<br><br>
+        <div class="body-mut">The Coach uses Claude AI to give you personalised advice based on your actual betting data. It knows your bank, your recent bets, your rules and your P&L.<br><br>
         Get a free API key at <a href="https://console.anthropic.com" target="_blank" style="color:#e8e4dc;">console.anthropic.com</a> → API Keys.</div>
         <div class="fg"><label>Anthropic API Key</label>
           <input type="password" id="apikey-inp" placeholder="sk-ant-…" autocomplete="off">
@@ -633,12 +633,12 @@ RACING <span class="logo-accent">PUZZLE</span>
       </div>
 
       <div class="blk"><div class="bttl">Backup &amp; Data</div>
-        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px;">Export all your data as JSON — ready for Supabase or any external database.</div>
-        <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:10px;">
+        <div class="body-mut">Export all your data as JSON — ready for Supabase or any external database.</div>
+        <div class="row-g7" style="gap:9px;">
           <button class="btn" style="background:#60a5fa;color:#141414;font-weight:700;" onclick="exportData()">⬇ Export Data (JSON)</button>
           <button class="btn bout" onclick="importDataPrompt()">⬆ Import JSON</button>
         </div>
-        <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:10px;">
+        <div class="row-g7" style="gap:9px;">
           <button class="btn" style="background:#34d399;color:#141414;font-weight:700;" onclick="supaTestSync()">☁ Test Supabase Sync</button>
         </div>
         <div id="supa-status" style="font-family:monospace;font-size:11px;color:var(--mut);margin-bottom:10px;"></div>
@@ -682,7 +682,7 @@ RACING <span class="logo-accent">PUZZLE</span>
         <div class="fg"><label>Trainer</label><input type="text" id="em-trainer" autocomplete="off"></div>
       </div>
       <div class="fg"><label>Source</label><select id="em-source"></select></div>
-      <div class="fg"><label>Pre-Race Notes</label><textarea id="em-prenotes" style="min-height:44px;"></textarea></div>
+      <div class="fg"><label>Pre-Race Notes</label><textarea id="em-prenotes" style="min-height:44px"></textarea></div>
     </div>
 
     <div class="sdiv" style="margin-top:12px;" id="em-result-divider">Result</div>
@@ -690,10 +690,10 @@ RACING <span class="logo-accent">PUZZLE</span>
       <div class="fg"><label>Result</label><select id="emres" onchange="onEditResChange()"><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>
       <div class="fg"><label>Returns (£)</label><input type="number" id="emret" step="0.01" min="0" placeholder=""></div>
     </div>
-    <div class="fg"><label>Post-Race Notes</label><textarea id="emnotes" placeholder="What happened? What did I learn?" style="min-height:44px;"></textarea></div>
+    <div class="fg"><label>Post-Race Notes</label><textarea id="emnotes" placeholder="What happened? What did I learn?" style="min-height:44px"></textarea></div>
 
     <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="btn bgld" style="flex:1;" onclick="saveEM()">Save</button>
+      <button class="btn bgld" style="flex:1" onclick="saveEM()">Save</button>
       <button class="btn bout" onclick="closeEM()">Cancel</button>
     </div>
     <button class="btn bdng bw mt8" onclick="delBetEM()">Delete this bet</button>
@@ -706,10 +706,10 @@ RACING <span class="logo-accent">PUZZLE</span>
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Welcome to</div>
     <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:48px;letter-spacing:3px;color:#fff;text-align:center;line-height:1;margin-bottom:4px;">Racing <span style="color:#8b5cf6;">Puzzle</span></div>
     <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px;">
-      <span style="color:#60a5fa;">Real</span>
-      <span style="color:var(--mut);margin:0 6px;">·</span>
+      <span style="color:var(--blu);">Real</span>
+      <span class="hdr-bal-sep">·</span>
       <span style="color:#fb923c;">Virtual</span>
-      <span style="color:var(--mut);margin:0 6px;">·</span>
+      <span class="hdr-bal-sep">·</span>
       <span style="color:var(--mut);">Disciplined</span>
     </div>
   </div>

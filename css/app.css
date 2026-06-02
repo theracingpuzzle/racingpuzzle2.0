@@ -333,3 +333,84 @@ tr:hover td { background: var(--sur2); }
 #logbet-overlay .btn    { width: 100%; padding: 16px; font-size: 12px; border-radius: 12px; margin-top: 4px; }
 #logbet-overlay .sdiv   { margin: 18px 0 12px; }
 #logbet-overlay::-webkit-scrollbar { display: none; }
+
+/* ── Index.html utility classes ── */
+
+/* Header extras */
+.hdr-sep   { color: rgba(255,255,255,.3); font-size: 11px; margin: 0 2px; }
+.supa-dot  { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.4); flex-shrink: 0; cursor: pointer; }
+.supa-banner { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 999; padding: 8px 14px; font-size: 11px; font-weight: 700; text-align: center; }
+
+/* Card headers (Today / Racecards / Results top strip) */
+.card-hdr  { margin: -18px -17px 0; padding: 14px 17px 13px; border-bottom: 1px solid var(--bdr); }
+.card-hdr-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+
+/* Section label — small caps muted */
+.lbl       { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--mut); margin-bottom: 3px; }
+.lbl-sm    { margin-bottom: 0; }
+.lbl-8     { font-size: 8px; letter-spacing: 1.5px; }
+
+/* Card title (large coloured heading) */
+.card-title { font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
+
+/* Refresh button */
+.btn-refresh { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 6px 12px; border-radius: 7px; border: 1px solid var(--bdr); background: var(--sur); color: var(--mut); cursor: pointer; }
+
+/* Stat tile (white box) */
+.tile      { background: var(--sur); border: 1px solid var(--bdr); border-radius: 9px; padding: 9px 11px; }
+.tile-lbl  { font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mut); margin-bottom: 3px; }
+.tile-val  { font-size: 17px; font-weight: 700; }
+
+/* Mood / emoji buttons */
+.mood-btn  { flex: 1; padding: 7px 4px; border-radius: 8px; border: 1px solid var(--bdr); background: transparent; font-size: 15px; cursor: pointer; }
+
+/* Check-in / alert box */
+.alert-box { border-radius: 11px; padding: 12px 14px; }
+
+/* cin strip with touch-action */
+.cin-touch { touch-action: pan-y; }
+
+/* rc/results card inner */
+.rc-cin    { touch-action: pan-y; background: var(--sur2); padding: 14px 14px 24px; }
+
+/* Card overlay (loading / empty state) */
+.card-overlay { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(15,15,20,.85); backdrop-filter: blur(4px); border-radius: inherit; }
+
+/* Status text (italic muted) */
+.status-txt { color: var(--mut); font-style: italic; font-size: 13px; }
+
+/* History toggle (Real / Virtual) */
+.hist-tog  { display: flex; background: var(--sur2); border: 1px solid var(--bdr); border-radius: 9px; overflow: hidden; margin-bottom: 16px; width: fit-content; }
+.hist-tog-btn { font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: 8px 18px; border: none; cursor: pointer; }
+.hist-tog-btn.on  { background: var(--navy); color: #fff; }
+.hist-tog-btn.off { background: transparent; color: var(--mut); }
+
+/* Inline flex gap helpers */
+.row       { display: flex; align-items: center; }
+.row-sb    { display: flex; align-items: center; justify-content: space-between; }
+.row-g8    { display: flex; align-items: center; gap: 8px; }
+.row-g7    { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 12px; }
+.col       { display: flex; flex-direction: column; }
+.g2-8      { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.g3        { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+/* Purple beta/tag pill */
+.pill-pur  { font-family: monospace; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #cc44aa; border: 1px solid #cc44aa; padding: 5px 16px; border-radius: 20px; margin-bottom: 10px; }
+.pill-lbl  { font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--mut); display: block; margin-bottom: 5px; }
+
+/* Body copy */
+.body-txt  { font-size: 13px; color: var(--txt); line-height: 1.7; }
+.body-mut  { font-size: 13px; color: var(--mut); line-height: 1.6; margin-bottom: 12px; }
+.body-sm   { font-size: 12px; color: var(--mut); line-height: 1.5; margin-top: 10px; }
+.body-it   { font-size: 12px; color: var(--mut); font-style: italic; margin-bottom: 10px; }
+.body-c    { font-size: 13px; color: var(--mut); text-align: center; max-width: 220px; line-height: 1.6; }
+.lbl-mut   { font-size: 9px; color: var(--mut); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px; }
+
+/* Emoji / icon large */
+.ico-xl    { font-size: 32px; margin-bottom: 12px; }
+.mt20      { margin-top: 20px; }
+.mb12      { margin-bottom: 12px; }
+
+/* Input width override */
+.inp-110   { width: 110px; font-size: 12px; }
+.inp-flex  { flex: 1; min-width: 140px; font-size: 13px; }

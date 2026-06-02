@@ -23,9 +23,9 @@ function runTodayDemo(){
 function _showTodayDemo(){
   // ── P&L tiles ──
   const pe = document.getElementById('tpnl');
-  if(pe){ pe.textContent = '+£42.50'; pe.style.color = '#3b82f6'; }
+  if(pe){ pe.textContent = '+£42.50'; pe.style.color = 'var(--blu)'; }
   const vpe = document.getElementById('t-virt-pnl');
-  if(vpe){ vpe.textContent = '+£18.00'; vpe.style.color = '#fb923c'; }
+  if(vpe){ vpe.textContent = '+£18.00'; vpe.style.color = 'var(--ora)'; }
 
   // ── Bet limit tile ──
   const bl = document.getElementById('tbetlimit');
@@ -680,7 +680,7 @@ function renderToday(){
   const set=tb.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr');
   const p=set.reduce((a,b)=>a+(pnl(b)||0),0);
   const pe=document.getElementById('tpnl');
-  if(pe){pe.textContent=fmt(p);pe.style.color='#3b82f6';}
+  if(pe){pe.textContent=fmt(p);pe.style.color='var(--blu)';}
 
   // ── Virtual P&L today ──
   const vb=getVBank();
@@ -688,7 +688,7 @@ function renderToday(){
   const vset=vtb.filter(b=>b.result&&b.result!=='pending'&&b.result!=='nr');
   const vp=vset.reduce((a,b)=>a+((parseFloat(b.returns)||0)-(parseFloat(b.stake)||0)),0);
   const vpe=document.getElementById('t-virt-pnl');
-  if(vpe){vpe.textContent=fmt(vp);vpe.style.color='#fb923c';}
+  if(vpe){vpe.textContent=fmt(vp);vpe.style.color='var(--ora)';}
 
   // ── Bet limit tile ──
   renderBetLimit();

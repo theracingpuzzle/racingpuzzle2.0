@@ -231,9 +231,6 @@
 .rc-pos-3 { color: #ea580c; }
 .rc-pos-n { color: #d1d5db; }
 
-/* SP (starting price) */
-.rc-sp { font-family: var(--font-ui); font-size: 13px; font-weight: 800; color: #b45309; flex-shrink: 0; }
-
 /* Result badges */
 .rc-res {
   font-family: var(--font-ui); font-size: 8px; font-weight: 800;

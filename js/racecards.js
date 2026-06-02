@@ -707,7 +707,6 @@ function rcSwRaceCard(race, course){
             + '<div class="rc-runner-jt">'+(jock||'')+(trainer?' · '+trainer:'')+'</div>'
           + '</div>'
           + '<div class="rc-runner-right">'
-            + '<span class="rc-sp">'+sp+'</span>'
             + watchBtn
           + '</div>'
         + '</div>';

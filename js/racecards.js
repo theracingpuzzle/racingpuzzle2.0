@@ -239,7 +239,7 @@ const WAL_COURSES=['bangor','bangor-on-dee','chepstow','ffos las'];
 const IRE_COURSES=['curragh','leopardstown','naas','navan','gowran park','galway','tipperary','cork','killarney','listowel','down royal','downpatrick','dundalk','fairyhouse','kilbeggan','laytown','limerick','roscommon','sligo','tramore','thurles','punchestown','ballinrobe','bellewstown','clonmel','mullingar','wexford','kilmalloch'];
 const GER_COURSES=['cologne'];
 const USA_COURSES=['santa anita'];
-const FRA_COURSES=['longchamp','auteuil'];
+const FRA_COURSES=['longchamp','auteuil','saint-cloud'];
 
 function rcCourseCountry(course){
   const c=(course||'').toLowerCase().trim();

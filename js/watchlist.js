@@ -12,9 +12,9 @@ function orEdge(entry){
 function orEdgeBadge(entry){
   const edge=orEdge(entry);
   if(edge===null) return '';
-  if(edge>0) return '<span style="font-family:monospace;font-size:10px;font-weight:700;color:#4ade80;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:1px 6px;border-radius:4px;margin-left:4px;">▲ +'+edge+' edge</span>';
-  if(edge<0) return '<span style="font-family:monospace;font-size:10px;font-weight:700;color:#f87171;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25);padding:1px 6px;border-radius:4px;margin-left:4px;">▼ '+edge+' edge</span>';
-  return '<span style="font-family:monospace;font-size:10px;color:var(--mut);background:var(--sur2);border:1px solid var(--bdr);padding:1px 6px;border-radius:4px;margin-left:4px;">→ on mark</span>';
+  if(edge>0) return '<span class="wll-edge-pos">▲ +'+edge+' edge</span>';
+  if(edge<0) return '<span class="wll-edge-neg">▼ '+edge+' edge</span>';
+  return '<span class="wll-edge-nil">→ on mark</span>';
 }
 
 function orSummaryLine(entry){
@@ -22,9 +22,9 @@ function orSummaryLine(entry){
   const or=parseFloat(entry.currentRating);
   if(!mr&&!or) return '';
   let parts=[];
-  if(mr) parts.push('<span style="color:var(--gld);font-weight:700;">MR '+mr+'</span>');
-  if(or) parts.push('<span style="color:var(--mut);">OR '+or+'</span>');
-  return '<div style="font-family:monospace;font-size:11px;display:flex;align-items:center;gap:4px;margin-top:3px;">'+parts.join('<span style="color:var(--mut);margin:0 2px;">·</span>')+orEdgeBadge(entry)+'</div>';
+  if(mr) parts.push('<span class="wll-or-mr">MR '+mr+'</span>');
+  if(or) parts.push('<span class="wll-or-or">OR '+or+'</span>');
+  return '<div class="wll-or-line">'+parts.join('<span class="wll-or-sep">·</span>')+orEdgeBadge(entry)+'</div>';
 }
 
 
@@ -36,8 +36,8 @@ function setWLView(v){
   document.getElementById('wl-cal-view').style.display=v==='cal'?'block':'none';
   document.getElementById('wl-list-view').style.display=v==='list'?'block':'none';
   const cb=document.getElementById('wl-cal-btn'),lb=document.getElementById('wl-list-btn');
-  if(cb){cb.style.background=v==='cal'?'rgba(232,121,249,.2)':'transparent';cb.style.borderColor=v==='cal'?'rgba(232,121,249,.4)':'var(--bdr)';cb.style.color=v==='cal'?'#e879f9':'var(--mut)';}
-  if(lb){lb.style.background=v==='list'?'rgba(232,121,249,.2)':'transparent';lb.style.borderColor=v==='list'?'rgba(232,121,249,.4)':'var(--bdr)';lb.style.color=v==='list'?'#e879f9':'var(--mut)';}
+  if(cb){cb.className='wl-tog-btn '+(v==='cal'?'on':'off');}
+  if(lb){lb.className='wl-tog-btn '+(v==='list'?'on':'off');}
   if(v==='cal')renderWLCal();else renderWLList();
 }
 
@@ -79,7 +79,7 @@ function renderWLCal(){
   });
   // Day headers
   const dayNames=['S','M','T','W','T','F','S'];
-  let html=dayNames.map(d=>'<div style="color:var(--mut);font-size:9px;padding:3px 0;font-weight:700;">'+d+'</div>').join('');
+  let html=dayNames.map(d=>'<div class="wl-cal-day-hdr">'+d+'</div>').join('');
   // Empty cells before first day
   const start=firstDay; // Sun=0
   for(let i=0;i<start;i++)html+='<div></div>';
@@ -94,15 +94,15 @@ function renderWLCal(){
     const fixtures=getFixtureForDate(dateStr);
     const hasFixture=fixtures.length>0;
     const dotCol=dayTargets.length&&!entries.length&&!dayObs.length?'#fb923c':dayObs.length&&!entries.length&&!dayTargets.length?'#4ade80':'#e879f9';
-    const fixtureBar=hasFixture?'<div style="height:3px;border-radius:2px;background:'+fixtures[0].colour+';margin:1px 2px 0;" title="'+fixtures[0].name+'"></div>':'';
+    const fixtureBar=hasFixture?'<div class="wl-cal-fixture-bar" style="background:'+fixtures[0].colour+';" title="'+fixtures[0].name+'"></div>':'';
     // Show up to 3 coloured dots for different event types
     const dots=[];
-    if(entries.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#e879f9;display:inline-block;margin:0 1px;"></div>');
-    if(dayTargets.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#fb923c;display:inline-block;margin:0 1px;"></div>');
-    if(dayObs.length)dots.push('<div style="width:5px;height:5px;border-radius:50%;background:#4ade80;display:inline-block;margin:0 1px;"></div>');
-    html+='<div onclick="wlSelectDay(\''+dateStr+'\')" style="cursor:pointer;padding:5px 2px;border-radius:6px;'+(isToday?'background:rgba(232,121,249,.15);':'')+'text-align:center;">'
-      +'<div style="font-size:11px;color:'+(isToday?'#e879f9':hasBet?'var(--txt)':'var(--mut)')+(hasBet?';font-weight:700':';font-weight:400')+';">'+d+'</div>'
-      +(hasBet?'<div style="display:flex;justify-content:center;margin:1px 0 0;">'+dots.join('')+'</div>':'<div style="height:7px;"></div>')+fixtureBar
+    if(entries.length)dots.push('<div class="wl-cal-dot" style="background:var(--pur);"></div>');
+    if(dayTargets.length)dots.push('<div class="wl-cal-dot" style="background:var(--ora);"></div>');
+    if(dayObs.length)dots.push('<div class="wl-cal-dot" style="background:var(--grn);"></div>');
+    html+='<div onclick="wlSelectDay(\''+dateStr+'\')" class="wl-cal-cell'+(isToday?' wl-cal-cell-today':'')+'">'
+      +'<div class="wl-cal-num '+(isToday?'wl-cal-num-today':hasBet?'wl-cal-num-active':'wl-cal-num-empty')+'">'+d+'</div>'
+      +(hasBet?'<div class="wl-cal-dots">'+dots.join('')+'</div>':'<div style="height:7px;"></div>')+fixtureBar
     +'</div>';
   }
   grid.innerHTML=html;
@@ -127,50 +127,45 @@ function wlSelectDay(dateStr){
   const el=document.getElementById('wl-cal-day-entries');if(!el)return;
   const dayFixtures=getFixtureForDate(dateStr);
   const fixtureBanner=dayFixtures.map(f=>'<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;background:rgba(0,0,0,.2);border-left:3px solid '+f.colour+';margin-bottom:8px;"><span>'+f.emoji+'</span><div><div style="font-weight:700;font-size:13px;color:'+f.colour+';">'+f.name+'</div><div style="font-size:11px;color:var(--mut);">'+f.course+'</div></div></div>').join('');
-  const dayLabel='<div style="font-family:monospace;font-size:9px;color:rgba(232,121,249,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+'</div>';
+  const dayLabel='<div class="wl-day-lbl">'+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+'</div>';
   let html=fixtureBanner+dayLabel;
   // Target race cards
   if(dayTargets.length){
-    html+='<div style="font-family:monospace;font-size:9px;color:rgba(251,146,60,.6);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">🎯 Target Races</div>';
+    html+='<div class="wl-day-sec-lbl wl-day-sec-lbl-ora">🎯 Target Races</div>';
     html+=dayTargets.map(function(d){
       const t=d.target;
-      return'<div data-wl-id="'+d.horseId+'" style="cursor:pointer;border-left:3px solid #fb923c;margin-bottom:8px;padding:10px 11px;background:rgba(251,146,60,.05);border-radius:0 8px 8px 0;">'
-        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
-          +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-weight:700;font-size:14px;margin-bottom:2px;">'+d.horse+'</div>'
-            +orSummaryLine(d)
-            +(d.trainer?'<div style="font-size:11px;color:var(--mut);margin-bottom:3px;">'+d.trainer+'</div>':'')
-            +'<div style="font-size:12px;color:#fb923c;font-weight:600;">'+t.race+(t.track?' · '+t.track:'')+'</div>'
-            +(t.condition?'<div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:2px;">'+t.condition+'</div>':'')
-          +'</div>'
-        +'</div>'
+      return'<div data-wl-id="'+d.horseId+'" class="wl-day-target">'
+        +'<div class="wl-day-target-horse">'+d.horse+'</div>'
+        +orSummaryLine(d)
+        +(d.trainer?'<div class="wll-sub">'+d.trainer+'</div>':'')
+        +'<div class="wl-day-target-race">'+t.race+(t.track?' · '+t.track:'')+'</div>'
+        +(t.condition?'<div class="wl-day-target-cond">'+t.condition+'</div>':'')
       +'</div>';
     }).join('');
   }
   // Observations
   if(dayObs.length){
-    html+='<div style="font-family:monospace;font-size:9px;color:rgba(74,222,128,.6);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;'+(dayTargets.length?'margin-top:10px;':'')+'">📋 Observations</div>';
+    html+='<div class="wl-day-sec-lbl wl-day-sec-lbl-grn"'+(dayTargets.length?' style="margin-top:10px;"':'')+'>📋 Observations</div>';
     html+=dayObs.map(function(d){
       const o=d.obs;
-      const resultCol=o.result&&o.result.toLowerCase().includes('win')?'#4ade80':o.result?'#fb923c':'var(--mut)';
-      return'<div data-wl-id="'+d.horseId+'" style="cursor:pointer;border-left:3px solid #4ade80;margin-bottom:8px;padding:10px 11px;background:rgba(74,222,128,.04);border-radius:0 8px 8px 0;">'
-        +'<div style="font-weight:700;font-size:14px;margin-bottom:3px;">'+d.horse+'</div>'
-        +(o.raceName?'<div style="font-size:12px;color:var(--mut);margin-bottom:3px;">'+o.raceName+'</div>':'')
-        +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;">'
-          +(o.result?'<span style="font-family:monospace;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);color:'+resultCol+';">'+o.result+'</span>':'')
-          +(o.going?'<span style="font-family:monospace;font-size:10px;color:var(--mut);padding:1px 6px;border-radius:4px;background:var(--sur2);border:1px solid var(--bdr);">'+o.going+'</span>':'')
+      return'<div data-wl-id="'+d.horseId+'" class="wl-day-obs">'
+        +'<div class="wl-day-obs-horse">'+d.horse+'</div>'
+        +(o.raceName?'<div class="wll-sub">'+o.raceName+'</div>':'')
+        +'<div class="wl-day-obs-chips">'
+          +(o.result?'<span class="wl-day-obs-result">'+o.result+'</span>':'')
+          +(o.going?'<span class="wl-day-obs-going">'+o.going+'</span>':'')
         +'</div>'
-        +(o.notes?'<div style="font-size:12px;color:var(--mut);font-style:italic;line-height:1.45;">'+o.notes+'</div>':'')
+        +(o.notes?'<div class="wl-day-obs-notes">'+o.notes+'</div>':'')
       +'</div>';
     }).join('');
   }
   // Regular watchlist entries
   if(entries.length){
-    if(dayTargets.length||dayObs.length)html+='<div style="font-family:monospace;font-size:9px;color:rgba(232,121,249,.5);text-transform:uppercase;letter-spacing:.1em;margin:10px 0 6px;">Puzzle Profiler</div>';
+    if(dayTargets.length||dayObs.length)html+='<div class="wl-day-sec-lbl wl-day-sec-lbl-pur" style="margin-top:10px;">Puzzle Profiler</div>';
     html+=entries.map(function(e){return renderWLEntry(e);}).join('');
   }
   if(!entries.length&&!dayTargets.length&&!dayObs.length){
-    html+='<div style="color:var(--mut);font-style:italic;font-size:13px;padding:8px 0;">No targets on '+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'.<br><span style="font-size:12px;">Tap + to add one.</span></div>';
+    html+='<div class="wl-day-empty">No targets on '+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'.<br><span style="font-size:12px;">Tap + to add one.</span></div>';
   }
   el.innerHTML=html;
   el.querySelectorAll('[data-wl-id]').forEach(function(el2){el2.addEventListener('click',function(){openWLProfile(el2.getAttribute('data-wl-id'));});});
@@ -245,7 +240,6 @@ function _injectAlbumCSS(){
 }
 
 function renderWLList(){
-  _injectAlbumCSS();
   const wl=getWL();
   const search=(document.getElementById('wl-search')||{value:''}).value.toLowerCase();
   let entries=[...wl].sort(function(a,b){return(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0);});
@@ -277,9 +271,9 @@ function renderWLList(){
 
   // ── Stats strip ──
   html+='<div class="wll-stats">'
-    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#e879f9;">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
-    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#4ade80;">'+totalObs+'</div><div class="wll-stat-l">Observations</div></div>'
-    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#fb923c;">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--pur);">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--grn);">'+totalObs+'</div><div class="wll-stat-l">Observations</div></div>'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--ora);">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
   +'</div>';
 
   // ── Groups ──
@@ -309,13 +303,13 @@ function renderWLList(){
       html+='<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
         +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
         +'<div class="wll-main">'
-          +'<div class="wll-name">'+(e.horse||'Unknown')+(e.needsReview?'<span style="font-size:9px;font-weight:800;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:1px;background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.25);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:middle;">REVIEW</span>':'')+'</div>'
+          +'<div class="wll-name">'+(e.horse||'Unknown')+(e.needsReview?'<span class="wll-review-badge">REVIEW</span>':'')+'</div>'
           +'<div class="wll-sub">'+subParts.join(' · ')+'</div>'
           +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
         +'</div>'
         +'<div class="wll-right">'
-          +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'#a78bfa':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
-          +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'#f59e0b':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
+          +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--pur)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+          +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
         +'</div>'
       +'</div>';
     });
@@ -354,8 +348,8 @@ function renderWLEntry(e){
       +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
     +'</div>'
     +'<div class="wll-right">'
-      +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'#a78bfa':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
-      +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'#f59e0b':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
+      +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--pur)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+      +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
     +'</div>'
   +'</div>';
 }
@@ -371,44 +365,43 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName){
   const currentMR=entry?parseFloat(entry.myRating)||null:null;
   const modal=document.createElement('div');
   modal.id='wl-review-modal';
-  modal.style.cssText='position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;';
+  modal.className='wlr-modal';
   const F='width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',sans-serif;outline:none;box-sizing:border-box;';
   const L='display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;';
   modal.innerHTML=
-    '<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:16px 16px 0 0;padding:0;width:100%;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">'
-    +'<div style="display:flex;justify-content:center;padding:10px 0 0;"><div style="width:36px;height:4px;border-radius:2px;background:#1c1c30;"></div></div>'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px;border-bottom:1px solid #1c1c30;">'
-      +'<div>'
-        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:800;letter-spacing:.5px;color:#fff;">✍️ Race Review</div>'
-        +'<div style="font-size:11px;color:#3a3a5c;">'+(horse||'')+(course?' · '+course:'')+(time?' · '+time:'')+'</div>'
+    '<div class="wlr-sheet">'
+    +'<div class="wlr-handle"><div class="wlr-handle-bar"></div></div>'
+    +'<div class="wlr-hdr">'
+      +'<div><div class="wlr-title">✍️ Race Review</div>'
+        +'<div class="wlr-sub">'+(horse||'')+(course?' · '+course:'')+(time?' · '+time:'')+'</div>'
       +'</div>'
-      +'<button onclick="document.getElementById(\'wl-review-modal\').remove()" style="width:30px;height:30px;border-radius:50%;background:#111120;border:1px solid #1c1c30;color:#888;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>'
+      +'<button onclick="document.getElementById(\'wl-review-modal\').remove()" class="wlr-close">✕</button>'
     +'</div>'
-    +'<div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px;">'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-      +'<div><label style="'+L+'">Date</label><input type="date" id="rvw-date" value="'+td()+'" style="'+F+'"></div>'
-      +'<div><label style="'+L+'">Course</label><input type="text" id="rvw-course" value="'+(course||'')+'" placeholder="e.g. Haydock" style="'+F+'"></div>'
+    +'<div class="wlr-body">'
+    +'<div class="g2">'
+      +'<div class="fg"><label>Date</label><input type="date" id="rvw-date" value="'+td()+'"></div>'
+      +'<div class="fg"><label>Course</label><input type="text" id="rvw-course" value="'+(course||'')+'" placeholder="e.g. Haydock"></div>'
     +'</div>'
-    +'<div><label style="'+L+'">Race Name</label><input type="text" id="rvw-race" value="'+(raceName||'')+'" placeholder="e.g. Sandy Lane Stakes" style="'+F+'"></div>'
-    +'<div><label style="'+L+'">Result</label><div style="display:flex;gap:6px;">'
-    +['win','place','unplaced','nr'].map(function(r){const cols={win:'#4ade80',place:'#f59e0b',unplaced:'#f87171',nr:'#3a3a5c'};return'<button data-result="'+r+'" data-grp="result" class="rvw-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid '+cols[r]+'40;background:'+cols[r]+'10;color:'+cols[r]+';font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;" onclick="wlRvwToggle(this)">'+r+'</button>';}).join('')
+    +'<div class="fg"><label>Race Name</label><input type="text" id="rvw-race" value="'+(raceName||'')+'" placeholder="e.g. Sandy Lane Stakes"></div>'
+    +'<div class="fg"><label>Result</label><div style="display:flex;gap:6px;">'
+    +['win','place','unplaced','nr'].map(function(r){const cols={win:'var(--grn)',place:'var(--gld)',unplaced:'var(--red)',nr:'var(--mut)'};return'<button data-result="'+r+'" data-grp="result" class="rvw-btn" style="flex:1;border:1px solid;border-color:'+cols[r]+';color:'+cols[r]+';background:transparent;" onclick="wlRvwToggle(this)">'+r+'</button>';}).join('')
     +'</div></div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-      +'<div><label style="'+L+'">Finish Position</label><input type="text" id="rvw-pos" placeholder="e.g. 3rd" style="'+F+'"></div>'
-      +'<div><label style="'+L+'">Beaten Distance</label><input type="text" id="rvw-beaten" placeholder="e.g. 2.5L" style="'+F+'"></div>'
+    +'<div class="g2">'
+      +'<div class="fg"><label>Finish Position</label><input type="text" id="rvw-pos" placeholder="e.g. 3rd"></div>'
+      +'<div class="fg"><label>Beaten Distance</label><input type="text" id="rvw-beaten" placeholder="e.g. 2.5L"></div>'
     +'</div>'
-    +'<div><label style="'+L+'">Verdict</label><div style="display:flex;gap:6px;">'
-    +[{k:'upgrade',col:'#4ade80',lbl:'Upgrade ↑'},{k:'hold',col:'#60a5fa',lbl:'Hold →'},{k:'downgrade',col:'#f87171',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid '+v.col+'40;background:'+v.col+'10;color:'+v.col+';font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
+    +'<div class="fg"><label>Verdict</label><div style="display:flex;gap:6px;">'
+    +[{k:'upgrade',col:'var(--grn)',lbl:'Upgrade ↑'},{k:'hold',col:'var(--blu)',lbl:'Hold →'},{k:'downgrade',col:'var(--red)',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="flex:1;border:1px solid;border-color:'+v.col+';color:'+v.col+';background:transparent;" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
     +'</div></div>'
-    +(currentMR?'<div><label style="'+L+'">MR Adjustment <span style="color:#3a3a5c;">(current: '+currentMR+')</span></label><input type="number" id="rvw-mr-adj" placeholder="e.g. 5 or -3" style="'+F+'"></div>':'<input type="hidden" id="rvw-mr-adj" value="0">')
-    +'<div><label style="'+L+'">Conditions Handled?</label><div style="display:flex;gap:6px;">'
-    +[{k:'confirmed',lbl:'✓ Confirmed'},{k:'mixed',lbl:'~ Mixed'},{k:'against',lbl:'✗ Against'}].map(function(g){return'<button data-going="'+g.k+'" data-grp="going" class="rvw-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:rgba(255,255,255,.4);font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.5px;cursor:pointer;" onclick="wlRvwToggle(this)">'+g.lbl+'</button>';}).join('')
+    +(currentMR?'<div class="fg"><label>MR Adjustment <span style="color:var(--mut);font-weight:400;">(current: '+currentMR+')</span></label><input type="number" id="rvw-mr-adj" placeholder="e.g. 5 or -3"></div>':'<input type="hidden" id="rvw-mr-adj" value="0">')
+    +'<div class="fg"><label>Conditions Handled?</label><div style="display:flex;gap:6px;">'
+    +[{k:'confirmed',lbl:'✓ Confirmed'},{k:'mixed',lbl:'~ Mixed'},{k:'against',lbl:'✗ Against'}].map(function(g){return'<button data-going="'+g.k+'" data-grp="going" class="rvw-btn" style="flex:1;border:1px solid var(--bdr);color:var(--mut);background:transparent;" onclick="wlRvwToggle(this)">'+g.lbl+'</button>';}).join('')
     +'</div></div>'
-    +'<div><label style="'+L+'">Back Next Time?</label><div style="display:flex;gap:6px;">'
-    +[{k:'yes',col:'#4ade80',lbl:'Yes'},{k:'depends',col:'#f59e0b',lbl:'Depends'},{k:'no',col:'#f87171',lbl:'No'}].map(function(b){return'<button data-back="'+b.k+'" data-grp="back" class="rvw-btn" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid '+b.col+'40;background:'+b.col+'10;color:'+b.col+';font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;" onclick="wlRvwToggle(this)">'+b.lbl+'</button>';}).join('')
+    +'<div class="fg"><label>Back Next Time?</label><div style="display:flex;gap:6px;">'
+    +[{k:'yes',col:'var(--grn)',lbl:'Yes'},{k:'depends',col:'var(--gld)',lbl:'Depends'},{k:'no',col:'var(--red)',lbl:'No'}].map(function(b){return'<button data-back="'+b.k+'" data-grp="back" class="rvw-btn" style="flex:1;border:1px solid;border-color:'+b.col+';color:'+b.col+';background:transparent;" onclick="wlRvwToggle(this)">'+b.lbl+'</button>';}).join('')
     +'</div></div>'
-    +'<div><label style="'+L+'">Notes</label><textarea id="rvw-notes" placeholder="What you saw, sectionals, paddock notes…" style="'+F+'min-height:64px;resize:vertical;"></textarea></div>'
-    +'<button onclick="saveWLReview(\''+profileId+'\',\''+horse+'\',\''+course+'\')" style="width:100%;padding:13px;border-radius:10px;border:none;background:#8b5cf6;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;margin-bottom:4px;">Save Review</button>'
+    +'<div class="fg"><label>Notes</label><textarea id="rvw-notes" placeholder="What you saw, sectionals, paddock notes…" style="min-height:64px;"></textarea></div>'
+    +'<button onclick="saveWLReview(\''+profileId+'\',\''+horse+'\',\''+course+'\')" class="wlr-save-btn">Save Review</button>'
     +'</div></div>';
   document.body.appendChild(modal);
   modal.addEventListener('click',function(ev){if(ev.target===modal)modal.remove();});
@@ -488,70 +481,73 @@ function openWLForm(id,prefill){
     targets:e&&e.targets?e.targets.map(function(t){return Object.assign({},t);}):p.targets||[]
   };
   const modal=document.createElement('div');
-  modal.id='wl-modal';modal.style.cssText='position:fixed;inset:0;z-index:500;background:#050508;overflow-y:auto;-webkit-overflow-scrolling:touch;';
+  modal.id='wl-modal';modal.className='wlf-modal';
   const going=['Firm','Good to Firm','Good','Good to Soft','Soft','Heavy'];
   const goingPrefs=e?e.goingPrefs||[]:[];
   _wlDossier.goingPrefs=goingPrefs.slice();
-  const goingHtml=going.map(function(g){const sel=_wlDossier.goingPrefs.includes(g);return'<button type="button" data-going="'+g+'" onclick="wlToggleGoing(this)" style="padding:6px 13px;border-radius:20px;border:1.5px solid '+(sel?'#4ade80':'rgba(255,255,255,.1)')+';background:'+(sel?'rgba(74,222,128,.1)':'transparent')+';color:'+(sel?'#4ade80':'rgba(255,255,255,.3)')+';font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;cursor:pointer;">'+g+'</button>';}).join('');
+  const goingHtml=going.map(function(g){const sel=_wlDossier.goingPrefs.includes(g);return'<button type="button" data-going="'+g+'" onclick="wlToggleGoing(this)" class="wlf-going-btn'+(sel?' on':'')+'">'+g+'</button>';}).join('');
   const REASONS=[{value:'eye-catcher',emoji:'🔭',label:'Eye Catcher'},{value:'future-target',emoji:'📰',label:'Future Target'},{value:'trainer-intel',emoji:'🗣',label:'Trainer Intel'},{value:'form-study',emoji:'📊',label:'Form Study'},{value:'tip-source',emoji:'💡',label:'Tip / Source'}];
   const curReason=e?e.reason||'eye-catcher':'eye-catcher';
   const REASON_COLS={'eye-catcher':'#a78bfa','future-target':'#fb923c','trainer-intel':'#60a5fa','form-study':'#ef4444','tip-source':'#eab308'};
-  const reasonHtml=REASONS.map(function(r){const sel=r.value===curReason;const col=REASON_COLS[r.value]||'#e879f9';const rgb=col.replace('#','').match(/.{2}/g).map(function(h){return parseInt(h,16);});return'<button type="button" data-reason="'+r.value+'" onclick="wlSelectReason(this)" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;border-radius:10px;border:1.5px solid '+(sel?col:'rgba(255,255,255,.08)')+';background:'+(sel?'rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+',.12)':'#0d0d18')+';color:'+(sel?col:'rgba(255,255,255,.3)')+';cursor:pointer;flex:1;min-width:0;transition:all .15s;"><span style="font-size:18px;">'+r.emoji+'</span><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:'+(sel?'800':'600')+';letter-spacing:.5px;text-transform:uppercase;text-align:center;line-height:1.2;">'+r.label+'</span></button>';}).join('');
+  const reasonHtml=REASONS.map(function(r){const sel=r.value===curReason;return'<button type="button" data-reason="'+r.value+'" onclick="wlSelectReason(this)" class="wlf-reason-btn'+(sel?' on':'')+'"><span class="wlf-reason-ico">'+r.emoji+'</span><span class="wlf-reason-lbl">'+r.label+'</span></button>';}).join('');
   modal.innerHTML=
-  '<div style="max-width:520px;margin:0 auto;background:#050508;min-height:100%;padding-bottom:40px;">'
-  +'<div style="display:flex;align-items:center;justify-content:space-between;padding:max(14px,env(safe-area-inset-top,14px)) 16px 12px;background:rgba(5,5,8,.96);backdrop-filter:blur(12px);border-bottom:1px solid #1c1c30;position:sticky;top:0;z-index:10;">'
-  +'<div style="display:flex;align-items:center;gap:7px;"><span style="font-size:16px;">🧩</span><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#fff;">RACING <span style="color:#8b5cf6;">PUZZLE</span></span></div>'
-  +'<div style="display:flex;gap:8px;align-items:center;">'
-  +(e?'<button onclick="delWLEntry(\''+e.id+'\')" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.08);color:#f87171;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Delete</button>':'')
-  +'<button onclick="document.getElementById(\'wl-modal\').remove()" style="width:34px;height:34px;border-radius:50%;background:#111120;border:1px solid #1c1c30;color:#888;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>'
+  '<div class="wlf-page">'
+  +'<div class="wlf-nav">'
+  +'<div class="wlf-brand"><span>🧩</span>RACING <span class="wlf-brand-accent">PUZZLE</span></div>'
+  +'<div class="wlf-nav-btns">'
+  +(e?'<button onclick="delWLEntry(\''+e.id+'\')" class="wlf-del-btn">Delete</button>':'')
+  +'<button onclick="document.getElementById(\'wl-modal\').remove()" class="wlf-close-btn">✕</button>'
   +'</div></div>'
-  +'<div style="background:#0d0d18;border-bottom:1px solid #1c1c30;padding:16px;">'
-  +(e?'<div style="font-family:\'Bebas Neue\',cursive;font-size:38px;letter-spacing:2px;color:#fff;line-height:1;margin-bottom:2px;">'+e.horse+'</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a4a6a;">Editing Profile</div>':'<div style="font-family:\'Bebas Neue\',cursive;font-size:32px;letter-spacing:2px;color:#8b5cf6;line-height:1;margin-bottom:2px;">New Profile</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#4a4a6a;">Create a puzzle profiler entry</div>')
+  +'<div class="wlf-hero">'
+  +(e?'<div class="wlf-hero-title">'+e.horse+'</div><div class="wlf-hero-sub">Editing Profile</div>':'<div class="wlf-hero-title" style="color:rgba(255,255,255,.7);">New Profile</div><div class="wlf-hero-sub">Create a puzzle profiler entry</div>')
   +'</div>'
-  +'<div style="padding:0 12px;">'
-  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:12px;overflow:hidden;">'
-  +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">1</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#c8d0df;">Why Am I Logging This?</span>'+'</div>'
+  +'<div class="wlf-body">'
+  +'<div class="wlf-section">'
+  +'<div class="wlf-sec-hdr"><div class="wlf-sec-num">1</div><span class="wlf-sec-title">Why Am I Logging This?</span></div>'
   +'<div style="display:flex;gap:5px;padding:12px 13px 13px;" id="wlf-reasons">'+reasonHtml+'</div>'
   +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
-  +'<div style="padding:0 13px 14px;">'
-  +'<label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">In a sentence...</label>'
-  +'<input type="text" id="wlf-reason-note" placeholder="e.g. Finished well from rear at Ascot, should improve" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;">'
-  +'</div></div>'
-  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
-  +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">2</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#c8d0df;">Horse</span>'+'</div>'
-  +'<div style="padding:12px 13px;display:flex;flex-direction:column;gap:10px;">'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Current OR <span style="color:#3a3a5c;font-weight:400;">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(e?e.currentRating||'':p.currentRating||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#f59e0b;margin-bottom:5px;">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid rgba(245,158,11,.35);border-radius:8px;color:#f59e0b;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'</div><div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Trainer</label><input type="text" id="wlf-trainer" value="'+(e?e.trainer||'':p.trainer||'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'</div></div>'
-  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
-  +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">3</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#c8d0df;">Race Observations</span>'+'</div>'
-  +'<div style="padding:12px 13px 4px;"><div id="wlf-obs-list"></div>'
-  +'<button onclick="wlAddObsRow()" style="width:100%;padding:9px;border:1px dashed rgba(232,121,249,.3);border-radius:9px;background:transparent;color:#e879f9;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:12px;">+ Add Observation</button>'
-  +'</div></div>'
-  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
-  +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">4</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#60a5fa;">Trainer / Connections Intel</span>'+'</div>'
-  +'<div style="padding:12px 13px 14px;"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;resize:vertical;min-height:64px;">'+(e?e.trainerIntel||'':'')+'</textarea></div>'
+  +'<div class="wlf-sec-body">'
+  +'<div class="fg"><label>In a sentence...</label>'
+  +'<input type="text" id="wlf-reason-note" placeholder="e.g. Finished well from rear at Ascot, should improve" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off">'
+  +'</div></div></div>'
+  +'<div class="wlf-section">'
+  +'<div class="wlf-sec-hdr"><div class="wlf-sec-num">2</div><span class="wlf-sec-title">Horse</span></div>'
+  +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
+  +'<div class="fg"><label>Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'"></div>'
+  +'<div class="g2">'
+  +'<div class="fg"><label>Current OR <span style="font-weight:400;color:var(--mut);">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(e?e.currentRating||'':p.currentRating||'')+'"></div>'
+  +'<div class="fg"><label style="color:var(--gld);">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" class="wlf-mr-input"></div>'
   +'</div>'
-  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
-  +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">5</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#fb923c;">Future Targets</span>'+'</div>'
-  +'<div style="padding:12px 13px 4px;"><div id="wlf-targets-list"></div>'
-  +'<button onclick="wlAddTargetRow()" style="width:100%;padding:9px;border:1px dashed rgba(251,146,60,.3);border-radius:9px;background:transparent;color:#fb923c;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:12px;">+ Add Target Race</button>'
+  +'<div class="fg"><label>Trainer</label><input type="text" id="wlf-trainer" value="'+(e?e.trainer||'':p.trainer||'')+'"></div>'
   +'</div></div>'
-  +'<div style="background:#0d0d18;border:1px solid #1c1c30;border-radius:13px;margin-top:10px;overflow:hidden;">'
-  +'<div style="display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid #1c1c30;">'+'<div style="width:24px;height:24px;background:#1a1a2e;border:1px solid #1c1c30;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;color:#3a3a5c;flex-shrink:0;">6</div>'+'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#4ade80;">Conditions Profile</span>'+'</div>'
-  +'<div style="padding:12px 13px;display:flex;flex-direction:column;gap:10px;">'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
-  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Preferred Distance</label><input type="text" id="wlf-dist" placeholder="e.g. 6-7f" value="'+(e?e.distancePref||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight" value="'+(e?e.trackPref||'':'')+'" style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-  +'</div><div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;">Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;resize:vertical;min-height:52px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
+  +'<div class="wlf-section">'
+  +'<div class="wlf-sec-hdr"><div class="wlf-sec-num">3</div><span class="wlf-sec-title">Race Observations</span></div>'
+  +'<div class="wlf-sec-body"><div id="wlf-obs-list"></div>'
+  +'<button onclick="wlAddObsRow()" class="wlf-add-btn">+ Add Observation</button>'
   +'</div></div>'
-  +'<div style="display:flex;gap:8px;margin-top:16px;">'
-  +'<button style="flex:1;padding:13px;border-radius:10px;border:none;background:#8b5cf6;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;" onclick="saveWLEntry(\''+( e?e.id:'')+'\')">'+(e?'Save Profile':'Create Profile')+'</button>'
-  +'<button style="padding:13px 18px;border-radius:10px;border:1px solid #1c1c30;background:#111120;color:#888;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;" onclick="document.getElementById(\'wl-modal\').remove()">Cancel</button>'
+  +'<div class="wlf-section">'
+  +'<div class="wlf-sec-hdr"><div class="wlf-sec-num">4</div><span class="wlf-sec-title" style="color:var(--blu);">Trainer / Connections Intel</span></div>'
+  +'<div class="wlf-sec-body"><div class="fg"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="min-height:64px;">'+(e?e.trainerIntel||'':'')+'</textarea></div></div>'
+  +'</div>'
+  +'<div class="wlf-section">'
+  +'<div class="wlf-sec-hdr"><div class="wlf-sec-num">5</div><span class="wlf-sec-title" style="color:var(--ora);">Future Targets</span></div>'
+  +'<div class="wlf-sec-body"><div id="wlf-targets-list"></div>'
+  +'<button onclick="wlAddTargetRow()" class="wlf-add-btn">+ Add Target Race</button>'
+  +'</div></div>'
+  +'<div class="wlf-section">'
+  +'<div class="wlf-sec-hdr"><div class="wlf-sec-num">6</div><span class="wlf-sec-title" style="color:var(--grn);">Conditions Profile</span></div>'
+  +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
+  +'<div class="fg"><label>Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
+  +'<div class="g2">'
+  +'<div class="fg"><label>Preferred Distance</label><input type="text" id="wlf-dist" placeholder="e.g. 6-7f" value="'+(e?e.distancePref||'':'')+'"></div>'
+  +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight" value="'+(e?e.trackPref||'':'')+'"></div>'
+  +'</div>'
+  +'<div class="fg"><label>Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="min-height:52px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
+  +'</div></div>'
+  +'<div class="wlf-actions">'
+  +'<button class="wlf-save-btn" onclick="saveWLEntry(\''+( e?e.id:'')+'\')">'
+  +(e?'Save Profile':'Create Profile')+'</button>'
+  +'<button class="wlf-cancel-btn" onclick="document.getElementById(\'wl-modal\').remove()">Cancel</button>'
   +'</div>'
   +'</div></div>';
   document.body.appendChild(modal);
@@ -563,25 +559,22 @@ function openWLForm(id,prefill){
 
 function _renderObsList(){
   const el=document.getElementById('wlf-obs-list');if(!el)return;
-  if(!_wlDossier.obs.length){el.innerHTML='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:600;color:#3a3a5c;font-style:italic;text-align:center;padding:8px 0 10px;">No observations yet — tap Add to log a run</div>';return;}
+  if(!_wlDossier.obs.length){el.innerHTML='<div class="wlf-obs-empty">No observations yet — tap Add to log a run</div>';return;}
   el.innerHTML=_wlDossier.obs.map(function(o,i){
-    return'<div style="background:#111120;border:1px solid #1c1c30;border-radius:10px;padding:12px;margin-bottom:8px;border-top:2px solid rgba(232,121,249,.25);">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
-      +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(232,121,249,.6);">Observation '+(i+1)+'</span>'
-      +'<button onclick="_wlDelObs('+i+')" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:6px;color:#f87171;font-size:11px;cursor:pointer;padding:2px 8px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">✕ Remove</button>'
-      +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Date</label><input type="date" value="'+(o.date||'')+'" onchange="_wlDossier.obs['+i+'].date=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Result</label><select onchange="_wlDossier.obs['+i+'].result=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;">'
+    return'<div class="wlf-obs-row">'
+      +'<div class="wlf-obs-hdr"><span class="wlf-obs-lbl">Observation '+(i+1)+'</span><button onclick="_wlDelObs('+i+')" class="wlf-obs-del">✕ Remove</button></div>'
+      +'<div class="g2" style="margin-bottom:8px;">'
+      +'<div class="fg"><label>Date</label><input type="date" value="'+(o.date||'')+'" onchange="_wlDossier.obs['+i+'].date=this.value"></div>'
+      +'<div class="fg"><label>Result</label><select onchange="_wlDossier.obs['+i+'].result=this.value">'
       +'<option value=""'+((!o.result)?' selected':'')+'>— Select</option>'
       +'<option value="win"'+((o.result==="win")?' selected':'')+'>Won</option>'
       +'<option value="place"'+((o.result==="place")?' selected':'')+'>Placed</option>'
       +'<option value="loss"'+((o.result==="loss")?' selected':'')+'>Unplaced</option>'
       +'</select></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Race / Track</label><input type="text" value="'+(o.raceName||'')+'" placeholder="e.g. Newmarket Maiden" onchange="_wlDossier.obs['+i+'].raceName=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Going</label><input type="text" value="'+(o.going||'')+'" placeholder="e.g. Good to Firm" onchange="_wlDossier.obs['+i+'].going=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+      +'<div class="fg"><label>Race / Track</label><input type="text" value="'+(o.raceName||'')+'" placeholder="e.g. Newmarket Maiden" onchange="_wlDossier.obs['+i+'].raceName=this.value"></div>'
+      +'<div class="fg"><label>Going</label><input type="text" value="'+(o.going||'')+'" placeholder="e.g. Good to Firm" onchange="_wlDossier.obs['+i+'].going=this.value"></div>'
       +'</div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Your Notes</label><textarea style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;min-height:52px;resize:vertical;" placeholder="What you noticed…" onchange="_wlDossier.obs['+i+'].notes=this.value">'+(o.notes||'')+'</textarea></div>'
+      +'<div class="fg"><label>Your Notes</label><textarea style="min-height:52px;" placeholder="What you noticed…" onchange="_wlDossier.obs['+i+'].notes=this.value">'+(o.notes||'')+'</textarea></div>'
     +'</div>';
   }).join('');
 }
@@ -595,18 +588,15 @@ function _wlDelObs(i){_wlDossier.obs.splice(i,1);_renderObsList();}
 
 function _renderTargetsList(){
   const el=document.getElementById('wlf-targets-list');if(!el)return;
-  if(!_wlDossier.targets.length){el.innerHTML='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:600;color:#3a3a5c;font-style:italic;text-align:center;padding:8px 0 10px;">No targets set — tap Add to plan a race</div>';return;}
+  if(!_wlDossier.targets.length){el.innerHTML='<div class="wlf-target-empty">No targets set — tap Add to plan a race</div>';return;}
   el.innerHTML=_wlDossier.targets.map(function(t,i){
-    return'<div style="background:#111120;border:1px solid rgba(251,146,60,.18);border-radius:10px;padding:12px;margin-bottom:8px;border-top:2px solid rgba(251,146,60,.3);">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
-      +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(251,146,60,.7);">🎯 Target '+(i+1)+'</span>'
-      +'<button onclick="_wlDelTarget('+i+')" style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:6px;color:#f87171;font-size:11px;cursor:pointer;padding:2px 8px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">✕ Remove</button>'
-      +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Race</label><input type="text" value="'+(t.race||'')+'" placeholder="e.g. Sandy Lane" onchange="_wlDossier.targets['+i+'].race=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Track</label><input type="text" value="'+(t.track||'')+'" placeholder="e.g. Haydock" onchange="_wlDossier.targets['+i+'].track=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Date</label><input type="date" value="'+(t.date||'')+'" onchange="_wlDossier.targets['+i+'].date=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
-      +'<div><label style="display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:4px;">Condition</label><input type="text" value="'+(t.condition||'')+'" placeholder="Optional notes" onchange="_wlDossier.targets['+i+'].condition=this.value" style="width:100%;padding:8px 10px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:13px;font-family:\'Outfit\',sans-serif;outline:none;box-sizing:border-box;"></div>'
+    return'<div class="wlf-target-row">'
+      +'<div class="wlf-obs-hdr"><span class="wlf-target-lbl">🎯 Target '+(i+1)+'</span><button onclick="_wlDelTarget('+i+')" class="wlf-obs-del">✕ Remove</button></div>'
+      +'<div class="g2">'
+      +'<div class="fg"><label>Race</label><input type="text" value="'+(t.race||'')+'" placeholder="e.g. Sandy Lane" onchange="_wlDossier.targets['+i+'].race=this.value"></div>'
+      +'<div class="fg"><label>Track</label><input type="text" value="'+(t.track||'')+'" placeholder="e.g. Haydock" onchange="_wlDossier.targets['+i+'].track=this.value"></div>'
+      +'<div class="fg"><label>Date</label><input type="date" value="'+(t.date||'')+'" onchange="_wlDossier.targets['+i+'].date=this.value"></div>'
+      +'<div class="fg"><label>Condition</label><input type="text" value="'+(t.condition||'')+'" placeholder="Optional notes" onchange="_wlDossier.targets['+i+'].condition=this.value"></div>'
       +'</div>'
     +'</div>';
   }).join('');
@@ -623,16 +613,8 @@ function wlSelectReason(btn){
   const val=btn.getAttribute('data-reason');
   const hidden=document.getElementById('wlf-reason');
   if(hidden)hidden.value=val;
-  const RCOLS={'eye-catcher':'#a78bfa','future-target':'#fb923c','trainer-intel':'#60a5fa','form-study':'#ef4444','tip-source':'#eab308'};
   document.querySelectorAll('#wlf-reasons button').forEach(function(b){
-    const bval=b.getAttribute('data-reason');
-    const sel=bval===val;
-    const col=RCOLS[bval]||'#e879f9';
-    b.style.border='1px solid '+(sel?col:'rgba(255,255,255,.1)');
-    b.style.background=sel?col.replace(/^#/,'').match(/.{2}/g).reduce(function(s,h,i){return s+(i?',':'')+parseInt(h,16);},'rgba(')+',.15)':'transparent';
-    b.style.color=sel?col:'var(--mut)';
-    const lbl=b.querySelector('span:last-child');
-    if(lbl)lbl.style.fontWeight=sel?'700':'400';
+    b.className='wlf-reason-btn'+(b.getAttribute('data-reason')===val?' on':'');
   });
 }
 
@@ -642,9 +624,7 @@ function wlToggleGoing(btn){
   const idx=_wlDossier.goingPrefs.indexOf(g);
   if(idx>-1){_wlDossier.goingPrefs.splice(idx,1);}else{_wlDossier.goingPrefs.push(g);}
   const sel=_wlDossier.goingPrefs.includes(g);
-  btn.style.border='1px solid '+(sel?'#e879f9':'rgba(232,121,249,.25)');
-  btn.style.background=sel?'rgba(232,121,249,.2)':'transparent';
-  btn.style.color=sel?'#e879f9':'var(--mut)';
+  btn.className='wlf-going-btn'+(sel?' on':'');
 }
 
 function saveWLEntry(id){
@@ -718,7 +698,7 @@ const WLP_CSS = `
   position: fixed;
   inset: 0;
   z-index: 500;
-  background: #050508;
+  background: var(--bg);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -726,8 +706,8 @@ const WLP_CSS = `
   max-width: 500px;
   margin: 0 auto;
   padding-bottom: 40px;
-  font-family: 'Outfit','Segoe UI',sans-serif;
-  color: #d4d8e8;
+  font-family: var(--font);
+  color: var(--txt);
 }
 /* NAV */
 .wlp-nav {
@@ -735,9 +715,9 @@ const WLP_CSS = `
   align-items: center;
   justify-content: space-between;
   padding: max(14px, env(safe-area-inset-top, 14px)) 16px 12px;
-  background: rgba(5,5,8,0.96);
+  background: var(--navy);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid #1c1c30;
+  border-bottom: 1px solid var(--bdr);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -746,8 +726,8 @@ const WLP_CSS = `
   display: flex; align-items: center; gap: 5px;
   height: 34px;
   border-radius: 8px;
-  background: #111120;
-  border: 1px solid #1c1c30;
+  background: var(--sur2);
+  border: 1px solid var(--bdr);
   padding: 0 12px;
   cursor: pointer; font-size: 14px; color: #fff;
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
@@ -761,22 +741,22 @@ const WLP_CSS = `
   color: #fff;
   display: flex; align-items: center; gap: 7px;
 }
-.wlp-brand-accent { color: #8b5cf6; }
+.wlp-brand-accent { color: var(--pur); }
 .wlp-edit-btn {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 12px; font-weight: 700;
   letter-spacing: 1px; text-transform: uppercase;
-  color: #8b5cf6;
+  color: var(--pur);
   padding: 6px 13px;
-  border: 1px solid rgba(139,92,246,.4);
+  border: 1px solid rgba(124,58,237,.4);
   border-radius: 8px;
-  background: rgba(139,92,246,.08);
+  background: rgba(124,58,237,.08);
   cursor: pointer;
 }
 /* HERO */
 .wlp-hero {
-  background: #0d0d18;
-  border-bottom: 1px solid #1c1c30;
+  background: var(--sur);
+  border-bottom: 1px solid var(--bdr);
   overflow: hidden;
   padding: 18px 16px 0;
   position: relative;
@@ -795,11 +775,11 @@ const WLP_CSS = `
 }
 .wlp-name-row { display: flex; align-items: center; gap: 8px; }
 .wlp-name {
-  font-family: 'Bebas Neue','Impact',cursive;
+  
   font-size: 40px; letter-spacing: 2px; color: #fff; line-height: 1;
 }
 .wlp-verified {
-  width: 20px; height: 20px; background: #8b5cf6; border-radius: 50%;
+  width: 20px; height: 20px; background: var(--pur); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 10px; color: #fff; margin-top: 4px; flex-shrink: 0;
 }
@@ -811,37 +791,37 @@ const WLP_CSS = `
   padding: 3px 8px; border-radius: 5px; margin-top: 4px;
 }
 .wlp-or-box {
-  background: #111120;
-  border: 1.5px solid rgba(139,92,246,.35);
+  background: var(--sur2);
+  border: 1.5px solid rgba(124,58,237,.35);
   border-radius: 10px; padding: 7px 13px; text-align: center;
 }
 .wlp-or-label {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 9px; font-weight: 800; letter-spacing: 2px;
-  text-transform: uppercase; color: #3a3a5c; display: block; margin-bottom: 1px;
+  text-transform: uppercase; color: var(--mut); display: block; margin-bottom: 1px;
 }
 .wlp-or-value {
-  font-family: 'Bebas Neue','Impact',cursive;
-  font-size: 32px; letter-spacing: 1px; color: #8b5cf6; line-height: 1;
+  
+  font-size: 32px; letter-spacing: 1px; color: var(--pur); line-height: 1;
 }
 .wlp-or-na {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size: 13px; font-weight: 700; color: #3a3a5c;
+  font-size: 13px; font-weight: 700; color: var(--mut);
 }
 /* META STRIP */
 .wlp-meta {
   display: flex; position: relative; z-index: 1;
   margin-top: 14px;
-  border-top: 1px solid #1c1c30; border-bottom: 1px solid #1c1c30;
+  border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr);
 }
 .wlp-meta-cell {
-  flex: 1; padding: 9px 11px; border-right: 1px solid #1c1c30;
+  flex: 1; padding: 9px 11px; border-right: 1px solid var(--bdr);
 }
 .wlp-meta-cell:last-child { border-right: none; }
 .wlp-meta-label {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; color: #4a4a6a; display: block; margin-bottom: 3px;
+  text-transform: uppercase; color: var(--mut); display: block; margin-bottom: 3px;
 }
 .wlp-meta-val {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
@@ -854,23 +834,23 @@ const WLP_CSS = `
 }
 .wlp-silks {
   width: 92px; height: 92px; flex-shrink: 0; border-radius: 50%;
-  background: #0a0a14; border: 2.5px solid rgba(139,92,246,.35);
+  background: var(--sur2); border: 2.5px solid rgba(139,92,246,.35);
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 16px rgba(139,92,246,.2);
 }
 .wlp-stats { flex: 1; display: flex; flex-direction: column; }
 .wlp-stat-row {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 7px 0; border-bottom: 1px solid #1c1c30;
+  padding: 7px 0; border-bottom: 1px solid var(--bdr);
 }
 .wlp-stat-row:last-child { border-bottom: none; }
 .wlp-stat-left {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size: 12px; font-weight: 600; color: #3a3a5c;
+  font-size: 12px; font-weight: 600; color: var(--mut);
   display: flex; align-items: center; gap: 6px;
 }
 .wlp-stat-val {
-  font-family: 'Bebas Neue','Impact',cursive;
+  
   font-size: 20px; letter-spacing: 1px; line-height: 1;
 }
 .wlp-stat-sm {
@@ -878,39 +858,39 @@ const WLP_CSS = `
   font-size: 12px; font-weight: 700; color: #fff;
 }
 .wlp-edge-badge {
-  font-family: 'Bebas Neue','Impact',cursive;
+  
   font-size: 15px; letter-spacing: 1px; padding: 2px 8px; border-radius: 5px;
 }
 /* EDGE BAR */
 .wlp-edge-bar { padding: 2px 0 10px; position: relative; z-index: 1; }
-.wlp-edge-bar-track { height: 4px; background: #111120; border-radius: 2px; overflow: hidden; }
+.wlp-edge-bar-track { height: 4px; background: var(--sur2); border-radius: 2px; overflow: hidden; }
 .wlp-edge-bar-fill { height: 100%; border-radius: 2px; }
 /* SECTIONS */
 .wlp-section {
-  background: #0d0d18; border: 1px solid #1c1c30;
+  background: var(--sur); border: 1px solid var(--bdr);
   border-radius: 13px; margin: 10px 12px 0; overflow: hidden;
 }
 .wlp-section-hdr {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 11px 14px; border-bottom: 1px solid #1c1c30;
+  padding: 11px 14px; border-bottom: 1px solid var(--bdr);
 }
 .wlp-section-left { display: flex; align-items: center; gap: 9px; }
 .wlp-section-num {
-  width: 24px; height: 24px; background: #1a1a2e;
-  border: 1px solid #1c1c30; border-radius: 6px;
+  width: 24px; height: 24px; background: var(--navy);
+  border: 1px solid var(--bdr); border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size: 12px; font-weight: 800; color: #3a3a5c;
+  font-size: 12px; font-weight: 800; color: var(--mut);
 }
 .wlp-section-title {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 12px; font-weight: 800; letter-spacing: 2px;
-  text-transform: uppercase; color: #c8d0df;
+  text-transform: uppercase; color: var(--txt);
 }
 .wlp-section-action {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 11px; font-weight: 700; letter-spacing: 1px;
-  text-transform: uppercase; color: #8b5cf6; cursor: pointer;
+  text-transform: uppercase; color: var(--pur); cursor: pointer;
 }
 /* WHY LOGGED */
 .wlp-why-grid {
@@ -918,14 +898,14 @@ const WLP_CSS = `
   gap: 6px; padding: 11px 12px 12px;
 }
 .wlp-why-btn {
-  position: relative; background: #111120; border: 1.5px solid #1c1c30;
+  position: relative; background: var(--sur2); border: 1.5px solid #1c1c30;
   border-radius: 9px; padding: 8px 4px;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
-.wlp-why-active { background: rgba(139,92,246,.1); border-color: rgba(139,92,246,.4); }
+.wlp-why-active { background: rgba(124,58,237,.1); border-color: rgba(139,92,246,.4); }
 .wlp-why-check {
   position: absolute; top: 4px; right: 4px;
-  width: 13px; height: 13px; background: #8b5cf6; border-radius: 50%;
+  width: 13px; height: 13px; background: var(--pur); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 7px; color: #fff;
 }
@@ -933,33 +913,33 @@ const WLP_CSS = `
 .wlp-why-label {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 9px; font-weight: 700; letter-spacing: .4px;
-  text-align: center; line-height: 1.2; color: #c8d0df;
+  text-align: center; line-height: 1.2; color: var(--txt);
 }
 .wlp-why-active .wlp-why-label { color: #fff; }
 .wlp-reason-note {
   padding: 0 13px 11px;
-  font-family: 'Caveat',cursive; font-size: 13px;
+  font-family: var(--font); font-size: 13px;
   color: #6a6a8a; line-height: 1.5; font-style: italic;
 }
 /* RATINGS */
 .wlp-ratings-row { display: flex; padding: 13px 12px; }
 .wlp-rating-col {
   flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 0 4px; border-right: 1px solid #1c1c30;
+  padding: 0 4px; border-right: 1px solid var(--bdr);
 }
 .wlp-rating-col:last-child { border-right: none; }
 .wlp-rating-key {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; color: #4a4a6a; margin-bottom: 5px; text-align: center;
+  text-transform: uppercase; color: var(--mut); margin-bottom: 5px; text-align: center;
 }
 .wlp-rating-val {
-  font-family: 'Bebas Neue','Impact',cursive;
+  
   font-size: 28px; letter-spacing: 1px; line-height: 1; text-align: center;
 }
 .wlp-rating-na {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size: 14px; font-weight: 700; color: #4a4a6a;
+  font-size: 14px; font-weight: 700; color: var(--mut);
 }
 .wlp-rating-bar { height: 2px; border-radius: 1px; margin-top: 5px; width: 80%; }
 .wlp-or-hist {
@@ -969,15 +949,15 @@ const WLP_CSS = `
 .wlp-hist-label {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; color: #4a4a6a;
+  text-transform: uppercase; color: var(--mut);
 }
 .wlp-hist-pill {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 5px;
-  background: rgba(139,92,246,.15); border: 1px solid rgba(139,92,246,.35);
-  color: #8b5cf6; display: flex; align-items: center; gap: 4px;
+  background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.35);
+  color: var(--pur); display: flex; align-items: center; gap: 4px;
 }
-.wlp-hist-date { color: #3a3a5c; font-weight: 600; }
+.wlp-hist-date { color: var(--mut); font-weight: 600; }
 /* SPLIT ROW */
 .wlp-split { display: flex; gap: 10px; margin: 10px 12px 0; }
 .wlp-split .wlp-section { flex: 1; margin: 0; }
@@ -996,7 +976,7 @@ const WLP_CSS = `
   font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
 }
 .wlp-notepad-text {
-  font-family: 'Caveat',cursive; font-size: 13px;
+  font-family: var(--font); font-size: 13px;
   line-height: 1.7; color: #2a2510; white-space: pre-line;
 }
 .wlp-notepad-empty {
@@ -1005,15 +985,15 @@ const WLP_CSS = `
   padding: 14px 13px; text-align: center; line-height: 1.6;
 }
 .wlp-obs-count {
-  border-top: 1px solid #1c1c30; padding: 9px;
+  border-top: 1px solid var(--bdr); padding: 9px;
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 10px; font-weight: 700; letter-spacing: 1px;
-  text-transform: uppercase; color: #8b5cf6; text-align: center; cursor: pointer;
+  text-transform: uppercase; color: var(--pur); text-align: center; cursor: pointer;
 }
 /* TARGETS */
 .wlp-target-item {
   display: flex; align-items: flex-start; justify-content: space-between;
-  padding: 9px 13px; border-bottom: 1px solid #1c1c30; gap: 8px;
+  padding: 9px 13px; border-bottom: 1px solid var(--bdr); gap: 8px;
 }
 .wlp-target-item:last-child { border-bottom: none; }
 .wlp-target-icon { font-size: 14px; margin-top: 1px; flex-shrink: 0; opacity: .4; }
@@ -1024,7 +1004,7 @@ const WLP_CSS = `
 }
 .wlp-target-meta {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size: 10px; font-weight: 600; color: #4a4a6a; letter-spacing: .3px; margin-top: 2px;
+  font-size: 10px; font-weight: 600; color: var(--mut); letter-spacing: .3px; margin-top: 2px;
 }
 .wlp-target-date {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
@@ -1032,26 +1012,26 @@ const WLP_CSS = `
 }
 .wlp-target-cond {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size: 9px; font-weight: 600; color: #4a4a6a;
+  font-size: 9px; font-weight: 600; color: var(--mut);
   text-align: right; max-width: 70px; line-height: 1.2; margin-top: 2px;
 }
 .wlp-target-empty {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size: 11px; color: #4a4a6a; padding: 14px 13px;
+  font-size: 11px; color: var(--mut); padding: 14px 13px;
   text-align: center; font-style: italic;
 }
 /* CONDITIONS */
 .wlp-cond-grid { display: grid; padding: 11px 10px 10px; }
 .wlp-cond-cell {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 0 4px; border-right: 1px solid #1c1c30;
+  padding: 0 4px; border-right: 1px solid var(--bdr);
 }
 .wlp-cond-cell:last-child { border-right: none; }
 .wlp-cond-icon { font-size: 16px; opacity: .7; }
 .wlp-cond-label {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 8px; font-weight: 700; letter-spacing: 1px;
-  text-transform: uppercase; color: #4a4a6a; text-align: center;
+  text-transform: uppercase; color: var(--mut); text-align: center;
 }
 .wlp-cond-val {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
@@ -1061,8 +1041,8 @@ const WLP_CSS = `
 .wlp-intel { padding: 10px 13px 13px; display: flex; gap: 9px; align-items: flex-start; }
 .wlp-intel-icon { font-size: 16px; opacity: .6; flex-shrink: 0; margin-top: 1px; }
 .wlp-intel-text {
-  font-family: 'Caveat',cursive; font-size: 13px;
-  line-height: 1.6; color: #7a8099; white-space: pre-line;
+  font-family: var(--font); font-size: 13px;
+  line-height: 1.6; color: var(--mut); white-space: pre-line;
 }
 `;
 
@@ -1086,21 +1066,6 @@ function openWLProfile(id){
 
   const existing=document.getElementById('wlp-modal');
   if(existing)existing.remove();
-
-  // Inject Google Fonts once
-  if(!document.getElementById('wlp-fonts')){
-    const lnk=document.createElement('link');
-    lnk.id='wlp-fonts';lnk.rel='stylesheet';
-    lnk.href='https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Caveat:wght@500;600&display=swap';
-    document.head.appendChild(lnk);
-  }
-
-  // Inject styles once
-  if(!document.getElementById('wlp-styles')){
-    const s=document.createElement('style');
-    s.id='wlp-styles';s.textContent=WLP_CSS;
-    document.head.appendChild(s);
-  }
 
   const modal=document.createElement('div');
   modal.id='wlp-modal';
@@ -1193,19 +1158,19 @@ function _wlpBuildHTML(e){
   h+='<div class="wlp-stats">';
   // My Rating
   h+='<div class="wlp-stat-row"><span class="wlp-stat-left">⭐ My Rating</span>';
-  h+=mr?'<span class="wlp-stat-val" style="color:#f97316;">'+mr+'</span>':'<span class="wlp-stat-sm" style="color:#3a3a5c;">Not set</span>';
+  h+=mr?'<span class="wlp-stat-val" style="color:var(--gld);">'+mr+'</span>':'<span class="wlp-stat-sm" style="color:var(--mut);">Not set</span>';
   h+='</div>';
   // OR Edge
   h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🏆 OR Edge</span>';
-  h+=edge!==null?'<span class="wlp-edge-badge" style="background:'+edgeCol+'20;color:'+edgeCol+';">'+(edge>0?'+':'')+edge+' pts</span>':'<span class="wlp-stat-sm" style="color:#3a3a5c;">—</span>';
+  h+=edge!==null?'<span class="wlp-edge-badge" style="background:'+edgeCol+'20;color:'+edgeCol+';">'+(edge>0?'+':'')+edge+' pts</span>':'<span class="wlp-stat-sm" style="color:var(--mut);">—</span>';
   h+='</div>';
   // Last Entry
   h+='<div class="wlp-stat-row"><span class="wlp-stat-left">📅 Last Entry</span>';
   h+='<span class="wlp-stat-sm">'+fmt(lastDate)+'</span></div>';
   // Next Target
   h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🎯 Next Target</span>';
-  if(nextTarget){const tw=(nextTarget.race||'').split(' ').slice(0,2).join(' ');h+='<span class="wlp-stat-sm" style="color:#f59e0b;font-size:11px;">'+esc(tw)+'</span>';}
-  else h+='<span class="wlp-stat-sm" style="color:#3a3a5c;">None set</span>';
+  if(nextTarget){const tw=(nextTarget.race||'').split(' ').slice(0,2).join(' ');h+='<span class="wlp-stat-sm" style="color:var(--gld);font-size:11px;">'+esc(tw)+'</span>';}
+  else h+='<span class="wlp-stat-sm" style="color:var(--mut);">None set</span>';
   h+='</div>';
   h+='</div></div>'; // stats + hero-body
 
@@ -1242,7 +1207,7 @@ function _wlpBuildHTML(e){
     h+='<div class="wlp-rating-col"><span class="wlp-rating-key">'+r.key+'</span>';
     if(v){h+='<span class="wlp-rating-val" style="color:'+r.col+';">'+v+'</span>';
       h+='<div class="wlp-rating-bar" style="background:'+r.col+'20;"><div style="height:100%;border-radius:1px;background:'+r.col+';width:'+Math.min(v/130*100,100)+'%;"></div></div>';}
-    else{h+='<span class="wlp-rating-na">—</span><div class="wlp-rating-bar" style="background:#1c1c30;"></div>';}
+    else{h+='<span class="wlp-rating-na">—</span><div class="wlp-rating-bar" style="background:var(--bdr);"></div>';}
     h+='</div>';
   });
   h+='</div>';
@@ -1304,10 +1269,10 @@ function _wlpBuildHTML(e){
     profileReviews.forEach(function(r){
       const vm=VERDICT_META[r.verdict]||null;
       const rc=RESULT_COL[r.result]||'#3a3a5c';
-      h+='<div style="padding:11px 13px;border-bottom:1px solid #1c1c30;">';
+      h+='<div style="padding:11px 13px;border-bottom:1px solid var(--bdr);">';
       h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">';
       h+='<div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(r.raceName||r.course||'Race')+'</div>';
-      h+='<div style="font-size:11px;color:#3a3a5c;">'+[r.date?_wlpFmt(r.date):'',r.course].filter(Boolean).join(' · ')+'</div></div>';
+      h+='<div style="font-size:11px;color:var(--mut);">'+[r.date?_wlpFmt(r.date):'',r.course].filter(Boolean).join(' · ')+'</div></div>';
       h+='<div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">';
       if(r.result)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>';
       if(vm)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;padding:2px 8px;border-radius:5px;background:'+vm.col+'15;border:1px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';
@@ -1318,19 +1283,19 @@ function _wlpBuildHTML(e){
       if(r.mrAdjustment)chips.push((r.mrAdjustment>0?'+':'')+r.mrAdjustment+' MR');
       if(r.goingConfirmed)chips.push('Going: '+r.goingConfirmed);
       if(r.backNextTime)chips.push('Back: '+r.backNextTime);
-      if(chips.length)h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">'+chips.map(function(c){return'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#3a3a5c;">'+c+'</span>';}).join('')+'</div>';
-      if(r.notes)h+='<div style="font-size:12px;color:#7a8099;font-style:italic;line-height:1.5;">'+esc(r.notes)+'</div>';
+      if(chips.length)h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">'+chips.map(function(c){return'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--mut);">'+c+'</span>';}).join('')+'</div>';
+      if(r.notes)h+='<div style="font-size:12px;color:var(--mut);font-style:italic;line-height:1.5;">'+esc(r.notes)+'</div>';
       h+='</div>';
     });
   } else {
-    h+='<div style="padding:14px 13px;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;color:#3a3a5c;font-style:italic;text-align:center;">No reviews yet — tap Add after a run</div>';
+    h+='<div style="padding:14px 13px;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;color:var(--mut);font-style:italic;text-align:center;">No reviews yet — tap Add after a run</div>';
   }
   h+='</div>';
 
   // SECTION 6: CONDITIONS
   h+='<div class="wlp-section">';
   h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Conditions Profile</span></div></div>';
-  h+='<div class="wlp-cond-grid" style="grid-template-columns:repeat('+condItems.length+',1fr);border-bottom:1px solid #1c1c30;">';
+  h+='<div class="wlp-cond-grid" style="grid-template-columns:repeat('+condItems.length+',1fr);border-bottom:1px solid var(--bdr);">';
   condItems.forEach(function(c){
     const isDash=c.value==='—'||c.value==='Any';
     h+='<div class="wlp-cond-cell"><span class="wlp-cond-icon">'+c.icon+'</span><span class="wlp-cond-label">'+c.label+'</span><span class="wlp-cond-val" style="color:'+(isDash?'#3a3a5c':c.color)+';">'+esc(c.value)+'</span></div>';

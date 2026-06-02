@@ -26,7 +26,7 @@ async function rcSwLoadMeetings(){
     rcSwCurrentRaces=data.racecards||data.races||[];
     if(stEl) stEl.style.display='none';
     if(!rcSwCurrentRaces.length){
-      if(uiEl) uiEl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">No racecards available.</div>';
+      if(uiEl) uiEl.innerHTML='<div class="rc-empty">No racecards available.</div>';
       return;
     }
     // Update today card watchlist + edge alerts now that races are cached
@@ -43,9 +43,9 @@ function rcSwRenderUI(){
 
   const onTime=rcSwView==='time';
   const _sb_base='font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;transition:all .12s;';
-  let html='<div style="display:flex;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff;margin-bottom:10px;">'
-    +'<button style="'+_sb_base+(onTime?'background:transparent;color:#9ca3af;':'background:#1e293b;color:#fff;')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
-    +'<button style="'+_sb_base+(onTime?'background:#1e293b;color:#fff;':'background:transparent;color:#9ca3af;')+'border-left:1px solid #e5e7eb;" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
+  let html='<div class="rc-view-tog">'
+    +'<button class="rc-view-btn '+(onTime?'off':'on')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
+    +'<button class="rc-view-btn '+(onTime?'on':'off')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
     +'</div>';
 
   uiEl.innerHTML=html;
@@ -79,13 +79,13 @@ function rcSwRenderTime(listEl){
     if(mins===9999||(mins-nowMins)>-30) upcoming.push(r);
     else past.push(r);
   });
-  if(!allRaces.length){ listEl.innerHTML='<div class="es" style="padding:20px;">No races today.</div>'; return; }
+  if(!allRaces.length){ listEl.innerHTML='<div class="rc-empty">No races today.</div>'; return; }
 
   listEl.innerHTML=upcoming.map(function(r,i){
     return rcSwRaceCardPreview(r, r._course||r.course||'', i===0);
   }).join('')
   +(past.length
-    ? '<div class="clbl" style="padding:14px 0 6px;border-top:1px solid #e5e7eb;margin-top:4px;color:#9ca3af;">Earlier today</div>'
+    ? '<div class="rc-earlier-lbl">Earlier today</div>'
       + past.map(function(r){ return rcSwRaceCardPreview(r, r._course||r.course||'', false, true); }).join('')
     : '');
 }
@@ -140,16 +140,17 @@ function rcSwRenderCourse(listEl){
     const count=races.length;
     const escapedCourse=course.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
     return '<div class="rc-meeting">'
-      +'<div class="rc-meeting-hdr" data-course="'+escapedCourse+'" onclick="rcSwToggleCourse(this)" style="background:#2d3f55;">'
+      +'<div class="rc-meeting-hdr rc-mtg-blue" data-course="'+escapedCourse+'" onclick="rcSwToggleCourse(this)">'
         +'<span class="rc-meeting-flag">'+flag+'</span>'
         +'<div class="rc-meeting-info">'
-          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#93c5fd;letter-spacing:-.2px;">'+course+'</div>'
-          +'<div style="font-size:10px;color:#94a3b8;margin-top:2px;">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
+                    +'<div class="rc-meeting-info"><div class="rc-mtg-course">'+course+'</div>'
+
+          +'<div class="rc-mtg-meta">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
         +'</div>'
         +'<span class="rc-meeting-chevron'+(isOpen?' open':'')+'" >›</span>'
       +'</div>'
       +(isOpen
-        ? '<div style="border-radius:0 0 10px 10px;overflow:hidden;">'
+        ? '<div class="rc-meeting-body">'
             +races.map(function(r){return rcSwFullRaceCard(r,course);}).join('')
           +'</div>'
         : '')
@@ -176,14 +177,14 @@ function rcSwRaceCardPreview(r, course, isNext, isPast){
   const idx=_rcSwFlatRaces.length;
   _rcSwFlatRaces.push({race:r, course:course});
   const uid='rcr-'+idx;
-  return '<div class="rc-meeting" style="'+(isPast?'opacity:.38;':'')+'">'  // MARKER_PREVIEW
-    +'<div class="rc-meeting-hdr" onclick="rcSwToggleFlatRace('+idx+')" style="background:#2d3f55;">'
+  return '<div class="rc-meeting"'+(isPast?' style="opacity:.38;"':'')+'>'
+    +'<div class="rc-meeting-hdr rc-mtg-blue" onclick="rcSwToggleFlatRace('+idx+')">'
       +'<span class="rc-meeting-flag">'+flag+'</span>'
       +'<div class="rc-meeting-info">'
-        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#93c5fd;letter-spacing:-.2px;">'+course+'</div>'
-        +'<div style="font-size:10px;color:#94a3b8;margin-top:2px;">'+(isNext?'<span style="background:#dbeafe;color:#1d4ed8;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:800;margin-right:5px;">NEXT</span>':'')+time+' · '+activeRunners+' runners'+(name?' · '+name:'')+'</div>'
+        +'<div class="rc-mtg-course">'+course+'</div>'
+        +'<div class="rc-mtg-meta">'+(isNext?'<span class="rc-next-badge">NEXT</span>':'')+time+' · '+activeRunners+' runners'+(name?' · '+name:'')+'</div>'
       +'</div>'
-      +'<span id="rcfc-chev-'+idx+'" style="color:#9ca3af;font-size:14px;">›</span>'
+      +'<span id="rcfc-chev-'+idx+'" class="rc-meeting-chevron">›</span>'
     +'</div>'
     +'<div id="'+uid+'" style="display:none;"></div>'
     +'</div>';
@@ -198,14 +199,14 @@ function rcSwFullRaceCard(r, course){
   const idx=_rcSwFlatRaces.length;
   _rcSwFlatRaces.push({race:r, course:course});
   const uid='rcr-'+idx;
-  return '<div style="overflow:hidden;border-bottom:1px solid #e5e7eb;">'
-    +'<div onclick="rcSwToggleFlatRace('+idx+')" style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 13px 8px;background:#fafafa;cursor:pointer;border-bottom:1px solid #f3f4f6;">'
-      +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#374151;margin-bottom:2px;">'+time+'</div>'
-        +'<div style="font-size:13px;font-weight:600;color:#6b7280;line-height:1.3;margin-bottom:3px;">'+name+'</div>'
+  return '<div class="rc-race-row">'
+    +'<div onclick="rcSwToggleFlatRace('+idx+')" class="rc-race-hdr">'
+      +'<div class="rc-race-hdr-left">'
+        +'<div class="rc-race-time">'+time+'</div>'
+        +'<div class="rc-race-name">'+name+'</div>'
         +'<div class="rc-race-meta"><span class="rc-race-count">'+runnerCount+' runners'+(nrCount?' ('+nrCount+' NR)':'')+'</span></div>'
       +'</div>'
-      +'<span id="rcfc-chev-'+idx+'" style="color:#9ca3af;font-size:14px;">›</span>'
+      +'<span id="rcfc-chev-'+idx+'" class="rc-chev">›</span>'
     +'</div>'
     +'<div id="'+uid+'" style="display:none;"></div>'
     +'</div>';
@@ -239,7 +240,7 @@ const WAL_COURSES=['bangor','bangor-on-dee','chepstow','ffos las'];
 const IRE_COURSES=['curragh','leopardstown','naas','navan','gowran park','galway','tipperary','cork','killarney','listowel','down royal','downpatrick','dundalk','fairyhouse','kilbeggan','laytown','limerick','roscommon','sligo','tramore','thurles','punchestown','ballinrobe','bellewstown','clonmel','mullingar','wexford','kilmalloch'];
 const GER_COURSES=['cologne'];
 const USA_COURSES=['santa anita'];
-const FRA_COURSES=['longchamp','auteuil','saint-cloud'];
+const FRA_COURSES=['longchamp','auteuil'];
 
 function rcCourseCountry(course){
   const c=(course||'').toLowerCase().trim();
@@ -317,14 +318,14 @@ function rcSwRenderMeetingRaces(course, el){
     const isG1=rname.includes('group 1');const isG2=rname.includes('group 2');
     const isG3=rname.includes('group 3');const isListed=rname.includes('listed');
     const nameCol=isG1||isG2?'#f59e0b':isG3?'#a78bfa':isListed?'#a78bfa':'var(--txt)';
-    return'<div id="sw-row-'+safeId+'-'+i+'" style="border-bottom:1px solid #e5e7eb;background:#fff;">'
-      +'<div onclick="rcSwToggle('+i+',\''+course.replace(/\'/g,"\\'")+'\',\''+safeId+'\',true)" style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 13px 8px;background:#fafafa;cursor:pointer;">'
-        +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#374151;margin-bottom:2px;">'+time+'</div>'
-          +'<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:10px;color:#9ca3af;">'+(dist?'<span style="background:#f3f4f6;color:#9ca3af;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:600;">'+dist+'</span>':'')+runners+' runners</div>'
-          +'<div style="font-size:13px;font-weight:600;color:#6b7280;line-height:1.3;margin-bottom:3px;">'+name+'</div>'
+    return'<div id="sw-row-'+safeId+'-'+i+'" class="rc-race-row">'
+      +'<div onclick="rcSwToggle('+i+',\''+course.replace(/\'/g,"\\'")+'\',\''+safeId+'\',true)" class="rc-race-hdr">'
+        +'<div class="rc-race-hdr-left">'
+          +'<div class="rc-race-time">'+time+'</div>'
+          +'<div class="rc-race-meta-row">'+(dist?'<span class="rc-dist-chip">'+dist+'</span>':'')+runners+' runners</div>'
+          +'<div class="rc-race-name">'+name+'</div>'
         +'</div>'
-        +'<span id="sw-chev-'+safeId+'-'+i+'" style="color:#9ca3af;font-size:14px;transition:transform .15s;">›</span>'
+        +'<span id="sw-chev-'+safeId+'-'+i+'" class="rc-chev">›</span>'
       +'</div>'
       +'<div class="rc-runners-inline" id="sw-runners-'+safeId+'-'+i+'" data-course="'+course+'" data-idx="'+i+'" style="display:none;"></div>'
     +'</div>';
@@ -391,8 +392,8 @@ function rcSwRenderRunners(idx, course, el){
   const dist=race.distance_round||race.distance_f||race.distance||race.dist||'';
   const prize=race.prize||race.total_prize_money||'';
   const infoBar=[race.going,dist,prize].filter(Boolean).join(' · ');
-  let html=infoBar?'<div style="display:flex;gap:5px;flex-wrap:wrap;padding:7px 13px 6px;background:#fafafa;border-bottom:1px solid #f3f4f6;">'+infoBar.split(' · ').map(function(c){return'<span class="rc-chip">'+c+'</span>';}).join('')+'</div>':'';
-  if(!runners.length){el.innerHTML=html+'<div style="padding:8px 13px;color:var(--mut);font-style:italic;font-size:13px;">No runners listed yet.</div>';return;}
+  let html=infoBar?'<div class="rc-info-bar">'+infoBar.split(' · ').map(function(c){return'<span class="rc-chip">'+c+'</span>';}).join('')+'</div>':'';
+  if(!runners.length){el.innerHTML=html+'<div class="rc-no-runners">No runners listed yet.</div>';return;}
   html+=runners.map(function(r,i){
     const name=stripCountrySuffix(r.horse||r.name||'—');
     const no=r.number||r.saddle_cloth||(i+1);
@@ -409,15 +410,15 @@ function rcSwRenderRunners(idx, course, el){
     const _PM2={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#fb923c'},'trainer-intel':{emoji:'🗣',col:'#60a5fa'},'form-study':{emoji:'📊',col:'#ef4444'},'tip-source':{emoji:'💡',col:'#eab308'}};
     const _pm2=_pr2?_PM2[_pr2.reason||'eye-catcher']:null;
     const pid='sw-profile-'+course.replace(/\W/g,'_')+'-'+i;
-    return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'" style="background:#fff;">'
+    return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'">'
       +'<div class="rc-cloth">'+(isNR?'<span class="rc-nr-chip">NR</span>':'<span>'+no+'</span>')+'</div>'
-      +'<div style="flex:1;min-width:0;">'
+      +'<div class="rc-runner-body">'
         +(function(){
           const _wl=getWL();const _nl=(name||'').toLowerCase().trim();
           const _pr=_wl.find(function(w){return(w.horse||'').toLowerCase().trim()===_nl;});
           const _PM={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#fb923c'},'trainer-intel':{emoji:'🗣',col:'#60a5fa'},'form-study':{emoji:'📊',col:'#ef4444'},'tip-source':{emoji:'💡',col:'#eab308'}};
           const _pm=_pr?_PM[_pr.reason||'eye-catcher']:null;
-          const _badge=_pr?'<span style="font-size:9px;font-family:var(--font-ui);padding:1px 5px;border-radius:10px;border:1px solid '+_pm.col+';color:'+_pm.col+';background:rgba(0,0,0,.35);margin-left:3px;">'+_pm.emoji+'</span>':'';
+          const _badge=_pr?'<span class="rc-wl-pill" style="color:'+_pm.col+';">'+_pm.emoji+'</span>'+'';
           const _nc=isNR?'var(--mut)':_pr?_pm.col:'var(--txt)';
           return'<div class="rc-runner-name-row">'
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'
@@ -429,10 +430,10 @@ function rcSwRenderRunners(idx, course, el){
         }())
         +'<div class="rc-runner-jt">'+jock+(age?' · '+age:'')+'  ·  '+trainer+'</div>'
       +'</div>'
-      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'
+      +'<div class="rc-runner-actions">'
         +(isNR?''
           :'<button onclick="rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\')\" class="rc-bet-btn">Bet</button>')
-        +(_pr2&&!isNR?'<button onclick="rcToggleProfile(\''+pid+'\',this)" style="font-family:var(--font-ui);font-size:9px;font-weight:700;padding:3px 8px;border-radius:5px;border:1px solid '+_pm2.col+';background:transparent;color:'+_pm2.col+';cursor:pointer;">\u25bc</button>':'')
+        +(_pr2&&!isNR?'<button onclick="rcToggleProfile(\''+pid+'\',this)" class="rc-profile-tog" style="border-color:'+_pm2.col+';color:'+_pm2.col+';">\u25bc</button>':'')
       +'</div>'
     +'</div>'
     +(_pr2?'<div id="'+pid+'" class="rc-profile-panel" style="display:none;">'+rcProfilePanelHtml(_pr2,pid)+'</div>':'')
@@ -535,7 +536,7 @@ function openLogbetOverlay(mode, prefill){
     closeBar=document.createElement('div');
     closeBar.id='lbo-close-bar';
     closeBar.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:202;padding:12px 17px env(safe-area-inset-bottom,16px);background:var(--bg);border-top:1px solid var(--bdr);';
-    closeBar.innerHTML='<button onclick="_lboBackToChecklist()" style="width:100%;padding:14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">← Back to Checklist</button>';
+    closeBar.innerHTML='<button onclick="_lboBackToChecklist()" class="rc-close-bar-btn">← Back to Checklist</button>';
     document.body.appendChild(closeBar);
   }
   closeBar.style.display='block';
@@ -627,7 +628,7 @@ async function rcSwLoadResults(){
     if(stEl) stEl.style.display = 'none';
     autoMatchBetResults(rcSwResultsData);
     if(!rcSwResultsData.length){
-      if(listEl) listEl.innerHTML = '<div style="color:var(--mut);font-style:italic;font-size:13px;">No results yet today \u2014 check back after the first race.</div>';
+      if(listEl) listEl.innerHTML = '<div class="rc-empty">No results yet today — check back after the first race.</div>';
       return;
     }
     rcSwResultsOpenCourse = '';
@@ -647,9 +648,9 @@ function rcSwRenderResultsUI(){
   filterEl.style.display = 'block';
   const _rsb='font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;';
   filterEl.innerHTML =
-    '<div style="display:flex;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fff;margin-bottom:10px;">'
-    + '<button style="'+_rsb+(!onT?'background:#1e293b;color:#fff;':'background:transparent;color:#9ca3af;')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
-    + '<button style="'+_rsb+(onT?'background:#1e293b;color:#fff;':'background:transparent;color:#9ca3af;')+'border-left:1px solid #e5e7eb;" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
+    '<div class="rc-view-tog">'
+    + '<button class="rc-view-btn '+(!onT?'on':'off')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
+    + '<button class="rc-view-btn '+(onT?'on':'off')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
     + '</div>';
 
   const listEl = document.getElementById('sw-results-list');
@@ -668,11 +669,11 @@ function rcSwRaceCard(race, course){
   const places = (race.runners||[]).slice(0,5);
   const todayBets=[...D.bets,...((D.vBank&&D.vBank.bets)||[])];
   const esc = function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"  );};
-  return '<div class="rc-race-block" style="border-radius:10px;border:1px solid #e5e7eb;margin-bottom:8px;">'
-    + '<div class="rc-race-hdr" style="border-radius:10px 10px 0 0;background:#fafafa;">'
+  return '<div class="rc-race-block">'
+    + '<div class="rc-race-hdr" >'
       + '<div class="rc-race-hdr-left">'
-        + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#374151;margin-bottom:2px;">'+time+'</div>'
-        + '<div style="font-size:13px;font-weight:600;color:#6b7280;line-height:1.3;margin-bottom:3px;">'+name+'</div>'
+        + '<div class="rc-race-time">'+time+'</div>'
+        + '<div class="rc-race-name">'+name+'</div>'
       + '</div>'
       + '<span class="rc-race-count">'+places.length+' shown</span>'
     + '</div>'
@@ -694,9 +695,9 @@ function rcSwRaceCard(race, course){
           : '';
         const wlEntry = getWL().find(function(w){return(w.horse||'').toLowerCase().trim()===hn;});
         const watchBtn = wlEntry
-          ? '<button style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 9px;border-radius:5px;border:1px solid #bbf7d0;background:#f0fdf4;color:#15803d;cursor:pointer;white-space:nowrap;">\u2713 Watching</button>'
-          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\')" style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:4px 9px;border-radius:5px;border:1px solid #c4b5fd;background:#ede9fe;color:#7c3aed;cursor:pointer;white-space:nowrap;">+ Watch</button>';
-        return '<div class="rc-runner" style="background:#fff;">'
+          ? '<button class="rc-watch-btn rc-watch-btn-on">\u2713 Watching</button>'
+          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\')" class="rc-watch-btn rc-watch-btn-add">+ Watch</button>';
+        return '<div class="rc-res-runner">'
           + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
           + '<div class="rc-runner-main">'
             + '<div class="rc-runner-name-row">'
@@ -707,6 +708,7 @@ function rcSwRaceCard(race, course){
             + '<div class="rc-runner-jt">'+(jock||'')+(trainer?' · '+trainer:'')+'</div>'
           + '</div>'
           + '<div class="rc-runner-right">'
+            + '<span class="rc-sp">'+sp+'</span>'
             + watchBtn
           + '</div>'
         + '</div>';
@@ -762,16 +764,16 @@ function rcSwRenderResultsCourse(listEl){
     const count = races.length;
     const flag=rcCountryFlag(rcCourseCountry(course));
     return '<div class="rc-meeting">'
-      + '<div class="rc-meeting-hdr" onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':' +"'"+course+"'"+ ';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));" style="background:#2d3f55;">'
+      + '<div class="rc-meeting-hdr rc-mtg-ora" onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':' +"'"+course+"'"+ ';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));" class="rc-meeting-hdr rc-mtg-ora">'
         + '<span class="rc-meeting-flag">'+flag+'</span>'
         + '<div class="rc-meeting-info">'
-          + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#fdba74;">'+course+'</div>'
+          + '<div class="rc-mtg-course">'+course+'</div>'
           + '<div class="rc-meeting-meta">'+count+' race'+(count!==1?'s':'')+'</div>'
         + '</div>'
         + '<span class="rc-meeting-chevron'+(isOpen?' open':'')+'" >›</span>'
       + '</div>'
       + (isOpen
-          ? '<div style="border-radius:0 0 10px 10px;overflow:hidden;">'
+          ? '<div class="rc-meeting-body">'
               + races.map(function(race){ return rcSwRaceCard(race, course); }).join('')
             + '</div>'
           : '')
@@ -792,11 +794,11 @@ function rcProfilePanelHtml(profiled,panelId){
     :'<span style="font-family:var(--font-ui);font-size:10px;color:var(--mut);border:1px solid var(--bdr);padding:2px 6px;border-radius:4px;">→ on mark</span>';
   const obs=(profiled.observations||[]).slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');}).slice(0,3);
   const targets=(profiled.targets||[]).slice(0,3);
-  let html='<div style="border-top:1px solid var(--bdr);background:rgba(167,139,250,.04);padding:10px 13px 12px;">';
-  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">'
-    +'<span style="font-size:9px;font-family:var(--font-ui);font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(0,0,0,.2);border:1px solid '+meta.col+';color:'+meta.col+';">'+meta.emoji+' '+meta.label+'</span>'
-    +(profiled.myRating?'<span style="font-family:var(--font-ui);font-size:10px;color:var(--gld);">MR '+profiled.myRating+'</span>':'')
-    +(profiled.currentRating?'<span style="font-family:var(--font-ui);font-size:10px;color:var(--mut);">OR '+profiled.currentRating+'</span>':'')
+  let html='<div class="rc-profile-panel">';
+  html+='<div class="rc-pp-header">'
+    +'<span class="rc-pp-reason-badge" style="border-color:'+meta.col+';color:'+meta.col+';">'+meta.emoji+' '+meta.label+'</span>'
+    +(profiled.myRating?'<span class="rc-pp-mr">MR '+profiled.myRating+'</span>':'')
+    +(profiled.currentRating?'<span class="rc-pp-or">OR '+profiled.currentRating+'</span>':'')
     +edgeHtml
   +'</div>';
   if(profiled.reasonNote)html+='<div style="font-size:12px;color:var(--txt);line-height:1.5;margin-bottom:7px;font-style:italic;">“'+profiled.reasonNote+'”</div>';
@@ -804,23 +806,23 @@ function rcProfilePanelHtml(profiled,panelId){
   if(profiled.goingPrefs&&profiled.goingPrefs.length)conditions.push('⛳ '+profiled.goingPrefs.join(', '));
   if(profiled.distancePref)conditions.push('⇔ '+profiled.distancePref);
   if(profiled.trackPref)conditions.push('🏇 '+profiled.trackPref);
-  if(conditions.length)html+='<div style="font-family:var(--font-ui);font-size:10px;color:var(--mut);margin-bottom:7px;">'+conditions.join(' · ')+'</div>';
-  if(profiled.trainerIntel)html+='<div style="font-size:11px;color:var(--mut);border-left:2px solid rgba(96,165,250,.4);padding-left:7px;margin-bottom:7px;line-height:1.45;">🗣 '+profiled.trainerIntel+'</div>';
-  if(profiled.conditionsNotes)html+='<div style="font-size:11px;color:var(--mut);border-left:2px solid rgba(251,146,60,.4);padding-left:7px;margin-bottom:7px;line-height:1.45;">📋 '+profiled.conditionsNotes+'</div>';
+  if(conditions.length)html+='<div class="rc-pp-cond">'+conditions.join(' · ')+'</div>';
+  if(profiled.trainerIntel)html+='<div class="rc-pp-intel">🗣 '+profiled.trainerIntel+'</div>';
+  if(profiled.conditionsNotes)html+='<div class="rc-pp-cond-notes">📋 '+profiled.conditionsNotes+'</div>';
   if(obs.length){
-    html+='<div style="font-family:var(--font-ui);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin-bottom:5px;">Recent observations</div>';
+    html+='<div class="rc-pp-sec-lbl">Recent observations</div>';
     obs.forEach(function(o){
-      html+='<div style="font-size:11px;color:var(--mut);margin-bottom:4px;line-height:1.4;">'
-        +(o.date?'<span style="font-family:var(--font-ui);font-size:9px;color:var(--mut);margin-right:5px;">'+o.date+'</span>':'')
-        +(o.result?'<span style="font-family:var(--font-ui);font-size:9px;font-weight:700;color:'+(o.result.toLowerCase().includes('win')?'var(--grn)':'var(--mut)')+';margin-right:5px;">'+o.result+'</span>':'')
+      html+='<div class="rc-pp-obs-row">'
+        +(o.date?'<span class="rc-pp-obs-date">'+o.date+'</span>':'')
+        +(o.result?'<span class="'+(o.result.toLowerCase().includes('win')?'rc-pp-obs-result-win':'rc-pp-obs-result-mut')+'">'+o.result+'</span>':'')
         +(o.notes||o.raceName||'')
       +'</div>';
     });
   }
   if(targets.length){
-    html+='<div style="font-family:var(--font-ui);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin-top:6px;margin-bottom:5px;">Targets</div>';
+    html+='<div class="rc-pp-sec-lbl" style="margin-top:6px;">Targets</div>';
     targets.forEach(function(t){
-      html+='<div style="font-size:11px;color:var(--ora);font-family:var(--font-ui);margin-bottom:2px;">🎯 '+t.race+(t.date?' · '+t.date:'')+(t.track?' · '+t.track:'')+'</div>';
+      html+='<div class="rc-pp-target">🎯 '+t.race+(t.date?' · '+t.date:'')+(t.track?' · '+t.track:'')+'</div>';
     });
   }
   html+='</div>';
@@ -927,7 +929,7 @@ async function rcLoadResults(){
     rcSetStatus('');
     autoMatchBetResults(results);
     if(!results.length){
-      if(el)el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">No results yet today.</div>';
+      if(el)el.innerHTML='<div class="rc-empty">No results yet today.</div>';
       return;
     }
     // Group by course
@@ -939,11 +941,11 @@ async function rcLoadResults(){
         const runners=race.runners||[];
         const places=runners.slice(0,4);
         const flag=rcCountryFlag(rcCourseCountry(course));
-        return'<div class="blk" style="margin-bottom:10px;padding:12px 14px;">'
-          +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+        return'<div class="blk">'
+          +'<div class="row-g8" style="margin-bottom:8px;">'
             +'<span style="font-size:18px;flex-shrink:0;">'+flag+'</span>'
-            +'<div><div style="font-weight:700;font-size:14px;">'+time+' '+course+'</div>'
-            +'<div style="font-size:12px;color:var(--mut);">'+name+'</div></div>'
+            +'<div><div class="rc-race-time">'+time+' '+course+'</div>'
+            +'<div class="rc-race-name">'+name+'</div></div>'
           +'</div>'
           +places.map(function(r,i){
             const pos=r.position||r.place||(i+1);
@@ -956,15 +958,15 @@ async function rcLoadResults(){
             const esc2=function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");};
             return'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bdr);">'
               +'<span style="font-family:var(--font-ui);font-weight:700;font-size:14px;color:'+posCol+';min-width:20px;">'+pos+'</span>'
-              +'<div style="flex:1;min-width:0;">'
+              +'<div class="rc-runner-body">'
                 +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
                   +'<span style="font-weight:600;font-size:13px;">'+horse+'</span>'
-                  +(ofr?'<span style="font-family:var(--font-ui);font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:var(--blu);">'+ofr+'</span>':'')
+                  +(ofr?'<span class="rc-or">'+ofr+'</span>':'')
                 +'</div>'
                 +'<div style="font-size:11px;color:var(--mut);">'+jock+'</div>'
               +'</div>'
-              +'<span style="font-family:var(--font-ui);font-size:13px;color:var(--gld);flex-shrink:0;">'+sp+'</span>'
-              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\')" style="font-family:var(--font-ui);font-size:10px;font-weight:700;padding:4px 8px;border-radius:7px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;flex-shrink:0;">W</button>'
+              +'<span class="rc-sp">'+sp+'</span>'
+              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\')" class="rc-watch-btn-sm">W</button>'
               +'</div>';
           }).join('')
           +'</div>';

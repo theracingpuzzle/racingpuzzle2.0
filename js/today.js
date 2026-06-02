@@ -29,30 +29,30 @@ function _showTodayDemo(){
 
   // ── Bet limit tile ──
   const bl = document.getElementById('tbetlimit');
-  if(bl) bl.innerHTML = '<div style="font-family:var(--font-ui);font-size:9px;color:rgba(232,228,220,.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Bets Today</div>'
-    + '<div style="font-family:var(--font-ui);font-size:17px;font-weight:700;color:var(--gld);">2 <span class="t-muted">/ 3</span></div>';
+  if(bl) bl.innerHTML = '<div class="t-bet-lbl">Bets Today</div>'
+    + '<div class="t-bet-val">2 <span class="t-muted">/ 3</span></div>';
 
   // ── Check-in ──
   const ci = document.getElementById('tcin');
-  if(ci) ci.innerHTML = '<div style="background:rgba(45,184,122,.08);border:1px solid rgba(45,184,122,.25);border-radius:11px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;">'
-    + '<div><div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grn);margin-bottom:3px;">✓ Checked in</div>'
+  if(ci) ci.innerHTML = '<div class="t-checkin">'
+    + '<div><div class="t-checkin-lbl">✓ Checked in</div>'
     + '<div class="t-body">Looking for a well-treated handicapper on decent ground</div></div>'
-    + '<span style="font-size:22px;">🙂</span></div>';
+    + '<span class="t-checkin-emoji">🙂</span></div>';
 
   // ── Edge alerts ──
   const ea = document.getElementById('t-edge-alerts');
   if(ea){
     ea.style.display = 'block';
-    ea.innerHTML = '<div style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);border-radius:11px;padding:12px 14px;">'
-      + '<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grn);margin-bottom:8px;">⭐ Edge Running Today</div>'
+    ea.innerHTML = '<div class="t-alert-grn">'
+      + '<div class="t-alert-lbl-grn">⭐ Edge Running Today</div>'
       + [
           {horse:'Midnight Envoy', course:'Ascot', time:'14:30', mr:92, or:88, edge:4},
           {horse:'Thistle Down',   course:'York',  time:'16:10', mr:85, or:82, edge:3},
         ].map(function(e){
-          return '<div style="padding:7px 0;border-bottom:1px solid rgba(74,222,128,.1);display:flex;align-items:center;justify-content:space-between;">'
+          return '<div class="t-alert-row-grn">'
             + '<div><div class="t-heading">'+e.horse+'</div>'
-            + '<div style="font-family:var(--font-ui);font-size:10px;color:var(--mut);">'+e.time+' · '+e.course+'</div></div>'
-            + '<span style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--grn);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:3px 8px;border-radius:8px;white-space:nowrap;">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
+            + '<div class="mm">'+e.time+' · '+e.course+'</div></div>'
+            + '<span class="t-edge-badge">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
             + '</div>';
         }).join('')
       + '</div>';
@@ -63,16 +63,16 @@ function _showTodayDemo(){
   if(wa){
     wa.style.display = 'block';
     wa.innerHTML = '<div class="wl-alert-wrap">'
-      + '<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:8px;">🔔 Watchlist Running Today</div>'
+      + '<div class="t-alert-lbl-pur">🔔 Watchlist Running Today</div>'
       + [
           {horse:'Midnight Envoy', course:'Ascot', time:'14:30', jockey:'F. Dettori', race:'Copper Horse Stakes'},
           {horse:'Velvet Sunrise',  course:'Newmarket', time:'15:45', jockey:'R. Moore', race:'July Stakes'},
         ].map(function(a){
-          return '<div style="padding:7px 0;border-bottom:1px solid rgba(167,139,250,.12);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
+          return '<div class="t-alert-row-pur t-row-sb-gap">'
             + '<div><div class="t-heading">'+a.horse+'</div>'
             + '<div class="t-muted">'+a.time+' · '+a.course+' · '+a.race+'</div>'
-            + '<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div></div>'
-            + '<span style="font-family:var(--font-ui);font-size:9px;font-weight:700;background:rgba(167,139,250,.15);color:#a78bfa;padding:3px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;">Profile →</span>'
+            + '<div class="t-jockey">J: '+a.jockey+'</div></div>'
+            + '<span class="t-profile-btn">Profile →</span>'
             + '</div>';
         }).join('')
       + '</div>';
@@ -83,12 +83,12 @@ function _showTodayDemo(){
   const nrc = document.getElementById('t-next-race-content');
   if(nr && nrc){
     nr.style.display = 'block';
-    nrc.innerHTML = '<div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:11px;padding:12px 14px;">'
-      + '<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--blu);margin-bottom:6px;">⏰ Next Race</div>'
-      + '<div style="display:flex;align-items:center;justify-content:space-between;">'
-      + '<div><div style="font-size:14px;font-weight:700;color:var(--txt);">Ascot — 14:30</div>'
-      + '<div class="t-muted">Copper Horse Stakes · 12 runners</div></div>'
-      + '<div style="font-family:var(--font-ui);font-size:20px;font-weight:700;color:var(--blu);">8m</div>'
+    nrc.innerHTML = '<div class="t-alert-blu">'
+      + '<div class="t-alert-lbl-blu">⏰ Next Race</div>'
+      + '<div class="row-sb">'
+      + '<div><div class="t-next-title">Ascot — 14:30</div>'
+      + '<div class="mm">Copper Horse Stakes · 12 runners</div></div>'
+      + '<div class="t-next-count" style="color:var(--blu);">8m</div>'
       + '</div></div>';
   }
 
@@ -103,8 +103,8 @@ function _showTodayDemo(){
       const isV=b.type==='virt';
       const p=b.result==='win'?b.returns-b.stake:b.result==='loss'?-b.stake:null;
       const bgMap={win:'bw1',loss:'bl1',pending:'bpend'};
-      return '<div class="mb '+(b.result)+'" style="border-left-color:'+(isV?'#fb923c':'')+';cursor:pointer;">'
-        +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-size:9px;color:var(--ora);font-family:var(--font-ui);">VIRT</span>':'')+'</div>'
+      return '<div class="mb '+(b.result)+'" style="border-left-color:'+(isV?'var(--ora)':'')+';cursor:pointer;">'
+        +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span class="t-virt-lbl">VIRT</span>':'')+'</div>'
         +'<div class="mm">'+b.track+' · '+b.time+' · <span style="font-family:var(--font-ui);">'+b.odds+'</span></div></div>'
         +'<div class="mbr"><span class="bdg '+(bgMap[b.result]||'bpend')+'">'+b.result+'</span>'
         +'<div class="mp '+(p===null?'':p>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p===null?'—':fmt(p))+'</div></div>'
@@ -192,11 +192,11 @@ function renderNextRace(){
   const runners=(next.race.runners||[]).length;
   const urgency=mins<=0?'var(--mut)':mins<30?'var(--red)':mins<60?'#f59e0b':'var(--grn)';
   el.style.display='block';
-  content.innerHTML='<div style="background:#fff;border:1px solid #e5e7eb;border-left:3px solid '+urgency+';border-radius:10px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;" onclick="goTo(1)">'
-    +'<div><div style="font-size:14px;font-weight:700;color:var(--txt);">'+(next.race.off||next.race.time||'')+' '+course+'</div>'
-    +'<div class="t-muted">'+name+(runners?' · '+runners+' runners':'')+'</div></div>'
-    +'<div style="text-align:right;flex-shrink:0;"><div style="font-family:var(--font-ui);font-size:15px;font-weight:700;color:'+urgency+';">'+countdown+'</div>'
-    +'<div style="font-size:9px;color:var(--mut);">Racecards →</div></div>'
+  content.innerHTML='<div class="t-next-card" style="border-left:3px solid '+urgency+';" onclick="goTo(1)">'
+    +'<div><div class="t-next-title">'+(next.race.off||next.race.time||'')+' '+course+'</div>'
+    +'<div class="mm">'+name+(runners?' · '+runners+' runners':'')+'</div></div>'
+    +'<div class="t-next-count" style="color:'+urgency+';"><div>'+countdown+'</div>'
+    +'<div class="t-next-cta">Racecards →</div></div>'
     +'</div>';
   // Refresh every minute
   if(window._nextRaceTimer)clearTimeout(window._nextRaceTimer);
@@ -211,15 +211,15 @@ function renderStudyReminder(){
   const todayBets=D.bets.filter(b=>b.date===td());
   const hasBets=todayBets.length>0;
   el.style.display='block';
-  el.innerHTML='<div style="background:#fff;border:1px solid '+(done?'#bbf7d0':'#fde68a')+';border-left:3px solid '+(done?'#4ade80':'#f59e0b')+';border-radius:10px;padding:11px 13px;">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">'
+  el.innerHTML='<div class="t-study-card '+(done?'done':'pending')+'">'
+    +'<div class="row-sb" style="gap:10px;">'
       +'<div>'
-        +'<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:'+(done?'var(--grn)':'#f59e0b')+';margin-bottom:3px;">📋 Form Study</div>'
+        +'<div class="'+(done?'t-study-lbl-done':'t-study-lbl-pending')+'">📋 Form Study</div>'
         +'<div class="t-body">'+(done?'Done for today — good discipline.':hasBets?'You\'ve bet today. Form studied?':'Have you studied today\'s form before betting?')+'</div>'
       +'</div>'
       +(done
-        ?'<span style="font-size:20px;">✅</span>'
-        :'<button onclick="markStudyDone()" style="flex-shrink:0;font-family:var(--font-ui);font-size:10px;font-weight:700;padding:6px 12px;border-radius:8px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:var(--gld);cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">Mark done</button>'
+        ?'<span class="t-study-done-ico">✅</span>'
+        :'<button onclick="markStudyDone()" class="t-study-btn">Mark done</button>'
       )
     +'</div>'
   +'</div>';
@@ -257,28 +257,28 @@ async function checkWatchlistRunners(races){
   alertEl.style.display='block';
   const todayStr=td();
   alertEl.innerHTML='<div class="wl-alert-wrap">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
-      +'<div style="font-family:var(--font-ui);font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#a78bfa;">🔔 Watchlist Running Today</div>'
-      +'<button onclick="generateWatchlistPDF()" style="font-family:var(--font-ui);font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:6px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;white-space:nowrap;">↓ PDF</button>'
+    +'<div class="t-wl-hdr">'
+      +'<div class="t-alert-lbl-pur">🔔 Watchlist Running Today</div>'
+      +'<button onclick="generateWatchlistPDF()" class="t-pdf-btn">↓ PDF</button>'
     +'</div>'
     +alerts.map(function(a){
       const wid=(a.wlEntry&&a.wlEntry.id)?a.wlEntry.id:'';
       const alreadyReviewed=(D.reviews||[]).some(function(r){
         return r.profileId===wid&&r.date===todayStr;
       });
-      return'<div style="padding:8px 0;border-bottom:1px solid rgba(167,139,250,.1);">'
-        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
-          +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-family:var(--font-ui);font-size:15px;font-weight:800;letter-spacing:.5px;color:var(--txt);">'+a.horse+'</div>'
+      return'<div class="t-alert-row-pur">'
+        +'<div class="t-row-sb-gap">'
+          +'<div class="t-flex-info">'
+            +'<div class="t-horse-name">'+a.horse+'</div>'
             +'<div class="t-muted">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
-            +(a.jockey?'<div style="font-size:11px;color:var(--gld);">J: '+a.jockey+'</div>':'')
+            +(a.jockey?'<div class="t-jockey">J: '+a.jockey+'</div>':'')
           +'</div>'
-          +'<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;align-items:flex-end;">'
+          +'<div class="t-flex-col-end">'
             +(alreadyReviewed
-              ?'<span style="font-family:var(--font-ui);font-size:9px;font-weight:800;letter-spacing:1px;background:rgba(74,222,128,.12);color:var(--grn);padding:3px 9px;border-radius:6px;border:1px solid rgba(74,222,128,.2);">✓ Reviewed</span>'
-              :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" class="t-wl-review-btn" style="font-family:var(--font-ui);font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:rgba(167,139,250,.15);color:#a78bfa;padding:4px 10px;border-radius:6px;border:1px solid rgba(167,139,250,.3);cursor:pointer;white-space:nowrap;">Review ✍️</button>'
+              ?'<span class="t-reviewed-badge">✓ Reviewed</span>'
+              :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" class="t-wl-review-btn t-review-btn">Review ✍️</button>'
             )
-            +'<button data-wlid="'+wid+'" class="t-wl-profile-btn" style="font-family:var(--font-ui);font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:transparent;color:var(--mut);padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);cursor:pointer;white-space:nowrap;">Profile →</button>'
+            +'<button data-wlid="'+wid+'" class="t-wl-profile-btn t-profile-btn">Profile →</button>'
           +'</div>'
         +'</div>'
       +'</div>';
@@ -654,10 +654,10 @@ function renderThisWeek(){
     const d=new Date(item.date+'T00:00:00');
     const diff=Math.round((d-today)/(1000*60*60*24));
     const dayLbl=diff===1?'Tomorrow':d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-    return'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #f3f4f6;">''
-      +'<div style="width:3px;height:34px;border-radius:2px;background:'+item.col+';flex-shrink:0;"></div>'
-      +'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:#111827;">''+item.label+'</div>'+(item.sub?'<div class="t-muted">'+item.sub+'</div>':'')+'</div>'
-      +'<div style="font-family:var(--font-ui);font-size:10px;color:'+item.col+';flex-shrink:0;">'+dayLbl+'</div>'
+    return'<div class="t-week-row">'
+      +'<div class="t-week-bar" style="background:'+item.col+';"></div>'
+      +'<div style="flex:1;min-width:0;"><div class="t-week-label">'+item.label+'</div>'+(item.sub?'<div class="mm">'+item.sub+'</div>':'')+'</div>'
+      +'<div class="t-week-day" style="color:'+item.col+';">'+dayLbl+'</div>'
     +'</div>';
   }).join('');
 }
@@ -665,7 +665,7 @@ function renderThisWeek(){
 function renderChips(){
   const el=document.getElementById('tchips');if(!el)return;
   const t=getTracks();
-  el.innerHTML=t.length?t.map(n=>'<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(232,228,220,.08);border:1px solid rgba(232,228,220,.2);border-radius:20px;padding:4px 10px 4px 11px;font-size:12px;font-weight:600;color:var(--gld);">🏇 '+n+'<span onclick="rmTrack(\''+n+'\')" style="cursor:pointer;font-size:14px;opacity:.6;margin-left:1px;">×</span></div>').join(''):'<span style="font-size:12px;color:var(--mut);font-style:italic;">No courses added yet — tap Load from API</span>';
+  el.innerHTML=t.length?t.map(n=>'<div class="t-track-chip">🏇 '+n+'<span class="t-track-rm" onclick="rmTrack(\''+n+'\')">×</span></div>').join(''):'<span class="t-no-tracks">No courses added yet — tap Load from API</span>';
 }
 function rfrTL(){const c=[...new Set([...getTracks(),...TKS])];document.querySelectorAll('.tl').forEach(dl=>{dl.innerHTML=c.map(t=>`<option value="${t}">`).join('');});}
 
@@ -723,12 +723,12 @@ function renderCheckIn(){
   if(!ci) return;
   if(log&&log.checkedIn){
     const moodEmoji={poor:'😔',neutral:'😐',good:'🙂',great:'😄'}[log.mood||'neutral']||'😐';
-    ci.innerHTML='<div style="background:rgba(45,184,122,.08);border:1px solid rgba(45,184,122,.25);border-radius:11px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;">'
+    ci.innerHTML='<div class="t-checkin">'
       +'<div>'
-        +'<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grn);margin-bottom:3px;">✓ Checked in</div>'
-        +(log.focus?'<div class="t-body">'+log.focus+'</div>':'<div style="font-size:12px;color:var(--mut);font-style:italic;">No focus set</div>')
+        +'<div class="t-checkin-lbl">✓ Checked in</div>'
+        +(log.focus?'<div class="t-body">'+log.focus+'</div>':'<div class="t-no-focus">No focus set</div>')
       +'</div>'
-      +'<span style="font-size:22px;">'+moodEmoji+'</span>'
+      +'<span class="t-checkin-emoji">'+moodEmoji+'</span>'
       +'</div>';
   } else {
     // Show check-in form — restore mood button active state
@@ -809,15 +809,15 @@ function renderEdgeAlerts(races){
   if(!edges.length){el.style.display='none';return;}
   edges.sort(function(a,b){return b.edge-a.edge;});
   el.style.display='block';
-  el.innerHTML='<div style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);border-radius:11px;padding:12px 14px;">'
-    +'<div style="font-family:var(--font-ui);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grn);margin-bottom:8px;">⭐ Edge Running Today</div>'
+  el.innerHTML='<div class="t-alert-grn">'
+    +'<div class="t-alert-lbl-grn">⭐ Edge Running Today</div>'
     +edges.map(function(e){
-      return'<div style="padding:7px 0;border-bottom:1px solid rgba(74,222,128,.1);display:flex;align-items:center;justify-content:space-between;" onclick="goTo(5)">'
+      return'<div class="t-alert-row-grn" onclick="goTo(5)">'
         +'<div>'
           +'<div class="t-heading">'+e.horse+'</div>'
-          +'<div style="font-family:var(--font-ui);font-size:10px;color:var(--mut);">'+e.time+' · '+e.course+'</div>'
+          +'<div class="mm">'+e.time+' · '+e.course+'</div>'
         +'</div>'
-        +'<span style="font-family:var(--font-ui);font-size:11px;font-weight:700;color:var(--grn);background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);padding:3px 8px;border-radius:8px;white-space:nowrap;">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
+        +'<span class="t-edge-badge">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
         +'</div>';
     }).join('')
   +'</div>';
@@ -827,7 +827,7 @@ function renderTodayBets(tb, vtb){
   const le=document.getElementById('tbets');
   if(!le) return;
   const allBets=[...tb.map(b=>({...b,_type:'real'})),...vtb.map(b=>({...b,_type:'virt'}))];
-  if(!allBets.length){le.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;padding:4px 0;">No bets logged today.</div>';return;}
+  if(!allBets.length){le.innerHTML='<div class="t-empty">No bets logged today.</div>';return;}
   const bg={win:'bw1',place:'bp1',loss:'bl1',pending:'bpend',void:'bnr',nr:'bnr'};
   le.innerHTML=allBets.map(function(b){
     const isV=b._type==='virt';
@@ -835,10 +835,10 @@ function renderTodayBets(tb, vtb){
     const os=b.oddsDisplay||(b.odds||'—');
     const el=document.createElement('div');
     el.className='mb '+(b.result||'pending');
-    el.style.borderLeftColor=isV?'#fb923c':'';
+    el.style.borderLeftColor=isV?'var(--ora)':'';
     el.style.cursor='pointer';
     el.setAttribute('onclick',isV?'openVEM("'+b.id+'")':'openEM("'+b.id+'")');
-    el.innerHTML='<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-size:9px;color:var(--ora);font-family:var(--font-ui);">VIRT</span>':'')+'</div>'
+    el.innerHTML='<div class="mbl"><div class="mh">'+b.horse+(isV?' <span class="t-virt-lbl">VIRT</span>':'')+'</div>'
       +'<div class="mm">'+(b.track||'—')+(b.time?' · '+b.time:'')+' · <span style="font-family:var(--font-ui);">'+os+'</span></div></div>'
       +'<div class="mbr"><span class="bdg '+(bg[b.result]||'bpend')+'">'+(b.result||'pending')+'</span>'
       +'<div class="mp '+(p2===null?'':p2>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p2===null?'—':fmt(p2))+'</div></div>';
@@ -862,10 +862,10 @@ function renderOutstanding(){
       const isV=b._type==='virt';
       const fn=isV?'openVEM':'openEM';
       const os=b.oddsDisplay||(b.odds||'—');
-      return'<div class="mb pending" onclick="'+fn+'(\''+b.id+'\')" style="cursor:pointer;border-left-color:'+(isV?'#fb923c':'var(--red)')+';">'
-        +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span style="font-family:var(--font-ui);font-size:9px;color:var(--ora);">VIRT</span>':'')+'</div>'
+      return'<div class="mb pending" onclick="'+fn+'(\''+b.id+'\')" style="cursor:pointer;border-left-color:'+(isV?'var(--ora)':'var(--red)')+';">'
+        +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span class="t-virt-lbl">VIRT</span>':'')+'</div>'
         +'<div class="mm">'+b.date+' · '+(b.track||'—')+' · <span style="font-family:var(--font-ui);">'+os+'</span> · '+fp(b.stake)+'</div></div>'
-        +'<div class="mbr"><span class="bdg bpend" style="background:rgba(196,58,58,.15);color:var(--red);">settle</span></div></div>';
+        +'<div class="mbr"><span class="bdg bdg-settle">settle</span></div></div>';
     }).join('');
   }
 }

@@ -1,0 +1,165 @@
+/* ═══════════════════════════════════════════════════════════
+   TODAY.CSS — styles for today.js dynamic HTML
+═══════════════════════════════════════════════════════════ */
+
+/* ── Bet limit tile ── */
+.t-bet-lbl {
+  font-size: 9px; color: var(--mut);
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px;
+}
+.t-bet-val { font-size: 17px; font-weight: 700; color: var(--gld); }
+.t-muted   { color: var(--mut); }
+
+/* ── Check-in box ── */
+.t-checkin {
+  background: rgba(22,163,74,.08); border: 1px solid rgba(22,163,74,.25);
+  border-radius: 11px; padding: 11px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.t-checkin-lbl {
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--grn); margin-bottom: 3px;
+}
+.t-checkin-emoji { font-size: 22px; }
+.t-no-focus { font-size: 12px; color: var(--mut); font-style: italic; }
+.t-body     { font-size: 13px; color: var(--txt); }
+
+/* ── Alert boxes (edge / watchlist / next race) ── */
+.t-alert-grn {
+  background: rgba(22,163,74,.06); border: 1px solid rgba(22,163,74,.2);
+  border-radius: 11px; padding: 12px 14px;
+}
+.t-alert-pur {
+  background: rgba(124,58,237,.06); border: 1px solid rgba(124,58,237,.2);
+  border-radius: 11px; padding: 12px 14px;
+}
+.t-alert-blu {
+  background: rgba(37,99,235,.06); border: 1px solid rgba(37,99,235,.2);
+  border-radius: 11px; padding: 12px 14px;
+}
+
+/* ── Alert section labels ── */
+.t-alert-lbl-grn {
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--grn); margin-bottom: 8px;
+}
+.t-alert-lbl-pur {
+  font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--pur); margin-bottom: 0;
+}
+.t-alert-lbl-blu {
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--blu); margin-bottom: 6px;
+}
+
+/* ── Alert rows ── */
+.t-alert-row-grn {
+  padding: 7px 0; border-bottom: 1px solid rgba(22,163,74,.1);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.t-alert-row-pur {
+  padding: 8px 0; border-bottom: 1px solid rgba(124,58,237,.1);
+}
+.t-alert-row-pur:last-child { border-bottom: none; }
+.t-alert-row-grn:last-child { border-bottom: none; }
+
+/* ── Alert badges / buttons ── */
+.t-edge-badge {
+  font-size: 11px; font-weight: 700; color: var(--grn);
+  background: rgba(22,163,74,.12); border: 1px solid rgba(22,163,74,.25);
+  padding: 3px 8px; border-radius: 8px; white-space: nowrap;
+}
+.t-reviewed-badge {
+  font-size: 9px; font-weight: 800; letter-spacing: 1px;
+  background: rgba(22,163,74,.12); color: var(--grn);
+  padding: 3px 9px; border-radius: 6px; border: 1px solid rgba(22,163,74,.2);
+}
+.t-review-btn {
+  font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  background: rgba(124,58,237,.15); color: var(--pur);
+  padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(124,58,237,.3);
+  cursor: pointer; white-space: nowrap;
+}
+.t-profile-btn {
+  font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  background: transparent; color: var(--mut);
+  padding: 4px 10px; border-radius: 6px; border: 1px solid var(--bdr);
+  cursor: pointer; white-space: nowrap;
+}
+.t-pdf-btn {
+  font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 6px;
+  border: 1px solid rgba(124,58,237,.3); background: rgba(124,58,237,.1);
+  color: var(--pur); cursor: pointer; white-space: nowrap;
+}
+
+/* ── WL alert header row ── */
+.t-wl-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+
+/* ── WL horse entry ── */
+.t-horse-name {
+  font-size: 15px; font-weight: 800; letter-spacing: .5px; color: var(--txt);
+}
+.t-jockey { font-size: 11px; color: var(--gld); }
+.t-flex-col-end { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; align-items: flex-end; }
+.t-flex-info    { flex: 1; min-width: 0; }
+.t-row-sb-gap   { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+
+/* ── Next race card ── */
+.t-next-card {
+  background: var(--sur); border: 1px solid var(--bdr);
+  border-radius: 10px; padding: 11px 13px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; cursor: pointer;
+}
+.t-next-title   { font-size: 14px; font-weight: 700; color: var(--txt); }
+.t-next-cta     { font-size: 9px; color: var(--mut); }
+.t-next-count   { font-size: 15px; font-weight: 700; text-align: right; flex-shrink: 0; }
+
+/* ── Study reminder card ── */
+.t-study-card {
+  background: var(--sur); border-radius: 10px; padding: 11px 13px;
+}
+.t-study-card.done {
+  border: 1px solid #bbf7d0; border-left: 3px solid #4ade80;
+}
+.t-study-card.pending {
+  border: 1px solid #fde68a; border-left: 3px solid #f59e0b;
+}
+.t-study-lbl-done    { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--grn); margin-bottom: 3px; }
+.t-study-lbl-pending { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--gld); margin-bottom: 3px; }
+.t-study-done-ico    { font-size: 20px; }
+.t-study-btn {
+  flex-shrink: 0; font-size: 10px; font-weight: 700;
+  padding: 6px 12px; border-radius: 8px;
+  border: 1px solid rgba(217,119,6,.3); background: rgba(217,119,6,.1);
+  color: var(--gld); cursor: pointer; letter-spacing: .05em; text-transform: uppercase;
+}
+
+/* ── This week list ── */
+.t-week-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--bdr);
+}
+.t-week-bar   { width: 3px; height: 34px; border-radius: 2px; flex-shrink: 0; }
+.t-week-label { font-size: 13px; font-weight: 600; color: var(--txt); }
+.t-week-day   { font-size: 10px; flex-shrink: 0; }
+
+/* ── Track chip ── */
+.t-track-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--navy-t); border: 1px solid rgba(30,58,95,.2);
+  border-radius: 20px; padding: 4px 10px 4px 11px;
+  font-size: 12px; font-weight: 600; color: var(--navy);
+}
+.t-track-rm { cursor: pointer; font-size: 14px; opacity: .5; margin-left: 1px; }
+.t-no-tracks { font-size: 12px; color: var(--mut); font-style: italic; }
+
+/* ── VIRT label inline ── */
+.t-virt-lbl { font-size: 9px; color: var(--ora); }
+
+/* ── Settle badge override ── */
+.bdg-settle { background: rgba(220,38,38,.15); color: var(--red); }
+
+/* ── No bets / empty state ── */
+.t-empty    { color: var(--mut); font-style: italic; font-size: 13px; padding: 4px 0; }

@@ -418,7 +418,7 @@ function rcSwRenderRunners(idx, course, el){
           const _pr=_wl.find(function(w){return(w.horse||'').toLowerCase().trim()===_nl;});
           const _PM={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#fb923c'},'trainer-intel':{emoji:'🗣',col:'#60a5fa'},'form-study':{emoji:'📊',col:'#ef4444'},'tip-source':{emoji:'💡',col:'#eab308'}};
           const _pm=_pr?_PM[_pr.reason||'eye-catcher']:null;
-          const _badge=_pr?'<span class="rc-wl-pill" style="color:'+_pm.col+';">'+_pm.emoji+'</span>'+'';
+          const _badge=_pr?'<span class="rc-wl-pill" style="color:'+_pm.col+';">'+_pm.emoji+'</span>':'';
           const _nc=isNR?'var(--mut)':_pr?_pm.col:'var(--txt)';
           return'<div class="rc-runner-name-row">'
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'

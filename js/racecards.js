@@ -143,7 +143,7 @@ function rcSwRenderCourse(listEl){
       +'<div class="rc-meeting-hdr rc-mtg-blue" data-course="'+escapedCourse+'" onclick="rcSwToggleCourse(this)">'
         +'<span class="rc-meeting-flag">'+flag+'</span>'
         +'<div class="rc-meeting-info">'
-                    +'<div class="rc-meeting-info"><div class="rc-mtg-course">'+course+'</div>'
+          +'<div class="rc-mtg-course">'+course+'</div>'
 
           +'<div class="rc-mtg-meta">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
         +'</div>'
@@ -764,11 +764,11 @@ function rcSwRenderResultsCourse(listEl){
     const count = races.length;
     const flag=rcCountryFlag(rcCourseCountry(course));
     return '<div class="rc-meeting">'
-      + '<div class="rc-meeting-hdr rc-mtg-ora" onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':' +"'"+course+"'"+ ';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));" class="rc-meeting-hdr rc-mtg-ora">'
+      + '<div class="rc-meeting-hdr rc-mtg-ora" onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':' +"'"+course+"'"+ ';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));">'
         + '<span class="rc-meeting-flag">'+flag+'</span>'
         + '<div class="rc-meeting-info">'
           + '<div class="rc-mtg-course">'+course+'</div>'
-          + '<div class="rc-meeting-meta">'+count+' race'+(count!==1?'s':'')+'</div>'
+          + '<div class="rc-mtg-meta">'+count+' race'+(count!==1?'s':'')+'</div>'
         + '</div>'
         + '<span class="rc-meeting-chevron'+(isOpen?' open':'')+'" >›</span>'
       + '</div>'

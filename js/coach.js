@@ -113,7 +113,7 @@ function renderCoachCard(){
   const qEl = document.getElementById('coach-quick');
   if(qEl && !qEl.children.length){
     qEl.innerHTML = QUICK_PROMPTS.map((p,i)=>
-      '<button onclick="sendQuick('+i+')" style="font-family:monospace;font-size:10px;padding:5px 10px;border-radius:16px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;cursor:pointer;white-space:nowrap;">'+p.lbl+'</button>'
+      '<button onclick="sendQuick('+i+')" style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:5px 11px;border-radius:16px;border:1px solid var(--bdr);background:var(--sur);color:var(--navy);cursor:pointer;white-space:nowrap;">'+p.lbl+'</button>'
     ).join('');
   }
 
@@ -123,9 +123,9 @@ function renderCoachCard(){
     if(lastBriefDate !== td()){
       // Show "Get briefing" button instead of auto-calling
       const msgsEl2 = document.getElementById('coach-msgs');
-      if(msgsEl2) msgsEl2.innerHTML = '<div style="background:var(--sur2);border:1px solid rgba(167,139,250,.2);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--txt);">'
-        +'<strong style="color:#a78bfa;">Good '+( new Date().getHours()<12?'morning':'afternoon')+'. Coach ready.</strong><br><br>'
-        +'<button onclick="autoMorningBrief()" style="margin-top:8px;padding:10px 18px;border-radius:10px;border:1px solid rgba(167,139,250,.3);background:rgba(167,139,250,.1);color:#a78bfa;font-family:monospace;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">📋 Get Daily Briefing</button>'
+      if(msgsEl2) msgsEl2.innerHTML = '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--txt);">'
+        +'<strong style="color:var(--navy);">Good '+( new Date().getHours()<12?'morning':'afternoon')+'. Coach ready.</strong><br><br>'
+        +'<button onclick="autoMorningBrief()" style="margin-top:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--bdr);background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;">📋 Get Daily Briefing</button>'
         +'<div style="margin-top:8px;font-size:11px;color:var(--mut);">Uses 1 AI call (~1,300 tokens)</div>'
         +'</div>';
       return;
@@ -136,8 +136,8 @@ function renderCoachCard(){
   const msgsEl = document.getElementById('coach-msgs');
   if(msgsEl && !msgsEl.children.length){
     const hasKey = !!key;
-    msgsEl.innerHTML = '<div style="background:var(--sur2);border:1px solid rgba(167,139,250,.2);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--txt);">'
-      +'<strong style="color:#a78bfa;">The Coach is ready.</strong><br><br>'
+    msgsEl.innerHTML = '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--txt);">'
+      +'<strong style="color:var(--navy);">The Coach is ready.</strong><br><br>'
       +(hasKey
         ? 'Your daily briefing is loading... or tap a quick prompt below to get started.'
         : '⚠️ Add your API key in Command → Settings to activate the Coach.<br><br>The Coach knows your bank, bets, rules and results — and will give you a daily briefing every morning.')
@@ -261,8 +261,8 @@ function appendCoachMsg(role, text, isTyping=false){
   const bubble = document.createElement('div');
   bubble.style.cssText = `max-width:85%;padding:10px 13px;border-radius:${isUser?'14px 14px 4px 14px':'14px 14px 14px 4px'};font-size:14px;line-height:1.6;`
     + (isUser
-      ? 'background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.3);color:var(--txt);'
-      : 'background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);');
+      ? 'background:var(--navy);border:1px solid var(--navy);color:#fff;'
+      : 'background:var(--sur);border:1px solid var(--bdr);color:var(--txt);');
   bubble.textContent = text;
   if(isTyping) bubble.style.color = 'var(--mut)';
   div.appendChild(bubble);

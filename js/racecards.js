@@ -682,7 +682,7 @@ function rcSwRaceCard(race, course){
         const horse = stripCountrySuffix(r.horse||r.name||'—');
         const jock = r.jockey||'';
         const trainer = r.trainer||'';
-        const sp = r.sp||'—';
+        const sp = r.sp||'';
         const ofr = r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||rcGetOFR(horse)||'';
         const posClass = pos==1?'rc-pos-1':pos==2?'rc-pos-2':pos==3?'rc-pos-3':'rc-pos-n';
         const hn = horse.toLowerCase().trim();
@@ -708,7 +708,7 @@ function rcSwRaceCard(race, course){
             + '<div class="rc-runner-jt">'+(jock||'')+(trainer?' · '+trainer:'')+'</div>'
           + '</div>'
           + '<div class="rc-runner-right">'
-            + '<span class="rc-sp">'+sp+'</span>'
+            + (sp?'<span class="rc-sp">'+sp+'</span>':'')
             + watchBtn
           + '</div>'
         + '</div>';

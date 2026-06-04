@@ -57,9 +57,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .logo     { font-size: 18px; font-weight: 800; cursor: pointer; letter-spacing: .04em; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: #fff; text-transform: uppercase; }
 .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gld2); }
 .hdr-r    { display: flex; align-items: center; gap: 8px; }
-.hdr-bal  { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
+.hdr-bal  { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+.hdr-bal-pill { display: flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); }
 .hdr-bal-lbl { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.5); }
 .hdr-bal-val { font-size: 13px; font-weight: 700; white-space: nowrap; color: #fff; }
+.hdr-bal-arrow { margin-left: 3px; }
 .hdr-bal-sep { color: rgba(255,255,255,.3); font-size: 11px; margin: 0 2px; }
 
 /* Header pills & balance */

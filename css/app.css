@@ -376,7 +376,7 @@ tr:hover td { background: var(--sur2); }
 .rc-cin    { touch-action: pan-y; background: var(--sur2); padding: 14px 14px 24px; }
 
 /* Card overlay (loading / empty state) */
-.card-overlay { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(15,15,20,.85); backdrop-filter: blur(4px); border-radius: inherit; }
+.card-overlay { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(240,242,245,.92); backdrop-filter: blur(4px); border-radius: inherit; }
 
 /* Status text (italic muted) */
 .status-txt { color: var(--mut); font-style: italic; font-size: 13px; }
@@ -397,7 +397,7 @@ tr:hover td { background: var(--sur2); }
 .g3        { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
 /* Purple beta/tag pill */
-.pill-pur  { font-family: monospace; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #cc44aa; border: 1px solid #cc44aa; padding: 5px 16px; border-radius: 20px; margin-bottom: 10px; }
+.pill-pur  { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--navy); border: 1px solid var(--navy); padding: 5px 16px; border-radius: 20px; margin-bottom: 10px; }
 .pill-lbl  { font-family: monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--mut); display: block; margin-bottom: 5px; }
 
 /* Body copy */

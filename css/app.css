@@ -31,6 +31,20 @@
   --pur:   #7c3aed;   /* purple */
   --ora:   #ea580c;   /* orange */
 
+  /* ── Card accent colours — change here to retheme a card everywhere ── */
+  --clr-today:   #ef4444;
+  --clr-races:   #93c5fd;
+  --clr-results: #fb923c;
+  --clr-watch:   #f59e0b;   /* Puzzle Profiler / Tracker — change this one value to retheme */
+  --clr-watch-a1: rgba(245,158,11,.06);
+  --clr-watch-a2: rgba(245,158,11,.1);
+  --clr-watch-a3: rgba(245,158,11,.15);
+  --clr-watch-a4: rgba(245,158,11,.2);
+  --clr-watch-a5: rgba(245,158,11,.3);
+  --clr-watch-a6: rgba(245,158,11,.35);
+  --clr-watch-a7: rgba(245,158,11,.4);
+  --clr-watch-a8: rgba(245,158,11,.5);
+
   /* ── Font ── */
   --font:  'Barlow Condensed', 'Arial Narrow', sans-serif;
 
@@ -97,8 +111,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .cL::before  { background: var(--blu); }
 .cI::before  { background: var(--red); }
 .cB::before  { background: var(--gld2); }
-.cC::before  { background: var(--pur); }
-.cW::before  { background: #e879f9; }
+.cC::before  { background: var(--gld2); }
+.cW::before  { background: var(--clr-watch); }
 .cRC::before { background: var(--blu); }
 .cRS::before { background: var(--ora); }
 
@@ -120,7 +134,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .cP  .cttl { color: var(--grn); }
 .cL  .cttl { color: var(--blu); }
 .cB  .cttl { color: var(--gld); }
-.cC  .cttl { color: var(--pur); }
+.cC  .cttl { color: var(--gld2); }
 
 /* ═══════════════════════════════════════════════════════════
    BOTTOM NAV
@@ -335,7 +349,7 @@ tr:hover td { background: var(--sur2); }
 /* Racecard pills */
 .rc-pill   { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 4px; letter-spacing: .04em; text-transform: uppercase; border: 1px solid; }
 .rc-g1, .rc-g2  { background: rgba(245,158,11,.1);  color: #d97706; border-color: rgba(245,158,11,.25); }
-.rc-g3, .rc-listed { background: rgba(124,58,237,.1); color: var(--pur); border-color: rgba(124,58,237,.2); }
+.rc-g3, .rc-listed { background: rgba(245,158,11,.1); color: var(--gld2); border-color: rgba(245,158,11,.2); }
 .rc-cls    { background: var(--sur2); color: var(--mut); border-color: var(--bdr); }
 .rc-going  { background: rgba(22,163,74,.08); color: var(--grn); border-color: rgba(22,163,74,.2); }
 .rc-race-row    { background: var(--sur); border: 1px solid var(--bdr); border-radius: 12px; margin-bottom: 7px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.05); }

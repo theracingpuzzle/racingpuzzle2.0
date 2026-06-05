@@ -1,4 +1,17 @@
 // ─── CONFIG ───
+// ─── CARD ACCENT COLOURS ───
+// Single source of truth for JS-generated inline styles.
+// Must match --clr-watch (and siblings) in app.css :root.
+const CLR_WATCH    = '#f59e0b';            /* must match --clr-watch in app.css :root */
+const CLR_WATCH_A1 = 'rgba(245,158,11,.06)';
+const CLR_WATCH_A2 = 'rgba(245,158,11,.1)';
+const CLR_WATCH_A3 = 'rgba(245,158,11,.15)';
+const CLR_WATCH_A4 = 'rgba(245,158,11,.2)';
+const CLR_WATCH_A5 = 'rgba(245,158,11,.3)';
+const CLR_WATCH_A6 = 'rgba(245,158,11,.35)';
+const CLR_WATCH_A7 = 'rgba(245,158,11,.4)';
+const CLR_WATCH_A8 = 'rgba(245,158,11,.5)';
+
 // App key & Supabase credentials
 const SK = 'racing-edge-v2';
 const SUPA_URL = 'https://stsmantobrvejfykstrl.supabase.co';
@@ -10,7 +23,7 @@ const CARDS = [
   {id:'today',   lbl:'Today',   col:'#ef4444'},
   {id:'cards',   lbl:'Races',   col:'#93c5fd'},
   {id:'results', lbl:'Results', col:'#fb923c'},
-  {id:'watch',   lbl:'Tracker', col:'#e879f9'}
+  {id:'watch',   lbl:'Tracker', col:CLR_WATCH}
 ];
 
 // ─── TRACKS ───

@@ -191,7 +191,7 @@ function renderNextRace(){
   const course=next.race.course||next.race.venue||'';
   const name=next.race.race_name||next.race.name||'';
   const runners=(next.race.runners||[]).length;
-  const urgency=mins<=0?'var(--mut)':mins<30?'var(--red)':mins<60?'#f59e0b':'var(--grn)';
+  const urgency=mins<=0?'var(--mut)':mins<30?'var(--red)':mins<60?CLR_WATCH:'var(--grn)';
   el.style.display='block';
   content.innerHTML='<div class="t-next-card" style="border-left:3px solid '+urgency+';" onclick="goTo(1)">'
     +'<div><div class="t-next-title">'+(next.race.off||next.race.time||'')+' '+course+'</div>'
@@ -328,7 +328,7 @@ function generateWatchlistPDF(){
     const BLUE=[59,130,246];
     const GREEN=[22,163,74];
     const ORANGE=[234,88,12];
-    const PURPLE=[124,58,237];
+    const PURPLE=[245,158,11]; // matches CLR_WATCH
     const GOLD=[217,119,6];
     const RED=[220,38,38];
 
@@ -646,7 +646,7 @@ function renderThisWeek(){
     });
   });
   getWL().filter(e=>e.raceDate&&e.raceDate>todayStr&&new Date(e.raceDate+'T00:00:00')<=nextWeek).forEach(function(e){
-    items.push({type:'watch',date:e.raceDate,label:e.horse,sub:(e.raceName||'')+(e.track?' · '+e.track:''),col:'#a78bfa'});
+    items.push({type:'watch',date:e.raceDate,label:e.horse,sub:(e.raceName||'')+(e.track?' · '+e.track:''),col:CLR_WATCH});
   });
   items.sort(function(a,b){return a.date.localeCompare(b.date);});
   if(!items.length){el.style.display='none';return;}

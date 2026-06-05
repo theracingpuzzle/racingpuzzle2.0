@@ -93,11 +93,11 @@ function renderWLCal(){
     const hasBet=entries.length>0||dayTargets.length>0||dayObs.length>0;
     const fixtures=getFixtureForDate(dateStr);
     const hasFixture=fixtures.length>0;
-    const dotCol=dayTargets.length&&!entries.length&&!dayObs.length?'#fb923c':dayObs.length&&!entries.length&&!dayTargets.length?'#4ade80':'#e879f9';
+    const dotCol=dayTargets.length&&!entries.length&&!dayObs.length?'#fb923c':dayObs.length&&!entries.length&&!dayTargets.length?'#4ade80':CLR_WATCH;
     const fixtureBar=hasFixture?'<div class="wl-cal-fixture-bar" style="background:'+fixtures[0].colour+';" title="'+fixtures[0].name+'"></div>':'';
     // Show up to 3 coloured dots for different event types
     const dots=[];
-    if(entries.length)dots.push('<div class="wl-cal-dot" style="background:var(--pur);"></div>');
+    if(entries.length)dots.push('<div class="wl-cal-dot" style="background:var(--gld2);"></div>');
     if(dayTargets.length)dots.push('<div class="wl-cal-dot" style="background:var(--ora);"></div>');
     if(dayObs.length)dots.push('<div class="wl-cal-dot" style="background:var(--grn);"></div>');
     html+='<div onclick="wlSelectDay(\''+dateStr+'\')" class="wl-cal-cell'+(isToday?' wl-cal-cell-today':'')+'">'
@@ -183,11 +183,11 @@ function wlToggleGroup(r){
 function _silkColors(str){
   let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}
   const PALETTES=[
-    {body:'#7c3aed',accent:'#f59e0b'},{body:'#ef4444',accent:'#ffffff'},
+    {body:'#7c3aed',accent:CLR_WATCH},{body:'#ef4444',accent:'#ffffff'},
     {body:'#0ea5e9',accent:'#fbbf24'},{body:'#16a34a',accent:'#fbbf24'},
     {body:'#db2777',accent:'#ffffff'},{body:'#d97706',accent:'#1e1e2e'},
-    {body:'#0891b2',accent:'#f59e0b'},{body:'#7c3aed',accent:'#4ade80'},
-    {body:'#be185d',accent:'#fbbf24'},{body:'#1d4ed8',accent:'#f59e0b'},
+    {body:'#0891b2',accent:CLR_WATCH},{body:'#7c3aed',accent:'#4ade80'},
+    {body:'#be185d',accent:'#fbbf24'},{body:'#1d4ed8',accent:CLR_WATCH},
     {body:'#065f46',accent:'#ffffff'},{body:'#92400e',accent:'#ffffff'},
   ];
   return PALETTES[Math.abs(h)%PALETTES.length];
@@ -253,7 +253,7 @@ function renderWLList(){
 
   const REASON_ORDER=['eye-catcher','future-target','trainer-intel','form-study','tip-source'];
   const REASON_META={
-    'eye-catcher': {emoji:'🔭',label:'Eye Catcher',  labelPlural:'Eye Catchers',  col:'#a78bfa'},
+    'eye-catcher': {emoji:'🔭',label:'Eye Catcher',  labelPlural:'Eye Catchers',  col:CLR_WATCH},
     'future-target':{emoji:'📰',label:'Future Target',labelPlural:'Future Targets',col:'#fb923c'},
     'trainer-intel':{emoji:'🗣',label:'Trainer Intel',labelPlural:'Trainer Intel', col:'#60a5fa'},
     'form-study':   {emoji:'📊',label:'Form Study',   labelPlural:'Form Study',    col:'#ef4444'},
@@ -271,7 +271,7 @@ function renderWLList(){
 
   // ── Stats strip ──
   html+='<div class="wll-stats">'
-    +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--pur);">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--gld2);">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--grn);">'+totalObs+'</div><div class="wll-stat-l">Observations</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--ora);">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
   +'</div>';
@@ -308,7 +308,7 @@ function renderWLList(){
           +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
         +'</div>'
         +'<div class="wll-right">'
-          +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--pur)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+          +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--gld2)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
           +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
         +'</div>'
       +'</div>';
@@ -328,7 +328,7 @@ function renderWLList(){
 
 function renderWLEntry(e){
   // Used by calendar day panel
-  const RMAP={'eye-catcher':{emoji:'🔭',col:'#a78bfa',label:'Eye Catcher'},'future-target':{emoji:'📰',col:'#fb923c',label:'Future Target'},'trainer-intel':{emoji:'🗣',col:'#60a5fa',label:'Trainer Intel'},'form-study':{emoji:'📊',col:'#ef4444',label:'Form Study'},'tip-source':{emoji:'💡',col:'#eab308',label:'Tip / Source'}};
+  const RMAP={'eye-catcher':{emoji:'🔭',col:CLR_WATCH,label:'Eye Catcher'},'future-target':{emoji:'📰',col:'#fb923c',label:'Future Target'},'trainer-intel':{emoji:'🗣',col:'#60a5fa',label:'Trainer Intel'},'form-study':{emoji:'📊',col:'#ef4444',label:'Form Study'},'tip-source':{emoji:'💡',col:'#eab308',label:'Tip / Source'}};
   const rm=RMAP[e.reason||'eye-catcher']||RMAP['eye-catcher'];
   const obs=e.observations||[];
   const targets=e.targets||[];
@@ -348,7 +348,7 @@ function renderWLEntry(e){
       +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
     +'</div>'
     +'<div class="wll-right">'
-      +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--pur)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+      +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--gld2)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
       +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
     +'</div>'
   +'</div>';
@@ -488,7 +488,7 @@ function openWLForm(id,prefill){
   const goingHtml=going.map(function(g){const sel=_wlDossier.goingPrefs.includes(g);return'<button type="button" data-going="'+g+'" onclick="wlToggleGoing(this)" class="wlf-going-btn'+(sel?' on':'')+'">'+g+'</button>';}).join('');
   const REASONS=[{value:'eye-catcher',emoji:'🔭',label:'Eye Catcher'},{value:'future-target',emoji:'📰',label:'Future Target'},{value:'trainer-intel',emoji:'🗣',label:'Trainer Intel'},{value:'form-study',emoji:'📊',label:'Form Study'},{value:'tip-source',emoji:'💡',label:'Tip / Source'}];
   const curReason=e?e.reason||'eye-catcher':'eye-catcher';
-  const REASON_COLS={'eye-catcher':'#a78bfa','future-target':'#fb923c','trainer-intel':'#60a5fa','form-study':'#ef4444','tip-source':'#eab308'};
+  const REASON_COLS={'eye-catcher':CLR_WATCH,'future-target':'#fb923c','trainer-intel':'#60a5fa','form-study':'#ef4444','tip-source':'#eab308'};
   const reasonHtml=REASONS.map(function(r){const sel=r.value===curReason;return'<button type="button" data-reason="'+r.value+'" onclick="wlSelectReason(this)" class="wlf-reason-btn'+(sel?' on':'')+'"><span class="wlf-reason-ico">'+r.emoji+'</span><span class="wlf-reason-lbl">'+r.label+'</span></button>';}).join('');
   modal.innerHTML=
   '<div class="wlf-page">'
@@ -741,16 +741,16 @@ const WLP_CSS = `
   color: #fff;
   display: flex; align-items: center; gap: 7px;
 }
-.wlp-brand-accent { color: var(--pur); }
+.wlp-brand-accent { color: var(--gld2); }
 .wlp-edit-btn {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 12px; font-weight: 700;
   letter-spacing: 1px; text-transform: uppercase;
-  color: var(--pur);
+  color: var(--gld2);
   padding: 6px 13px;
-  border: 1px solid rgba(124,58,237,.4);
+  border: 1px solid CLR_WATCH_A7;
   border-radius: 8px;
-  background: rgba(124,58,237,.08);
+  background: CLR_WATCH_A1;
   cursor: pointer;
 }
 /* HERO */
@@ -779,7 +779,7 @@ const WLP_CSS = `
   font-size: 40px; letter-spacing: 2px; color: #fff; line-height: 1;
 }
 .wlp-verified {
-  width: 20px; height: 20px; background: var(--pur); border-radius: 50%;
+  width: 20px; height: 20px; background: var(--gld2); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 10px; color: #fff; margin-top: 4px; flex-shrink: 0;
 }
@@ -792,7 +792,7 @@ const WLP_CSS = `
 }
 .wlp-or-box {
   background: var(--sur2);
-  border: 1.5px solid rgba(124,58,237,.35);
+  border: 1.5px solid CLR_WATCH_A6;
   border-radius: 10px; padding: 7px 13px; text-align: center;
 }
 .wlp-or-label {
@@ -802,7 +802,7 @@ const WLP_CSS = `
 }
 .wlp-or-value {
   
-  font-size: 32px; letter-spacing: 1px; color: var(--pur); line-height: 1;
+  font-size: 32px; letter-spacing: 1px; color: var(--gld2); line-height: 1;
 }
 .wlp-or-na {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
@@ -890,7 +890,7 @@ const WLP_CSS = `
 .wlp-section-action {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 11px; font-weight: 700; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--pur); cursor: pointer;
+  text-transform: uppercase; color: var(--gld2); cursor: pointer;
 }
 /* WHY LOGGED */
 .wlp-why-grid {
@@ -902,10 +902,10 @@ const WLP_CSS = `
   border-radius: 9px; padding: 8px 4px;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
-.wlp-why-active { background: rgba(124,58,237,.1); border-color: rgba(139,92,246,.4); }
+.wlp-why-active { background: CLR_WATCH_A1; border-color: rgba(139,92,246,.4); }
 .wlp-why-check {
   position: absolute; top: 4px; right: 4px;
-  width: 13px; height: 13px; background: var(--pur); border-radius: 50%;
+  width: 13px; height: 13px; background: var(--gld2); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 7px; color: #fff;
 }
@@ -954,8 +954,8 @@ const WLP_CSS = `
 .wlp-hist-pill {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 5px;
-  background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.35);
-  color: var(--pur); display: flex; align-items: center; gap: 4px;
+  background: CLR_WATCH_A3; border: 1px solid CLR_WATCH_A6;
+  color: var(--gld2); display: flex; align-items: center; gap: 4px;
 }
 .wlp-hist-date { color: var(--mut); font-weight: 600; }
 /* SPLIT ROW */
@@ -988,7 +988,7 @@ const WLP_CSS = `
   border-top: 1px solid var(--bdr); padding: 9px;
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 10px; font-weight: 700; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--pur); text-align: center; cursor: pointer;
+  text-transform: uppercase; color: var(--gld2); text-align: center; cursor: pointer;
 }
 /* TARGETS */
 .wlp-target-item {
@@ -1008,7 +1008,7 @@ const WLP_CSS = `
 }
 .wlp-target-date {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
-  font-size: 11px; font-weight: 700; color: #f59e0b; letter-spacing: .5px;
+  font-size: 11px; font-weight: 700; color: var(--clr-watch); letter-spacing: .5px;
 }
 .wlp-target-cond {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
@@ -1078,14 +1078,14 @@ function _wlpBuildHTML(e){
   const fmt=_wlpFmt;
 
   const REASONS={
-    'eye-catcher':  {emoji:'🔭',label:'Eye Catcher',  col:'#a78bfa'},
+    'eye-catcher':  {emoji:'🔭',label:'Eye Catcher',  col:CLR_WATCH},
     'future-target':{emoji:'📰',label:'Future Target', col:'#fb923c'},
     'trainer-intel':{emoji:'🗣',label:'Trainer Intel', col:'#60a5fa'},
     'form-study':   {emoji:'📊',label:'Form Study',    col:'#ef4444'},
     'tip-source':   {emoji:'💡',label:'Tip / Source',  col:'#eab308'},
   };
   const WHY_ORDER=['eye-catcher','future-target','trainer-intel','form-study','tip-source'];
-  const RESULT_COLS={win:'#4ade80',place:'#f59e0b',loss:'#f87171'};
+  const RESULT_COLS={win:'#4ade80',place:CLR_WATCH,loss:'#f87171'};
 
   const reason=REASONS[e.reason||'eye-catcher']||REASONS['eye-catcher'];
   const or=parseFloat(e.currentRating)||null;
@@ -1142,17 +1142,17 @@ function _wlpBuildHTML(e){
   h+='<div class="wlp-silks">';
   h+='<svg width="64" height="74" viewBox="0 0 70 80" fill="none">';
   h+='<path d="M20 20 Q35 16 50 20 L54 62 Q35 66 16 62 Z" fill="#7c3aed"/>';
-  h+='<path d="M28 19 L28 63" stroke="#f59e0b" stroke-width="5"/>';
-  h+='<path d="M42 19 L42 63" stroke="#f59e0b" stroke-width="5"/>';
+  h+='<path d="M28 19 L28 63" stroke=CLR_WATCH stroke-width="5"/>';
+  h+='<path d="M42 19 L42 63" stroke=CLR_WATCH stroke-width="5"/>';
   h+='<path d="M20 20 Q10 24 6 38 Q10 42 16 40 L20 28 Z" fill="#7c3aed"/>';
-  h+='<line x1="8" y1="24" x2="15" y2="40" stroke="#f59e0b" stroke-width="4"/>';
+  h+='<line x1="8" y1="24" x2="15" y2="40" stroke=CLR_WATCH stroke-width="4"/>';
   h+='<path d="M50 20 Q60 24 64 38 Q60 42 54 40 L50 28 Z" fill="#7c3aed"/>';
-  h+='<line x1="62" y1="24" x2="55" y2="40" stroke="#f59e0b" stroke-width="4"/>';
-  h+='<path d="M26 20 Q35 15 44 20 Q35 26 26 20 Z" fill="#f59e0b"/>';
-  h+='<ellipse cx="35" cy="12" rx="13" ry="6" fill="#f59e0b"/>';
+  h+='<line x1="62" y1="24" x2="55" y2="40" stroke=CLR_WATCH stroke-width="4"/>';
+  h+='<path d="M26 20 Q35 15 44 20 Q35 26 26 20 Z" fill=CLR_WATCH/>';
+  h+='<ellipse cx="35" cy="12" rx="13" ry="6" fill=CLR_WATCH/>';
   h+='<ellipse cx="35" cy="10" rx="10" ry="7" fill="#7c3aed"/>';
-  h+='<rect x="22" y="11" width="26" height="3" fill="#f59e0b" rx="1"/>';
-  h+='<circle cx="35" cy="7" r="2" fill="#f59e0b"/>';
+  h+='<rect x="22" y="11" width="26" height="3" fill=CLR_WATCH rx="1"/>';
+  h+='<circle cx="35" cy="7" r="2" fill=CLR_WATCH/>';
   h+='</svg></div>';
 
   h+='<div class="wlp-stats">';
@@ -1261,7 +1261,7 @@ function _wlpBuildHTML(e){
   // SECTION 5: REVIEWS
   const profileReviews=(D.reviews||[]).filter(function(r){return r.profileId===e.id;}).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
   const VERDICT_META={upgrade:{col:'#4ade80',label:'Upgrade ↑'},hold:{col:'#60a5fa',label:'Hold →'},downgrade:{col:'#f87171',label:'Downgrade ↓'}};
-  const RESULT_COL={win:'#4ade80',place:'#f59e0b',unplaced:'#f87171',nr:'#3a3a5c'};
+  const RESULT_COL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'#3a3a5c'};
   h+='<div class="wlp-section">';
   h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Race Reviews</span></div>';
   h+='<span class="wlp-section-action" onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\'\')">Add +</span></div>';

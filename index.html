@@ -13,11 +13,11 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-apple.png">
 <title>The Racing Puzzle</title>
-<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/app.css?v=1780638960">
 
-<link rel="stylesheet" href="css/racecards.css">
-<link rel="stylesheet" href="css/today.css">
-<link rel="stylesheet" href="css/watchlist.css">
+<link rel="stylesheet" href="css/racecards.css?v=1780638960">
+<link rel="stylesheet" href="css/today.css?v=1780638960">
+<link rel="stylesheet" href="css/watchlist.css?v=1780638960">
 </head>
 <body class="swipe-mode">
 
@@ -249,14 +249,14 @@ RACING <span class="logo-accent">PUZZLE</span>
     <!-- WATCHLIST -->
     <div class="card cW" id="c3" >
       <div class="cin cin-touch">
-        <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid rgba(232,121,249,.2);">
+        <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid var(--clr-watch-a2);">
           <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Puzzle Profiler</div>
-          <div style="font-size:20px;font-weight:700;color:#e879f9;margin-bottom:10px;">Puzzle Profiler</div>
+          <div style="font-size:20px;font-weight:700;color:var(--clr-watch);margin-bottom:10px;">Puzzle Profiler</div>
           <div style="display:flex;gap:6px;align-items:center;">
             <input type="text" id="wl-search" oninput="renderWLList()" placeholder="Search…" style="font-size:11px;padding:5px 9px;border-radius:7px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);flex:1;min-width:0;">
             <button id="wl-cal-btn" onclick="setWLView('cal')" class="wl-tog-btn on">Cal</button>
             <button id="wl-list-btn" onclick="setWLView('list')" class="wl-tog-btn off">List</button>
-            <button onclick="openWLForm(null)" style="width:32px;height:32px;border-radius:7px;border:1px solid rgba(232,121,249,.3);background:rgba(232,121,249,.1);color:#e879f9;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+            <button onclick="openWLForm(null)" style="width:32px;height:32px;border-radius:7px;border:1px solid var(--clr-watch-a3);background:var(--clr-watch-a1);color:var(--clr-watch);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
           </div>
         </div>
 
@@ -530,7 +530,7 @@ RACING <span class="logo-accent">PUZZLE</span>
 
       <div class="blk">
         <div class="bttl">📋 Bet Sources</div>
-        <div class="body-mut">Manage the sources available when logging a bet. Tag each as <strong style="color:var(--blu);">Own</strong> (own-study checklist) or <strong style="color:#e879f9;">Tip</strong> (tip checklist).</div>
+        <div class="body-mut">Manage the sources available when logging a bet. Tag each as <strong style="color:var(--blu);">Own</strong> (own-study checklist) or <strong style="color:var(--clr-watch);">Tip</strong> (tip checklist).</div>
         <div id="set-sources-list" class="mb12"></div>
         <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
           <div style="flex:1;min-width:160px;">
@@ -744,21 +744,21 @@ RACING <span class="logo-accent">PUZZLE</span>
 </div>
 
 <!-- ── JS modules — load order: config → state → utils → supabase → ui → features → init ── -->
-<script src="js/config.js"></script>
-<script src="js/state.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/racing-api.js"></script>
-<script src="js/racecards.js"></script>
-<script src="js/ui-shell.js"></script>
-<script src="js/today.js"></script>
-<script src="js/betting.js"></script>
-<script src="js/rules.js"></script>
-<script src="js/dashboard.js"></script>
-<script src="js/virtual.js"></script>
-<script src="js/watchlist.js"></script>
-<script src="js/coach.js"></script>
-<script src="js/init.js"></script>
+<script src="js/config.js?v=1780638960"></script>
+<script src="js/state.js?v=1780638960"></script>
+<script src="js/utils.js?v=1780638960"></script>
+<script src="js/supabase.js?v=1780638960"></script>
+<script src="js/racing-api.js?v=1780638960"></script>
+<script src="js/racecards.js?v=1780638960"></script>
+<script src="js/ui-shell.js?v=1780638960"></script>
+<script src="js/today.js?v=1780638960"></script>
+<script src="js/betting.js?v=1780638960"></script>
+<script src="js/rules.js?v=1780638960"></script>
+<script src="js/dashboard.js?v=1780638960"></script>
+<script src="js/virtual.js?v=1780638960"></script>
+<script src="js/watchlist.js?v=1780638960"></script>
+<script src="js/coach.js?v=1780638960"></script>
+<script src="js/init.js?v=1780638960"></script>
 
 </body>
 </html>

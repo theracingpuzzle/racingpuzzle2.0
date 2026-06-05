@@ -179,6 +179,55 @@ function wlToggleGroup(r){
   renderWLList();
 }
 
+// ─── PROFILER FILTERS ───
+let _wlFilter=null; // null = all, or one of: 'no-obs','past-target','running-today','edge'
+
+const WL_FILTERS=[
+  {id:'running-today', label:'🏇 Running Today', title:'Horses from your profiler confirmed in today\'s racecards'},
+  {id:'no-obs',        label:'👁 No Observations', title:'Profiles with no observations logged yet'},
+  {id:'past-target',   label:'📅 Past Target',      title:'Target race dates that have passed — mark if they ran'},
+  {id:'edge',          label:'📈 Edge',              title:'Your rating is above the official rating — potential value'},
+];
+
+function setWLFilter(id){
+  _wlFilter=(_wlFilter===id)?null:id; // toggle off if already active
+  renderWLList();
+}
+
+function _applyWLFilter(entries){
+  if(!_wlFilter) return entries;
+  const today=td();
+  if(_wlFilter==='no-obs'){
+    return entries.filter(function(e){return!(e.observations&&e.observations.length);});
+  }
+  if(_wlFilter==='past-target'){
+    return entries.filter(function(e){
+      return (e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;});
+    });
+  }
+  if(_wlFilter==='running-today'){
+    const cache=window._todayMeetingsCache;
+    if(!cache) return [];
+    const races=cache.racecards||cache.races||[];
+    const runningNames=new Set();
+    races.forEach(function(race){
+      (race.runners||race.horses||[]).forEach(function(r){
+        runningNames.add((r.horse||r.name||'').toLowerCase().trim());
+      });
+    });
+    return entries.filter(function(e){
+      return runningNames.has((e.horse||'').toLowerCase().trim());
+    });
+  }
+  if(_wlFilter==='edge'){
+    return entries.filter(function(e){
+      const mr=parseFloat(e.myRating), or=parseFloat(e.currentRating);
+      return !isNaN(mr)&&!isNaN(or)&&mr>or;
+    });
+  }
+  return entries;
+}
+
 // ── Silk colour palette — deterministic from horse name ──
 function _silkColors(str){
   let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}
@@ -244,10 +293,33 @@ function renderWLList(){
   const search=(document.getElementById('wl-search')||{value:''}).value.toLowerCase();
   let entries=[...wl].sort(function(a,b){return(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0);});
   if(search)entries=entries.filter(function(e){return(e.horse||'').toLowerCase().includes(search)||(e.trainer||'').toLowerCase().includes(search)||(e.reasonNote||'').toLowerCase().includes(search);});
+
+  // ── Filter chips ──
   const el=document.getElementById('wl-list');if(!el)return;
+  const filterBar=document.getElementById('wl-filter-bar');
+  if(filterBar){
+    filterBar.innerHTML='';
+    WL_FILTERS.forEach(function(f){
+      const on=_wlFilter===f.id;
+      const btn=document.createElement('button');
+      btn.setAttribute('data-fid',f.id);
+      btn.title=f.title;
+      btn.textContent=f.label;
+      btn.style.cssText='font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:14px;cursor:pointer;white-space:nowrap;transition:all .12s;'
+        +(on?'background:var(--navy);color:#fff;border:1px solid var(--navy);':'background:var(--sur);color:var(--mut);border:1px solid var(--bdr);');
+      btn.addEventListener('click',function(){setWLFilter(f.id);});
+      filterBar.appendChild(btn);
+    });
+  }
+
+  // Apply active filter
+  entries=_applyWLFilter(entries);
 
   if(!entries.length){
-    el.innerHTML='<div class="wll-empty">'+(search?'No profiles match "'+search+'"':'No profiles yet — tap + to add your first horse.')+'</div>';
+    const emptyMsg=_wlFilter
+      ? 'No profiles match the <strong>'+WL_FILTERS.find(function(f){return f.id===_wlFilter;}).label+'</strong> filter.'
+      : (search?'No profiles match "'+search+'"':'No profiles yet — tap + to add your first horse.');
+    el.innerHTML='<div class="wll-empty">'+emptyMsg+'</div>';
     return;
   }
 

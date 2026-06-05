@@ -15,8 +15,8 @@
 .rc-meeting { margin-bottom:8px; border-radius:12px; overflow:hidden; border:1px solid var(--bdr); box-shadow:0 2px 8px rgba(0,0,0,.08); position:relative; z-index:1; background:var(--sur); }
 .rc-meeting-hdr { display:flex; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; transition:filter .1s; border-radius:12px 12px 0 0; }
 .rc-meeting-hdr:active { filter:brightness(.92); }
-.rc-mtg-blue { background:var(--blu); }
-.rc-mtg-ora  { background:var(--ora); }
+.rc-mtg-blue { background:#3b6cb7; }
+.rc-mtg-ora  { background:#b8612a; }
 .rc-meeting-flag { font-size:17px; flex-shrink:0; }
 .rc-meeting-info { flex:1; min-width:0; overflow:hidden; }
 .rc-mtg-course { font-size:17px; font-weight:900; color:#fff; letter-spacing:.2px; line-height:1; }

@@ -141,19 +141,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 ═══════════════════════════════════════════════════════════ */
 /* ─── BOTTOM NAV ─── */
 .bnav {
-  display: flex; align-items: stretch;
-  height: 72px; min-height: 72px;
+  display: flex; align-items: flex-start;
+  /* min-height = tap target; padding-bottom extends into safe area on iOS PWA */
+  min-height: 72px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--navy);
   flex-shrink: 0;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
   touch-action: none;
   border-top: 1px solid rgba(255,255,255,.08);
 }
 .bnav-item {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
   gap: 4px; border: none; background: none; cursor: pointer;
   color: rgba(255,255,255,.38); transition: color .15s;
-  -webkit-tap-highlight-color: transparent; padding: 8px 0;
+  -webkit-tap-highlight-color: transparent; padding: 12px 0 0;
+  height: 72px; /* fixed tap-target height, independent of safe-area padding below */
   position: relative;
 }
 .bnav-item.on { color: #fff; }

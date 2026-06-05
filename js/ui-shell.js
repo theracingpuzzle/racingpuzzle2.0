@@ -35,7 +35,7 @@ function setMode(m){
   sw.classList.toggle('gone',m!=='sw');
   cmd.classList.toggle('on',m==='cmd');
   document.body.classList.toggle('swipe-mode',m==='sw');
-  if(m==='cmd'){renderDash();renderCmdRules();}
+  // cmd shell removed — content now in swipe cards
   updHdr();
 }
 function goHome(){if(mode!=='sw')navTo('today');else goTo(0);}
@@ -150,8 +150,8 @@ function renderSwCard(){
   if(id==='cards')rcSwipeInit();
   if(id==='results')rcSwLoadResults();
   if(id==='watch')renderWatchlist();
-  if(id==='stats'){if(typeof renderStats==='function')renderStats();}
-  if(id==='settings'){if(typeof renderBkCard==='function')renderBkCard();if(typeof loadApiKeyField==='function')loadApiKeyField();if(typeof loadStartBankField==='function')loadStartBankField();if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();if(typeof loadAILimitField==='function')loadAILimitField();if(typeof renderSettingsSources==='function')renderSettingsSources();}
+  if(id==='stats'){if(typeof renderStats==='function')renderStats();if(typeof renderHist==='function')renderHist();}
+  if(id==='settings'){if(typeof renderBkCard==='function')renderBkCard();if(typeof loadApiKeyField==='function')loadApiKeyField();if(typeof loadStartBankField==='function')loadStartBankField();if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();if(typeof loadAILimitField==='function')loadAILimitField();if(typeof renderSettingsSources==='function')renderSettingsSources();if(typeof renderCmdRules==='function')renderCmdRules();}
 }
 
 // ─── HEADER ───

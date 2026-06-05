@@ -13,11 +13,11 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-apple.png">
 <title>The Racing Puzzle</title>
-<link rel="stylesheet" href="css/app.css?v=1780697293">
+<link rel="stylesheet" href="css/app.css?v=1780697933">
 
-<link rel="stylesheet" href="css/racecards.css?v=1780697293">
-<link rel="stylesheet" href="css/today.css?v=1780697293">
-<link rel="stylesheet" href="css/watchlist.css?v=1780697293">
+<link rel="stylesheet" href="css/racecards.css?v=1780697933">
+<link rel="stylesheet" href="css/today.css?v=1780697933">
+<link rel="stylesheet" href="css/watchlist.css?v=1780697933">
 </head>
 <body class="swipe-mode">
 
@@ -319,6 +319,55 @@ RACING <span class="logo-accent">PUZZLE</span>
           <div class="card-title-std">Stats</div>
         </div>
         <div id="cp-stats"></div>
+        <div class="card-sec-divider">History</div>
+        <div id="cp-hist">
+      <!-- Real/Virtual toggle -->
+      <div class="hist-tog">
+        <button id="hist-tog-real" class="hist-tog-btn on" onclick="setHistMode('real')">Real</button>
+        <button id="hist-tog-virt" class="hist-tog-btn off" onclick="setHistMode('virt')">Virtual</button>
+      </div>
+
+      <!-- REAL -->
+      <div id="hist-real-section">
+        <!-- Pending bets — action required -->
+        <div class="blk" id="hist-pending-blk">
+          <div class="bttl">⏳ Awaiting Results</div>
+          <div id="hist-pending"></div>
+        </div>
+
+        <!-- Search + settled record -->
+        <div class="blk">
+          <div class="bttl">All Bets</div>
+          <div class="row-g7">
+            <input type="text" id="hfs" class="inp-flex" oninput="renderHist()" placeholder="Search horse or track…">
+            <select id="hfr" onchange="renderHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">NR</option></select>
+            <button class="btn bout bsm" onclick="clrHF()">Clear</button>
+            <span style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:10px;color:var(--mut);align-self:center;" id="hcnt"></span>
+          </div>
+          <!-- Compact card list instead of wide table -->
+          <div id="hist-list"></div>
+        </div>
+      </div>
+
+      <!-- VIRTUAL -->
+      <div id="hist-virt-section" style="display:none;">
+        <div class="blk" id="hist-vpending-blk" style="display:none;">
+          <div class="bttl">⏳ Awaiting Results</div>
+          <div id="hist-vpending"></div>
+        </div>
+        <div class="blk">
+          <div class="bttl">All Virtual Bets</div>
+          <div class="row-g7">
+            <input type="text" id="hvfs" oninput="renderVirtHist()" placeholder="Search horse or track…" style="flex:1;min-width:140px;font-size:13px;">
+            <select id="hvfr" onchange="renderVirtHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
+            <button class="btn bout bsm" onclick="clrVHF()">Clear</button>
+            <span style="font-family:monospace;font-size:10px;color:var(--mut);align-self:center;" id="hvcnt"></span>
+          </div>
+          <div id="hist-virt-list"></div>
+        </div>
+      </div>
+    </div>
+        </div>
       </div>
     </div>
 
@@ -432,6 +481,8 @@ RACING <span class="logo-accent">PUZZLE</span>
             <button class="btn bdng" onclick="clrAll()">Clear All Data</button>
           </div>
         </div>
+        <div class="card-sec-divider">Checklists</div>
+        <div id="cp-rules"></div>
       </div>
       </div>
     </div>
@@ -469,72 +520,6 @@ RACING <span class="logo-accent">PUZZLE</span>
 
 
 <!-- COMMAND CENTRE -->
-<div class="cmd-shell" id="cmd-shell" >
-  <nav class="ctabs">
-        <button class="ctab on" data-tab="hist" onclick="cTab('hist',this)">History</button>
-    <button class="ctab" data-tab="rules" onclick="cTab('rules',this)">Checklists</button>
-      </nav>
-  <div class="cpane-wrap">
-
-    <!-- HISTORY -->
-    <div class="cpane" id="cp-hist">
-      <div class="ptitle">Record</div>
-      <div class="psub">Update results, search your bets, track virtual.</div>
-
-      <!-- Real/Virtual toggle -->
-      <div class="hist-tog">
-        <button id="hist-tog-real" class="hist-tog-btn on" onclick="setHistMode('real')">Real</button>
-        <button id="hist-tog-virt" class="hist-tog-btn off" onclick="setHistMode('virt')">Virtual</button>
-      </div>
-
-      <!-- REAL -->
-      <div id="hist-real-section">
-        <!-- Pending bets — action required -->
-        <div class="blk" id="hist-pending-blk">
-          <div class="bttl">⏳ Awaiting Results</div>
-          <div id="hist-pending"></div>
-        </div>
-
-        <!-- Search + settled record -->
-        <div class="blk">
-          <div class="bttl">All Bets</div>
-          <div class="row-g7">
-            <input type="text" id="hfs" class="inp-flex" oninput="renderHist()" placeholder="Search horse or track…">
-            <select id="hfr" onchange="renderHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">NR</option></select>
-            <button class="btn bout bsm" onclick="clrHF()">Clear</button>
-            <span style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:10px;color:var(--mut);align-self:center;" id="hcnt"></span>
-          </div>
-          <!-- Compact card list instead of wide table -->
-          <div id="hist-list"></div>
-        </div>
-      </div>
-
-      <!-- VIRTUAL -->
-      <div id="hist-virt-section" style="display:none;">
-        <div class="blk" id="hist-vpending-blk" style="display:none;">
-          <div class="bttl">⏳ Awaiting Results</div>
-          <div id="hist-vpending"></div>
-        </div>
-        <div class="blk">
-          <div class="bttl">All Virtual Bets</div>
-          <div class="row-g7">
-            <input type="text" id="hvfs" oninput="renderVirtHist()" placeholder="Search horse or track…" style="flex:1;min-width:140px;font-size:13px;">
-            <select id="hvfr" onchange="renderVirtHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
-            <button class="btn bout bsm" onclick="clrVHF()">Clear</button>
-            <span style="font-family:monospace;font-size:10px;color:var(--mut);align-self:center;" id="hvcnt"></span>
-          </div>
-          <div id="hist-virt-list"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RULES CMD -->
-    <div class="cpane" id="cp-rules"></div>
-
-
-  </div>
-</div>
-
 <!-- EDIT MODAL -->
 <div class="mov" id="emod">
   <div class="mbox">
@@ -635,21 +620,21 @@ RACING <span class="logo-accent">PUZZLE</span>
 </div>
 
 <!-- ── JS modules — load order: config → state → utils → supabase → ui → features → init ── -->
-<script src="js/config.js?v=1780697293"></script>
-<script src="js/state.js?v=1780697293"></script>
-<script src="js/utils.js?v=1780697293"></script>
-<script src="js/supabase.js?v=1780697293"></script>
-<script src="js/racing-api.js?v=1780697293"></script>
-<script src="js/racecards.js?v=1780697293"></script>
-<script src="js/ui-shell.js?v=1780697293"></script>
-<script src="js/today.js?v=1780697293"></script>
-<script src="js/betting.js?v=1780697293"></script>
-<script src="js/rules.js?v=1780697293"></script>
-<script src="js/dashboard.js?v=1780697293"></script>
-<script src="js/virtual.js?v=1780697293"></script>
-<script src="js/watchlist.js?v=1780697293"></script>
-<script src="js/coach.js?v=1780697293"></script>
-<script src="js/init.js?v=1780697293"></script>
+<script src="js/config.js?v=1780697933"></script>
+<script src="js/state.js?v=1780697933"></script>
+<script src="js/utils.js?v=1780697933"></script>
+<script src="js/supabase.js?v=1780697933"></script>
+<script src="js/racing-api.js?v=1780697933"></script>
+<script src="js/racecards.js?v=1780697933"></script>
+<script src="js/ui-shell.js?v=1780697933"></script>
+<script src="js/today.js?v=1780697933"></script>
+<script src="js/betting.js?v=1780697933"></script>
+<script src="js/rules.js?v=1780697933"></script>
+<script src="js/dashboard.js?v=1780697933"></script>
+<script src="js/virtual.js?v=1780697933"></script>
+<script src="js/watchlist.js?v=1780697933"></script>
+<script src="js/coach.js?v=1780697933"></script>
+<script src="js/init.js?v=1780697933"></script>
 
 </body>
 </html>

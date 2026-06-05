@@ -43,6 +43,7 @@ bldDots();
   renderPrebet();
   renderToday();
   renderBkCard();
+  if(typeof renderCmdRules==='function')renderCmdRules();
   rfrTL();
   renderChips();
   seedRules();

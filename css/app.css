@@ -138,6 +138,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .cB  .cttl { color: var(--gld); }
 .cC  .cttl { color: var(--gld2); }
 
+/* Shared card header for Stats + Settings swipe cards */
+.card-hdr-std  { margin: -18px -17px 16px; padding: 14px 17px; border-bottom: 1px solid var(--bdr); }
+.card-title-std { font-size: 20px; font-weight: 700; color: var(--navy); margin-top: 3px; }
+
 /* ═══════════════════════════════════════════════════════════
    BOTTOM NAV
 ═══════════════════════════════════════════════════════════ */

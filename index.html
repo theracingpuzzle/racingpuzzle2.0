@@ -13,11 +13,11 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-apple.png">
 <title>The Racing Puzzle</title>
-<link rel="stylesheet" href="css/app.css?v=1780696371">
+<link rel="stylesheet" href="css/app.css?v=1780697293">
 
-<link rel="stylesheet" href="css/racecards.css?v=1780696371">
-<link rel="stylesheet" href="css/today.css?v=1780696371">
-<link rel="stylesheet" href="css/watchlist.css?v=1780696371">
+<link rel="stylesheet" href="css/racecards.css?v=1780697293">
+<link rel="stylesheet" href="css/today.css?v=1780697293">
+<link rel="stylesheet" href="css/watchlist.css?v=1780697293">
 </head>
 <body class="swipe-mode">
 
@@ -310,251 +310,129 @@ RACING <span class="logo-accent">PUZZLE</span>
 
   </div>
 
+
     <!-- STATS CARD -->
     <div class="card cST" id="c4">
       <div class="cin" style="touch-action:pan-y;">
-        <div style="margin:-18px -17px 16px;padding:14px 17px;background:transparent;border-bottom:1px solid var(--bdr);">
-          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Performance</div>
-          <div style="font-size:20px;font-weight:700;color:var(--navy);">Stats</div>
+        <div class="card-hdr-std">
+          <div class="lbl">Performance</div>
+          <div class="card-title-std">Stats</div>
         </div>
-      <div class="ptitle">Angles &amp; Stats</div>
-      <div class="psub">Where your edge is. Where you're leaking. Auto-generated from your bets.</div>
-
-      <!-- Data scope toggle -->
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center;">
-        <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;overflow:hidden;">
-          <button id="st-tog-both" onclick="setStatsScope('both')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:7px 14px;border:none;cursor:pointer;background:var(--gld);color:#141414;font-weight:700;">Both</button>
-          <button id="st-tog-real" onclick="setStatsScope('real')" class="hist-tog-btn off">Real</button>
-          <button id="st-tog-virt" onclick="setStatsScope('virt')" class="hist-tog-btn off">Virtual</button>
-        </div>
-        <button id="st-tog-own" onclick="toggleOwnStudy()" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:7px 12px;border-radius:9px;border:1px solid var(--bdr);cursor:pointer;background:transparent;color:var(--mut);">Own Study Only: Off</button>
-      </div>
-
-      <div class="blk" id="st-insights" style="background:linear-gradient(135deg,rgba(232,228,220,.05),transparent);border-color:rgba(232,228,220,.2);">
-        <div class="bttl">🔍 Observations</div>
-        <div id="st-insights-body" style="font-size:13px;color:var(--mut);font-style:italic;">Log more settled bets to unlock observations.</div>
-      </div>
-
-      <div class="blk">
-        <div class="bttl">Source / Tipster</div>
-        <div id="st-src-table"></div>
-      </div>
-
-      <div class="blk">
-        <div class="bttl">Checklist Score vs Outcome</div>
-        <div class="body-it">Does a higher checklist score actually mean better results?</div>
-        <div id="st-ck-table"></div>
-      </div>
-
-      <div class="blk">
-        <div class="bttl">Confidence vs Reality</div>
-        <div class="body-it">Do your high-confidence bets actually outperform?</div>
-        <div id="st-conf-table"></div>
-      </div>
-
-      <div class="tc">
-        <div class="blk"><div class="bttl">Track P&L</div><div class="barchart" id="st-trk"></div></div>
-        <div class="blk"><div class="bttl">Bet Type ROI</div><div id="st-type-table"></div></div>
-      </div>
-
-      <div class="tc">
-        <div class="blk"><div class="bttl">Jockey ROI</div><div id="st-jockey"></div></div>
-        <div class="blk"><div class="bttl">Trainer ROI</div><div id="st-trainer"></div></div>
-      </div>
-
-      <div class="blk"><div class="bttl">Monthly P&L</div><div id="st-monthly"></div></div>
-
-      <div class="blk" id="d-compare-blk" style="background:linear-gradient(135deg,rgba(58,127,212,.04),rgba(251,146,60,.04));border-color:rgba(100,160,200,.2);">
-        <div class="bttl">Real vs Virtual — Head to Head</div>
-        <div id="d-compare"></div>
-      </div>
-    </div>
-
-
-    <div class="cpane" id="cp-cards">
-      <div class="ptitle">Racecards</div>
-
-      <!-- Toggle at top — always visible -->
-      <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;overflow:hidden;margin-bottom:14px;width:fit-content;">
-        <button id="rc-btn-cards" onclick="rcSetMode('cards')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:7px 16px;border:none;cursor:pointer;background:#60a5fa;color:#141414;font-weight:700;">Racecards</button>
-        <button id="rc-btn-results" onclick="rcSetMode('results')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:7px 16px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Results</button>
-      </div>
-
-      <!-- Racecards section -->
-      <div id="rc-cards-section">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
-          <div style="flex:0 0 auto">
-            <!-- Course / Time view toggle -->
-            <div class="lbl-mut">View</div>
-            <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;">
-              <button id="rc-btn-course" onclick="rcSetView('course')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;background:#60a5fa;color:#141414;font-weight:700;">Course</button>
-              <button id="rc-btn-time" onclick="rcSetView('time')" style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Time</button>
-            </div>
-          </div>
-          <div id="rc-meeting-wrap" style="flex:1;min-width:140px;">
-            <div class="lbl-mut">Meeting</div>
-            <select id="rc-meeting" onchange="rcLoadRaces()" style="width:100%;font-size:13px;"><option value="">— Select meeting —</option></select>
-          </div>
-          <button class="btn" style="flex-shrink:0;height:44px;padding:0 16px;background:#60a5fa;color:#141414;font-weight:700;border-radius:9px;" onclick="rcLoad()">Load</button>
-        </div>
-        <div id="rc-time-list" style="display:none;"></div>
-        <div id="rc-status" style="color:var(--mut);font-style:italic;font-size:13px;padding:4px 0 8px;display:none;"></div>
-        <div id="rc-race-list"></div>
-      </div>
-
-      <!-- Results section -->
-      <div id="rc-results-section" style="display:none;">
-        <div id="rc-results-list"></div>
-      </div>
-    </div>
-
-    <!-- RULES CMD -->
+        <div id="cp-stats"></div>
       </div>
     </div>
 
     <!-- SETTINGS CARD -->
     <div class="card cSE" id="c5">
       <div class="cin" style="touch-action:pan-y;">
-        <div style="margin:-18px -17px 16px;padding:14px 17px;background:transparent;border-bottom:1px solid var(--bdr);">
-          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Configuration</div>
-          <div style="font-size:20px;font-weight:700;color:var(--navy);">Settings</div>
+        <div class="card-hdr-std">
+          <div class="lbl">Configuration</div>
+          <div class="card-title-std">Settings</div>
         </div>
-      <div class="ptitle">Settings</div><div class="psub">Configure your tool and manage your data.</div>
+        <div id="cp-set">
+        <div class="blk">
+          <div class="bttl">💳 Current Bank</div>
+          <div id="bkdisp" style="margin-bottom:14px;"></div>
+          <div class="fg"><label>Current Bank (£)</label><input type="number" id="bkcu" step="0.01" placeholder="487.50" style="max-width:200px;"></div>
+          <button class="btn bgld" id="bk-save-btn" onclick="saveBank()">Update Bank</button>
+        </div>
 
-      <div class="blk">
-        <div class="bttl">💳 Current Bank</div>
-        <div id="bkdisp" style="margin-bottom:14px;"></div>
-        <div class="fg"><label>Current Bank (£)</label><input type="number" id="bkcu" step="0.01" placeholder="487.50" style="max-width:200px;"></div>
-        <button class="btn bgld" id="bk-save-btn" onclick="saveBank()">Update Bank</button>
-      </div>
+        <div class="blk">
+          <div class="bttl">🎯 Staking Plan</div>
+          <div class="body-mut">Points-based staking. Set your <strong class="gld">point value</strong> once — your confidence level determines the stake automatically.</div>
+          <div class="fg"><label>Point Value — £ per point</label><input type="number" id="set-pv" step="0.5" min="0.5" placeholder="5.00" style="max-width:140px;" oninput="renderPVPreview()"></div>
+          <div id="pv-preview" style="margin:10px 0;"></div>
+          <button class="btn bgld bw" onclick="savePointValue()">Save Point Value</button>
+          <div class="body-sm" style="margin-top:8px;" id="set-pv-status"></div>
+        </div>
 
-      <div class="blk">
-        <div class="bttl">🎯 Staking Plan</div>
-        <div class="body-mut">Points-based staking. Set your <strong class="gld">point value</strong> once — your confidence level determines the stake automatically.</div>
-        <div class="fg"><label>Point Value — £ per point</label><input type="number" id="set-pv" step="0.5" min="0.5" placeholder="5.00" style="max-width:140px;" oninput="renderPVPreview()"></div>
-        <div id="pv-preview" style="margin:10px 0;"></div>
-        <button class="btn bgld bw" onclick="savePointValue()">Save Point Value</button>
-        <div class="body-sm" style="margin-top:8px;" id="set-pv-status"></div>
-      </div>
+        <div class="blk">
+          <div class="bttl">🔄 Recalculate Banks</div>
+          <div class="body-mut">If your balance looks wrong after editing or deleting bets, this rebuilds both banks from scratch using your full bet history.</div>
+          <button class="btn bout bw" onclick="recalcBanks()">Recalculate Banks from Bets</button>
+        </div>
 
-      <div class="blk">
-        <div class="bttl">🔄 Recalculate Banks</div>
-        <div class="body-mut">If your balance looks wrong after editing or deleting bets, this rebuilds both banks from scratch using your full bet history.</div>
-        <button class="btn bout bw" onclick="recalcBanks()">Recalculate Banks from Bets</button>
-      </div>
+        <div class="blk">
+          <div class="bttl">💰 Starting Bank</div>
+          <div class="body-mut">Set your starting bankroll. Used to calculate ROI and growth percentage.</div>
+          <div class="fg"><label>Starting Bank (£)</label><input type="number" id="set-bk-start" step="10" placeholder="500" style="max-width:200px;"></div>
+          <button class="btn bgld" onclick="saveStartBank()">Save Starting Bank</button>
+          <div class="body-sm" style="margin-top:8px;" id="set-bk-status"></div>
+        </div>
 
-      <div class="blk">
-        <div class="bttl">📋 Bet Sources</div>
-        <div class="body-mut">Manage the sources available when logging a bet. Tag each as <strong style="color:var(--blu);">Own</strong> (own-study checklist) or <strong style="color:var(--clr-watch);">Tip</strong> (tip checklist).</div>
-        <div id="set-sources-list" class="mb12"></div>
-        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
-          <div style="flex:1;min-width:160px;">
-            <label class="pill-lbl">Label</label>
-            <input type="text" id="set-src-new-label" placeholder="e.g. Racing Post" autocomplete="off" style="width:100%;box-sizing:border-box;">
+        <div class="blk">
+          <div class="bttl">🟢 Virtual Bank</div>
+          <div class="body-mut">Set your virtual paper trading bank.</div>
+          <div class="fg2">
+            <div class="fg"><label>Starting Virtual Bank (£)</label><input type="number" id="set-vbk-start" step="10" placeholder="500"></div>
+            <div class="fg"><label>Current Virtual Bank (£)</label><input type="number" id="set-vbk-cur" step="0.01" placeholder="500.00"></div>
           </div>
-          <div>
-            <label class="pill-lbl">Type</label>
-            <select id="set-src-new-type" style="padding:10px 14px;border-radius:8px;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);font-size:13px;">
-              <option value="tip">Tip</option>
-              <option value="own">Own</option>
-            </select>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:4px;">
+            <button class="btn" style="background:#fb923c;color:#141414;font-weight:700;" onclick="saveVBankSettings()">Save Virtual Bank</button>
+            <button class="btn bout" onclick="resetVBank()">Reset to Starting Amount</button>
           </div>
-          <button class="btn bgld" onclick="settingsAddSource()" style="white-space:nowrap;">+ Add Source</button>
+          <div class="body-sm" style="margin-top:8px;" id="set-vbk-status"></div>
         </div>
-        <div style="font-family:monospace;font-size:11px;color:var(--mut);margin-top:8px;" id="set-src-status"></div>
-      </div>
 
-      <div class="blk">
-        <div class="bttl">💰 Starting Bank</div>
-        <div class="body-mut">Set your starting bankroll. This is used to calculate ROI and growth percentage. Your current bank is updated from the Bank card.</div>
-        <div class="fg"><label>Starting Bank (£)</label><input type="number" id="set-bk-start" step="10" placeholder="500" style="max-width:200px;"></div>
-        <button class="btn bgld" onclick="saveStartBank()">Save Starting Bank</button>
-        <div class="body-sm" style="margin-top:8px;" id="set-bk-status"></div>
-      </div>
-
-
-
-      <div class="blk">
-        <div class="bttl">🟢 Virtual Bank</div>
-        <div class="body-mut">Set your virtual paper trading bank. Adjust the starting amount or reset the current balance at any time.</div>
-        <div class="fg2">
-          <div class="fg"><label>Starting Virtual Bank (£)</label><input type="number" id="set-vbk-start" step="10" placeholder="500"></div>
-          <div class="fg"><label>Current Virtual Bank (£)</label><input type="number" id="set-vbk-cur" step="0.01" placeholder="500.00"></div>
-        </div>
-        <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:4px;">
-          <button class="btn" style="background:#fb923c;color:#141414;font-weight:700;" onclick="saveVBankSettings()">Save Virtual Bank</button>
-          <button class="btn bout" onclick="resetVBank()">Reset to Starting Amount</button>
-        </div>
-        <div class="body-sm" style="margin-top:8px;" id="set-vbk-status"></div>
-      </div>
-
-      <div class="blk">
-        <div class="bttl">🏇 Racing API</div>
-        <div class="body-mut">Connect to <strong class="gld">theracingapi.com</strong> to search horse profiles, auto-fill trainer and jockey, and pull today's entries. Use your account username and password.</div>
-        <div class="fg"><label>Username (email)</label><input type="text" id="racing-api-user" placeholder="" autocomplete="off" autocapitalize="none"></div>
-        <div class="fg"><label>Password</label><input type="password" id="racing-api-pass" autocomplete="off"></div>
-        <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;">
-          <button class="btn bgld" onclick="saveRacingCreds()">Save Credentials</button>
-          <button class="btn bout bsm" onclick="testRacingAPI()">Test Connection</button>
-          <button class="btn bdng bsm" onclick="clearRacingCreds()">Clear & Reset</button>
-          <span style="font-family:monospace;font-size:11px;" id="racing-api-status"></span>
-        </div>
-        <div style="margin-top:10px;font-size:12px;color:var(--mut);line-height:1.5;">💡 Credentials stored only in this browser's localStorage. If you get 401 errors, tap <strong>Clear &amp; Reset</strong> then re-enter your details and Save.</div>
-      </div>
-
-      <div class="blk">
-        <div class="bttl">🤖 AI Coach</div>
-        <div class="body-mut">The Coach uses Claude AI to give you personalised advice based on your actual betting data. It knows your bank, your recent bets, your rules and your P&L.<br><br>
-        Get a free API key at <a href="https://console.anthropic.com" target="_blank" style="color:#e8e4dc;">console.anthropic.com</a> → API Keys.</div>
-        <div class="fg"><label>Anthropic API Key</label>
-          <input type="password" id="apikey-inp" placeholder="sk-ant-…" autocomplete="off">
-        </div>
-        <div style="display:flex;gap:9px;align-items:center;">
-          <button class="btn bgld" onclick="saveApiKey()">Save Key</button>
-          <span style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:11px;color:var(--mut);" id="apikey-status"></span>
-        </div>
-        <div style="margin-top:10px;font-size:12px;color:var(--mut);line-height:1.5;">💡 Your key is stored only in this browser's localStorage. It is never sent anywhere except directly to Anthropic's API.</div>
-        <!-- Usage display -->
-        <div style="margin-top:12px;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;">
-          <div style="font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">AI Usage Today</div>
-          <div id="ai-usage-display"></div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
-            <label style="font-size:12px;color:var(--mut);white-space:nowrap;">Daily limit:</label>
-            <input type="number" id="ai-limit-inp" min="1" max="50" style="width:70px;font-size:13px;padding:6px 10px;" value="10">
-            <button class="btn bout bsm" onclick="saveAILimit()">Save</button>
-            <span style="font-family:monospace;font-size:10px;color:var(--mut);" id="ai-limit-status"></span>
+        <div class="blk">
+          <div class="bttl">📋 Bet Sources</div>
+          <div class="body-mut">Manage the sources available when logging a bet.</div>
+          <div id="set-sources-list" class="mb12"></div>
+          <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+              <label class="pill-lbl">Label</label>
+              <input type="text" id="set-src-new-label" placeholder="e.g. Racing Post" autocomplete="off" style="width:100%;box-sizing:border-box;">
+            </div>
+            <div>
+              <label class="pill-lbl">Type</label>
+              <select id="set-src-new-type" style="padding:10px 14px;border-radius:8px;background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);font-size:13px;">
+                <option value="tip">Tip</option>
+                <option value="own">Own</option>
+              </select>
+            </div>
+            <button class="btn bgld" onclick="settingsAddSource()" style="white-space:nowrap;">+ Add Source</button>
           </div>
-          <div style="font-size:11px;color:var(--mut);margin-top:6px;">1 call ≈ £0.003 · Briefing ≈ 1 call · Each message ≈ 1–2 calls</div>
+          <div style="font-family:monospace;font-size:11px;color:var(--mut);margin-top:8px;" id="set-src-status"></div>
         </div>
-      </div>
 
-      <div class="blk" style="border:2px solid #34d399;">
-        <div class="bttl" style="color:#34d399;">☁ Supabase Connection</div>
-        <div style="font-family:monospace;font-size:10px;color:var(--mut);margin-bottom:8px;word-break:break-all;">URL: https://stsmantobrvejfykstrl.supabase.co</div>
-        <div style="font-family:monospace;font-size:10px;color:var(--mut);margin-bottom:10px;">User ID: racing-puzzle-default</div>
-        <button class="btn" style="background:#34d399;color:#0d1b2a;font-weight:700;width:100%;margin-bottom:8px;" onclick="supaRawTest()">Run Connection Test</button>
-        <textarea id="supa-raw-out" readonly style="width:100%;min-height:100px;font-family:monospace;font-size:10px;background:var(--sur2);border:1px solid var(--bdr);border-radius:6px;padding:8px;color:var(--txt);resize:none;" placeholder="Test output will appear here..."></textarea>
-      </div>
+        <div class="blk">
+          <div class="bttl">🏇 Racing API</div>
+          <div class="body-mut">Connect to <strong class="gld">theracingapi.com</strong> to load today's racecards and results.</div>
+          <div class="fg"><label>Username (email)</label><input type="text" id="racing-api-user" placeholder="" autocomplete="off" autocapitalize="none"></div>
+          <div class="fg"><label>Password</label><input type="password" id="racing-api-pass" autocomplete="off"></div>
+          <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;">
+            <button class="btn bgld" onclick="saveRacingCreds()">Save Credentials</button>
+            <button class="btn bout bsm" onclick="testRacingAPI()">Test Connection</button>
+            <button class="btn bdng bsm" onclick="clearRacingCreds()">Clear &amp; Reset</button>
+            <span style="font-family:monospace;font-size:11px;" id="racing-api-status"></span>
+          </div>
+        </div>
 
-      <div class="blk"><div class="bttl">Backup &amp; Data</div>
-        <div class="body-mut">Export all your data as JSON — ready for Supabase or any external database.</div>
-        <div class="row-g7" style="gap:9px;">
-          <button class="btn" style="background:#60a5fa;color:#141414;font-weight:700;" onclick="exportData()">⬇ Export Data (JSON)</button>
-          <button class="btn bout" onclick="importDataPrompt()">⬆ Import JSON</button>
+        <div class="blk">
+          <div class="bttl">🤖 AI Coach</div>
+          <div class="body-mut">The Coach uses Claude AI to give personalised advice based on your betting data. Get a free API key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--blu);">console.anthropic.com</a>.</div>
+          <div class="fg"><label>Anthropic API Key</label>
+            <input type="password" id="apikey-inp" placeholder="sk-ant-…" autocomplete="off">
+          </div>
+          <div style="display:flex;gap:9px;align-items:center;">
+            <button class="btn bgld" onclick="saveApiKey()">Save Key</button>
+            <span style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:11px;color:var(--mut);" id="apikey-status"></span>
+          </div>
+          <div style="margin-top:12px;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;" id="ai-usage-display"></div>
+          <div class="fg" style="margin-top:12px;"><label>Daily AI Call Limit</label><input type="number" id="ai-limit-inp" min="1" max="50" placeholder="10" style="max-width:100px;"></div>
+          <button class="btn bout bsm" onclick="saveAILimit()">Save Limit</button>
         </div>
-        <div class="row-g7" style="gap:9px;">
-          <button class="btn" style="background:#34d399;color:#141414;font-weight:700;" onclick="supaTestSync()">☁ Test Supabase Sync</button>
-        </div>
-        <div id="supa-status" style="font-family:monospace;font-size:11px;color:var(--mut);margin-bottom:10px;"></div>
-        <div style="font-family:monospace;font-size:10px;color:var(--mut);line-height:1.7;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;padding:9px 11px;margin-bottom:12px;">
-          Export includes: real bets · virtual bets · Puzzle Profiler · bank · rules · daily log · settings<br>
-          Schema matches Supabase table structure — each collection exports as a flat array.
-        </div>
-        <div style="display:flex;gap:9px;flex-wrap:wrap;">
-          <button class="btn bdng" onclick="clrAll()">Clear All Data</button>
+
+        <div class="blk">
+          <div class="bttl">📤 Export / Import</div>
+          <div class="body-mut">Export all your data as a JSON file, or import a previous export to restore your data.</div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;">
+            <button class="btn bgld" onclick="exportData()">Export Data</button>
+            <label class="btn bout" style="cursor:pointer;">Import Data<input type="file" accept=".json" onchange="importData(this)" style="display:none;"></label>
+            <button class="btn bdng" onclick="clrAll()">Clear All Data</button>
+          </div>
         </div>
       </div>
-    </div>
       </div>
     </div>
   <div class="snav" id="snav" style="display:none;"></div>
@@ -757,21 +635,21 @@ RACING <span class="logo-accent">PUZZLE</span>
 </div>
 
 <!-- ── JS modules — load order: config → state → utils → supabase → ui → features → init ── -->
-<script src="js/config.js?v=1780696371"></script>
-<script src="js/state.js?v=1780696371"></script>
-<script src="js/utils.js?v=1780696371"></script>
-<script src="js/supabase.js?v=1780696371"></script>
-<script src="js/racing-api.js?v=1780696371"></script>
-<script src="js/racecards.js?v=1780696371"></script>
-<script src="js/ui-shell.js?v=1780696371"></script>
-<script src="js/today.js?v=1780696371"></script>
-<script src="js/betting.js?v=1780696371"></script>
-<script src="js/rules.js?v=1780696371"></script>
-<script src="js/dashboard.js?v=1780696371"></script>
-<script src="js/virtual.js?v=1780696371"></script>
-<script src="js/watchlist.js?v=1780696371"></script>
-<script src="js/coach.js?v=1780696371"></script>
-<script src="js/init.js?v=1780696371"></script>
+<script src="js/config.js?v=1780697293"></script>
+<script src="js/state.js?v=1780697293"></script>
+<script src="js/utils.js?v=1780697293"></script>
+<script src="js/supabase.js?v=1780697293"></script>
+<script src="js/racing-api.js?v=1780697293"></script>
+<script src="js/racecards.js?v=1780697293"></script>
+<script src="js/ui-shell.js?v=1780697293"></script>
+<script src="js/today.js?v=1780697293"></script>
+<script src="js/betting.js?v=1780697293"></script>
+<script src="js/rules.js?v=1780697293"></script>
+<script src="js/dashboard.js?v=1780697293"></script>
+<script src="js/virtual.js?v=1780697293"></script>
+<script src="js/watchlist.js?v=1780697293"></script>
+<script src="js/coach.js?v=1780697293"></script>
+<script src="js/init.js?v=1780697293"></script>
 
 </body>
 </html>

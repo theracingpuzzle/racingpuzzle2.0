@@ -56,10 +56,7 @@ bldDots();
     if (_lbt) _lbt.value = it[0];
   }
 
-  // Auto-navigate to Coach if key set and no brief today
-  if (getApiKey() && localStorage.getItem('re-brief-date') !== td()) {
-    setTimeout(function(){ goTo(3, false); }, 600);
-  }
+  // Coach removed from swipe deck
 })();
 
 // ─── SUPABASE PING (settings test button) ───

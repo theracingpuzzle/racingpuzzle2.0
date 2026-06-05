@@ -70,9 +70,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .bpill span { color: #fff; font-weight: 700; }
 
 /* Mode toggle in header */
-.mtog { display: flex; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 8px; overflow: hidden; gap: 1px; }
-.mbtn { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 6px 11px; border: none; background: transparent; color: rgba(255,255,255,.6); cursor: pointer; transition: all .15s; }
-.mbtn.on { background: rgba(255,255,255,.2); color: #fff; }
+/* mtog hidden — replaced by bottom nav */
+.mtog { display: none; }
+.mbtn { display: none; }
 
 /* ═══════════════════════════════════════════════════════════
    SWIPE SHELL & CARDS
@@ -125,19 +125,37 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 /* ═══════════════════════════════════════════════════════════
    BOTTOM NAV
 ═══════════════════════════════════════════════════════════ */
-.snav {
-  height: 72px; min-height: 72px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+/* ─── BOTTOM NAV ─── */
+.bnav {
+  display: flex; align-items: stretch;
+  height: 58px; min-height: 58px;
   background: var(--navy);
-  flex-shrink: 0; cursor: grab; touch-action: none; position: relative;
+  flex-shrink: 0;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  touch-action: none;
+  border-top: 1px solid rgba(255,255,255,.08);
 }
-.snav::before { content: ''; position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 36px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.2); }
-.snav:active { cursor: grabbing; }
-.dots { display: flex; gap: 8px; align-items: center; }
-.dot  { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.25); transition: all .25s; cursor: pointer; }
-.dot.on { width: 22px; border-radius: 4px; background: #fff; }
-.cnlbl { font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+.bnav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; border: none; background: none; cursor: pointer;
+  color: rgba(255,255,255,.38); transition: color .15s;
+  -webkit-tap-highlight-color: transparent; padding: 0;
+  position: relative;
+}
+.bnav-item.on { color: #fff; }
+.bnav-item.on::before {
+  content: ''; position: absolute; top: 0; left: 20%; right: 20%;
+  height: 2px; border-radius: 0 0 2px 2px;
+  background: #fff;
+}
+.bnav-lbl {
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+}
+/* keep snav hidden but in DOM (JS references it) */
+.snav { display: none; }
+.dots { display: none; }
+.cnlbl { display: none; }
 
 /* ═══════════════════════════════════════════════════════════
    COMMAND CENTRE TABS

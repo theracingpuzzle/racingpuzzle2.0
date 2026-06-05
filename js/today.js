@@ -812,7 +812,7 @@ function renderEdgeAlerts(races){
   el.innerHTML='<div class="t-alert-grn">'
     +'<div class="t-alert-lbl-grn">⭐ Edge Running Today</div>'
     +edges.map(function(e){
-      return'<div class="t-alert-row-grn" onclick="goTo(5)">'
+      return'<div class="t-alert-row-grn" onclick="navTo('tracker')">'
         +'<div>'
           +'<div class="t-heading">'+e.horse+'</div>'
           +'<div class="mm">'+e.time+' · '+e.course+'</div>'

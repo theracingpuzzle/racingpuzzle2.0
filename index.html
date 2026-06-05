@@ -29,10 +29,7 @@
       
 RACING <span class="logo-accent">PUZZLE</span>
     </div>
-    <div class="mtog">
-      <button class="mbtn on" id="bsw" onclick="setMode('sw')">Swipe</button>
-      <button class="mbtn" id="bcmd" onclick="setMode('cmd')">CMD</button>
-    </div>
+
   </div>
   <div class="hdr-bal">
     <div id="supa-dot" class="supa-dot" onclick="supaTestSync()" title="Supabase status" style="display:none;"></div>
@@ -249,72 +246,8 @@ RACING <span class="logo-accent">PUZZLE</span>
       </div>
     </div>
 
-    <!-- COACH -->
-    <div class="card cC" id="c5" style="position:relative;background:#f5f6f8;">
-      <div class="card-overlay">
-        <div class="ico-xl">🧠</div>
-        <div class="pill-pur">Coming Soon</div>
-        <div class="body-c">The AI Coach is in development.<br>Check back soon.</div>
-      </div>
-      <div class="card-overlay">
-        <div class="ico-xl">🧠</div>
-        <div class="pill-pur">Coming Soon</div>
-        <div class="body-c">The AI Coach is in development.<br>Check back soon.</div>
-      </div>
-      <div class="cin" style="touch-action:pan-y;display:flex;flex-direction:column;height:100%;padding-bottom:0;">
-        <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid var(--bdr);flex-shrink:0;">
-          <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">AI Assistant</div>
-          <div style="font-size:20px;font-weight:700;color:var(--navy);">The Coach</div>
-        </div>
-        <div id="coach-key-warn" style="display:none;margin:12px 0 0;background:rgba(196,58,58,.08);border:1px solid rgba(196,58,58,.2);border-radius:9px;padding:9px 12px;font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:11px;color:var(--red);flex-shrink:0;">⚠️ Add your API key in Command → Settings to activate.</div>
-        <div id="coach-msgs" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:12px 0 8px;-webkit-overflow-scrolling:touch;min-height:0;"></div>
-        <div style="padding:8px 0 16px;flex-shrink:0;border-top:1px solid var(--bdr);">
-          <div style="display:flex;gap:7px;overflow-x:auto;margin-bottom:9px;padding-bottom:2px;" id="coach-quick"></div>
-          <div class="row-g8">
-            <input type="text" id="coach-inp" placeholder="Ask the coach…" style="flex:1;border-radius:22px;padding:11px 16px;" onkeydown="if(event.key==='Enter'){event.preventDefault();sendCoach();}">
-            <button type="button" onclick="sendCoach()" style="flex-shrink:0;width:44px;height:44px;border-radius:22px;border:none;background:var(--navy);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">→</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- BANK -->
-    <div class="card cB" id="c3" >
-      <div class="cin"  style="touch-action:pan-y;">
-        <div style="margin:-18px -17px 16px;padding:14px 17px;background:transparent;border-bottom:1px solid rgba(245,158,11,.2);">
-          <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Bankroll</div>
-          <div style="font-size:20px;font-weight:700;color:#f59e0b;">Bankroll</div>
-        </div>
-        <div id="bkdisp" style="margin-bottom:14px;"></div>
-        <div class="sdiv" style="margin-top:0;">Update Current Bank</div>
-        <div class="fg"><label>Current Bank (£)</label><input type="number" id="bkcu" step="0.01" placeholder="487.50"></div>
-        <button class="btn bgld bw" onclick="saveBank()">Update Bank</button>
-        <div style="font-size:11px;color:var(--mut);font-style:italic;margin-top:8px;">To change your starting bank, go to Command → Settings.</div>
-        <div class="sdiv" class="mt20">🔄 Recalculate</div>
-        <div class="body-mut">If your balance looks wrong after editing or deleting bets, this rebuilds both banks from scratch using your full bet history.</div>
-        <button class="btn bout bw" onclick="recalcBanks()">Recalculate Banks from Bets</button>
-
-        <div class="sdiv" class="mt20">🎯 Staking Plan</div>
-        <div class="body-mut">Points-based staking. Set your <strong class="gld">point value</strong> once — your confidence level determines the stake automatically.</div>
-        <div class="fg"><label>Point Value — £ per point</label><input type="number" id="set-pv" step="0.5" min="0.5" placeholder="5.00" style="max-width:140px;" oninput="renderPVPreview()"></div>
-        <div id="pv-preview" style="margin:10px 0;"></div>
-        <button class="btn bgld bw" onclick="savePointValue()">Save Point Value</button>
-        <div class="body-sm" style="margin-top:8px;" id="set-pv-status"></div>
-
-        <!-- SOURCES -->
-        <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--bdr);">
-          <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Tip Sources</div>
-          <div id="sources-list" class="mb12"></div>
-          <div class="row-g8">
-            <input id="source-input" type="text" placeholder="e.g. Racing Post, Telegram, Friend…" autocomplete="off" style="flex:1;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;padding:10px 13px;font-size:14px;color:var(--txt);outline:none;" onkeydown="if(event.key==='Enter')addSource()">
-            <button class="btn bgld" onclick="addSource()" style="flex:0 0 auto">Add</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- WATCHLIST -->
-    <div class="card cW" id="c4" >
+    <div class="card cW" id="c3" >
       <div class="cin cin-touch">
         <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid rgba(232,121,249,.2);">
           <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Puzzle Profiler</div>
@@ -378,17 +311,46 @@ RACING <span class="logo-accent">PUZZLE</span>
     </div>
 
   </div>
-  <div class="snav" id="snav"><div class="dots" id="dots"></div><div class="cnlbl" id="cnlbl">Today</div></div>
+  <div class="snav" id="snav" style="display:none;"></div>
 </div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav" id="bnav">
+  <button class="bnav-item on" id="bn-today" onclick="navTo('today')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v2M13 2v2"/><circle cx="10" cy="13" r="1" fill="currentColor" stroke="none"/></svg>
+    <span class="bnav-lbl">Today</span>
+  </button>
+  <button class="bnav-item" id="bn-races" onclick="navTo('races')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v14M5 3l10 3.5L5 10"/></svg>
+    <span class="bnav-lbl">Races</span>
+  </button>
+  <button class="bnav-item" id="bn-results" onclick="navTo('results')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg>
+    <span class="bnav-lbl">Results</span>
+  </button>
+  <button class="bnav-item" id="bn-tracker" onclick="navTo('tracker')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>
+    <span class="bnav-lbl">Tracker</span>
+  </button>
+  <button class="bnav-item" id="bn-stats" onclick="navTo('stats')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>
+    <span class="bnav-lbl">Stats</span>
+  </button>
+  <button class="bnav-item" id="bn-settings" onclick="navTo('settings')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.5"/><path d="M10 3v1.5M10 15.5V17M3 10h1.5M15.5 10H17M5.05 5.05l1.06 1.06M13.89 13.89l1.06 1.06M5.05 14.95l1.06-1.06M13.89 6.11l1.06-1.06"/></svg>
+    <span class="bnav-lbl">Settings</span>
+  </button>
+</nav>
+
 
 
 <!-- COMMAND CENTRE -->
 <div class="cmd-shell" id="cmd-shell" >
   <nav class="ctabs">
-    <button class="ctab on" onclick="cTab('stats',this)">Stats</button>
-    <button class="ctab" onclick="cTab('hist',this)">History</button>
-    <button class="ctab" onclick="cTab('rules',this)">Checklists</button>
-    <button class="ctab" onclick="cTab('set',this)">Settings</button>
+    <button class="ctab on" data-tab="stats" onclick="cTab('stats',this)">Stats</button>
+    <button class="ctab" data-tab="hist" onclick="cTab('hist',this)">History</button>
+    <button class="ctab" data-tab="rules" onclick="cTab('rules',this)">Checklists</button>
+    <button class="ctab" data-tab="set" onclick="cTab('set',this)">Settings</button>
   </nav>
   <div class="cpane-wrap">
 
@@ -543,6 +505,28 @@ RACING <span class="logo-accent">PUZZLE</span>
     <!-- SETTINGS -->
     <div class="cpane" id="cp-set">
       <div class="ptitle">Settings</div><div class="psub">Configure your tool and manage your data.</div>
+
+      <div class="blk">
+        <div class="bttl">💳 Current Bank</div>
+        <div id="bkdisp" style="margin-bottom:14px;"></div>
+        <div class="fg"><label>Current Bank (£)</label><input type="number" id="bkcu" step="0.01" placeholder="487.50" style="max-width:200px;"></div>
+        <button class="btn bgld" id="bk-save-btn" onclick="saveBank()">Update Bank</button>
+      </div>
+
+      <div class="blk">
+        <div class="bttl">🎯 Staking Plan</div>
+        <div class="body-mut">Points-based staking. Set your <strong class="gld">point value</strong> once — your confidence level determines the stake automatically.</div>
+        <div class="fg"><label>Point Value — £ per point</label><input type="number" id="set-pv" step="0.5" min="0.5" placeholder="5.00" style="max-width:140px;" oninput="renderPVPreview()"></div>
+        <div id="pv-preview" style="margin:10px 0;"></div>
+        <button class="btn bgld bw" onclick="savePointValue()">Save Point Value</button>
+        <div class="body-sm" style="margin-top:8px;" id="set-pv-status"></div>
+      </div>
+
+      <div class="blk">
+        <div class="bttl">🔄 Recalculate Banks</div>
+        <div class="body-mut">If your balance looks wrong after editing or deleting bets, this rebuilds both banks from scratch using your full bet history.</div>
+        <button class="btn bout bw" onclick="recalcBanks()">Recalculate Banks from Bets</button>
+      </div>
 
       <div class="blk">
         <div class="bttl">📋 Bet Sources</div>

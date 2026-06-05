@@ -20,10 +20,12 @@ let SUPA_USER_ID = 'racing-puzzle-default'; // update when auth is added
 
 // ─── SWIPE CARDS ───
 const CARDS = [
-  {id:'today',   lbl:'Today',   col:'#ef4444'},
-  {id:'cards',   lbl:'Races',   col:'#93c5fd'},
-  {id:'results', lbl:'Results', col:'#fb923c'},
-  {id:'watch',   lbl:'Tracker', col:CLR_WATCH}
+  {id:'today',    lbl:'Today',    col:'#ef4444'},
+  {id:'cards',    lbl:'Races',    col:'#93c5fd'},
+  {id:'results',  lbl:'Results',  col:'#fb923c'},
+  {id:'watch',    lbl:'Tracker',  col:CLR_WATCH},
+  {id:'stats',    lbl:'Stats',    col:'#60a5fa'},
+  {id:'settings', lbl:'Settings', col:'#94a3b8'},
 ];
 
 // ─── TRACKS ───

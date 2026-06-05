@@ -503,7 +503,7 @@ function saveEM(){
     }
     // NR/void: returns = stake so net bank impact is zero (nothing to do)
     save();updHdr();closeEM();renderToday();renderVBMini();
-    if(mode==='cmd'){renderStats();renderHist();}
+    renderStats();renderHist();
     return;
   }
   const idx=D.bets.findIndex(x=>x.id===id);if(idx===-1)return;
@@ -514,7 +514,7 @@ function saveEM(){
   b.result=newRes;b.returns=newRet;b.postNotes=postNotes;
   applyBankDelta(b,oldResult,oldReturns);
   save();updHdr();closeEM();renderToday();renderNums();
-  if(mode==='cmd'){renderStats();renderHist();}
+  renderStats();renderHist();
 }
 function closeEM(){document.getElementById('emod').classList.remove('open');}
 function delBetEM(){
@@ -542,7 +542,7 @@ function delBetEM(){
     D.bets=D.bets.filter(x=>x.id!==id);
   }
   save();updHdr();closeEM();renderVBMini();
-  if(mode==='cmd'){renderStats();renderHist();renderStats();}
+  renderStats();renderHist();
 }
 document.getElementById('emod').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEM();});
 

@@ -15,8 +15,8 @@
 .rc-meeting { margin-bottom:8px; border-radius:12px; overflow:hidden; border:1px solid var(--bdr); box-shadow:0 2px 8px rgba(0,0,0,.08); position:relative; z-index:1; background:var(--sur); }
 .rc-meeting-hdr { display:flex; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; transition:filter .1s; border-radius:12px 12px 0 0; }
 .rc-meeting-hdr:active { filter:brightness(.92); }
-.rc-mtg-blue { background:#3b6cb7; }
-.rc-mtg-ora  { background:#b8612a; }
+.rc-mtg-blue { background:var(--blu); }
+.rc-mtg-ora  { background:var(--ora); }
 .rc-meeting-flag { font-size:17px; flex-shrink:0; }
 .rc-meeting-info { flex:1; min-width:0; overflow:hidden; }
 .rc-mtg-course { font-size:17px; font-weight:900; color:#fff; letter-spacing:.2px; line-height:1; }
@@ -45,8 +45,12 @@
 /* "Earlier today" divider */
 .rc-earlier-lbl { padding:14px 0 6px; border-top:1px solid var(--bdr); margin-top:4px; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--mut); }
 
-/* ── Info bar (going / distance chips) ── */
-.rc-info-bar { display:flex; gap:5px; flex-wrap:wrap; padding:8px 14px 7px; background:var(--sur2); border-bottom:1px solid var(--bdr); }
+/* ── Info bar (going / distance / prize) ── */
+.rc-info-bar  { display:flex; gap:0; background:var(--sur2); border-bottom:1px solid var(--bdr); }
+.rc-info-item { flex:1; display:flex; flex-direction:column; padding:9px 14px; border-right:1px solid var(--bdr); }
+.rc-info-item:last-child { border-right:none; }
+.rc-info-lbl  { font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--mut); margin-bottom:3px; }
+.rc-info-val  { font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:14px; font-weight:700; color:var(--navy); line-height:1; letter-spacing:.02em; }
 
 /* ── Runner rows ── */
 .rc-runner { display:flex; align-items:center; padding:10px 14px; border-bottom:1px solid var(--bdr); gap:10px; background:var(--sur); transition:background .1s; }

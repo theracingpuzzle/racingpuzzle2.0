@@ -1,5 +1,53 @@
 // ─── RACECARDS & RESULTS ─── swipe cards, results, overlay flow
 
+// ─── DISTANCE FORMATTER ───
+// Converts API distance values (raw furlongs, "5f", "1m4f", "1408y" etc.)
+// into a clean "Xm Yf" display string.
+function formatDist(d){
+  if(!d) return '';
+  const s = String(d).trim();
+
+  // Already formatted: "1m4f", "1m 4f", "5f", "2m", "1m½f", "2m2½f"
+  const mf = s.match(/^(\d+)m\s*(\d*\.?\d*)(f?)$/i);
+  if(mf){
+    const miles = parseInt(mf[1]);
+    const fur   = parseFloat(mf[2]||0);
+    if(miles && fur)  return miles+'m '+fur+'f';
+    if(miles)         return miles+'m';
+    return s;
+  }
+  const fo = s.match(/^(\d*\.?\d+)f$/i);
+  if(fo){
+    const fur = parseFloat(fo[1]);
+    const miles = Math.floor(fur/8);
+    const rem   = Math.round((fur%8)*2)/2;
+    if(miles && rem) return miles+'m '+rem+'f';
+    if(miles)        return miles+'m';
+    return fur+'f';
+  }
+  // Yards: e.g. "1408y"
+  const yd = s.match(/^(\d+)y$/i);
+  if(yd){
+    const yards  = parseInt(yd[1]);
+    const fur    = yards/220;
+    const miles  = Math.floor(fur/8);
+    const remFur = Math.round((fur%8)*2)/2;
+    if(miles && remFur) return miles+'m '+remFur+'f';
+    if(miles)           return miles+'m';
+    return Math.round(fur)+'f';
+  }
+  // Raw number (furlongs)
+  const raw = parseFloat(s);
+  if(!isNaN(raw) && raw > 0){
+    const miles = Math.floor(raw/8);
+    const rem   = Math.round((raw%8)*2)/2;
+    if(miles && rem) return miles+'m '+rem+'f';
+    if(miles)        return miles+'m';
+    return raw+'f';
+  }
+  return s;
+}
+
 // ─── SWIPE RACECARDS / RESULTS ───
 let rcSwCurrentRaces=[], rcSwRacesByMeeting={}, rcSwView='course', _pendingRCBet=null;
 
@@ -312,7 +360,7 @@ function rcSwRenderMeetingRaces(course, el){
   el.innerHTML=races.map(function(r,i){
     const time=r.off||r.off_time||r.time||'\u2014';
     const name=r.race_name||r.name||r.title||('Race '+(i+1));
-    const dist=r.distance_round||r.distance_f||r.distance||r.dist||'';
+    const dist=formatDist(r.distance_round||r.distance_f||r.distance||r.dist||'');
     const runners=(r.runners||r.horses||[]).length;
     const rname=name.toLowerCase();
     const isG1=rname.includes('group 1');const isG2=rname.includes('group 2');
@@ -389,10 +437,24 @@ function rcSwRenderRunners(idx, course, el){
   const race=(rcSwRacesByMeeting[course]||rcSwSortedRaces||[])[idx];if(!race){el.innerHTML='';return;}
   const runners=race.runners||race.horses||[];
   const time=race.off||race.off_time||race.time||'—';
-  const dist=race.distance_round||race.distance_f||race.distance||race.dist||'';
+  const dist=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||'');
   const prize=race.prize||race.total_prize_money||'';
-  const infoBar=[race.going,dist,prize].filter(Boolean).join(' · ');
-  let html=infoBar?'<div class="rc-info-bar">'+infoBar.split(' · ').map(function(c){return'<span class="rc-chip">'+c+'</span>';}).join('')+'</div>':'';
+  const going=race.going||'';
+  const infoItems=[
+    going ? {lbl:'Going',    val:going} : null,
+    dist  ? {lbl:'Distance', val:dist}  : null,
+    prize ? {lbl:'Prize',    val:prize} : null,
+  ].filter(Boolean);
+  let html=infoItems.length
+    ? '<div class="rc-info-bar">'
+        +infoItems.map(function(item){
+          return '<div class="rc-info-item">'
+            +'<div class="rc-info-lbl">'+item.lbl+'</div>'
+            +'<div class="rc-info-val">'+item.val+'</div>'
+            +'</div>';
+        }).join('')
+      +'</div>'
+    : '';
   if(!runners.length){el.innerHTML=html+'<div class="rc-no-runners">No runners listed yet.</div>';return;}
   html+=runners.map(function(r,i){
     const name=stripCountrySuffix(r.horse||r.name||'—');

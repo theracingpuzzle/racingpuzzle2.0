@@ -13,33 +13,31 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-apple.png">
 <title>The Racing Puzzle</title>
-<link rel="stylesheet" href="css/app.css?v=1780693664">
+<link rel="stylesheet" href="css/app.css?v=1780696371">
 
-<link rel="stylesheet" href="css/racecards.css?v=1780693664">
-<link rel="stylesheet" href="css/today.css?v=1780693664">
-<link rel="stylesheet" href="css/watchlist.css?v=1780693664">
+<link rel="stylesheet" href="css/racecards.css?v=1780696371">
+<link rel="stylesheet" href="css/today.css?v=1780696371">
+<link rel="stylesheet" href="css/watchlist.css?v=1780696371">
 </head>
 <body class="swipe-mode">
 
 <!-- HEADER -->
 <div id="supa-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999;padding:8px 14px;font-family:monospace;font-size:11px;text-align:center;font-weight:700;"></div>
 <div class="hdr" id="hdr">
+  <div id="supa-dot" class="supa-dot" onclick="supaTestSync()" title="Supabase status" style="display:none;"></div>
   <div class="hdr-top">
     <div class="logo" onclick="goHome()">
-      
 RACING <span class="logo-accent">PUZZLE</span>
     </div>
-
-  </div>
-  <div class="hdr-bal">
-    <div id="supa-dot" class="supa-dot" onclick="supaTestSync()" title="Supabase status" style="display:none;"></div>
-    <div class="hdr-bal-pill" style="border-color:rgba(96,165,250,.3);">
-      <span class="hdr-bal-lbl">Real</span>
-      <span id="hbank-wrap" class="hdr-bal-val" style="color:var(--blu);">£<span id="hbank">0.00</span><span id="hbank-arrow" class="hdr-bal-arrow"></span></span>
-    </div>
-    <div class="hdr-bal-pill" style="border-color:rgba(251,146,60,.3);">
-      <span class="hdr-bal-lbl">Virtual</span>
-      <span id="hvbank-wrap" class="hdr-bal-val" style="color:var(--ora);">£<span id="hvbank">0.00</span><span id="hvbank-arrow" class="hdr-bal-arrow"></span></span>
+    <div class="hdr-bal">
+      <div class="hdr-bal-pill" style="border-color:rgba(96,165,250,.3);">
+        <span class="hdr-bal-lbl">Real</span>
+        <span id="hbank-wrap" class="hdr-bal-val" style="color:var(--blu);">£<span id="hbank">0.00</span><span id="hbank-arrow" class="hdr-bal-arrow"></span></span>
+      </div>
+      <div class="hdr-bal-pill" style="border-color:rgba(251,146,60,.3);">
+        <span class="hdr-bal-lbl">Virtual</span>
+        <span id="hvbank-wrap" class="hdr-bal-val" style="color:var(--ora);">£<span id="hvbank">0.00</span><span id="hvbank-arrow" class="hdr-bal-arrow"></span></span>
+      </div>
     </div>
   </div>
 </div>
@@ -250,7 +248,7 @@ RACING <span class="logo-accent">PUZZLE</span>
     <div class="card cW" id="c3" >
       <div class="cin cin-touch">
         <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid var(--clr-watch-a2);">
-          <div style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Puzzle Profiler</div>
+          <div class="lbl">Tracker</div>
           <div style="font-size:20px;font-weight:700;color:var(--clr-watch);margin-bottom:10px;">Puzzle Profiler</div>
           <div style="display:flex;gap:6px;align-items:center;">
             <input type="text" id="wl-search" oninput="renderWLList()" placeholder="Search…" style="font-size:11px;padding:5px 9px;border-radius:7px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);flex:1;min-width:0;">
@@ -311,103 +309,14 @@ RACING <span class="logo-accent">PUZZLE</span>
     </div>
 
   </div>
-  <div class="snav" id="snav" style="display:none;"></div>
-</div>
 
-<!-- BOTTOM NAV -->
-<nav class="bnav" id="bnav">
-  <button class="bnav-item on" id="bn-today" onclick="navTo('today')">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v2M13 2v2"/><circle cx="10" cy="13" r="1" fill="currentColor" stroke="none"/></svg>
-    <span class="bnav-lbl">Today</span>
-  </button>
-  <button class="bnav-item" id="bn-races" onclick="navTo('races')">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v14M5 3l10 3.5L5 10"/></svg>
-    <span class="bnav-lbl">Races</span>
-  </button>
-  <button class="bnav-item" id="bn-results" onclick="navTo('results')">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg>
-    <span class="bnav-lbl">Results</span>
-  </button>
-  <button class="bnav-item" id="bn-tracker" onclick="navTo('tracker')">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>
-    <span class="bnav-lbl">Tracker</span>
-  </button>
-  <button class="bnav-item" id="bn-stats" onclick="navTo('stats')">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>
-    <span class="bnav-lbl">Stats</span>
-  </button>
-  <button class="bnav-item" id="bn-settings" onclick="navTo('settings')">
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.5"/><path d="M10 3v1.5M10 15.5V17M3 10h1.5M15.5 10H17M5.05 5.05l1.06 1.06M13.89 13.89l1.06 1.06M5.05 14.95l1.06-1.06M13.89 6.11l1.06-1.06"/></svg>
-    <span class="bnav-lbl">Settings</span>
-  </button>
-</nav>
-
-
-
-<!-- COMMAND CENTRE -->
-<div class="cmd-shell" id="cmd-shell" >
-  <nav class="ctabs">
-    <button class="ctab on" data-tab="stats" onclick="cTab('stats',this)">Stats</button>
-    <button class="ctab" data-tab="hist" onclick="cTab('hist',this)">History</button>
-    <button class="ctab" data-tab="rules" onclick="cTab('rules',this)">Checklists</button>
-    <button class="ctab" data-tab="set" onclick="cTab('set',this)">Settings</button>
-  </nav>
-  <div class="cpane-wrap">
-
-    <!-- HISTORY -->
-    <div class="cpane" id="cp-hist">
-      <div class="ptitle">Record</div>
-      <div class="psub">Update results, search your bets, track virtual.</div>
-
-      <!-- Real/Virtual toggle -->
-      <div class="hist-tog">
-        <button id="hist-tog-real" class="hist-tog-btn on" onclick="setHistMode('real')">Real</button>
-        <button id="hist-tog-virt" class="hist-tog-btn off" onclick="setHistMode('virt')">Virtual</button>
-      </div>
-
-      <!-- REAL -->
-      <div id="hist-real-section">
-        <!-- Pending bets — action required -->
-        <div class="blk" id="hist-pending-blk">
-          <div class="bttl">⏳ Awaiting Results</div>
-          <div id="hist-pending"></div>
+    <!-- STATS CARD -->
+    <div class="card cST" id="c4">
+      <div class="cin" style="touch-action:pan-y;">
+        <div style="margin:-18px -17px 16px;padding:14px 17px;background:transparent;border-bottom:1px solid var(--bdr);">
+          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Performance</div>
+          <div style="font-size:20px;font-weight:700;color:var(--navy);">Stats</div>
         </div>
-
-        <!-- Search + settled record -->
-        <div class="blk">
-          <div class="bttl">All Bets</div>
-          <div class="row-g7">
-            <input type="text" id="hfs" class="inp-flex" oninput="renderHist()" placeholder="Search horse or track…">
-            <select id="hfr" onchange="renderHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">NR</option></select>
-            <button class="btn bout bsm" onclick="clrHF()">Clear</button>
-            <span style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:10px;color:var(--mut);align-self:center;" id="hcnt"></span>
-          </div>
-          <!-- Compact card list instead of wide table -->
-          <div id="hist-list"></div>
-        </div>
-      </div>
-
-      <!-- VIRTUAL -->
-      <div id="hist-virt-section" style="display:none;">
-        <div class="blk" id="hist-vpending-blk" style="display:none;">
-          <div class="bttl">⏳ Awaiting Results</div>
-          <div id="hist-vpending"></div>
-        </div>
-        <div class="blk">
-          <div class="bttl">All Virtual Bets</div>
-          <div class="row-g7">
-            <input type="text" id="hvfs" oninput="renderVirtHist()" placeholder="Search horse or track…" style="flex:1;min-width:140px;font-size:13px;">
-            <select id="hvfr" onchange="renderVirtHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
-            <button class="btn bout bsm" onclick="clrVHF()">Clear</button>
-            <span style="font-family:monospace;font-size:10px;color:var(--mut);align-self:center;" id="hvcnt"></span>
-          </div>
-          <div id="hist-virt-list"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- STATS -->
-    <div class="cpane on" id="cp-stats">
       <div class="ptitle">Angles &amp; Stats</div>
       <div class="psub">Where your edge is. Where you're leaking. Auto-generated from your bets.</div>
 
@@ -500,10 +409,16 @@ RACING <span class="logo-accent">PUZZLE</span>
     </div>
 
     <!-- RULES CMD -->
-    <div class="cpane" id="cp-rules"></div>
+      </div>
+    </div>
 
-    <!-- SETTINGS -->
-    <div class="cpane" id="cp-set">
+    <!-- SETTINGS CARD -->
+    <div class="card cSE" id="c5">
+      <div class="cin" style="touch-action:pan-y;">
+        <div style="margin:-18px -17px 16px;padding:14px 17px;background:transparent;border-bottom:1px solid var(--bdr);">
+          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Configuration</div>
+          <div style="font-size:20px;font-weight:700;color:var(--navy);">Settings</div>
+        </div>
       <div class="ptitle">Settings</div><div class="psub">Configure your tool and manage your data.</div>
 
       <div class="blk">
@@ -640,6 +555,104 @@ RACING <span class="logo-accent">PUZZLE</span>
         </div>
       </div>
     </div>
+      </div>
+    </div>
+  <div class="snav" id="snav" style="display:none;"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav" id="bnav">
+  <button class="bnav-item on" id="bn-today" style="--accent:#ef4444" onclick="navTo('today')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v2M13 2v2"/><circle cx="10" cy="13" r="1" fill="currentColor" stroke="none"/></svg>
+    <span class="bnav-lbl">Today</span>
+  </button>
+  <button class="bnav-item" id="bn-races" style="--accent:#93c5fd" onclick="navTo('races')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v14M5 3l10 3.5L5 10"/></svg>
+    <span class="bnav-lbl">Races</span>
+  </button>
+  <button class="bnav-item" id="bn-results" style="--accent:#fb923c" onclick="navTo('results')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg>
+    <span class="bnav-lbl">Results</span>
+  </button>
+  <button class="bnav-item" id="bn-tracker" style="--accent:var(--clr-watch)" onclick="navTo('tracker')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>
+    <span class="bnav-lbl">Tracker</span>
+  </button>
+  <button class="bnav-item" id="bn-stats" style="--accent:#60a5fa" onclick="navTo('stats')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>
+    <span class="bnav-lbl">Stats</span>
+  </button>
+  <button class="bnav-item" id="bn-settings" style="--accent:#94a3b8" onclick="navTo('settings')">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.5"/><path d="M10 3v1.5M10 15.5V17M3 10h1.5M15.5 10H17M5.05 5.05l1.06 1.06M13.89 13.89l1.06 1.06M5.05 14.95l1.06-1.06M13.89 6.11l1.06-1.06"/></svg>
+    <span class="bnav-lbl">Settings</span>
+  </button>
+</nav>
+
+
+
+<!-- COMMAND CENTRE -->
+<div class="cmd-shell" id="cmd-shell" >
+  <nav class="ctabs">
+        <button class="ctab on" data-tab="hist" onclick="cTab('hist',this)">History</button>
+    <button class="ctab" data-tab="rules" onclick="cTab('rules',this)">Checklists</button>
+      </nav>
+  <div class="cpane-wrap">
+
+    <!-- HISTORY -->
+    <div class="cpane" id="cp-hist">
+      <div class="ptitle">Record</div>
+      <div class="psub">Update results, search your bets, track virtual.</div>
+
+      <!-- Real/Virtual toggle -->
+      <div class="hist-tog">
+        <button id="hist-tog-real" class="hist-tog-btn on" onclick="setHistMode('real')">Real</button>
+        <button id="hist-tog-virt" class="hist-tog-btn off" onclick="setHistMode('virt')">Virtual</button>
+      </div>
+
+      <!-- REAL -->
+      <div id="hist-real-section">
+        <!-- Pending bets — action required -->
+        <div class="blk" id="hist-pending-blk">
+          <div class="bttl">⏳ Awaiting Results</div>
+          <div id="hist-pending"></div>
+        </div>
+
+        <!-- Search + settled record -->
+        <div class="blk">
+          <div class="bttl">All Bets</div>
+          <div class="row-g7">
+            <input type="text" id="hfs" class="inp-flex" oninput="renderHist()" placeholder="Search horse or track…">
+            <select id="hfr" onchange="renderHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">NR</option></select>
+            <button class="btn bout bsm" onclick="clrHF()">Clear</button>
+            <span style="font-family:'Barlow Condensed', 'Arial Narrow', sans-serif;font-size:10px;color:var(--mut);align-self:center;" id="hcnt"></span>
+          </div>
+          <!-- Compact card list instead of wide table -->
+          <div id="hist-list"></div>
+        </div>
+      </div>
+
+      <!-- VIRTUAL -->
+      <div id="hist-virt-section" style="display:none;">
+        <div class="blk" id="hist-vpending-blk" style="display:none;">
+          <div class="bttl">⏳ Awaiting Results</div>
+          <div id="hist-vpending"></div>
+        </div>
+        <div class="blk">
+          <div class="bttl">All Virtual Bets</div>
+          <div class="row-g7">
+            <input type="text" id="hvfs" oninput="renderVirtHist()" placeholder="Search horse or track…" style="flex:1;min-width:140px;font-size:13px;">
+            <select id="hvfr" onchange="renderVirtHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
+            <button class="btn bout bsm" onclick="clrVHF()">Clear</button>
+            <span style="font-family:monospace;font-size:10px;color:var(--mut);align-self:center;" id="hvcnt"></span>
+          </div>
+          <div id="hist-virt-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RULES CMD -->
+    <div class="cpane" id="cp-rules"></div>
+
 
   </div>
 </div>
@@ -744,21 +757,21 @@ RACING <span class="logo-accent">PUZZLE</span>
 </div>
 
 <!-- ── JS modules — load order: config → state → utils → supabase → ui → features → init ── -->
-<script src="js/config.js?v=1780693664"></script>
-<script src="js/state.js?v=1780693664"></script>
-<script src="js/utils.js?v=1780693664"></script>
-<script src="js/supabase.js?v=1780693664"></script>
-<script src="js/racing-api.js?v=1780693664"></script>
-<script src="js/racecards.js?v=1780693664"></script>
-<script src="js/ui-shell.js?v=1780693664"></script>
-<script src="js/today.js?v=1780693664"></script>
-<script src="js/betting.js?v=1780693664"></script>
-<script src="js/rules.js?v=1780693664"></script>
-<script src="js/dashboard.js?v=1780693664"></script>
-<script src="js/virtual.js?v=1780693664"></script>
-<script src="js/watchlist.js?v=1780693664"></script>
-<script src="js/coach.js?v=1780693664"></script>
-<script src="js/init.js?v=1780693664"></script>
+<script src="js/config.js?v=1780696371"></script>
+<script src="js/state.js?v=1780696371"></script>
+<script src="js/utils.js?v=1780696371"></script>
+<script src="js/supabase.js?v=1780696371"></script>
+<script src="js/racing-api.js?v=1780696371"></script>
+<script src="js/racecards.js?v=1780696371"></script>
+<script src="js/ui-shell.js?v=1780696371"></script>
+<script src="js/today.js?v=1780696371"></script>
+<script src="js/betting.js?v=1780696371"></script>
+<script src="js/rules.js?v=1780696371"></script>
+<script src="js/dashboard.js?v=1780696371"></script>
+<script src="js/virtual.js?v=1780696371"></script>
+<script src="js/watchlist.js?v=1780696371"></script>
+<script src="js/coach.js?v=1780696371"></script>
+<script src="js/init.js?v=1780696371"></script>
 
 </body>
 </html>

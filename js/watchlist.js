@@ -282,11 +282,14 @@ function renderWLList(){
     const rm=REASON_META[r];
     const grp=groups[r];
 
-    html+='<div class="wll-sec">'
+    const isOpen=!!_wlGroupOpen[r];
+    html+='<div class="wll-sec" data-grp="'+r+'" style="cursor:pointer;">'
       +'<div class="wll-sec-dot" style="background:'+rm.col+';"></div>'
       +'<span class="wll-sec-lbl" style="color:'+rm.col+';">'+rm.emoji+' '+rm.labelPlural+'</span>'
       +'<span class="wll-sec-cnt">'+grp.length+'</span>'
+      +'<span class="wll-sec-chev" style="margin-left:auto;color:var(--mut);font-size:16px;line-height:1;display:inline-block;transition:transform .2s;'+(isOpen?'transform:rotate(90deg);':'')+'">›</span>'
     +'</div>';
+    if(!isOpen){return;}
 
     grp.forEach(function(e){
       const obs=e.observations||[];
@@ -322,6 +325,12 @@ function renderWLList(){
     row.addEventListener('click',function(ev){
       ev.stopPropagation();
       openWLProfile(row.getAttribute('data-wl-id'));
+    });
+  });
+  el.querySelectorAll('[data-grp]').forEach(function(sec){
+    sec.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      wlToggleGroup(sec.getAttribute('data-grp'));
     });
   });
 }

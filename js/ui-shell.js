@@ -42,32 +42,8 @@ function goHome(){if(mode!=='sw')navTo('today');else goTo(0);}
 
 // ─── NAV ───
 function navTo(id){
-  if(id==='stats'){
-    setMode('cmd');
-    // activate stats tab
-    document.querySelectorAll('.ctab').forEach(function(t){t.classList.remove('on');});
-    const st=document.querySelector('.ctab[data-tab="stats"]');
-    if(st)st.classList.add('on');
-    document.querySelectorAll('.cpane').forEach(function(p){p.style.display='none';});
-    const sp=document.getElementById('cp-stats');if(sp)sp.style.display='';
-    renderStats();
-    updNav('stats');
-    return;
-  }
-  if(id==='settings'){
-    setMode('cmd');
-    document.querySelectorAll('.ctab').forEach(function(t){t.classList.remove('on');});
-    const st=document.querySelector('.ctab[data-tab="set"]');
-    if(st)st.classList.add('on');
-    document.querySelectorAll('.cpane').forEach(function(p){p.style.display='none';});
-    const sp=document.getElementById('cp-set');if(sp)sp.style.display='';
-    renderBkCard();
-    updNav('settings');
-    return;
-  }
-  // Swipe card
   if(mode!=='sw')setMode('sw');
-  const idx={today:0,races:1,results:2,tracker:3}[id];
+  const idx={today:0,races:1,results:2,tracker:3,stats:4,settings:5}[id];
   if(idx!=null)goTo(idx);
 }
 
@@ -78,6 +54,7 @@ function updNav(activeId){
     if(el)el.classList.toggle('on',id===activeId);
   });
 }
+
 
 // ─── SWIPE ENGINE ───
 let cur=0,drag=false,sx=0,dx=0,px=0,pt=0,vel=0;
@@ -155,7 +132,7 @@ function goTo(i,instant=false){
   }
   rpos(0,false);
   // Sync bottom nav
-  const navKeys=['today','races','results','tracker'];
+  const navKeys=['today','races','results','tracker','stats','settings'];
   updNav(navKeys[i]||'today');
   renderSwCard();
   const hb=document.getElementById('hbtn');if(hb)hb.classList.toggle('vis',i!==0);
@@ -173,6 +150,8 @@ function renderSwCard(){
   if(id==='cards')rcSwipeInit();
   if(id==='results')rcSwLoadResults();
   if(id==='watch')renderWatchlist();
+  if(id==='stats'){if(typeof renderStats==='function')renderStats();}
+  if(id==='settings'){if(typeof renderBkCard==='function')renderBkCard();if(typeof loadApiKeyField==='function')loadApiKeyField();if(typeof loadStartBankField==='function')loadStartBankField();if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();if(typeof loadAILimitField==='function')loadAILimitField();if(typeof renderSettingsSources==='function')renderSettingsSources();}
 }
 
 // ─── HEADER ───

@@ -67,12 +67,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   background: var(--navy);
   position: relative; z-index: 80; flex-shrink: 0; box-sizing: content-box;
 }
-.hdr-top  { display: flex; align-items: center; justify-content: space-between; }
+.hdr-top  { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .logo     { font-size: 18px; font-weight: 800; cursor: pointer; letter-spacing: .04em; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: #fff; text-transform: uppercase; }
 .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gld2); }
 .hdr-r    { display: flex; align-items: center; gap: 8px; }
-.hdr-bal  { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
-.hdr-bal-pill { display: flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); }
+.hdr-bal  { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.hdr-bal-pill { display: flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); }
 .hdr-bal-lbl { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.5); }
 .hdr-bal-val { font-size: 13px; font-weight: 700; white-space: nowrap; color: #fff; }
 .hdr-bal-arrow { margin-left: 3px; }
@@ -113,6 +113,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .cB::before  { background: var(--gld2); }
 .cC::before  { background: var(--gld2); }
 .cW::before  { background: var(--clr-watch); }
+.cST::before { background: #60a5fa; }
+.cSE::before { background: #94a3b8; }
 .cRC::before { background: var(--blu); }
 .cRS::before { background: var(--ora); }
 
@@ -158,11 +160,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   height: 72px; /* fixed tap-target height, independent of safe-area padding below */
   position: relative;
 }
-.bnav-item.on { color: #fff; }
+.bnav-item.on { color: var(--accent, #fff); }
 .bnav-item.on::before {
   content: ''; position: absolute; top: 0; left: 18%; right: 18%;
   height: 2px; border-radius: 0 0 2px 2px;
-  background: #fff;
+  background: var(--accent, #fff);
 }
 .bnav-item svg { width: 22px; height: 22px; }
 .bnav-lbl {

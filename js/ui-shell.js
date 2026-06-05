@@ -11,7 +11,7 @@ const NAV_CARD_MAP  = {today:0, races:1, results:2, tracker:3};
     const sat = tmp.getBoundingClientRect().top;
     document.body.removeChild(tmp);
     // 56px header + 58px bottom nav
-    document.documentElement.style.setProperty('--shell-h', (window.innerHeight - 56 - 58 - sat) + 'px');
+    document.documentElement.style.setProperty('--shell-h', (window.innerHeight - 56 - 72 - sat) + 'px');
   }
   setH();
   window.addEventListener('resize',setH);
@@ -198,5 +198,4 @@ function updHdr(){
   const st=document.getElementById('tstreak-tile');
   if(st){st.innerHTML='<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:800;color:var(--gld);margin-bottom:2px;letter-spacing:1px;">'+streak+'<span style="font-size:16px;">🔥</span></div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:rgba(232,228,220,.4);">Day Streak</div>';}
 
-  if(typeof renderToday==='function')renderToday();
 }

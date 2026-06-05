@@ -42,6 +42,7 @@ bldDots();
   updHdr();
   renderPrebet();
   renderToday();
+  renderBkCard();
   rfrTL();
   renderChips();
   seedRules();
@@ -56,7 +57,11 @@ bldDots();
     if (_lbt) _lbt.value = it[0];
   }
 
-  // Coach removed from swipe deck
+  // Pre-fetch today's meetings in background so watchlist alerts
+  // and Tracker card are populated without needing to visit Races first
+  setTimeout(function(){
+    if(typeof rcSwLoadMeetings === 'function') rcSwLoadMeetings();
+  }, 800);
 })();
 
 // ─── SUPABASE PING (settings test button) ───

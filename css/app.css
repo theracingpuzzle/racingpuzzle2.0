@@ -128,7 +128,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 /* ─── BOTTOM NAV ─── */
 .bnav {
   display: flex; align-items: stretch;
-  height: 58px; min-height: 58px;
+  height: 72px; min-height: 72px;
   background: var(--navy);
   flex-shrink: 0;
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -137,20 +137,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .bnav-item {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; border: none; background: none; cursor: pointer;
+  gap: 4px; border: none; background: none; cursor: pointer;
   color: rgba(255,255,255,.38); transition: color .15s;
-  -webkit-tap-highlight-color: transparent; padding: 0;
+  -webkit-tap-highlight-color: transparent; padding: 8px 0;
   position: relative;
 }
 .bnav-item.on { color: #fff; }
 .bnav-item.on::before {
-  content: ''; position: absolute; top: 0; left: 20%; right: 20%;
+  content: ''; position: absolute; top: 0; left: 18%; right: 18%;
   height: 2px; border-radius: 0 0 2px 2px;
   background: #fff;
 }
+.bnav-item svg { width: 22px; height: 22px; }
 .bnav-lbl {
   font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
-  font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
 }
 /* keep snav hidden but in DOM (JS references it) */
 .snav { display: none; }

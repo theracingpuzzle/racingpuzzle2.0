@@ -137,6 +137,7 @@ async function loadTodayMeetings(){
     if(stEl)stEl.textContent=courses.length+' meetings';
     rfrTL();
     checkWatchlistRunners(races);
+    renderEdgeAlerts(races);
     renderNextRace();
   }catch(e){if(stEl)stEl.textContent='';}
 }

@@ -57,10 +57,10 @@ bldDots();
     if (_lbt) _lbt.value = it[0];
   }
 
-  // Pre-fetch today's meetings in background so watchlist alerts
-  // and Tracker card are populated without needing to visit Races first
+  // Pre-fetch today's meetings so watchlist/edge alerts show on Today
+  // without requiring the user to visit the Races card first
   setTimeout(function(){
-    if(typeof rcSwLoadMeetings === 'function') rcSwLoadMeetings();
+    if(typeof loadTodayMeetings === 'function') loadTodayMeetings();
   }, 800);
 })();
 
@@ -89,4 +89,7 @@ function enterApp() {
   s.style.transition = 'opacity .35s ease';
   s.style.opacity = '0';
   setTimeout(function(){ s.style.display = 'none'; }, 360);
+  // Refresh header and bank display once app is visible
+  updHdr();
+  renderBkCard();
 }

@@ -150,8 +150,8 @@ function renderSwCard(){
   if(id==='cards')rcSwipeInit();
   if(id==='results')rcSwLoadResults();
   if(id==='watch')renderWatchlist();
-  if(id==='stats'){if(typeof renderStats==='function')renderStats();if(typeof renderHist==='function')renderHist();}
-  if(id==='settings'){if(typeof renderBkCard==='function')renderBkCard();if(typeof loadApiKeyField==='function')loadApiKeyField();if(typeof loadStartBankField==='function')loadStartBankField();if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();if(typeof loadAILimitField==='function')loadAILimitField();if(typeof renderSettingsSources==='function')renderSettingsSources();if(typeof renderCmdRules==='function')renderCmdRules();}
+  if(id==='stats'){const _sc=document.querySelector('#c4 .cin');if(_sc)_sc.scrollTop=0;if(typeof renderStats==='function')renderStats();if(typeof renderHist==='function')renderHist();}
+  if(id==='settings'){const _sc=document.querySelector('#c5 .cin');if(_sc)_sc.scrollTop=0;if(typeof renderBkCard==='function')renderBkCard();if(typeof loadApiKeyField==='function')loadApiKeyField();if(typeof loadStartBankField==='function')loadStartBankField();if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();if(typeof loadAILimitField==='function')loadAILimitField();if(typeof renderSettingsSources==='function')renderSettingsSources();if(typeof renderCmdRules==='function')renderCmdRules();}
 }
 
 // ─── HEADER ───

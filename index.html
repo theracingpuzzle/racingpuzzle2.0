@@ -13,11 +13,11 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-apple.png">
 <title>The Racing Puzzle</title>
-<link rel="stylesheet" href="css/app.css?v=1780730255">
+<link rel="stylesheet" href="css/app.css?v=1780730728">
 
-<link rel="stylesheet" href="css/racecards.css?v=1780730255">
-<link rel="stylesheet" href="css/today.css?v=1780730255">
-<link rel="stylesheet" href="css/watchlist.css?v=1780730255">
+<link rel="stylesheet" href="css/racecards.css?v=1780730728">
+<link rel="stylesheet" href="css/today.css?v=1780730728">
+<link rel="stylesheet" href="css/watchlist.css?v=1780730728">
 </head>
 <body class="swipe-mode">
 
@@ -318,7 +318,74 @@ RACING <span class="logo-accent">PUZZLE</span>
           <div class="lbl">Performance</div>
           <div class="card-title" style="color:#60a5fa;">Stats</div>
         </div>
-        <div id="cp-stats"></div>
+        <div id="cp-stats">
+        <!-- Scope toggle -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center;">
+          <div style="display:flex;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;overflow:hidden;">
+            <button id="st-tog-real" onclick="setStatsScope('real')" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 14px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Real</button>
+            <button id="st-tog-both" onclick="setStatsScope('both')" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 14px;border:none;cursor:pointer;background:var(--gld);color:#141414;font-weight:700;">Both</button>
+            <button id="st-tog-virt" onclick="setStatsScope('virt')" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 14px;border:none;cursor:pointer;background:transparent;color:var(--mut);">Virtual</button>
+          </div>
+          <button id="st-tog-own" onclick="toggleOwnStudy()" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 14px;border:1px solid var(--bdr);border-radius:9px;cursor:pointer;background:transparent;color:var(--mut);">Own Study Only: Off</button>
+        </div>
+
+        <!-- Key metrics -->
+        <div class="blk" id="st-insights-body"></div>
+
+        <!-- Real vs Virtual compare -->
+        <div class="blk" id="d-compare-blk">
+          <div class="bttl">Real vs Virtual</div>
+          <div id="d-compare"></div>
+        </div>
+
+        <!-- Source breakdown -->
+        <div class="blk">
+          <div class="bttl">By Source</div>
+          <div id="st-src-table"></div>
+        </div>
+
+        <!-- Confidence breakdown -->
+        <div class="blk">
+          <div class="bttl">By Confidence</div>
+          <div id="st-conf-table"></div>
+        </div>
+
+        <!-- Bet type breakdown -->
+        <div class="blk">
+          <div class="bttl">By Bet Type</div>
+          <div id="st-type-table"></div>
+        </div>
+
+        <!-- Monthly -->
+        <div class="blk">
+          <div class="bttl">Monthly P&amp;L</div>
+          <div id="st-monthly"></div>
+        </div>
+
+        <!-- Track -->
+        <div class="blk">
+          <div class="bttl">By Track</div>
+          <div id="st-trk"></div>
+        </div>
+
+        <!-- Checklist -->
+        <div class="blk">
+          <div class="bttl">Checklist Score vs Outcome</div>
+          <div id="st-ck-table"></div>
+        </div>
+
+        <!-- Jockey -->
+        <div class="blk">
+          <div class="bttl">By Jockey</div>
+          <div id="st-jockey"></div>
+        </div>
+
+        <!-- Trainer -->
+        <div class="blk">
+          <div class="bttl">By Trainer</div>
+          <div id="st-trainer"></div>
+        </div>
+      </div>
         <div class="card-sec-divider">History</div>
         <div id="cp-hist">
       <!-- Real/Virtual toggle -->
@@ -620,21 +687,21 @@ RACING <span class="logo-accent">PUZZLE</span>
 </div>
 
 <!-- ── JS modules — load order: config → state → utils → supabase → ui → features → init ── -->
-<script src="js/config.js?v=1780730255"></script>
-<script src="js/state.js?v=1780730255"></script>
-<script src="js/utils.js?v=1780730255"></script>
-<script src="js/supabase.js?v=1780730255"></script>
-<script src="js/racing-api.js?v=1780730255"></script>
-<script src="js/racecards.js?v=1780730255"></script>
-<script src="js/ui-shell.js?v=1780730255"></script>
-<script src="js/today.js?v=1780730255"></script>
-<script src="js/betting.js?v=1780730255"></script>
-<script src="js/rules.js?v=1780730255"></script>
-<script src="js/dashboard.js?v=1780730255"></script>
-<script src="js/virtual.js?v=1780730255"></script>
-<script src="js/watchlist.js?v=1780730255"></script>
-<script src="js/coach.js?v=1780730255"></script>
-<script src="js/init.js?v=1780730255"></script>
+<script src="js/config.js?v=1780730728"></script>
+<script src="js/state.js?v=1780730728"></script>
+<script src="js/utils.js?v=1780730728"></script>
+<script src="js/supabase.js?v=1780730728"></script>
+<script src="js/racing-api.js?v=1780730728"></script>
+<script src="js/racecards.js?v=1780730728"></script>
+<script src="js/ui-shell.js?v=1780730728"></script>
+<script src="js/today.js?v=1780730728"></script>
+<script src="js/betting.js?v=1780730728"></script>
+<script src="js/rules.js?v=1780730728"></script>
+<script src="js/dashboard.js?v=1780730728"></script>
+<script src="js/virtual.js?v=1780730728"></script>
+<script src="js/watchlist.js?v=1780730728"></script>
+<script src="js/coach.js?v=1780730728"></script>
+<script src="js/init.js?v=1780730728"></script>
 
 </body>
 </html>

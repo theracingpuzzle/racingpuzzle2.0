@@ -44,8 +44,8 @@
   color: var(--grn); margin-bottom: 8px;
 }
 .t-alert-lbl-pur {
-  font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--clr-watch); margin-bottom: 0;
+  font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--mut); margin-bottom: 0;
 }
 .t-alert-lbl-blu {
   font-size: 9px; letter-spacing: .14em; text-transform: uppercase;

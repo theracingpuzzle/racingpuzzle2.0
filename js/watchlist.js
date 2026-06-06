@@ -276,7 +276,7 @@ function _injectAlbumCSS(){
     .wll-row:active{background:var(--dim);}
     .wll-silks{width:30px;height:30px;border-radius:50%;background:var(--sur);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;}
     .wll-main{flex:1;min-width:0;}
-    .wll-name{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:16px;font-weight:800;letter-spacing:.5px;color:var(--txt);line-height:1;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .wll-name{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:16px;font-weight:600;letter-spacing:.2px;color:var(--txt);line-height:1;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .wll-sub{font-size:11px;color:var(--mut);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .wll-tag{display:inline-flex;align-items:center;gap:3px;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;}
     .wll-right{display:flex;gap:5px;align-items:center;flex-shrink:0;margin-left:10px;}

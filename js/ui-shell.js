@@ -81,6 +81,8 @@ function onMove(e){
 function onEnd(){
   if(!drag)return;
   drag=false;
+  // If barely moved it's a tap — let the button's onclick handle it
+  if(Math.abs(dx)<8&&Math.abs(vel)<.15){dx=0;vel=0;return;}
   let n=cur;
   if(dx<-40||vel<-.3)n=(cur+1)%CARDS.length;
   else if(dx>40||vel>.3)n=(cur-1+CARDS.length)%CARDS.length;

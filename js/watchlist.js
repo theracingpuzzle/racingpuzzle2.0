@@ -259,7 +259,8 @@ function _silkSVG(horse,size){
 
 // ── List CSS — injected once ──
 function _injectAlbumCSS(){
-  if(document.getElementById('wl-album-css'))return;
+  const existing=document.getElementById('wl-album-css');
+  if(existing)existing.remove();
   const s=document.createElement('style');
   s.id='wl-album-css';
   s.textContent=`
@@ -323,7 +324,7 @@ function renderWLList(){
     return;
   }
 
-  const REASON_ORDER=['eye-catcher','future-target','trainer-intel','form-study','tip-source'];
+  const REASON_ORDER=['form-study','eye-catcher','trainer-intel','tip-source','future-target'];
   const REASON_META={
     'eye-catcher': {emoji:'🔭',label:'Eye Catcher',  labelPlural:'Eye Catchers',  col:CLR_WATCH},
     'future-target':{emoji:'📰',label:'Future Target',labelPlural:'Future Targets',col:'#fb923c'},
@@ -355,12 +356,21 @@ function renderWLList(){
     const grp=groups[r];
 
     const isOpen=!!_wlGroupOpen[r];
-    html+='<div class="wll-sec" data-grp="'+r+'" style="cursor:pointer;">'
-      +'<div class="wll-sec-dot" style="background:'+rm.col+';"></div>'
-      +'<span class="wll-sec-lbl" style="color:'+rm.col+';">'+rm.emoji+' '+rm.labelPlural+'</span>'
-      +'<span class="wll-sec-cnt">'+grp.length+'</span>'
-      +'<span class="wll-sec-chev" style="margin-left:auto;color:var(--mut);font-size:16px;line-height:1;display:inline-block;transition:transform .2s;'+(isOpen?'transform:rotate(90deg);':'')+'">›</span>'
+    html+='<div class="wll-cat-hdr" data-grp="'+r+'" style="'
+      +'display:flex;align-items:center;gap:10px;'
+      +'padding:11px 14px;cursor:pointer;border-radius:10px;'
+      +'background:'+rm.col+';margin-bottom:'+(isOpen?'0':'8px')+';'
+      +'border-radius:'+(isOpen?'10px 10px 0 0':'10px')+';'
+      +'transition:border-radius .2s;">'
+      +'<span style="font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#fff;flex:1;">'
+        +rm.emoji+' '+rm.labelPlural
+      +'</span>'
+      +'<span style="font-family:var(--font);font-size:12px;font-weight:700;color:rgba(255,255,255,.75);margin-right:6px;">'+grp.length+'</span>'
+      +'<span style="color:rgba(255,255,255,.85);font-size:18px;line-height:1;display:inline-block;transition:transform .2s;'+(isOpen?'transform:rotate(90deg);':'')+'">›</span>'
     +'</div>';
+    if(isOpen){
+      html+='<div style="border:1px solid '+rm.col+'40;border-top:none;border-radius:0 0 10px 10px;margin-bottom:8px;overflow:hidden;">';
+    }
     if(!isOpen){return;}
 
     grp.forEach(function(e){
@@ -375,7 +385,7 @@ function renderWLList(){
       if(targets.length)subParts.push(targets.length+' target'+(targets.length>1?'s':''));
       if(!obs.length&&!targets.length)subParts.push('No obs or targets yet');
 
-      html+='<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
+      html+='<div class="wll-row" style="border-left:none;border-bottom:1px solid var(--bdr);" data-wl-id="'+e.id+'">'
         +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
         +'<div class="wll-main">'
           +'<div class="wll-name">'+(e.horse||'Unknown')+(e.needsReview?'<span class="wll-review-badge">REVIEW</span>':'')+'</div>'
@@ -388,6 +398,7 @@ function renderWLList(){
         +'</div>'
       +'</div>';
     });
+    if(isOpen){html+='</div>';} // close category wrapper
   });
 
   html+='</div>'; // wll-wrap

@@ -33,18 +33,18 @@ function renderCompare(set,p,roi,sr){
       let insight='';
       if(set.length>=3&&vset.length>=3){
         const diff=vROI-roi;
-        if(diff>8)insight='🔍 Virtual ROI is beating real by '+diff.toFixed(0)+'% — you may be second-guessing yourself in real betting.';
-        else if(diff<-8)insight='✅ Real ROI is beating virtual by '+Math.abs(diff).toFixed(0)+'% — real stakes are sharpening your decisions.';
-        else insight='📊 Real and virtual performance are closely aligned — your process is consistent.';
+        if(diff>8)insight='Virtual ROI is beating real by '+diff.toFixed(0)+'% — you may be second-guessing yourself in real betting.';
+        else if(diff<-8)insight='Real ROI is beating virtual by '+Math.abs(diff).toFixed(0)+'% — real stakes are sharpening your decisions.';
+        else insight='Real and virtual performance are closely aligned — your process is consistent.';
       }
       dc.innerHTML='<div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0;border:1px solid var(--bdr);border-radius:9px;overflow:hidden;">'
         +'<div style="background:var(--sur2);padding:8px 12px;font-family:monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);border-bottom:1px solid var(--bdr);"></div>'
-        +'<div style="background:rgba(96,165,250,.08);padding:8px 12px;font-family:monospace;font-size:10px;font-weight:700;color:var(--blu);text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);">Real 💷</div>'
-        +'<div style="background:rgba(251,146,60,.12);padding:8px 12px;font-family:monospace;font-size:10px;font-weight:700;color:#fb923c;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);">Virtual 📋</div>'
+        +'<div style="background:rgba(96,165,250,.08);padding:8px 12px;font-family:monospace;font-size:10px;font-weight:700;color:var(--blu);text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);">Real</div>'
+        +'<div style="background:rgba(251,146,60,.12);padding:8px 12px;font-family:monospace;font-size:10px;font-weight:700;color:#fb923c;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);">Virtual</div>'
         +rows.map(function(r){
           const rWin=r.length>3&&r[3]>r[4],vWin=r.length>3&&r[4]>r[3];
           return'<div style="background:var(--sur2);padding:8px 12px;font-family:monospace;font-size:11px;color:var(--mut);border-bottom:1px solid var(--bdr);">'+r[0]+'</div>'
-            +'<div style="padding:8px 12px;font-family:monospace;font-size:13px;font-weight:600;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);color:'+(r.length>3?(r[3]>=0?'var(--grn)':'var(--red)'):'var(--txt)')+';">'
+            +'<div style="padding:8px 12px;font-family:monospace;font-size:13px;font-weight:600;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);color:'+(r.length>3?(r[3]>=0?'var(--blu)':'var(--red)'):'var(--txt)')+';">'
               +r[1]+(rWin?' ◀':'')
             +'</div>'
             +'<div style="padding:8px 12px;font-family:monospace;font-size:13px;font-weight:600;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);color:'+(r.length>3?(r[4]>=0?'#fb923c':'var(--red)'):'var(--txt)')+';">'

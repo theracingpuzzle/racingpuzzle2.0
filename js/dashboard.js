@@ -183,13 +183,18 @@ function renderStats(){
   const scope=window._statsScope||'both';
   const vbBets=getVBank().bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='nr';});
   const realBets=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
+  // 'set' = bets used for all breakdowns (source, confidence, track etc.)
+  // For 'both', combine real+virtual so breakdowns show everything.
+  // Headline stats (P&L, ROI, SR) use scope-specific bets so figures are accurate.
   const set=scope==='real'?realBets:scope==='virt'?vbBets:[...realBets,...vbBets.map(function(b){return Object.assign({},b,{_virt:true});})];
-  const wins=set.filter(b=>b.result==='win');
-  const places=set.filter(b=>b.result==='place'&&(b.betType==='ew'||b.betType==='place'));
-  const staked=set.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
-  const rets=set.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
+  // Headline metrics always use only the primary scope bets (not mixed for 'both')
+  const statBets=scope==='virt'?vbBets:realBets;
+  const wins=statBets.filter(b=>b.result==='win');
+  const places=statBets.filter(b=>b.result==='place'&&(b.betType==='ew'||b.betType==='place'));
+  const staked=statBets.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
+  const rets=statBets.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
   const p=rets-staked,roi=staked>0?(p/staked*100):0;
-  const sr=set.length>0?((wins.length+places.length)/set.length*100):0;
+  const sr=statBets.length>0?((wins.length+places.length)/statBets.length*100):0;
   const avg=set.length>0?set.reduce((a,b)=>a+(parseFloat(b.odds)||0),0)/set.length:0;
   const ownStudyOnly=window._ownStudyOnly||false;
   const OWN_SOURCES=['Own Form Study'];
@@ -408,11 +413,15 @@ function renderStats(){
         +'</div>';}).join('')+'</div>';
     }
   }
-  // Real vs Virtual comparison — at the bottom of stats
-  renderCompare(
-    D.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr'),
-    p, roi, sr
-  );
+  // Real vs Virtual comparison — only shown in Both mode
+  const dcblk2=document.getElementById('d-compare-blk');
+  if(dcblk2) dcblk2.style.display=scope==='both'?'block':'none';
+  if(scope==='both'){
+    renderCompare(
+      D.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr'),
+      p, roi, sr
+    );
+  }
 }
 
 // ─── CMD TAB ROUTER ───

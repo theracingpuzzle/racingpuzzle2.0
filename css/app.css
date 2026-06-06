@@ -266,7 +266,12 @@ textarea { resize: vertical; min-height: 56px; }
 .bgrn:hover { filter: brightness(1.08); }
 .bout  { background: transparent; border: 1px solid var(--bdr); color: var(--mut); }
 .bout:hover { border-color: var(--navy); color: var(--navy); }
-.bdng  { background: transparent; border: 1px solid var(--red); color: var(--red); }
+.bblu  { background: var(--blu); color: #fff; }
+.bblu:hover { filter: brightness(1.1); }
+.bdng  { background: var(--red); color: #fff; border: none; }
+.bdng:hover { filter: brightness(1.08); }
+.bvirt { background: var(--ora); color: #fff; }
+.bvirt:hover { background: #fb923c; }
 .bnavy { background: var(--navy); color: #fff; }
 .bnavy:hover { background: var(--navy2); }
 .bsm   { padding: 5px 10px; font-size: 9px; }

@@ -13,11 +13,11 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-apple.png">
 <title>The Racing Puzzle</title>
-<link rel="stylesheet" href="css/app.css?v=1780742358">
+<link rel="stylesheet" href="css/app.css?v=1780742745">
 
-<link rel="stylesheet" href="css/racecards.css?v=1780742358">
-<link rel="stylesheet" href="css/today.css?v=1780742358">
-<link rel="stylesheet" href="css/watchlist.css?v=1780742358">
+<link rel="stylesheet" href="css/racecards.css?v=1780742745">
+<link rel="stylesheet" href="css/today.css?v=1780742745">
+<link rel="stylesheet" href="css/watchlist.css?v=1780742745">
 </head>
 <body class="swipe-mode">
 
@@ -437,8 +437,8 @@ RACING <span class="logo-accent">PUZZLE</span>
               </div>
             </div>
             <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:10px;">
-              <button class="btn bgld" onclick="saveStartBank();saveBank();" id="bk-save-btn">Save Bank</button>
-              <button class="btn bout bsm" onclick="recalcBanks()">Recalculate from Bets</button>
+              <button class="btn bblu" onclick="saveStartBank();saveBank();" id="bk-save-btn">Save Bank</button>
+              <button class="btn bout" onclick="recalcBanks()">Recalculate from Bets</button>
             </div>
             <div class="body-sm" style="margin-top:8px;" id="set-bk-status"></div>
           </div>
@@ -451,7 +451,7 @@ RACING <span class="logo-accent">PUZZLE</span>
               <div class="fg"><label>Current Bank (£)</label><input type="number" id="set-vbk-cur" step="0.01" placeholder="500.00"></div>
             </div>
             <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:4px;">
-              <button class="btn" style="background:#fb923c;color:#141414;font-weight:700;" onclick="saveVBankSettings()">Save Virtual Bank</button>
+              <button class="btn bvirt" onclick="saveVBankSettings()">Save Virtual Bank</button>
               <button class="btn bout" onclick="resetVBank()">Reset to Starting Amount</button>
             </div>
             <div class="body-sm" style="margin-top:8px;" id="set-vbk-status"></div>
@@ -463,7 +463,7 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="body-mut">Points-based staking. Set your <strong class="gld">point value</strong> once — your confidence level determines the stake automatically.</div>
             <div class="fg"><label>Point Value — £ per point</label><input type="number" id="set-pv" step="0.5" min="0.5" placeholder="5.00" style="max-width:140px;" oninput="renderPVPreview()"></div>
             <div id="pv-preview" style="margin:10px 0;"></div>
-            <button class="btn bgld bw" onclick="savePointValue()">Save Point Value</button>
+            <button class="btn bgrn" onclick="savePointValue()">Save Point Value</button>
             <div class="body-sm" style="margin-top:8px;" id="set-pv-status"></div>
           </div>
 
@@ -483,7 +483,7 @@ RACING <span class="logo-accent">PUZZLE</span>
                   <option value="own">Own</option>
                 </select>
               </div>
-              <button class="btn bgld" onclick="settingsAddSource()" style="white-space:nowrap;">+ Add Source</button>
+              <button class="btn bgrn" onclick="settingsAddSource()" style="white-space:nowrap;">+ Add Source</button>
             </div>
             <div style="font-family:monospace;font-size:11px;color:var(--mut);margin-top:8px;" id="set-src-status"></div>
           </div>
@@ -495,9 +495,9 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="fg"><label>Username (email)</label><input type="text" id="racing-api-user" placeholder="" autocomplete="off" autocapitalize="none"></div>
             <div class="fg"><label>Password</label><input type="password" id="racing-api-pass" autocomplete="off"></div>
             <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;">
-              <button class="btn bgld" onclick="saveRacingCreds()">Save Credentials</button>
-              <button class="btn bout bsm" onclick="testRacingAPI()">Test Connection</button>
-              <button class="btn bdng bsm" onclick="clearRacingCreds()">Clear &amp; Reset</button>
+              <button class="btn bgrn" onclick="saveRacingCreds()">Save Credentials</button>
+              <button class="btn bout" onclick="testRacingAPI()">Test Connection</button>
+              <button class="btn bdng" onclick="clearRacingCreds()">Clear &amp; Reset</button>
               <span style="font-family:monospace;font-size:11px;" id="racing-api-status"></span>
             </div>
           </div>
@@ -506,7 +506,7 @@ RACING <span class="logo-accent">PUZZLE</span>
           <div class="blk">
             <div class="bttl">📤 Export / Import</div>
             <div style="display:flex;gap:9px;flex-wrap:wrap;">
-              <button class="btn bgld" onclick="exportData()">Export Data</button>
+              <button class="btn bgrn" onclick="exportData()">Export Data</button>
               <label class="btn bout" style="cursor:pointer;">Import Data<input type="file" accept=".json" onchange="importData(this)" style="display:none;"></label>
               <button class="btn bdng" onclick="clrAll()">Clear All Data</button>
             </div>
@@ -653,21 +653,21 @@ RACING <span class="logo-accent">PUZZLE</span>
 </div>
 
 <!-- ── JS modules — load order: config → state → utils → supabase → ui → features → init ── -->
-<script src="js/config.js?v=1780742358"></script>
-<script src="js/state.js?v=1780742358"></script>
-<script src="js/utils.js?v=1780742358"></script>
-<script src="js/supabase.js?v=1780742358"></script>
-<script src="js/racing-api.js?v=1780742358"></script>
-<script src="js/racecards.js?v=1780742358"></script>
-<script src="js/ui-shell.js?v=1780742358"></script>
-<script src="js/today.js?v=1780742358"></script>
-<script src="js/betting.js?v=1780742358"></script>
-<script src="js/rules.js?v=1780742358"></script>
-<script src="js/dashboard.js?v=1780742358"></script>
-<script src="js/virtual.js?v=1780742358"></script>
-<script src="js/watchlist.js?v=1780742358"></script>
-<script src="js/coach.js?v=1780742358"></script>
-<script src="js/init.js?v=1780742358"></script>
+<script src="js/config.js?v=1780742745"></script>
+<script src="js/state.js?v=1780742745"></script>
+<script src="js/utils.js?v=1780742745"></script>
+<script src="js/supabase.js?v=1780742745"></script>
+<script src="js/racing-api.js?v=1780742745"></script>
+<script src="js/racecards.js?v=1780742745"></script>
+<script src="js/ui-shell.js?v=1780742745"></script>
+<script src="js/today.js?v=1780742745"></script>
+<script src="js/betting.js?v=1780742745"></script>
+<script src="js/rules.js?v=1780742745"></script>
+<script src="js/dashboard.js?v=1780742745"></script>
+<script src="js/virtual.js?v=1780742745"></script>
+<script src="js/watchlist.js?v=1780742745"></script>
+<script src="js/coach.js?v=1780742745"></script>
+<script src="js/init.js?v=1780742745"></script>
 
 
 <!-- Hidden elements kept for JS compatibility (AI Coach removed from UI) -->

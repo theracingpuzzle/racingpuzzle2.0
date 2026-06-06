@@ -162,19 +162,28 @@ function clrHF(){const hfr=document.getElementById('hfr');const hfs=document.get
 function toggleOwnStudy(){
   window._ownStudyOnly=!window._ownStudyOnly;
   const btn=document.getElementById('st-tog-own');
-  if(btn){btn.textContent='Own Study Only: '+(window._ownStudyOnly?'On':'Off');btn.style.background=window._ownStudyOnly?'rgba(232,228,220,.15)':'transparent';btn.style.color=window._ownStudyOnly?'var(--gld)':'var(--mut)';btn.style.borderColor=window._ownStudyOnly?'var(--gld)':'var(--bdr)';}
+  if(btn){btn.textContent='Own Study Only: '+(window._ownStudyOnly?'On':'Off');btn.style.background=window._ownStudyOnly?'var(--navy)':'';btn.style.color=window._ownStudyOnly?'#fff':'';btn.style.borderColor=window._ownStudyOnly?'var(--navy)':'';}
   renderStats();
 }
 
 function setStatsScope(scope){
   window._statsScope=scope;
-  const cfg={real:'#60a5fa',virt:'#fb923c',both:'var(--navy)'};
+  // Colour overrides for Real (blue) and Virtual (orange) active states;
+  // Both uses the default navy from .rc-view-btn.on
+  const colMap={real:'#60a5fa',virt:'#fb923c'};
   ['real','virt','both'].forEach(function(s){
     const el=document.getElementById('st-tog-'+s);if(!el)return;
     const active=s===scope;
-    el.style.background=active?cfg[s]:'transparent';
-    el.style.color=active?(s==='both'?'#fff':'#141414'):'var(--mut)';
-    el.style.fontWeight=active?'700':'400';
+    el.classList.toggle('on', active);
+    el.classList.toggle('off', !active);
+    // Override background/color for real and virt active states
+    if(active&&colMap[s]){
+      el.style.background=colMap[s];
+      el.style.color='#141414';
+    } else {
+      el.style.background='';
+      el.style.color='';
+    }
   });
   renderStats();
 }

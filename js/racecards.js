@@ -124,18 +124,35 @@ function rcSwRenderTime(listEl){
   const upcoming=[],past=[];
   allRaces.forEach(function(r){
     const mins=timeToMins(r.off||r.off_time||r.time||'');
-    if(mins===9999||(mins-nowMins)>-30) upcoming.push(r);
+    // Upcoming = race hasn't started yet, or started within the last 5 minutes
+    if(mins===9999||(mins-nowMins)>-5) upcoming.push(r);
     else past.push(r);
   });
   if(!allRaces.length){ listEl.innerHTML='<div class="rc-empty">No races today.</div>'; return; }
 
-  listEl.innerHTML=upcoming.map(function(r,i){
-    return rcSwRaceCardPreview(r, r._course||r.course||'', i===0);
-  }).join('')
-  +(past.length
-    ? '<div class="rc-earlier-lbl">Earlier today</div>'
-      + past.map(function(r){ return rcSwRaceCardPreview(r, r._course||r.course||'', false, true); }).join('')
-    : '');
+  // First upcoming race gets the NEXT badge; mark the closest future race
+  const nextIdx=upcoming.findIndex(function(r){
+    return timeToMins(r.off||r.off_time||r.time||'')>=nowMins;
+  });
+
+  let html=upcoming.map(function(r,i){
+    return rcSwRaceCardPreview(r, r._course||r.course||'', i===nextIdx&&nextIdx>=0);
+  }).join('');
+
+  if(!upcoming.length){
+    html='<div class="rc-empty" style="padding:20px 0;">All races have finished for today.</div>';
+  }
+
+  if(past.length){
+    html+='<div class="rc-earlier-lbl" onclick="var n=this.nextElementSibling;n.style.display=n.style.display===\'none\'?\'block\':\'none\';" style="cursor:pointer;user-select:none;">'
+      +'Earlier today <span style="font-size:10px;color:var(--mut);">('+(past.length)+') ›</span>'
+    +'</div>'
+    +'<div style="display:none;">'
+      +past.map(function(r){ return rcSwRaceCardPreview(r, r._course||r.course||'', false, true); }).join('')
+    +'</div>';
+  }
+
+  listEl.innerHTML=html;
 }
 
 let _rcSwOpenCourse='';

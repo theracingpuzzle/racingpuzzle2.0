@@ -792,7 +792,8 @@ function rcSwRaceCard(race, course){
               + (ofr?'<span class="rc-or">'+ofr+'</span>':'')
               + betBadge
             + '</div>'
-            + '<div class="rc-runner-jt">'+(jock||'')+(trainer?' · '+trainer:'')+'</div>'
+            + (jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
+            + (trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
           + '</div>'
           + '<div class="rc-runner-right">'
             + (sp?'<span class="rc-sp">'+sp+'</span>':'')

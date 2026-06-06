@@ -678,6 +678,15 @@ function goFromChecklist(){
 }
 
 let rcSwResultsData = [], rcSwResultsView = 'course', rcSwResultsOpenCourse = '';
+const _rcResTimeOpen = {}; // tracks which time-view result races are expanded
+
+function rcSwToggleResTime(idx){
+  _rcResTimeOpen[idx] = !_rcResTimeOpen[idx];
+  const body = document.getElementById('rcrt-body-'+idx);
+  const chev = document.getElementById('rcrt-chev-'+idx);
+  if(body){ body.style.display = _rcResTimeOpen[idx] ? 'block' : 'none'; }
+  if(chev){ chev.style.transform = _rcResTimeOpen[idx] ? 'rotate(90deg)' : ''; }
+}
 
 // Look up OR for a horse name from today's racecard data
 function rcGetOFR(horseName){
@@ -796,33 +805,41 @@ function rcSwRaceCard(race, course){
 
 
 function rcSwRenderResultsTime(listEl){
-  const domestic = rcSwResultsData.filter(function(r){
-    const c=(r.course||r.venue||'').toLowerCase();
-    return ENG_COURSES.some(k=>c.includes(k))
-      || SCO_COURSES.some(function(k){return k==='perth'?(c===k||c.startsWith(k+' ')||c.endsWith(' '+k)):c.includes(k);})
-      || WAL_COURSES.some(k=>c.includes(k))
-      || IRE_COURSES.some(k=>c.includes(k));
+  // Sort all races chronologically (ascending)
+  const all = rcSwResultsData.slice().sort(function(a,b){
+    return cmpTime(a.off_time||a.off||a.time||'', b.off_time||b.off||b.time||'');
   });
-  const intl = rcSwResultsData.filter(function(r){
-    return !domestic.includes(r);
-  });
-  domestic.sort(function(a,b){
-    return cmpTime(b.off_time||b.off||b.time||'',a.off_time||a.off||a.time||'');
-  });
-  intl.sort(function(a,b){
-    return cmpTime(b.off_time||b.off||b.time||'',a.off_time||a.off||a.time||'');
-  });
-  let html = domestic.map(function(race){
-    return rcSwRaceCard(race, race.course||race.venue||'Unknown');
+
+  let idx = 0;
+  let html = all.map(function(race){
+    const course = race.course||race.venue||'Unknown';
+    const time   = race.off_time||race.off||race.time||'—';
+    const name   = race.race_name||race.name||'';
+    const flag   = rcCountryFlag(rcCourseCountry(course));
+    const count  = (race.runners||[]).length;
+    const i      = idx++;
+    const isOpen = !!_rcResTimeOpen[i];
+    return '<div class="rc-meeting">'
+      +'<div class="rc-meeting-hdr rc-mtg-ora" onclick="rcSwToggleResTime('+i+')">'
+        +'<span class="rc-meeting-flag">'+flag+'</span>'
+        +'<div class="rc-meeting-info">'
+          +'<div style="display:flex;align-items:baseline;gap:10px;">'
+            +'<span class="rc-mtg-course" style="font-size:20px;letter-spacing:.5px;">'+time+'</span>'
+            +'<span style="font-size:14px;font-weight:700;color:rgba(255,255,255,.9);letter-spacing:.2px;">'+course+'</span>'
+          +'</div>'
+          +'<div class="rc-mtg-meta">'+count+' runners'+(name?' · '+name:'')+'</div>'
+        +'</div>'
+        +'<span id="rcrt-chev-'+i+'" class="rc-meeting-chevron'+(isOpen?' open':'')+'" style="'+(isOpen?'transform:rotate(90deg);':'')+'">\u203a</span>'
+      +'</div>'
+      +'<div id="rcrt-body-'+i+'" class="rc-meeting-body" style="display:'+(isOpen?'block':'none')+';">'
+        +rcSwRaceCard(race, course)
+      +'</div>'
+    +'</div>';
   }).join('');
-  if(intl.length){
-    html += '<div style="font-family:var(--font-ui);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);padding:10px 4px 6px;">\U0001f30d International</div>';
-    html += intl.map(function(race){
-      return rcSwRaceCard(race, race.course||race.venue||'Unknown');
-    }).join('');
-  }
+
   listEl.innerHTML = html;
 }
+
 
 function rcSwRenderResultsCourse(listEl){
   const meetings = {};

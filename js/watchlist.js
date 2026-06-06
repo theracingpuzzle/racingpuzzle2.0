@@ -243,17 +243,13 @@ function _silkColors(str){
 }
 
 function _silkSVG(horse,size){
+  // Placeholder — will be replaced with real silks when API is upgraded
   size=size||18;
-  const c=_silkColors(horse||'?');
-  return'<svg width="'+size+'" height="'+(size*1.15).toFixed(0)+'" viewBox="0 0 70 80" fill="none">'
-    +'<path d="M20 20 Q35 16 50 20 L54 62 Q35 66 16 62 Z" fill="'+c.body+'"/>'
-    +'<path d="M28 19 L28 63" stroke="'+c.accent+'" stroke-width="8"/>'
-    +'<path d="M42 19 L42 63" stroke="'+c.accent+'" stroke-width="8"/>'
-    +'<path d="M20 20 Q10 24 6 38 Q10 42 16 40 L20 28 Z" fill="'+c.body+'"/>'
-    +'<path d="M50 20 Q60 24 64 38 Q60 42 54 40 L50 28 Z" fill="'+c.body+'"/>'
-    +'<ellipse cx="35" cy="12" rx="13" ry="6" fill="'+c.accent+'"/>'
-    +'<ellipse cx="35" cy="10" rx="10" ry="7" fill="'+c.body+'"/>'
-    +'<rect x="22" y="11" width="26" height="3" fill="'+c.accent+'" rx="1"/>'
+  const s=Math.round(size*1.8);
+  return'<svg width="'+s+'" height="'+s+'" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    +'<circle cx="18" cy="18" r="18" fill="#e2e6eb"/>'
+    +'<circle cx="18" cy="14" r="5" fill="#9ca3af"/>'
+    +'<path d="M8 30c0-5.523 4.477-10 10-10s10 4.477 10 10" fill="#9ca3af"/>'
   +'</svg>';
 }
 

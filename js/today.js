@@ -63,7 +63,7 @@ function _showTodayDemo(){
   if(wa){
     wa.style.display = 'block';
     wa.innerHTML = '<div class="wl-alert-wrap">'
-      + '<div class="t-alert-lbl-pur">🔔 Watchlist Running Today</div>'
+      + '<div class="t-alert-lbl-pur">Watchlist Running Today</div>'
       + [
           {horse:'Midnight Envoy', course:'Ascot', time:'14:30', jockey:'F. Dettori', race:'Copper Horse Stakes'},
           {horse:'Velvet Sunrise',  course:'Newmarket', time:'15:45', jockey:'R. Moore', race:'July Stakes'},
@@ -257,9 +257,9 @@ async function checkWatchlistRunners(races){
   window._wlAlerts=alerts; // stored for PDF generation
   alertEl.style.display='block';
   const todayStr=td();
-  alertEl.innerHTML='<div class="wl-alert-wrap">'
+  alertEl.innerHTML='<div class="t-alert-pur">'
     +'<div class="t-wl-hdr">'
-      +'<div class="t-alert-lbl-pur">🔔 Watchlist Running Today</div>'
+      +'<div class="t-alert-lbl-pur">Watchlist Running Today</div>'
       +'<button onclick="generateWatchlistPDF()" class="t-pdf-btn">↓ PDF</button>'
     +'</div>'
     +alerts.map(function(a){

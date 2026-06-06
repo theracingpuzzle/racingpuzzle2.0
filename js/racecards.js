@@ -285,10 +285,10 @@ function rcSwToggleFlatRace(idx){
 const ENG_COURSES=['aintree','ascot','bath','beverley','brighton','carlisle','cartmel','catterick','chelmsford','cheltenham','chester','doncaster','epsom','exeter','fakenham','fontwell','goodwood','haydock','hereford','hexham','huntingdon','kempton','leicester','lingfield','ludlow','market rasen','newbury','newcastle','newmarket','newton abbot','nottingham','plumpton','pontefract','redcar','ripon','salisbury','sandown','sedgefield','southwell','stratford','taunton','thirsk','uttoxeter','warwick','wetherby','wincanton','windsor','wolverhampton','worcester','yarmouth','york'];
 const SCO_COURSES=['ayr','hamilton','kelso','musselburgh','perth'];
 const WAL_COURSES=['bangor','bangor-on-dee','chepstow','ffos las'];
-const IRE_COURSES=['curragh','leopardstown','naas','navan','gowran park','galway','tipperary','cork','killarney','listowel','down royal','downpatrick','dundalk','fairyhouse','kilbeggan','laytown','limerick','roscommon','sligo','tramore','thurles','punchestown','ballinrobe','bellewstown','clonmel','mullingar','wexford','kilmalloch'];
-const GER_COURSES=['cologne'];
-const USA_COURSES=['santa anita'];
-const FRA_COURSES=['longchamp','auteuil'];
+const IRE_COURSES=['curragh','leopardstown','naas','navan','gowran park','galway','tipperary','cork','killarney','listowel','down royal','downpatrick','dundalk','fairyhouse','kilbeggan','laytown','limerick','roscommon','sligo','tramore','thurles','punchestown','ballinrobe','bellewstown','clonmel','wexford'];
+const GER_COURSES=['cologne','baden baden'];
+const USA_COURSES=['santa anita','saratoga'];
+const FRA_COURSES=['longchamp','auteuil','chantilly'];
 
 function rcCourseCountry(course){
   const c=(course||'').toLowerCase().trim();

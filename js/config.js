@@ -29,7 +29,7 @@ const CARDS = [
 ];
 
 // ─── TRACKS ───
-const TKS = ['Ascot','Aintree','Ayr','Bath','Brighton','Carlisle','Catterick','Chelmsford City','Cheltenham','Chester','Chepstow','Cork','Curragh','Doncaster','Down Royal','Dundalk','Epsom','Exeter','Fakenham','Ffos Las','Galway','Goodwood','Gowran Park','Hamilton','Haydock','Hereford','Hexham','Huntingdon','Kelso','Kempton','Leopardstown','Leicester','Limerick','Lingfield','Ludlow','Market Rasen','Musselburgh','Naas','Navan','Newbury','Newcastle','Newmarket','Newton Abbot','Nottingham','Perth','Plumpton','Pontefract','Punchestown','Redcar','Ripon','Salisbury','Sandown','Sedgefield','Sligo','Southwell','Stratford','Taunton','Thirsk','Tipperary','Towcester','Tramore','Uttoxeter','Warwick','Wincanton','Windsor','Wolverhampton','Worcester','Yarmouth','York'].sort();
+const TKS = ['Eagle Farm','Greyville','Ascot','Aintree','Ayr','Bath','Brighton','Carlisle','Catterick','Chelmsford City','Cheltenham','Chester','Chepstow','Cork','Curragh','Doncaster','Down Royal','Dundalk','Epsom','Exeter','Fakenham','Ffos Las','Galway','Goodwood','Gowran Park','Hamilton','Haydock','Hereford','Hexham','Huntingdon','Kelso','Kempton','Leopardstown','Leicester','Limerick','Lingfield','Ludlow','Market Rasen','Musselburgh','Naas','Navan','Newbury','Newcastle','Newmarket','Newton Abbot','Nottingham','Perth','Plumpton','Pontefract','Punchestown','Redcar','Ripon','Salisbury','Sandown','Sedgefield','Sligo','Southwell','Stratford','Taunton','Thirsk','Tipperary','Towcester','Tramore','Uttoxeter','Warwick','Wincanton','Windsor','Wolverhampton','Worcester','Yarmouth','York'].sort();
 
 // ─── PRE-BET CHECKLIST ───
 const CKS = [

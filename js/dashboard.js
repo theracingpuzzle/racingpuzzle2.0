@@ -168,12 +168,12 @@ function toggleOwnStudy(){
 
 function setStatsScope(scope){
   window._statsScope=scope;
-  const cfg={real:'#60a5fa',virt:'#fb923c',both:'var(--gld)'};
+  const cfg={real:'#60a5fa',virt:'#fb923c',both:'var(--navy)'};
   ['real','virt','both'].forEach(function(s){
     const el=document.getElementById('st-tog-'+s);if(!el)return;
     const active=s===scope;
     el.style.background=active?cfg[s]:'transparent';
-    el.style.color=active?'#141414':'var(--mut)';
+    el.style.color=active?(s==='both'?'#fff':'#141414'):'var(--mut)';
     el.style.fontWeight=active?'700':'400';
   });
   renderStats();

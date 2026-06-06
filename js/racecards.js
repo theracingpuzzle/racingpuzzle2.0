@@ -173,8 +173,10 @@ function rcSwRenderCourse(listEl){
   });
   const sorted=Object.keys(meetings).sort(function(a,b){
     const ca=rcCourseCountry(a),cb=rcCourseCountry(b);
-    const order={gb:0,ie:1,intl:2};
-    if(order[ca]!==order[cb])return order[ca]-order[cb];
+    // UK (eng/sco/wal) first, then others alphabetically by country, intl last
+    const order={eng:0,sco:0,wal:0,ie:1,aus:2,fra:3,ger:4,rsa:5,usa:6,intl:99};
+    const oa=order[ca]!=null?order[ca]:50,ob=order[cb]!=null?order[cb]:50;
+    if(oa!==ob)return oa-ob;
     return a.localeCompare(b);
   });
   listEl.innerHTML=sorted.map(function(course){
@@ -289,9 +291,13 @@ const IRE_COURSES=['curragh','leopardstown','naas','navan','gowran park','galway
 const GER_COURSES=['cologne','baden-baden'];
 const USA_COURSES=['santa anita','saratoga'];
 const FRA_COURSES=['longchamp','auteuil','chantilly'];
+const AUS_COURSES=['eagle farm','flemington','randwick','moonee valley','caulfield','morphettville'];
+const RSA_COURSES=['greyville','turffontein','kenilworth'];
 
 function rcCourseCountry(course){
   const c=(course||'').toLowerCase().trim();
+  // Ascot exists in both England and Australia — always resolve to England
+  if(c==='ascot'||c==='ascot (berkshire)')return'eng';
   if(SCO_COURSES.some(k=>k==='perth'?(c===k||c.startsWith(k+' ')||c.endsWith(' '+k)):c.includes(k)))return'sco';
   if(WAL_COURSES.some(k=>c.includes(k)))return'wal';
   if(ENG_COURSES.some(k=>c.includes(k)))return'eng';
@@ -299,6 +305,8 @@ function rcCourseCountry(course){
   if(GER_COURSES.some(k=>c.includes(k)))return'ger';
   if(USA_COURSES.some(k=>c.includes(k)))return'usa';
   if(FRA_COURSES.some(k=>c.includes(k)))return'fra';
+  if(AUS_COURSES.some(k=>c.includes(k)))return'aus';
+  if(RSA_COURSES.some(k=>c.includes(k)))return'rsa';
   if(c.includes('(aw)'))return'eng';
   return'intl';
 }
@@ -311,6 +319,8 @@ function rcCountryFlag(code){
   if(code==='ger')return'🇩🇪';
   if(code==='usa')return'🇺🇸';
   if(code==='fra')return'🇫🇷';
+  if(code==='aus')return'🇦🇺';
+  if(code==='rsa')return'🇿🇦';
   return'🌍';
 }
 
@@ -818,7 +828,13 @@ function rcSwRenderResultsCourse(listEl){
     if(!meetings[c]) meetings[c] = [];
     meetings[c].push(r);
   });
-  const courses = Object.keys(meetings).sort();
+  const courses = Object.keys(meetings).sort(function(a,b){
+    const ca=rcCourseCountry(a),cb=rcCourseCountry(b);
+    const order={eng:0,sco:0,wal:0,ie:1,aus:2,fra:3,ger:4,rsa:5,usa:6,intl:99};
+    const oa=order[ca]!=null?order[ca]:50,ob=order[cb]!=null?order[cb]:50;
+    if(oa!==ob)return oa-ob;
+    return a.localeCompare(b);
+  });
 
   listEl.innerHTML = courses.map(function(course){
     const races = meetings[course].slice().sort(function(a,b){

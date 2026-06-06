@@ -75,8 +75,10 @@
 /* Form figures */
 .rc-runner-form { font-size:11px; color:var(--mut); letter-spacing:.08em; display:block; margin-bottom:3px; }
 
-/* Jockey · age · trainer */
-.rc-runner-jt { font-size:12px; color:var(--mut); font-weight:500; }
+/* Labelled detail rows (Form / Jockey / Trainer) */
+.rc-runner-detail-row { display:flex; align-items:baseline; gap:6px; margin-bottom:2px; }
+.rc-detail-lbl { font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--mut); flex-shrink:0; min-width:42px; }
+.rc-runner-jt { font-size:12px; color:var(--txt); font-weight:500; }
 
 /* Watchlist reason pill */
 .rc-wl-pill { font-size:12px; }

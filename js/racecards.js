@@ -488,9 +488,12 @@ function rcSwRenderRunners(idx, course, el){
             +(_badge?'<span class="rc-wl-pill">'+_pm.emoji+'</span>':'')
             +(draw?'<span class="rc-runner-age">'+draw+'</span>':'')
           +'</div>'
-          +(form?'<span class="rc-runner-form">'+form+'</span>':'');
+          +(form
+            ?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Form</span><span class="rc-runner-form" style="margin-bottom:0;">'+form+'</span></div>'
+            :'');
         }())
-        +'<div class="rc-runner-jt">'+jock+(age?' · '+age:'')+'  ·  '+trainer+'</div>'
+        +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+(age?' ('+age+')':'')+'</span></div>':'')
+        +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
       +'</div>'
       +'<div class="rc-runner-actions">'
         +(isNR?''

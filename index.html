@@ -13,11 +13,11 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-apple.png">
 <title>The Racing Puzzle</title>
-<link rel="stylesheet" href="css/app.css?v=1780735642">
+<link rel="stylesheet" href="css/app.css?v=1780742358">
 
-<link rel="stylesheet" href="css/racecards.css?v=1780735642">
-<link rel="stylesheet" href="css/today.css?v=1780735642">
-<link rel="stylesheet" href="css/watchlist.css?v=1780735642">
+<link rel="stylesheet" href="css/racecards.css?v=1780742358">
+<link rel="stylesheet" href="css/today.css?v=1780742358">
+<link rel="stylesheet" href="css/watchlist.css?v=1780742358">
 </head>
 <body class="swipe-mode">
 
@@ -29,15 +29,24 @@
     <div class="logo" onclick="goHome()">
 RACING <span class="logo-accent">PUZZLE</span>
     </div>
-    <div class="hdr-bal">
-      <div class="hdr-bal-pill" style="border-color:rgba(96,165,250,.3);">
-        <span class="hdr-bal-lbl">Real</span>
-        <span id="hbank-wrap" class="hdr-bal-val" style="color:var(--blu);">£<span id="hbank">0.00</span><span id="hbank-arrow" class="hdr-bal-arrow"></span></span>
+    <div class="hdr-right">
+      <div class="hdr-bal">
+        <div class="hdr-bal-pill">
+          <span class="hdr-bal-lbl">Real</span>
+          <span id="hbank-wrap" class="hdr-bal-val" style="color:#60a5fa;">£<span id="hbank">0.00</span><span id="hbank-arrow" class="hdr-bal-arrow"></span></span>
+        </div>
+        <div class="hdr-bal-sep">·</div>
+        <div class="hdr-bal-pill">
+          <span class="hdr-bal-lbl">Virtual</span>
+          <span id="hvbank-wrap" class="hdr-bal-val" style="color:#fb923c;">£<span id="hvbank">0.00</span><span id="hvbank-arrow" class="hdr-bal-arrow"></span></span>
+        </div>
       </div>
-      <div class="hdr-bal-pill" style="border-color:rgba(251,146,60,.3);">
-        <span class="hdr-bal-lbl">Virtual</span>
-        <span id="hvbank-wrap" class="hdr-bal-val" style="color:var(--ora);">£<span id="hvbank">0.00</span><span id="hvbank-arrow" class="hdr-bal-arrow"></span></span>
-      </div>
+      <button class="hdr-profile-btn" onclick="navTo('settings')" title="Profile &amp; Settings">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="10" cy="7" r="3"/>
+          <path d="M3 18c0-3.866 3.134-7 7-7s7 3.134 7 7"/>
+        </svg>
+      </button>
     </div>
   </div>
 </div>
@@ -249,11 +258,11 @@ RACING <span class="logo-accent">PUZZLE</span>
       <div class="cin cin-touch">
         <div style="margin:-18px -17px 0;padding:14px 17px 12px;background:transparent;border-bottom:1px solid var(--clr-watch-a2);">
           <div class="lbl">Tracker</div>
-          <div style="font-size:20px;font-weight:700;color:var(--clr-watch);margin-bottom:10px;">Puzzle Profiler</div>
+          <div class="card-title" style="color:var(--clr-watch);">Puzzle Profiler</div>
           <div style="display:flex;gap:6px;align-items:center;">
             <input type="text" id="wl-search" oninput="renderWLList()" placeholder="Search…" style="font-size:11px;padding:5px 9px;border-radius:7px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);flex:1;min-width:0;">
-            <button id="wl-cal-btn" onclick="setWLView('cal')" class="wl-tog-btn on">Cal</button>
-            <button id="wl-list-btn" onclick="setWLView('list')" class="wl-tog-btn off">List</button>
+            <button id="wl-list-btn" onclick="setWLView('list')" class="wl-tog-btn on">List</button>
+            <button id="wl-cal-btn" onclick="setWLView('cal')" class="wl-tog-btn off">Cal</button>
             <button onclick="openWLForm(null)" style="width:32px;height:32px;border-radius:7px;border:1px solid var(--clr-watch-a3);background:var(--clr-watch-a1);color:var(--clr-watch);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
           </div>
         </div>
@@ -644,21 +653,21 @@ RACING <span class="logo-accent">PUZZLE</span>
 </div>
 
 <!-- ── JS modules — load order: config → state → utils → supabase → ui → features → init ── -->
-<script src="js/config.js?v=1780735642"></script>
-<script src="js/state.js?v=1780735642"></script>
-<script src="js/utils.js?v=1780735642"></script>
-<script src="js/supabase.js?v=1780735642"></script>
-<script src="js/racing-api.js?v=1780735642"></script>
-<script src="js/racecards.js?v=1780735642"></script>
-<script src="js/ui-shell.js?v=1780735642"></script>
-<script src="js/today.js?v=1780735642"></script>
-<script src="js/betting.js?v=1780735642"></script>
-<script src="js/rules.js?v=1780735642"></script>
-<script src="js/dashboard.js?v=1780735642"></script>
-<script src="js/virtual.js?v=1780735642"></script>
-<script src="js/watchlist.js?v=1780735642"></script>
-<script src="js/coach.js?v=1780735642"></script>
-<script src="js/init.js?v=1780735642"></script>
+<script src="js/config.js?v=1780742358"></script>
+<script src="js/state.js?v=1780742358"></script>
+<script src="js/utils.js?v=1780742358"></script>
+<script src="js/supabase.js?v=1780742358"></script>
+<script src="js/racing-api.js?v=1780742358"></script>
+<script src="js/racecards.js?v=1780742358"></script>
+<script src="js/ui-shell.js?v=1780742358"></script>
+<script src="js/today.js?v=1780742358"></script>
+<script src="js/betting.js?v=1780742358"></script>
+<script src="js/rules.js?v=1780742358"></script>
+<script src="js/dashboard.js?v=1780742358"></script>
+<script src="js/virtual.js?v=1780742358"></script>
+<script src="js/watchlist.js?v=1780742358"></script>
+<script src="js/coach.js?v=1780742358"></script>
+<script src="js/init.js?v=1780742358"></script>
 
 
 <!-- Hidden elements kept for JS compatibility (AI Coach removed from UI) -->

@@ -1,6 +1,6 @@
 // ─── WATCHLIST / PUZZLE PROFILER ───
 
-let wlView='cal', wlCalDate=new Date();
+let wlView='list', wlCalDate=new Date();
 // ── OR Edge helpers ──
 function orEdge(entry){
   const mr=parseFloat(entry.myRating);

@@ -71,12 +71,17 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .logo     { font-size: 18px; font-weight: 800; cursor: pointer; letter-spacing: .04em; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: #fff; text-transform: uppercase; }
 .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gld2); }
 .hdr-r    { display: flex; align-items: center; gap: 8px; }
-.hdr-bal  { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
-.hdr-bal-pill { display: flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 20px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.95); }
-.hdr-bal-lbl { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--mut); }
-.hdr-bal-val { font-size: 13px; font-weight: 700; white-space: nowrap; color: #fff; }
-.hdr-bal-arrow { margin-left: 3px; }
-.hdr-bal-sep { color: rgba(255,255,255,.3); font-size: 11px; margin: 0 2px; }
+/* Right side of header: balances + profile icon */
+.hdr-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.hdr-bal   { display: flex; align-items: center; gap: 4px; }
+.hdr-bal-pill { display: flex; align-items: center; gap: 4px; padding: 3px 0; }
+.hdr-bal-lbl  { font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.45); }
+.hdr-bal-val  { font-size: 13px; font-weight: 700; white-space: nowrap; }
+.hdr-bal-arrow { margin-left: 2px; }
+.hdr-bal-sep  { color: rgba(255,255,255,.2); font-size: 14px; margin: 0 2px; line-height: 1; }
+/* Profile icon button */
+.hdr-profile-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: rgba(255,255,255,.8); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s; -webkit-tap-highlight-color: transparent; }
+.hdr-profile-btn:active { background: rgba(255,255,255,.18); }
 
 /* Header pills & balance */
 .spill  { font-size: 11px; font-weight: 700; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); border-radius: 20px; padding: 4px 10px; color: #fff; letter-spacing: .04em; }

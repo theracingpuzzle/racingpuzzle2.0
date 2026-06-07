@@ -282,6 +282,7 @@ async function checkWatchlistRunners(races){
               ?'<span class="t-reviewed-badge">✓ Reviewed</span>'
               :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" data-dist="'+(a.raceDist||'')+'" data-going="'+(a.raceGoing||'')+'" data-class="'+(a.raceClass||'')+'" class="t-wl-review-btn t-review-btn">Review ✍️</button>'
             )
+            +'<button data-course="'+a.course+'" data-time="'+a.time+'" class="t-wl-race-btn t-race-btn">Race 🏇</button>'
             +'<button data-wlid="'+wid+'" class="t-wl-profile-btn t-profile-btn">Profile →</button>'
           +'</div>'
         +'</div>'
@@ -308,6 +309,29 @@ async function checkWatchlistRunners(races){
       btn.addEventListener('click',function(ev){
         ev.stopPropagation();
         var id=btn.getAttribute('data-wlid');if(id)openWLProfile(id);
+      });
+    });
+    alertEl.querySelectorAll('.t-wl-race-btn').forEach(function(btn){
+      btn.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        var course=btn.getAttribute('data-course');
+        var time=btn.getAttribute('data-time')||'';
+        if(!course)return;
+        navTo('races');
+        // Step 1: open meeting, then step 2: open the specific race
+        setTimeout(function(){
+          rcSwSelectCourse(course);
+          setTimeout(function(){
+            var safeId=course.replace(/\W/g,'_');
+            var races=window.rcSwRacesByMeeting&&window.rcSwRacesByMeeting[course];
+            if(!races)return;
+            var idx=races.findIndex(function(r){
+              var t=r.off||r.off_time||r.time||'';
+              return t===time;
+            });
+            if(idx>-1)rcSwToggle(idx,course,safeId,true);
+          },200);
+        },350);
       });
     });
   },0);

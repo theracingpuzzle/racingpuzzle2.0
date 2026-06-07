@@ -471,16 +471,13 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
       +'<div class="fg"><label>Date</label><input type="date" id="rvw-date" value="'+td()+'"></div>'
       +'<div class="fg"><label>Course</label><input type="text" id="rvw-course" value="'+(course||'')+'" placeholder="e.g. Haydock"></div>'
     +'</div>'
-    +'<div class="g2">'
-      +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" value="'+(raceDist||'')+'" placeholder="e.g. 1m2f"></div>'
-      +'<div class="fg"><label>Class</label><input type="text" id="rvw-class" value="'+(raceClass||'')+'" placeholder="e.g. Class 3"></div>'
-    +'</div>'
+    +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" value="'+(raceDist||'')+'" placeholder="e.g. 1m2f"></div>'
     +'<div class="fg"><label>Result</label><div class="rvw-btn-group">'
     +['win','place','unplaced','nr'].map(function(r){const cols={win:'var(--grn)',place:'var(--gld)',unplaced:'var(--red)',nr:'var(--mut)'};return'<button data-result="'+r+'" data-grp="result" class="rvw-btn" style="--rvw-col:'+cols[r]+'" onclick="wlRvwToggle(this)">'+r+'</button>';}).join('')
     +'</div></div>'
     +'<div class="g2">'
       +'<div class="fg"><label>Finish Position</label><input type="text" id="rvw-pos" placeholder="e.g. 3rd"></div>'
-      +'<div class="fg"><label>Beaten Distance</label><input type="text" id="rvw-beaten" placeholder="e.g. 2.5L"></div>'
+      +'<div class="fg" id="rvw-beaten-row"><label>Beaten Distance</label><input type="text" id="rvw-beaten" placeholder="e.g. 2.5L"></div>'
     +'</div>'
     +'<div class="fg"><label>Verdict</label><div class="rvw-btn-group">'
     +[{k:'upgrade',col:'var(--grn)',lbl:'Upgrade ↑'},{k:'hold',col:'var(--blu)',lbl:'Hold →'},{k:'downgrade',col:'var(--red)',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="--rvw-col:'+v.col+'" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
@@ -509,6 +506,19 @@ function wlRvwToggle(btn){
     b.style.opacity=isThis?'1':'0.4';
     b.dataset.selected=isThis?'1':'';
   });
+  // Result-specific UX
+  if(grp==='result'){
+    const result=btn.dataset.result;
+    const posEl=document.getElementById('rvw-pos');
+    const beatenRow=document.getElementById('rvw-beaten-row');
+    if(result==='win'){
+      if(posEl)posEl.value='1st';
+      if(beatenRow)beatenRow.style.display='none';
+    } else {
+      if(posEl&&posEl.value==='1st')posEl.value='';
+      if(beatenRow)beatenRow.style.display='';
+    }
+  }
 }
 
 function _rvwGet(grp){
@@ -522,16 +532,15 @@ function saveWLReview(profileId,horse,course){
   const date=document.getElementById('rvw-date').value||td();
   const rvwCourse=(document.getElementById('rvw-course').value||course||'').trim();
   const rvwDist=(document.getElementById('rvw-dist')||{value:''}).value.trim();
-  const rvwClass=(document.getElementById('rvw-class')||{value:''}).value.trim();
   const mrAdjEl=document.getElementById('rvw-mr-adj');
   const mrAdj=mrAdjEl?parseInt(mrAdjEl.value)||0:0;
   // Build a descriptive raceName from distance + class for display purposes
-  const raceName=[rvwDist,rvwClass].filter(Boolean).join(' · ');
+  const raceName=rvwDist||'';
 
   const review={
     id:gid(),profileId:profileId,
     date:date,raceName:raceName,course:rvwCourse,
-    distance:rvwDist,raceClass:rvwClass,going:(document.getElementById('rvw-going-prefill')||{value:''}).value,
+    distance:rvwDist,going:(document.getElementById('rvw-going-prefill')||{value:''}).value,
     result:_rvwGet('result'),
     position:(document.getElementById('rvw-pos').value||'').trim(),
     beatenDistance:(document.getElementById('rvw-beaten').value||'').trim(),
@@ -1395,7 +1404,6 @@ function _wlpBuildHTML(e){
     h+='<span>'+fmt(latestReview.date)+'</span>';
     if(latestReview.course)h+='<span class="wlp-notepad-dot">·</span><span>'+esc(latestReview.course)+'</span>';
     if(latestReview.distance)h+='<span class="wlp-notepad-dot">·</span><span>'+esc(latestReview.distance)+'</span>';
-    if(latestReview.raceClass)h+='<span class="wlp-notepad-dot">·</span><span>'+esc(latestReview.raceClass)+'</span>';
     if(latestReview.result)h+='<span class="wlp-result-badge" style="background:'+rc+'22;color:'+rc+';">'+latestReview.result.toUpperCase()+'</span>';
     h+='</div><div class="wlp-notepad-text">'+esc(latestReview.notes||'No notes')+'</div></div>';
   }else{

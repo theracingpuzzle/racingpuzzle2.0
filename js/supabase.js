@@ -517,7 +517,6 @@ async function _syncReviews(){
     verdict:r.verdict||null,mr_adjustment:r.mrAdjustment||0,
     going_confirmed:r.goingConfirmed||null,back_next_time:r.backNextTime||null,
     notes:r.notes||null,source:r.source||'manual',
-    needs_review:r.needsReview||false,
     created_at:r.createdAt?new Date(r.createdAt).toISOString():new Date().toISOString()
   };});
   const ids=rows.map(function(r){return r.id;});

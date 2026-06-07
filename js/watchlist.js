@@ -889,8 +889,7 @@ const WLP_CSS = `
   text-transform: uppercase; color: var(--mut); display: block; margin-bottom: 1px;
 }
 .wlp-or-value {
-  
-  font-size: 32px; letter-spacing: 1px; color: var(--gld2); line-height: 1;
+  font-size: 32px; letter-spacing: 1px; color: #fff; line-height: 1;
 }
 .wlp-or-na {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;

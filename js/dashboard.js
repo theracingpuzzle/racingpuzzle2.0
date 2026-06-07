@@ -471,11 +471,10 @@ function _openModal(b,type){
   document.getElementById('emres').value=b.result||'pending';
   document.getElementById('emret').value=b.returns||'';
   document.getElementById('emnotes').value=b.postNotes||'';
-  document.getElementById('emod').classList.add('open');
+  const scr=document.getElementById('emod');scr.style.display='block';scr.scrollTop=0;
 }
 function closeEM(){
-  document.getElementById('emod').classList.remove('open');
-  const lbl=document.getElementById('em-type-lbl');if(lbl)lbl.style.color='var(--mut)';
+  document.getElementById('emod').style.display='none';
 }
 function saveEM(){
   const id=document.getElementById('emid').value;

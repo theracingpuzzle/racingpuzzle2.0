@@ -553,49 +553,65 @@ RACING <span class="logo-accent">PUZZLE</span>
 
 
 
-<!-- COMMAND CENTRE -->
-<!-- EDIT MODAL -->
-<div class="mov" id="emod">
-  <div class="mbox">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;">
-      <div>
-        <div style="font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px;" id="em-type-lbl">Real Bet</div>
-        <div class="mttl" id="emttl">Update Bet</div>
+<!-- EDIT BET FULL-SCREEN -->
+<div class="em-screen" id="emod" style="display:none;">
+  <!-- Sticky nav -->
+  <div class="em-nav">
+    <div class="em-nav-title">
+      <span id="em-type-lbl" style="font-family:monospace;font-size:9px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:2px;">Real Bet</span>
+      Edit Bet
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="delBetEM()" class="em-del-btn">Delete</button>
+      <button onclick="closeEM()" class="em-close-btn">✕</button>
+    </div>
+  </div>
+
+  <!-- Hero strip -->
+  <div class="em-hero">
+    <div class="em-hero-title" id="emttl">—</div>
+    <div class="em-hero-sub" id="emsub">—</div>
+  </div>
+
+  <input type="hidden" id="emid">
+  <input type="hidden" id="emtype">
+
+  <div class="em-body">
+    <!-- Bet details section -->
+    <div id="em-full-fields" class="em-section">
+      <div class="em-sec-hdr"><span class="em-sec-num">1</span><span class="em-sec-title">Bet Details</span></div>
+      <div class="em-sec-body">
+        <div class="g2">
+          <div class="fg"><label>Horse</label><input type="text" id="em-horse" autocomplete="off"></div>
+          <div class="fg"><label>Track</label><input type="text" id="em-track" autocomplete="off"></div>
+          <div class="fg"><label>Time</label><input type="text" id="em-time"></div>
+          <div class="fg"><label>Odds</label><input type="text" id="em-odds" style="font-family:monospace;" oninput="onEditResChange()"></div>
+          <div class="fg"><label>Stake (£)</label><input type="number" id="em-stake" step="0.5" oninput="onEditResChange()"></div>
+          <div class="fg"><label>Type</label><select id="em-type-sel" onchange="onEditResChange()"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>
+          <div class="fg"><label>Jockey</label><input type="text" id="em-jockey" autocomplete="off"></div>
+          <div class="fg"><label>Trainer</label><input type="text" id="em-trainer" autocomplete="off"></div>
+        </div>
+        <div class="fg"><label>Source</label><select id="em-source"></select></div>
+        <div class="fg"><label>Pre-Race Notes</label><textarea id="em-prenotes" style="min-height:52px"></textarea></div>
       </div>
-      <button onclick="closeEM()" style="background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer;padding:4px;">✕</button>
     </div>
-    <div class="msub" id="emsub">—</div>
-    <input type="hidden" id="emid">
-    <input type="hidden" id="emtype"> <!-- 'real' or 'virt' -->
 
-    <!-- Pending: show all fields. Settled: show result/returns/notes only -->
-    <div id="em-full-fields">
-      <div class="g2">
-        <div class="fg"><label>Horse</label><input type="text" id="em-horse" autocomplete="off"></div>
-        <div class="fg"><label>Track</label><input type="text" id="em-track" autocomplete="off"></div>
-        <div class="fg"><label>Time</label><input type="text" id="em-time" placeholder=""></div>
-        <div class="fg"><label>Odds</label><input type="text" id="em-odds" style="font-family:monospace;" oninput="onEditResChange()"></div>
-        <div class="fg"><label>Stake (£)</label><input type="number" id="em-stake" step="0.5" oninput="onEditResChange()"></div>
-        <div class="fg"><label>Type</label><select id="em-type-sel" onchange="onEditResChange()"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>
-        <div class="fg"><label>Jockey</label><input type="text" id="em-jockey" autocomplete="off"></div>
-        <div class="fg"><label>Trainer</label><input type="text" id="em-trainer" autocomplete="off"></div>
+    <!-- Result section -->
+    <div class="em-section">
+      <div class="em-sec-hdr"><span class="em-sec-num">2</span><span class="em-sec-title" id="em-result-divider">Result</span></div>
+      <div class="em-sec-body">
+        <div class="g2">
+          <div class="fg"><label>Result</label><select id="emres" onchange="onEditResChange()"><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>
+          <div class="fg"><label>Returns (£)</label><input type="number" id="emret" step="0.01" min="0" placeholder=""></div>
+        </div>
+        <div class="fg"><label>Post-Race Notes</label><textarea id="emnotes" placeholder="What happened? What did I learn?" style="min-height:52px"></textarea></div>
       </div>
-      <div class="fg"><label>Source</label><select id="em-source"></select></div>
-      <div class="fg"><label>Pre-Race Notes</label><textarea id="em-prenotes" style="min-height:44px"></textarea></div>
     </div>
 
-    <div class="sdiv" style="margin-top:12px;" id="em-result-divider">Result</div>
-    <div class="g2">
-      <div class="fg"><label>Result</label><select id="emres" onchange="onEditResChange()"><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>
-      <div class="fg"><label>Returns (£)</label><input type="number" id="emret" step="0.01" min="0" placeholder=""></div>
+    <div class="em-actions">
+      <button class="em-save-btn" onclick="saveEM()">Save Changes</button>
+      <button class="em-cancel-btn" onclick="closeEM()">Cancel</button>
     </div>
-    <div class="fg"><label>Post-Race Notes</label><textarea id="emnotes" placeholder="What happened? What did I learn?" style="min-height:44px"></textarea></div>
-
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="btn bgld" style="flex:1" onclick="saveEM()">Save</button>
-      <button class="btn bout" onclick="closeEM()">Cancel</button>
-    </div>
-    <button class="btn bdng bw mt8" onclick="delBetEM()">Delete this bet</button>
   </div>
 </div>
 

@@ -245,7 +245,15 @@
 .wlp-why-icon   { font-size:14px; }
 .wlp-why-label  { font-size:9px; font-weight:700; letter-spacing:.4px; text-align:center; line-height:1.2; color:var(--mut); }
 .wlp-why-active .wlp-why-label { color:var(--gld2); font-weight:800; }
-.wlp-reason-note { padding:0 13px 11px; font-size:13px; color:var(--mut); line-height:1.5; font-style:italic; }
+.wlp-reason-note { padding:0 13px 6px; font-size:13px; color:var(--mut); line-height:1.5; font-style:italic; }
+.wlp-init-obs { margin:0 13px 12px; padding:10px 12px; background:var(--sur2); border:1px solid var(--bdr); border-radius:10px; }
+.wlf-obs-sub-hdr { font-size:9px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:var(--mut); padding:10px 0 8px; }
+.wlf-rvw-row { padding:10px 0; border-bottom:1px solid var(--bdr); }
+.wlf-rvw-row:last-child { border-bottom:none; }
+.wlf-rvw-meta { font-size:11px; color:var(--mut); display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-bottom:3px; }
+.wlf-rvw-dot { opacity:.4; }
+.wlf-rvw-badge { font-size:9px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+.wlf-rvw-notes { font-size:12px; color:var(--txt); line-height:1.4; }
 
 /* Ratings */
 .wlp-ratings-row { display:flex; padding:13px 12px; }

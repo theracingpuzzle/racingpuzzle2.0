@@ -581,7 +581,7 @@ function openWLForm(id,prefill){
   modal.innerHTML=
   '<div class="wlf-page">'
   +'<div class="wlf-nav">'
-  +'<div class="wlf-brand"><span>🧩</span>RACING <span class="wlf-brand-accent">PUZZLE</span></div>'
+  +'<div class="wlf-brand">RACING <span class="wlf-brand-accent">PUZZLE</span></div>'
   +'<div class="wlf-nav-btns">'
   +(e?'<button onclick="delWLEntry(\''+e.id+'\')" class="wlf-del-btn">Delete</button>':'')
   +'<button onclick="document.getElementById(\'wl-modal\').remove()" class="wlf-close-btn">✕</button>'
@@ -1201,7 +1201,7 @@ function _wlpBuildHTML(e){
   // NAV
   h+='<div class="wlp-nav">';
   h+='<div class="wlp-back" onclick="document.getElementById(\'wlp-modal\').remove()">← Profiles</div>';
-  h+='<div class="wlp-brand"><span style="font-size:16px;">🧩</span>RACING <span class="wlp-brand-accent">PUZZLE</span></div>';
+  h+='<div class="wlp-brand">RACING <span class="wlp-brand-accent">PUZZLE</span></div>';
   h+='<div class="wlp-edit-btn" onclick="'+editFn+'">Edit ✏️</div>';
   h+='</div>';
 
@@ -1210,7 +1210,7 @@ function _wlpBuildHTML(e){
   h+='<div class="wlp-hero-bg">🐎</div>';
   h+='<div class="wlp-hero-top">';
   h+='<div>';
-  h+='<div class="wlp-name-row"><span class="wlp-name">'+esc(e.horse)+'</span><div class="wlp-verified">✓</div></div>';
+  h+='<div class="wlp-name-row"><span class="wlp-name">'+esc(e.horse)+'</span></div>';
   h+='<div><span class="wlp-reason-badge" style="background:'+reason.col+'20;border:1px solid '+reason.col+'40;color:'+reason.col+';">'+reason.emoji+' '+reason.label+'</span></div>';
   h+='</div>';
   h+='<div class="wlp-or-box"><span class="wlp-or-label">OR</span>';
@@ -1229,18 +1229,10 @@ function _wlpBuildHTML(e){
   h+='<div class="wlp-hero-body">';
   h+='<div class="wlp-silks">';
   h+='<svg width="64" height="74" viewBox="0 0 70 80" fill="none">';
-  h+='<path d="M20 20 Q35 16 50 20 L54 62 Q35 66 16 62 Z" fill="#7c3aed"/>';
-  h+='<path d="M28 19 L28 63" stroke=CLR_WATCH stroke-width="5"/>';
-  h+='<path d="M42 19 L42 63" stroke=CLR_WATCH stroke-width="5"/>';
-  h+='<path d="M20 20 Q10 24 6 38 Q10 42 16 40 L20 28 Z" fill="#7c3aed"/>';
-  h+='<line x1="8" y1="24" x2="15" y2="40" stroke=CLR_WATCH stroke-width="4"/>';
-  h+='<path d="M50 20 Q60 24 64 38 Q60 42 54 40 L50 28 Z" fill="#7c3aed"/>';
-  h+='<line x1="62" y1="24" x2="55" y2="40" stroke=CLR_WATCH stroke-width="4"/>';
-  h+='<path d="M26 20 Q35 15 44 20 Q35 26 26 20 Z" fill=CLR_WATCH/>';
-  h+='<ellipse cx="35" cy="12" rx="13" ry="6" fill=CLR_WATCH/>';
-  h+='<ellipse cx="35" cy="10" rx="10" ry="7" fill="#7c3aed"/>';
-  h+='<rect x="22" y="11" width="26" height="3" fill=CLR_WATCH rx="1"/>';
-  h+='<circle cx="35" cy="7" r="2" fill=CLR_WATCH/>';
+  h+='<path d="M20 20 Q35 16 50 20 L54 62 Q35 66 16 62 Z" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>';
+  h+='<path d="M20 20 Q10 24 6 38 Q10 42 16 40 L20 28 Z" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>';
+  h+='<path d="M50 20 Q60 24 64 38 Q60 42 54 40 L50 28 Z" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>';
+  h+='<ellipse cx="35" cy="12" rx="13" ry="6" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>';
   h+='</svg></div>';
 
   h+='<div class="wlp-stats">';

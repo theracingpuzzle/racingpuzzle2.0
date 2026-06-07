@@ -534,7 +534,6 @@ function saveEM(){
   save();updHdr();closeEM();renderToday();renderNums();
   renderStats();renderHist();
 }
-function closeEM(){document.getElementById('emod').classList.remove('open');}
 function delBetEM(){
   if(!confirm('Delete this bet permanently?'))return;
   const id=document.getElementById('emid').value;
@@ -562,5 +561,4 @@ function delBetEM(){
   save();updHdr();closeEM();renderVBMini();
   renderStats();renderHist();
 }
-document.getElementById('emod').addEventListener('click',e=>{if(e.target===e.currentTarget)closeEM();});
 

@@ -207,9 +207,9 @@
 .wlp-or-na    { font-size:13px; font-weight:700; color:rgba(255,255,255,.3); }
 
 /* Meta strip */
-.wlp-meta { display:flex; position:relative; z-index:1; margin-top:14px; border-top:1px solid rgba(255,255,255,.1); }
-.wlp-meta-cell { flex:1; padding:9px 11px; border-right:1px solid rgba(255,255,255,.1); }
-.wlp-meta-cell:last-child { border-right:none; }
+.wlp-meta { display:flex; flex-direction:column; position:relative; z-index:1; margin-top:14px; border-top:1px solid rgba(255,255,255,.1); }
+.wlp-meta-cell { padding:9px 11px; border-bottom:1px solid rgba(255,255,255,.1); }
+.wlp-meta-cell:last-child { border-bottom:none; }
 .wlp-meta-label { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.35); display:block; margin-bottom:3px; }
 .wlp-meta-val   { font-size:13px; font-weight:700; color:#fff; }
 

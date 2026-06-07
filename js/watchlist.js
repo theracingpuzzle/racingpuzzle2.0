@@ -634,7 +634,6 @@ function openWLForm(id,prefill){
   +'<div class="wlf-sec-hdr"><div class="wlf-sec-num">6</div><span class="wlf-sec-title" style="color:var(--grn);">Conditions Profile</span></div>'
   +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
   +'<div class="fg"><label>Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
-  +'<div class="g2">'
   +(function(){
       var distHtml=DIST_GROUPS.map(function(grp){
         return'<div style="margin-bottom:6px;">'
@@ -646,7 +645,6 @@ function openWLForm(id,prefill){
       return'<div class="fg"><label>Preferred Distance</label><div id="wlf-dist-btns" style="padding:4px 0;">'+distHtml+'</div></div>';
     }())
   +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight" value="'+(e?e.trackPref||'':'')+'"></div>'
-  +'</div>'
   +'<div class="fg"><label>Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="min-height:52px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
   +'</div></div>'
   +'<div class="wlf-actions">'

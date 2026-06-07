@@ -446,6 +446,60 @@ function renderWLEntry(e){
 
 
 // ── POST-RACE REVIEW SHEET ──
+function openWLEditReview(reviewId){
+  const r=(D.reviews||[]).find(function(x){return x.id===reviewId;});
+  if(!r)return;
+  const wl=getWL();
+  const entry=wl.find(function(x){return x.id===r.profileId;})||{};
+  openWLPostRaceReview(r.profileId,entry.horse||'',r.course||'','','',r.distance||'',r.going||'','');
+  // After modal opens, populate all fields from existing review
+  setTimeout(function(){
+    const d=document.getElementById('rvw-date');if(d)d.value=r.date||'';
+    const c=document.getElementById('rvw-course');if(c)c.value=r.course||'';
+    const dist=document.getElementById('rvw-dist');if(dist)dist.value=r.distance||'';
+    const pos=document.getElementById('rvw-pos');if(pos)pos.value=r.position||'';
+    const beaten=document.getElementById('rvw-beaten');if(beaten)beaten.value=r.beatenDistance||'';
+    const mr=document.getElementById('rvw-mr-adj');if(mr)mr.value=r.mrAdjustment||0;
+    const notes=document.getElementById('rvw-notes');if(notes)notes.value=r.notes||'';
+    const goingPre=document.getElementById('rvw-going-prefill');if(goingPre)goingPre.value=r.going||'';
+    // Pre-select toggle buttons
+    ['result','verdict','going','back'].forEach(function(grp){
+      const val={result:r.result,verdict:r.verdict,going:r.goingConfirmed,back:r.backNextTime}[grp];
+      if(!val)return;
+      const btn=document.querySelector('.rvw-btn[data-grp="'+grp+'"][data-'+grp+'="'+val+'"]');
+      if(btn)wlRvwToggle(btn);
+    });
+    // Result UX (hide beaten if win)
+    if(r.result==='win'){
+      const beatenRow=document.getElementById('rvw-beaten-row');
+      if(beatenRow)beatenRow.style.display='none';
+    }
+    // Override save to update existing record instead of creating new
+    const saveBtn=document.querySelector('#wl-review-modal .btn.bgld');
+    if(saveBtn){
+      saveBtn.onclick=function(){
+        r.date=document.getElementById('rvw-date').value||r.date;
+        r.course=(document.getElementById('rvw-course').value||'').trim()||r.course;
+        r.distance=(document.getElementById('rvw-dist')||{value:''}).value.trim();
+        r.position=(document.getElementById('rvw-pos').value||'').trim();
+        r.beatenDistance=(document.getElementById('rvw-beaten').value||'').trim();
+        r.result=_rvwGet('result')||r.result;
+        r.verdict=_rvwGet('verdict')||r.verdict;
+        r.goingConfirmed=_rvwGet('going')||r.goingConfirmed;
+        r.backNextTime=_rvwGet('back')||r.backNextTime;
+        r.mrAdjustment=parseInt((document.getElementById('rvw-mr-adj')||{value:0}).value)||0;
+        r.notes=(document.getElementById('rvw-notes').value||'').trim();
+        r.going=(document.getElementById('rvw-going-prefill')||{value:''}).value;
+        r.raceName=r.distance||'';
+        const idx=(D.reviews||[]).findIndex(function(x){return x.id===reviewId;});
+        if(idx>-1)D.reviews[idx]=r;
+        save();
+        document.getElementById('wl-review-modal').remove();
+        if(document.getElementById('wlp-modal'))openWLProfile(r.profileId);
+      };
+    }
+  },50);
+}
 function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,raceGoing,raceClass){
   const existing=document.getElementById('wl-review-modal');if(existing)existing.remove();
   const wl=getWL();
@@ -1393,28 +1447,9 @@ function _wlpBuildHTML(e){
   }
   h+='</div>';
 
-  // Section 3: Race Reviews (horse_reviews only)
-  const reviewAddFn="openWLPostRaceReview('"+e.id+"','"+e.horse.replace(/'/g,"\\'")+"','','','')";
+  // Section 3: Targets
   h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">3</div><span class="wlp-section-title" style="font-size:11px;">Race Reviews</span></div>';
-  h+='<span class="wlp-section-action" style="font-size:11px;" onclick="'+reviewAddFn+'">Add +</span></div>';
-  if(latestReview){
-    const rc=RESULT_COLS[latestReview.result||'']||'#888';
-    h+='<div class="wlp-notepad"><div class="wlp-notepad-meta">';
-    h+='<span>'+fmt(latestReview.date)+'</span>';
-    if(latestReview.course)h+='<span class="wlp-notepad-dot">·</span><span>'+esc(latestReview.course)+'</span>';
-    if(latestReview.distance)h+='<span class="wlp-notepad-dot">·</span><span>'+esc(latestReview.distance)+'</span>';
-    if(latestReview.result)h+='<span class="wlp-result-badge" style="background:'+rc+'22;color:'+rc+';">'+latestReview.result.toUpperCase()+'</span>';
-    h+='</div><div class="wlp-notepad-text">'+esc(latestReview.notes||'No notes')+'</div></div>';
-  }else{
-    h+='<div class="wlp-notepad-empty">No race reviews yet<br>Tap Add after each run</div>';
-  }
-  if(horseReviews.length>1)h+='<div class="wlp-obs-count">📋 '+horseReviews.length+' reviews ›</div>';
-  h+='</div>';
-
-  // Section 4: Targets
-  h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">4</div><span class="wlp-section-title" style="font-size:11px;">Targets</span></div>';
+  h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">3</div><span class="wlp-section-title" style="font-size:11px;">Targets</span></div>';
   h+='<span class="wlp-section-action" style="font-size:16px;" onclick="'+editFn+'">+</span></div>';
   if(targets.length){
     targets.forEach(function(t){
@@ -1435,7 +1470,7 @@ function _wlpBuildHTML(e){
   const VERDICT_META={upgrade:{col:'#4ade80',label:'Upgrade ↑'},hold:{col:'#60a5fa',label:'Hold →'},downgrade:{col:'#f87171',label:'Downgrade ↓'}};
   const RESULT_COL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'#3a3a5c'};
   h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Race Reviews</span></div>';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">4</div><span class="wlp-section-title">Race Reviews</span></div>';
   h+='<span class="wlp-section-action" onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\'\')">Add +</span></div>';
   if(profileReviews.length){
     profileReviews.forEach(function(r){
@@ -1443,8 +1478,8 @@ function _wlpBuildHTML(e){
       const rc=RESULT_COL[r.result]||'#3a3a5c';
       h+='<div style="padding:11px 13px;border-bottom:1px solid var(--bdr);">';
       h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">';
-      h+='<div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(r.raceName||r.course||'Race')+'</div>';
-      h+='<div style="font-size:11px;color:var(--mut);">'+[r.date?_wlpFmt(r.date):'',r.course].filter(Boolean).join(' · ')+'</div></div>';
+      h+='<div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(r.course||'Race')+(r.distance?' · '+r.distance:'')+'</div>';
+      h+='<div style="font-size:11px;color:var(--mut);">'+[r.date?_wlpFmt(r.date):''].filter(Boolean).join(' · ')+'</div></div>';
       h+='<div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">';
       if(r.result)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>';
       if(vm)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;padding:2px 8px;border-radius:5px;background:'+vm.col+'15;border:1px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';
@@ -1457,6 +1492,7 @@ function _wlpBuildHTML(e){
       if(r.backNextTime)chips.push('Back: '+r.backNextTime);
       if(chips.length)h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">'+chips.map(function(c){return'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--mut);">'+c+'</span>';}).join('')+'</div>';
       if(r.notes)h+='<div style="font-size:12px;color:var(--mut);font-style:italic;line-height:1.5;">'+esc(r.notes)+'</div>';
+      h+='<div style="margin-top:8px;"><button onclick="openWLEditReview(\''+r.id+'\')" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--mut);cursor:pointer;">Edit ✏️</button></div>';
       h+='</div>';
     });
   } else {
@@ -1466,7 +1502,7 @@ function _wlpBuildHTML(e){
 
   // SECTION 6: CONDITIONS
   h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Conditions Profile</span></div></div>';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Conditions</span></div><span class="wlp-section-action" onclick="'+editFn+'">Edit ✏️</span></div>';
   h+='<div class="wlp-cond-grid" style="grid-template-columns:repeat('+condItems.length+',1fr);border-bottom:1px solid var(--bdr);">';
   condItems.forEach(function(c){
     const isDash=c.value==='—'||c.value==='Any';

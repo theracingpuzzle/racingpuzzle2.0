@@ -1303,7 +1303,7 @@ function _wlpBuildHTML(e){
   if((e.orHistory||[]).length>1)h+='<span class="wlp-section-action">History ›</span>';
   h+='</div>';
   h+='<div class="wlp-ratings-row">';
-  [{key:'Official Rating',val:e.currentRating,col:'#8b5cf6'},{key:'My Rating',val:e.myRating,col:'#f97316'}].forEach(function(r){
+  [{key:'Official Rating',val:e.currentRating,col:'var(--navy)'},{key:'My Rating',val:e.myRating,col:'#f97316'}].forEach(function(r){
     const v=parseFloat(r.val)||null;
     h+='<div class="wlp-rating-col"><span class="wlp-rating-key">'+r.key+'</span>';
     if(v){h+='<span class="wlp-rating-val" style="color:'+r.col+';">'+v+'</span>';
@@ -1319,11 +1319,8 @@ function _wlpBuildHTML(e){
   }
   h+='</div>';
 
-  // SECTIONS 3+4 SPLIT
-  h+='<div class="wlp-split">';
-
   // Section 3: Observations
-  h+='<div class="wlp-section" style="flex:1.05;">';
+  h+='<div class="wlp-section">';
   h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">3</div><span class="wlp-section-title" style="font-size:11px;">Observations</span></div>';
   h+='<span class="wlp-section-action" style="font-size:11px;" onclick="'+editFn+'">Add +</span></div>';
   if(latestObs){
@@ -1341,7 +1338,7 @@ function _wlpBuildHTML(e){
   h+='</div>';
 
   // Section 4: Targets
-  h+='<div class="wlp-section" style="flex:1;">';
+  h+='<div class="wlp-section">';
   h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">4</div><span class="wlp-section-title" style="font-size:11px;">Targets</span></div>';
   h+='<span class="wlp-section-action" style="font-size:16px;" onclick="'+editFn+'">+</span></div>';
   if(targets.length){
@@ -1357,7 +1354,6 @@ function _wlpBuildHTML(e){
   }
   h+='</div>';
 
-  h+='</div>'; // split
 
   // SECTION 5: REVIEWS
   const profileReviews=(D.reviews||[]).filter(function(r){return r.profileId===e.id;}).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});

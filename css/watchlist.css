@@ -203,13 +203,13 @@
 .wlp-reason-badge { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; padding:3px 8px; border-radius:5px; margin-top:4px; }
 .wlp-or-box { background:rgba(255,255,255,.1); border:1.5px solid rgba(196,181,253,.4); border-radius:10px; padding:7px 13px; text-align:center; }
 .wlp-or-label { font-size:9px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,.4); display:block; margin-bottom:1px; }
-.wlp-or-value { font-size:32px; font-weight:900; letter-spacing:1px; color:#c4b5fd; line-height:1; }
+.wlp-or-value { font-size:32px; font-weight:900; letter-spacing:1px; color:#fff; line-height:1; }
 .wlp-or-na    { font-size:13px; font-weight:700; color:rgba(255,255,255,.3); }
 
 /* Meta strip */
-.wlp-meta { display:flex; flex-direction:column; position:relative; z-index:1; margin-top:14px; border-top:1px solid rgba(255,255,255,.1); }
-.wlp-meta-cell { padding:9px 11px; border-bottom:1px solid rgba(255,255,255,.1); }
-.wlp-meta-cell:last-child { border-bottom:none; }
+.wlp-meta { display:flex; position:relative; z-index:1; margin-top:14px; border-top:1px solid rgba(255,255,255,.1); }
+.wlp-meta-cell { flex:1; padding:9px 11px; border-right:1px solid rgba(255,255,255,.1); }
+.wlp-meta-cell:last-child { border-right:none; }
 .wlp-meta-label { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.35); display:block; margin-bottom:3px; }
 .wlp-meta-val   { font-size:13px; font-weight:700; color:#fff; }
 

@@ -218,7 +218,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
 /* Block / panel */
 .blk  { background: var(--sur); border: 1px solid var(--bdr); border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-.bttl { font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--navy); margin-bottom: 10px; padding-bottom: 7px; border-bottom: 1px solid var(--bdr); }
+.bttl { font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--mut); margin-bottom: 10px; padding-bottom: 7px; border-bottom: 1px solid var(--bdr); }
 
 /* Stat grid */
 .sg  { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 9px; margin-bottom: 14px; }

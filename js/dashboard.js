@@ -225,9 +225,9 @@ function renderStats(){
 
   // ── Auto-observations ──
   const insights=[];
-  // Virtual vs Real comparison — only in 'both' mode
-  if(scope==='both'){
-    const vBets2=getVBank().bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='nr');
+  // Virtual vs Real comparison — only in 'both' mode and NOT own study
+  if(scope==='both'&&!ownStudyOnly){
+    const vBets2=getVBank().bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr');
     if(vBets2.length>=3&&realBets.length>=3){
       const vSt=vBets2.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
       const vRet=vBets2.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
@@ -241,10 +241,10 @@ function renderStats(){
       else insights.push('📊 Virtual and real closely aligned ('+vROI.toFixed(1)+'% vs '+rROI.toFixed(1)+'% ROI). Process is consistent.');
     }
   }
-  // Best source
+  // Best source — only when NOT in own study mode (all bets are own study then)
   const srcMap={};set.forEach(b=>{const k=b.source||'Unknown';if(!srcMap[k])srcMap[k]={p:0,n:0,staked:0,wins:0};srcMap[k].p+=(pnl(b)||0);srcMap[k].n++;srcMap[k].staked+=(parseFloat(b.stake)||0);if(b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place')))srcMap[k].wins++;});
   const srcArr=Object.entries(srcMap).map(([k,v])=>({k,roi:v.staked>0?v.p/v.staked*100:0,p:v.p,n:v.n,sr:v.n>0?(v.wins/v.n*100):0}));
-  if(srcArr.length>1){
+  if(!ownStudyOnly&&srcArr.length>1){
     srcArr.sort((a,b)=>b.roi-a.roi);
     const best=srcArr[0],worst=srcArr[srcArr.length-1];
     if(best.roi>0)insights.push('✅ <strong style="color:var(--grn);">'+best.k+'</strong> is your best source — ROI of '+best.roi.toFixed(1)+'% from '+best.n+' bets.');
@@ -259,9 +259,9 @@ function renderStats(){
     else if(lcROI>hcROI+10)insights.push('🤔 Your lower-confidence bets are actually outperforming high-confidence by '+(lcROI-hcROI).toFixed(0)+'% ROI. Are you overthinking your best bets?');
     else insights.push('📊 No significant difference between high and low confidence ROI yet. Keep logging.');
   }
-  // Chasing pattern — consecutive losses followed by big stake
-  const recent=[...D.bets].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,10);
-  let consLosses=0;for(const b of recent){if(b.result==='loss')consLosses++;else if(b.result&&b.result!=='pending')break;}
+  // Chasing pattern — use scope-matched bets, not all bets
+  const recentScoped=[...statBets].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,10);
+  let consLosses=0;for(const b of recentScoped){if(b.result==='loss')consLosses++;else if(b.result&&b.result!=='pending')break;}
   if(consLosses>=3)insights.push('🚨 You\'re on <strong style="color:var(--red);">'+consLosses+' consecutive losses</strong>. This is the highest-risk time for chasing. Step back before the next bet.');
   // Bet frequency
   const today=disciplineSet.filter(b=>b.date===td()).length;
@@ -377,7 +377,8 @@ function renderStats(){
   // ── Track bar chart ──
   function bar(id,data){const el=document.getElementById(id);if(!el)return;if(!Object.keys(data).length){el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Not enough data.</div>';return;}const mx=Math.max(...Object.values(data).map(Math.abs),1);el.innerHTML=Object.entries(data).map(([k,v])=>{const pct=Math.abs(v)/mx*100,neg=v<0,lbl=(v>=0?'+£':'-£')+Math.abs(v).toFixed(2);return'<div class="brow"><div class="blbl" title="'+k+'">'+String(k).slice(0,14)+'</div><div class="btrk"><div class="bfil '+(neg?'nb':'pb')+'" style="width:'+pct.toFixed(1)+'%;"><span class="bval">'+lbl+'</span></div></div></div>';}).join('');}
   const tkD={};set.forEach(b=>{const k=b.track||'Unknown';tkD[k]=(tkD[k]||0)+(pnl(b)||0);});
-  bar('st-trk',Object.fromEntries(Object.entries(tkD).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,8)));
+  const tkSorted=[...Object.entries(tkD).filter(([,v])=>v>=0).sort((a,b)=>b[1]-a[1]),...Object.entries(tkD).filter(([,v])=>v<0).sort((a,b)=>a[1]-b[1])];
+  bar('st-trk',Object.fromEntries(tkSorted));
 
   // ── Jockey + Trainer tables (combined real + virtual) ──
   const allBets=set; // set already contains the right scope (real/virtual/both)
@@ -395,8 +396,9 @@ function renderStats(){
     });
     const rows=Object.entries(map).filter(([,v])=>v.n>=1)
       .map(([k,v])=>({k,roi:v.staked>0?v.p/v.staked*100:0,p:v.p,n:v.n,sr:v.w/v.n*100}))
-      .sort((a,b)=>b.p-a.p).slice(0,8);
+      .sort((a,b)=>b.roi-a.roi);
     if(!rows.length){el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">No data yet — add jockey/trainer when logging bets.</div>';return;}
+    el.style.maxHeight='220px';el.style.overflowY='auto';
     el.innerHTML='<table style="width:100%;font-size:12px;border-collapse:collapse;">'
       +'<thead><tr>'
       +'<th style="text-align:left;font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Name</th>'
@@ -428,14 +430,20 @@ function renderStats(){
         +'</div>';}).join('')+'</div>';
     }
   }
-  // Real vs Virtual comparison — only shown in Both mode
+  // Real vs Virtual comparison — only shown in Both mode and NOT own study
   const dcblk2=document.getElementById('d-compare-blk');
-  if(dcblk2) dcblk2.style.display=scope==='both'?'block':'none';
-  if(scope==='both'){
+  if(dcblk2) dcblk2.style.display=(scope==='both'&&!ownStudyOnly)?'block':'none';
+  if(scope==='both'&&!ownStudyOnly){
     renderCompare(
       D.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr'),
       p, roi, sr
     );
+  }
+  // By Source block — hidden in own study mode
+  const srcBlk=document.getElementById('st-src-table');
+  if(srcBlk){
+    const srcParent=srcBlk.closest('.blk');
+    if(srcParent) srcParent.style.display=ownStudyOnly?'none':'block';
   }
 }
 

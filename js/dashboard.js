@@ -190,7 +190,7 @@ function setStatsScope(scope){
 
 function renderStats(){
   const scope=window._statsScope||'both';
-  const vbBets=getVBank().bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='nr';});
+  const vbBets=getVBank().bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
   const realBets=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
   // 'set' = bets used for all breakdowns (source, confidence, track etc.)
   // For 'both', combine real+virtual so breakdowns show everything.
@@ -242,8 +242,8 @@ function renderStats(){
     }
   }
   // Best source
-  const srcMap={};set.forEach(b=>{const k=b.source||'Unknown';if(!srcMap[k])srcMap[k]={p:0,n:0,staked:0};srcMap[k].p+=(pnl(b)||0);srcMap[k].n++;srcMap[k].staked+=(parseFloat(b.stake)||0);});
-  const srcArr=Object.entries(srcMap).filter(([,v])=>v.n>=2).map(([k,v])=>({k,roi:v.staked>0?v.p/v.staked*100:0,p:v.p,n:v.n}));
+  const srcMap={};set.forEach(b=>{const k=b.source||'Unknown';if(!srcMap[k])srcMap[k]={p:0,n:0,staked:0,wins:0};srcMap[k].p+=(pnl(b)||0);srcMap[k].n++;srcMap[k].staked+=(parseFloat(b.stake)||0);if(b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place')))srcMap[k].wins++;});
+  const srcArr=Object.entries(srcMap).map(([k,v])=>({k,roi:v.staked>0?v.p/v.staked*100:0,p:v.p,n:v.n,sr:v.n>0?(v.wins/v.n*100):0}));
   if(srcArr.length>1){
     srcArr.sort((a,b)=>b.roi-a.roi);
     const best=srcArr[0],worst=srcArr[srcArr.length-1];
@@ -276,17 +276,23 @@ function renderStats(){
   // ── Source leaderboard ──
   const srcEl=document.getElementById('st-src-table');
   if(srcEl){
-    const rows=srcArr.sort((a,b)=>b.p-a.p);
+    const rows=srcArr.sort((a,b)=>b.roi-a.roi);
     if(!rows.length){srcEl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Not enough data.</div>';}
     else{srcEl.innerHTML='<table style="width:100%;font-size:13px;border-collapse:collapse;">'
-      +'<thead><tr><th style="text-align:left;font-family:monospace;font-size:9px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">Source</th>'
+      +'<thead><tr>'
+      +'<th style="text-align:left;font-family:monospace;font-size:9px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">Source</th>'
       +'<th style="font-family:monospace;font-size:9px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">Bets</th>'
+      +'<th style="font-family:monospace;font-size:9px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">SR%</th>'
       +'<th style="font-family:monospace;font-size:9px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">P&L</th>'
-      +'<th style="font-family:monospace;font-size:9px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">ROI</th></tr></thead><tbody>'
-      +rows.map(r=>'<tr><td style="padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'+r.k+'</td>'
+      +'<th style="font-family:monospace;font-size:9px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">ROI</th>'
+      +'</tr></thead><tbody>'
+      +rows.map(r=>'<tr>'
+        +'<td style="padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'+r.k+'</td>'
         +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:var(--mut);">'+r.n+'</td>'
+        +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'+r.sr.toFixed(0)+'%</td>'
         +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
-        +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+r.roi.toFixed(1)+'%</td></tr>').join('')
+        +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+r.roi.toFixed(1)+'%</td>'
+        +'</tr>').join('')
       +'</tbody></table>';}
   }
 

@@ -24,7 +24,7 @@ async function _supaUpsert(table,rows){
   // Upsert using POST with Prefer: resolution=merge-duplicates
   if(!rows||!rows.length)return;
   const url=SUPA_URL+'/rest/v1/'+table;
-  await fetch(url,{
+  const resp=await fetch(url,{
     method:'POST',
     headers:{
       'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,
@@ -33,6 +33,11 @@ async function _supaUpsert(table,rows){
     },
     body:JSON.stringify(rows)
   });
+  if(!resp.ok){
+    const txt=await resp.text().catch(()=>'');
+    console.error('[Supabase] upsert '+table+' failed '+resp.status+':',txt);
+    throw new Error(table+' upsert failed: '+resp.status+' '+txt.slice(0,200));
+  }
 }
 
 async function _supa(method,table,body,params){

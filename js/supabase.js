@@ -449,6 +449,7 @@ async function supaLoad(){
         verdict:r.verdict||'',mrAdjustment:r.mr_adjustment||0,
         goingConfirmed:r.going_confirmed||'',backNextTime:r.back_next_time||'',
         notes:r.notes||'',source:r.source||'manual',
+        distance:r.distance||r.race_name||'',going:r.going||'',
         needsReview:r.needs_review||false,
         createdAt:new Date(r.created_at).getTime()
       };});
@@ -507,10 +508,8 @@ function loadAILimitField(){
 async function _syncReviews(){
   const uid=SUPA_USER_ID;
   const reviews=D.reviews||[];
-  if(!reviews.length){
-    await _supa('DELETE','horse_reviews',null,'user_id=eq.'+uid);
-    return;
-  }
+  // NEVER delete-all when reviews is empty — could be a cold start before supaLoad completes
+  if(!reviews.length)return;
   const rows=reviews.map(function(r){return{
     id:r.id,user_id:uid,profile_id:r.profileId,
     date:r.date||null,race_name:r.raceName||null,course:r.course||null,

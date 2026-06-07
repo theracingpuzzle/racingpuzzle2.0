@@ -573,6 +573,14 @@ function openWLForm(id,prefill){
   const going=['Firm','Good to Firm','Good','Good to Soft','Soft','Heavy'];
   const goingPrefs=e?e.goingPrefs||[]:[];
   _wlDossier.goingPrefs=goingPrefs.slice();
+  const DIST_GROUPS=[
+    {label:'Sprint',   opts:['5f','5-6f','6f','6-7f']},
+    {label:'Mile',     opts:['7f','1m','1m1f','1m2f']},
+    {label:'Middle',   opts:['1m4f','1m6f','2m']},
+    {label:'Stayer',   opts:['2m2f','2m4f','2m6f','3m+']},
+  ];
+  const savedDist=e?e.distancePref||'':'';
+  _wlDossier.distPrefs=savedDist?savedDist.split(',').map(function(s){return s.trim();}).filter(Boolean):[];
   const goingHtml=going.map(function(g){const sel=_wlDossier.goingPrefs.includes(g);return'<button type="button" data-going="'+g+'" onclick="wlToggleGoing(this)" class="wlf-going-btn'+(sel?' on':'')+'">'+g+'</button>';}).join('');
   const REASONS=[{value:'eye-catcher',emoji:'🔭',label:'Eye Catcher'},{value:'future-target',emoji:'📰',label:'Future Target'},{value:'trainer-intel',emoji:'🗣',label:'Trainer Intel'},{value:'form-study',emoji:'📊',label:'Form Study'},{value:'tip-source',emoji:'💡',label:'Tip / Source'}];
   const curReason=e?e.reason||'eye-catcher':'eye-catcher';
@@ -627,7 +635,16 @@ function openWLForm(id,prefill){
   +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
   +'<div class="fg"><label>Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
   +'<div class="g2">'
-  +'<div class="fg"><label>Preferred Distance</label><input type="text" id="wlf-dist" placeholder="e.g. 6-7f" value="'+(e?e.distancePref||'':'')+'"></div>'
+  +(function(){
+      var distHtml=DIST_GROUPS.map(function(grp){
+        return'<div style="margin-bottom:6px;">'
+          +'<div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:4px;">'+grp.label+'</div>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:5px;">'
+          +grp.opts.map(function(d){var sel=_wlDossier.distPrefs.includes(d);return'<button type="button" data-dist="'+d+'" onclick="wlToggleDist(this)" class="wlf-going-btn'+(sel?' on':'')+'">'+d+'</button>';}).join('')
+          +'</div></div>';
+      }).join('');
+      return'<div class="fg"><label>Preferred Distance</label><div id="wlf-dist-btns" style="padding:4px 0;">'+distHtml+'</div></div>';
+    }())
   +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight" value="'+(e?e.trackPref||'':'')+'"></div>'
   +'</div>'
   +'<div class="fg"><label>Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="min-height:52px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
@@ -706,6 +723,13 @@ function wlSelectReason(btn){
   });
 }
 
+function wlToggleDist(btn){
+  const d=btn.getAttribute('data-dist');
+  if(!_wlDossier.distPrefs)_wlDossier.distPrefs=[];
+  const idx=_wlDossier.distPrefs.indexOf(d);
+  if(idx>-1){_wlDossier.distPrefs.splice(idx,1);}else{_wlDossier.distPrefs.push(d);}
+  btn.className='wlf-going-btn'+(_wlDossier.distPrefs.includes(d)?' on':'');
+}
 function wlToggleGoing(btn){
   const g=btn.getAttribute('data-going');
   if(!_wlDossier.goingPrefs)_wlDossier.goingPrefs=[];
@@ -742,7 +766,7 @@ function saveWLEntry(id){
     observations:_wlDossier.obs,
     targets:_wlDossier.targets.filter(function(t){return t.race;}),
     goingPrefs,
-    distancePref:(document.getElementById('wlf-dist').value||'').trim(),
+    distancePref:(_wlDossier.distPrefs||[]).join(', '),
     trackPref:(document.getElementById('wlf-track').value||'').trim(),
     conditionsNotes:(document.getElementById('wlf-cond-notes').value||'').trim(),
     raceDate,

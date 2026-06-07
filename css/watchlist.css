@@ -165,15 +165,15 @@
 /* ═══════════════════════════════════════════════════════════
    POST-RACE REVIEW MODAL
 ═══════════════════════════════════════════════════════════ */
-.wlr-modal { position:fixed; inset:0; z-index:600; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; }
-.wlr-sheet { background:var(--sur); border-radius:16px 16px 0 0; padding:0; width:100%; max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.wlr-modal { position:fixed; inset:0; z-index:600; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; justify-content:center; }
+.wlr-sheet { background:var(--sur); border-radius:16px 16px 0 0; padding:0; width:100%; max-width:600px; height:90dvh; max-height:90dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; }
+.wlr-body { padding:14px 16px; display:flex; flex-direction:column; gap:12px; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:max(24px,env(safe-area-inset-bottom,24px)); }
 .wlr-handle { display:flex; justify-content:center; padding:10px 0 0; }
 .wlr-handle-bar { width:36px; height:4px; border-radius:2px; background:var(--bdr); }
 .wlr-hdr { display:flex; align-items:center; justify-content:space-between; padding:12px 16px 10px; border-bottom:1px solid var(--bdr); }
 .wlr-title { font-size:18px; font-weight:900; color:var(--navy); }
 .wlr-sub   { font-size:11px; color:var(--mut); }
 .wlr-close { width:30px; height:30px; border-radius:50%; background:var(--sur2); border:1px solid var(--bdr); color:var(--mut); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-.wlr-body  { padding:14px 16px; display:flex; flex-direction:column; gap:12px; }
 
 /* Review toggle buttons */
 .rvw-btn-group { display:flex; gap:6px; }

@@ -446,7 +446,7 @@ function renderWLEntry(e){
 
 
 // ── POST-RACE REVIEW SHEET ──
-function openWLPostRaceReview(profileId,horse,course,time,raceName){
+function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,raceGoing,raceClass){
   const existing=document.getElementById('wl-review-modal');if(existing)existing.remove();
   const wl=getWL();
   const entry=wl.find(function(x){return x.id===profileId;});
@@ -465,14 +465,15 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName){
       +'</div>'
       +'<button onclick="document.getElementById(\'wl-review-modal\').remove()" class="wlr-close">✕</button>'
     +'</div>'
+    +'<input type="hidden" id="rvw-going-prefill" value="'+(raceGoing||'')+'">'
     +'<div class="wlr-body">'
     +'<div class="g2">'
       +'<div class="fg"><label>Date</label><input type="date" id="rvw-date" value="'+td()+'"></div>'
       +'<div class="fg"><label>Course</label><input type="text" id="rvw-course" value="'+(course||'')+'" placeholder="e.g. Haydock"></div>'
     +'</div>'
     +'<div class="g2">'
-      +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" placeholder="e.g. 1m2f"></div>'
-      +'<div class="fg"><label>Class</label><input type="text" id="rvw-class" placeholder="e.g. Class 3"></div>'
+      +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" value="'+(raceDist||'')+'" placeholder="e.g. 1m2f"></div>'
+      +'<div class="fg"><label>Class</label><input type="text" id="rvw-class" value="'+(raceClass||'')+'" placeholder="e.g. Class 3"></div>'
     +'</div>'
     +'<div class="fg"><label>Result</label><div class="rvw-btn-group">'
     +['win','place','unplaced','nr'].map(function(r){const cols={win:'var(--grn)',place:'var(--gld)',unplaced:'var(--red)',nr:'var(--mut)'};return'<button data-result="'+r+'" data-grp="result" class="rvw-btn" style="--rvw-col:'+cols[r]+'" onclick="wlRvwToggle(this)">'+r+'</button>';}).join('')
@@ -485,7 +486,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName){
     +[{k:'upgrade',col:'var(--grn)',lbl:'Upgrade ↑'},{k:'hold',col:'var(--blu)',lbl:'Hold →'},{k:'downgrade',col:'var(--red)',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="--rvw-col:'+v.col+'" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
     +'</div></div>'
     +(currentMR?'<div class="fg"><label>MR Adjustment <span style="color:var(--mut);font-weight:400;">(current: '+currentMR+')</span></label><input type="number" id="rvw-mr-adj" placeholder="e.g. 5 or -3"></div>':'<input type="hidden" id="rvw-mr-adj" value="0">')
-    +'<div class="fg"><label>Conditions Handled?</label><div class="rvw-btn-group">'
+    +'<div class="fg"><label>Going'+(raceGoing?' <span style="color:var(--mut);font-weight:400;font-size:11px;">('+raceGoing+')</span>':'')+'</label><div class="rvw-btn-group">'
     +[{k:'confirmed',lbl:'✓ Confirmed'},{k:'mixed',lbl:'~ Mixed'},{k:'against',lbl:'✗ Against'}].map(function(g){return'<button data-going="'+g.k+'" data-grp="going" class="rvw-btn" style="--rvw-col:var(--txt)" onclick="wlRvwToggle(this)">'+g.lbl+'</button>';}).join('')
     +'</div></div>'
     +'<div class="fg"><label>Back Next Time?</label><div class="rvw-btn-group">'
@@ -530,7 +531,7 @@ function saveWLReview(profileId,horse,course){
   const review={
     id:gid(),profileId:profileId,
     date:date,raceName:raceName,course:rvwCourse,
-    distance:rvwDist,raceClass:rvwClass,
+    distance:rvwDist,raceClass:rvwClass,going:(document.getElementById('rvw-going-prefill')||{value:''}).value,
     result:_rvwGet('result'),
     position:(document.getElementById('rvw-pos').value||'').trim(),
     beatenDistance:(document.getElementById('rvw-beaten').value||'').trim(),

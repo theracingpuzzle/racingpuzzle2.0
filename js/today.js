@@ -240,13 +240,16 @@ async function checkWatchlistRunners(races){
     const time=race.off||race.off_time||race.time||'—';
     const course=race.course||race.venue||'—';
     const raceName=race.race_name||race.name||'';
+    const raceDist=typeof formatDist==='function'?formatDist(race.distance_round||race.distance_f||race.distance||race.dist||''):(race.distance_round||race.distance_f||race.distance||race.dist||'');
+    const raceGoing=race.going||race.going_description||'';
+    const raceClass=race.race_class||race.class||'';
     (race.runners||race.horses||[]).forEach(function(r){
       const horseName=(r.horse||r.name||'').toLowerCase().trim();
       watching.forEach(function(w){
         const wlName=(w.horse||'').toLowerCase().trim();
         if(horseName&&wlName&&horseName===wlName){
           if(!alerts.find(a=>a.horse.toLowerCase()===horseName)){
-            alerts.push({horse:r.horse||r.name,course,time,raceName,jockey:r.jockey||'',wlEntry:w});
+            alerts.push({horse:r.horse||r.name,course,time,raceName,jockey:r.jockey||'',raceDist,raceGoing,raceClass,wlEntry:w});
           }
         }
       });
@@ -277,7 +280,7 @@ async function checkWatchlistRunners(races){
           +'<div class="t-flex-col-end">'
             +(alreadyReviewed
               ?'<span class="t-reviewed-badge">✓ Reviewed</span>'
-              :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" class="t-wl-review-btn t-review-btn">Review ✍️</button>'
+              :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" data-dist="'+(a.raceDist||'')+'" data-going="'+(a.raceGoing||'')+'" data-class="'+(a.raceClass||'')+'" class="t-wl-review-btn t-review-btn">Review ✍️</button>'
             )
             +'<button data-wlid="'+wid+'" class="t-wl-profile-btn t-profile-btn">Profile →</button>'
           +'</div>'
@@ -294,7 +297,10 @@ async function checkWatchlistRunners(races){
           btn.getAttribute('data-horse'),
           btn.getAttribute('data-course'),
           btn.getAttribute('data-time'),
-          btn.getAttribute('data-race')
+          btn.getAttribute('data-race'),
+          btn.getAttribute('data-dist')||'',
+          btn.getAttribute('data-going')||'',
+          btn.getAttribute('data-class')||''
         );
       });
     });

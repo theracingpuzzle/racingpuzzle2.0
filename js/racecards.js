@@ -514,6 +514,7 @@ function rcSwRenderRunners(idx, course, el){
           const _nc=isNR?'var(--mut)':_pr?_pm.col:'var(--txt)';
           return'<div class="rc-runner-name-row">'
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'
+            +(age?'<span class="rc-runner-age" style="font-size:0.72em;color:var(--mut);margin-left:4px;">'+age+'</span>':'')
             +(rpr?'<span class="rc-or">'+rpr+'</span>':'')
             +(_badge?'<span class="rc-wl-pill">'+_pm.emoji+'</span>':'')
             +(draw?'<span class="rc-runner-age">'+draw+'</span>':'')
@@ -522,7 +523,7 @@ function rcSwRenderRunners(idx, course, el){
             ?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Form</span><span class="rc-runner-form" style="margin-bottom:0;">'+form+'</span></div>'
             :'');
         }())
-        +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+(age?' ('+age+')':'')+'</span></div>':'')
+        +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
         +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
       +'</div>'
       +'<div class="rc-runner-actions">'

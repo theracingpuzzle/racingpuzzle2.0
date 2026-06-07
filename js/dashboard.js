@@ -465,6 +465,7 @@ function _openModal(b,type){
   document.getElementById('em-type-sel').value=b.betType||'win';
   document.getElementById('em-jockey').value=b.jockey||'';
   document.getElementById('em-trainer').value=b.trainer||'';
+  populateSourceDropdowns();
   document.getElementById('em-source').value=b.source||'Own Form Study';
   document.getElementById('em-prenotes').value=b.notes||'';
   document.getElementById('emres').value=b.result||'pending';

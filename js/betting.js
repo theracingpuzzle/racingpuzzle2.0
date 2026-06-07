@@ -195,7 +195,7 @@ function getSourceOptions(){
   return all.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
 }
 function populateSourceDropdowns(){
-  ['lbsrc','vbsrc'].forEach(function(id){
+  ['lbsrc','vbsrc','em-source'].forEach(function(id){
     const el=document.getElementById(id);
     if(el)el.innerHTML=getSourceOptions();
   });

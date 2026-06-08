@@ -123,9 +123,8 @@ async function authSubmit(mode) {
     } else {
       await authSignIn(email, password);
     }
-    // Success — hide login and boot the app
-    authHideLogin();
-    await bootApp();
+    // Success — reload so the full boot sequence runs cleanly with the new session
+    location.reload();
   } catch(e) {
     if (errEl) { errEl.style.color = '#ef4444'; errEl.textContent = e.message; }
   } finally {

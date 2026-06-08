@@ -57,8 +57,8 @@ async function bootApp() {
     if (typeof loadTodayMeetings === 'function') loadTodayMeetings();
   }, 800);
 
-  // Dismiss the splash screen automatically once boot is complete
-  enterApp();
+  // Dismiss the splash screen — small delay lets the browser paint first
+  setTimeout(enterApp, 80);
 }
 
 // ── Auth-first startup ─────────────────────────────────────────────────────────
@@ -66,18 +66,16 @@ async function bootApp() {
   try {
     const hasSession = await authInit();
     if (hasSession) {
-      // Already logged in — go straight to app
+      // Already logged in — boot and auto-dismiss splash
       await bootApp();
     } else {
-      // No session — show login screen, hide splash enter button
-      authShowLogin();
-      // Show splash without the Enter button while login is visible
+      // No session — hide the Enter button and show login overlay
       const enterBtn = document.querySelector('#splash button');
       if (enterBtn) enterBtn.style.display = 'none';
+      authShowLogin();
     }
   } catch(e) {
     console.error('[Auth] init failed:', e.message);
-    // Auth unavailable — fall back to showing app with local data
     await bootApp();
   }
 })();

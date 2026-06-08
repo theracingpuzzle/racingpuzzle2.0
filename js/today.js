@@ -245,10 +245,12 @@ async function checkWatchlistRunners(races){
     const raceClass=race.race_class||race.class||'';
     (race.runners||race.horses||[]).forEach(function(r){
       const horseName=(r.horse||r.name||'').toLowerCase().trim();
-      const racecardOR=String(r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||'').trim();
+      const racecardOR=String(r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||(typeof rcGetOFR==='function'?rcGetOFR(r.horse||r.name||''):'')||'').trim();
       watching.forEach(function(w){
         const wlName=(w.horse||'').toLowerCase().trim();
         if(horseName&&wlName&&horseName===wlName){
+          // Debug: log runner fields so we can find the OR field name
+          console.log('[WL OR Debug] Runner fields for '+horseName+':',JSON.stringify(r));
           // Auto-update OR if racecard has one and it differs from stored value
           const storedOR=String(w.currentRating||'').trim();
           const orChanged=racecardOR&&racecardOR!==storedOR;

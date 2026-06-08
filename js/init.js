@@ -56,6 +56,9 @@ async function bootApp() {
   setTimeout(function() {
     if (typeof loadTodayMeetings === 'function') loadTodayMeetings();
   }, 800);
+
+  // Dismiss the splash screen automatically once boot is complete
+  enterApp();
 }
 
 // ── Auth-first startup ─────────────────────────────────────────────────────────

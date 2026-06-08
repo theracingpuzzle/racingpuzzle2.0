@@ -107,12 +107,18 @@ async function authSubmit(mode) {
     if (mode === 'signup') {
       const result = await authSignUp(email, password);
       if (result.needsConfirmation) {
-        if (errEl) {
-          errEl.style.color = '#34d399';
-          errEl.textContent = 'Account created! Check your email to confirm, then sign in.';
+        // Email confirmation required — try signing in anyway (works if confirmation
+        // is disabled in Supabase dashboard; fails gracefully if it is enabled)
+        if (btn) btn.textContent = 'Signing in…';
+        try {
+          await authSignIn(email, password);
+          // Sign-in worked — carry on into the app
+        } catch(_) {
+          // Confirmation genuinely required — tell the user
+          if (errEl) { errEl.style.color = '#34d399'; errEl.textContent = 'Account created! Check your email to confirm, then sign in.'; }
+          authSetMode('signin');
+          return;
         }
-        authSetMode('signin');
-        return;
       }
     } else {
       await authSignIn(email, password);

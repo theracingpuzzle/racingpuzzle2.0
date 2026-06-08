@@ -249,8 +249,6 @@ async function checkWatchlistRunners(races){
       watching.forEach(function(w){
         const wlName=(w.horse||'').toLowerCase().trim();
         if(horseName&&wlName&&horseName===wlName){
-          // Debug: log runner fields so we can find the OR field name
-          console.log('[WL OR Debug] Runner fields for '+horseName+':',JSON.stringify(r));
           // Auto-update OR if racecard has one and it differs from stored value
           const storedOR=String(w.currentRating||'').trim();
           const orChanged=racecardOR&&racecardOR!==storedOR;

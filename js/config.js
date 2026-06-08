@@ -97,15 +97,15 @@ const CKS_OWN = [
   },
   {
     id:'time-of-day',
-    t:'Time of day',
-    s:'Captured automatically — morning research scores highest',
+    t:'How far in advance?',
+    s:'Captured automatically — the earlier before the race, the better',
     type:'auto',
-    autoCapture:'time-of-day',
+    autoCapture:'time-before-race',
     bands:[
-      {before:12,label:'Morning',score:100},
-      {before:17,label:'Afternoon',score:75},
-      {before:20,label:'Evening',score:50},
-      {before:24,label:'Late',score:25}
+      {minsMin:120, label:'2h+ before',  score:100},
+      {minsMin:60,  label:'1–2h before', score:75},
+      {minsMin:20,  label:'20–60 mins',  score:50},
+      {minsMin:0,   label:'Under 20 mins / race starting', score:25}
     ]
   }
 ];

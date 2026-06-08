@@ -278,7 +278,7 @@ function renderStats(){
   if(srcEl){
     const rows=srcArr.sort((a,b)=>b.roi-a.roi);
     if(!rows.length){srcEl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Not enough data.</div>';}
-    else{srcEl.innerHTML='<table style="width:100%;font-size:13px;border-collapse:collapse;">'
+    else{srcEl.style.maxHeight='220px';srcEl.style.overflowY='auto';srcEl.innerHTML='<table style="width:100%;font-size:13px;border-collapse:collapse;">'
       +'<thead><tr>'
       +'<th style="text-align:left;font-family:monospace;font-size:9px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">Source</th>'
       +'<th style="font-family:monospace;font-size:9px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">Bets</th>'
@@ -385,11 +385,11 @@ function renderStats(){
           }).join('')
         );
       }
-      // 6. Time of day
+      // 6. Time before race
       const todBets=ckBets.filter(function(b){return b.checklistAnswers['time-of-day'];});
       if(todBets.length>=3){
-        html+=ckSection('Time of Day',
-          ['Morning','Afternoon','Evening','Late'].map(function(lbl,i){
+        html+=ckSection('How Far in Advance',
+          ['2h+ before','1–2h before','20–60 mins','Under 20 mins / race starting'].map(function(lbl,i){
             return ckRow(lbl,todBets.filter(function(b){return b.checklistAnswers['time-of-day']===lbl;}),i===0?true:i>=3?false:null);
           }).join('')
         );

@@ -577,11 +577,32 @@ function _betFlowScale(i,val){
   _betFlowUpdateScore();
 }
 function _betFlowAutoCapture(i,c){
-  if(c.autoCapture==='time-of-day'){
-    const h=new Date().getHours();
-    const band=(c.bands||[]).find(function(b){return h<b.before;})||{label:'Late',score:25};
+  if(c.autoCapture==='time-before-race'){
+    const now=new Date();
+    const nowMins=now.getHours()*60+now.getMinutes();
+    // Parse race time from bet flow state
+    const raceTimeStr=(_betFlowState&&_betFlowState.time)||'';
+    let minsUntilRace=null;
+    if(raceTimeStr){
+      const m=raceTimeStr.match(/(\d{1,2}):(\d{2})/);
+      if(m){
+        let rh=parseInt(m[1]),rm=parseInt(m[2]);
+        // Treat times before 09:30 as PM (evening meetings)
+        if(rh*60+rm<570)rh+=12;
+        const raceMins=rh*60+rm;
+        minsUntilRace=raceMins-nowMins;
+      }
+    }
+    let band;
+    if(minsUntilRace===null){
+      // No race time available — fall back to time of day
+      band={label:'Unknown',score:50};
+    } else {
+      const bands=c.bands||[];
+      band=bands.slice().reverse().find(function(b){return minsUntilRace>=b.minsMin;})||{label:'After start',score:10};
+    }
     const lbl=document.getElementById('_bflow-auto-lbl-'+i);
-    if(lbl){lbl.textContent=band.label;lbl.style.color=band.score>=75?'var(--grn)':band.score>=50?'var(--gld)':'var(--mut)';}
+    if(lbl){lbl.textContent=band.label;lbl.style.color=band.score>=75?'var(--grn)':band.score>=50?'var(--gld)':'var(--red)';}
     _flowCks[i]=band.score/100;
     _flowCkAnswers[c.id||i]=band.label;
     _betFlowUpdateScore();
@@ -656,7 +677,7 @@ function _betFlowShowInfo(){
     {q:'Handicap ratings',type:'Multi-choice',detail:'Only shown for handicap races (auto-detected from race name). Yes = 100 pts · No = 0 pts. Non-handicap races skip this question entirely — it is excluded from the score so it does not skew the result.'},
     {q:'Price assessment',type:'Multi-choice',detail:'Value = 100 pts · Fair = 75 pts · Marginal = 25 pts · Forced = 0 pts.'},
     {q:'Why did you reach for the device?',type:'Multi-choice',detail:'Planned = 100 pts · Spotted it = 75 pts · Tipster = 50 pts · Impulse = 0 pts.'},
-    {q:'Time of day',type:'Auto-captured',detail:'Captured automatically when you open the checklist. Morning (<12:00) = 100 pts · Afternoon (<17:00) = 75 pts · Evening (<20:00) = 50 pts · Late night = 25 pts.'},
+    {q:'How far in advance?',type:'Auto-captured',detail:'Measured automatically from the current time vs the race start time. 2h+ before = 100 pts · 1–2h before = 75 pts · 20–60 mins = 50 pts · Under 20 mins = 25 pts. Rewards early research, penalises last-minute decisions.'},
   ];
   const html='<div style="padding:18px;overflow-y:auto;max-height:70dvh;">'
     +'<div style="font-family:monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;">How the score is calculated</div>'

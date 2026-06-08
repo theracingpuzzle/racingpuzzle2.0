@@ -245,11 +245,23 @@ async function checkWatchlistRunners(races){
     const raceClass=race.race_class||race.class||'';
     (race.runners||race.horses||[]).forEach(function(r){
       const horseName=(r.horse||r.name||'').toLowerCase().trim();
+      const racecardOR=String(r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||'').trim();
       watching.forEach(function(w){
         const wlName=(w.horse||'').toLowerCase().trim();
         if(horseName&&wlName&&horseName===wlName){
+          // Auto-update OR if racecard has one and it differs from stored value
+          const storedOR=String(w.currentRating||'').trim();
+          const orChanged=racecardOR&&racecardOR!==storedOR;
+          if(orChanged){
+            const prev=storedOR;
+            w.currentRating=racecardOR;
+            if(!w.orHistory)w.orHistory=[];
+            w.orHistory.unshift({or:racecardOR,prev:prev,date:td(),auto:true});
+            if(w.orHistory.length>20)w.orHistory=w.orHistory.slice(0,20);
+            save();
+          }
           if(!alerts.find(a=>a.horse.toLowerCase()===horseName)){
-            alerts.push({horse:r.horse||r.name,course,time,raceName,jockey:r.jockey||'',raceDist,raceGoing,raceClass,wlEntry:w});
+            alerts.push({horse:r.horse||r.name,course,time,raceName,jockey:r.jockey||'',raceDist,raceGoing,raceClass,wlEntry:w,orUpdated:orChanged?racecardOR:null,orPrev:orChanged?storedOR:null});
           }
         }
       });
@@ -276,6 +288,7 @@ async function checkWatchlistRunners(races){
             +'<div class="t-horse-name">'+a.horse+'</div>'
             +'<div class="t-muted">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
             +(a.jockey?'<div class="t-jockey">J: '+a.jockey+'</div>':'')
+            +(a.orUpdated?'<div style="font-size:10px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
           +'</div>'
           +'<div class="t-flex-col-end">'
             +(alreadyReviewed

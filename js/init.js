@@ -1,26 +1,21 @@
-// ─── INIT ─── boot sequence — Supabase loads before app renders
+// ─── INIT ─── boot sequence — Auth → Supabase → App render
 
 load(); // load localStorage immediately (offline fallback)
 bldDots();
 
-// ─── STARTUP: pull Supabase first, then enter app ───
-(async function boot() {
-  const dot = document.getElementById('supa-dot');
-  const splash = document.getElementById('splash');
+// ── Main boot ─────────────────────────────────────────────────────────────────
+// Called after auth confirms a valid session (or on login success)
+async function bootApp() {
+  const dot          = document.getElementById('supa-dot');
   const splashStatus = document.getElementById('splash-status');
 
-  // Show loading state on splash
-  if (splashStatus) {
-    splashStatus.textContent = 'Syncing your data…';
-    splashStatus.style.display = 'block';
-  }
+  if (splashStatus) { splashStatus.textContent = 'Syncing your data…'; splashStatus.style.display = 'block'; }
 
-  if (SUPA_URL && SUPA_ANON) {
+  if (SUPA_URL && SUPA_ANON && SUPA_USER_ID) {
     if (dot) { dot.style.background = '#f59e0b'; dot.title = 'Supabase: syncing...'; }
     try {
-      await supaLoad(); // pull latest from Supabase — overwrites localStorage
+      await supaLoad();
       if (dot) { dot.style.background = '#34d399'; dot.title = 'Supabase: synced ✅'; }
-      // Cache credentials to localStorage so they survive offline / new device
       if (D.settings && D.settings.racingCreds) {
         const rc = typeof D.settings.racingCreds === 'string' ? JSON.parse(D.settings.racingCreds) : D.settings.racingCreds;
         if (rc.username && rc.password) localStorage.setItem(RACING_CREDS_KEY, JSON.stringify(rc));
@@ -29,20 +24,21 @@ bldDots();
         localStorage.setItem(COACH_KEY_STORE, D.settings.apiKey);
       }
     } catch(e) {
-      // Offline or error — continue with localStorage data
       if (dot) { dot.style.background = '#f59e0b'; dot.title = 'Supabase: offline'; }
     }
   }
 
-  // Hide splash status
   if (splashStatus) splashStatus.style.display = 'none';
 
-  // Now render with correct data
+  // Show the signed-in user email in settings (if element exists)
+  const emailEl = document.getElementById('auth-user-email');
+  if (emailEl && window._rpUserEmail) emailEl.textContent = window._rpUserEmail;
+
   goTo(0, true);
   updHdr();
   renderToday();
   renderBkCard();
-  if(typeof renderCmdRules==='function')renderCmdRules();
+  if (typeof renderCmdRules === 'function') renderCmdRules();
   rfrTL();
   renderChips();
   seedRules();
@@ -57,11 +53,30 @@ bldDots();
     if (_lbt) _lbt.value = it[0];
   }
 
-  // Pre-fetch today's meetings so watchlist/edge alerts show on Today
-  // without requiring the user to visit the Races card first
-  setTimeout(function(){
-    if(typeof loadTodayMeetings === 'function') loadTodayMeetings();
+  setTimeout(function() {
+    if (typeof loadTodayMeetings === 'function') loadTodayMeetings();
   }, 800);
+}
+
+// ── Auth-first startup ─────────────────────────────────────────────────────────
+(async function startup() {
+  try {
+    const hasSession = await authInit();
+    if (hasSession) {
+      // Already logged in — go straight to app
+      await bootApp();
+    } else {
+      // No session — show login screen, hide splash enter button
+      authShowLogin();
+      // Show splash without the Enter button while login is visible
+      const enterBtn = document.querySelector('#splash button');
+      if (enterBtn) enterBtn.style.display = 'none';
+    }
+  } catch(e) {
+    console.error('[Auth] init failed:', e.message);
+    // Auth unavailable — fall back to showing app with local data
+    await bootApp();
+  }
 })();
 
 // ─── SUPABASE PING (settings test button) ───
@@ -70,7 +85,7 @@ function _supaPing() {
   const dot = document.getElementById('supa-dot');
   if (dot) { dot.style.background = '#f59e0b'; dot.title = 'Supabase: connecting...'; }
   fetch(SUPA_URL + '/rest/v1/profiles?limit=1', {
-    headers: { 'apikey': SUPA_ANON, 'Authorization': 'Bearer ' + SUPA_ANON }
+    headers: { 'apikey': SUPA_ANON, 'Authorization': 'Bearer ' + (window._rpAccessToken || SUPA_ANON) }
   }).then(function(r) {
     const dot = document.getElementById('supa-dot');
     if (r.ok) {
@@ -88,8 +103,7 @@ function enterApp() {
   const s = document.getElementById('splash');
   s.style.transition = 'opacity .35s ease';
   s.style.opacity = '0';
-  setTimeout(function(){ s.style.display = 'none'; }, 360);
-  // Refresh header and bank display once app is visible
+  setTimeout(function() { s.style.display = 'none'; }, 360);
   updHdr();
   renderBkCard();
 }

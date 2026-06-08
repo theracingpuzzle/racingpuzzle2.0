@@ -11,11 +11,18 @@ A single-page progressive web app (PWA) for horse racing bet tracking and analys
 ### JS Load Order (critical)
 Scripts are loaded in this exact order in `index.html` and must stay that way:
 ```
-config.js → state.js → utils.js → supabase.js → racing-api.js →
+config.js → state.js → utils.js → supabase.js → auth.js → racing-api.js →
 racecards.js → ui-shell.js → today.js → betting.js → rules.js →
 dashboard.js → virtual.js → watchlist.js → coach.js → init.js
 ```
-`init.js` is the entry point — it calls `load()` (state), then `supaLoad()` (Supabase), then renders all cards.
+`init.js` is the entry point — it calls `authInit()` first, then `bootApp()` which calls `supaLoad()` then renders all cards. `auth.js` must come after `supabase.js` (uses `SUPA_URL`/`SUPA_ANON`) and before `init.js`.
+
+### Auth
+- Supabase JS client loaded via CDN (`@supabase/supabase-js@2`) — used only for session management
+- `authInit()` in `auth.js` — checks for existing session on startup, sets `SUPA_USER_ID` and `window._rpAccessToken`
+- `window._rpAccessToken` — the user's JWT, used by `_rpToken()` in `supabase.js` as the Bearer token in all REST calls
+- Sessions persist in `localStorage` under key `rp-auth-session` and auto-refresh — users stay logged in indefinitely
+- Login screen overlay (`#auth-overlay`) shown only when no session exists
 
 ### Global State
 `D` in `state.js` is the single source of truth — a plain object persisted to `localStorage` under the key `SK` (`'racing-edge-v2'`). Shape:

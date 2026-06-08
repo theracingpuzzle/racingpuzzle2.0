@@ -19,6 +19,9 @@ function supaSync(){
   _supaSyncTimer=setTimeout(function(){_supaFlush();},1500);
 }
 
+// Returns the best available auth token — user JWT when logged in, anon key as fallback
+function _rpToken(){ return window._rpAccessToken || SUPA_ANON; }
+
 // Helper: Supabase REST fetch
 async function _supaUpsert(table,rows){
   // Upsert using POST with Prefer: resolution=merge-duplicates
@@ -27,7 +30,7 @@ async function _supaUpsert(table,rows){
   const resp=await fetch(url,{
     method:'POST',
     headers:{
-      'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,
+      'apikey':SUPA_ANON,'Authorization':'Bearer '+_rpToken(),
       'Content-Type':'application/json',
       'Prefer':'resolution=merge-duplicates,return=minimal'
     },
@@ -42,7 +45,7 @@ async function _supaUpsert(table,rows){
 
 async function _supa(method,table,body,params){
   const url=SUPA_URL+'/rest/v1/'+table+(params?'?'+params:'');
-  const headers={'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON};
+  const headers={'Content-Type':'application/json','apikey':SUPA_ANON,'Authorization':'Bearer '+_rpToken()};
   if(method==='POST')headers['Prefer']='resolution=merge-duplicates';
   if(method==='DELETE')headers['Prefer']='return=minimal';
   const opts={method,headers};
@@ -340,16 +343,17 @@ async function supaLoad(){
   const uid=SUPA_USER_ID;
   try{
     // Fetch all tables in parallel
+    const _h={'apikey':SUPA_ANON,'Authorization':'Bearer '+_rpToken()};
     const [bankRows,betRows,profileRows,obsRows,targetRows,ruleRows,logRows,settingRows,reviewRows]=await Promise.all([
-      fetch(SUPA_URL+'/rest/v1/bank?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/bets?user_id=eq.'+uid+'&order=created_at.asc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/horse_profiles?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/profile_observations?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/profile_targets?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/rules?user_id=eq.'+uid+'&order=sort_order.asc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/daily_log?user_id=eq.'+uid+'&order=log_date.desc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/settings?user_id=eq.'+uid,{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/horse_reviews?user_id=eq.'+uid+'&order=date.desc',{headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON}}).then(function(r){return r.json();})
+      fetch(SUPA_URL+'/rest/v1/bank?user_id=eq.'+uid,{headers:_h}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/bets?user_id=eq.'+uid+'&order=created_at.asc',{headers:_h}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/horse_profiles?user_id=eq.'+uid,{headers:_h}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/profile_observations?user_id=eq.'+uid,{headers:_h}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/profile_targets?user_id=eq.'+uid,{headers:_h}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/rules?user_id=eq.'+uid+'&order=sort_order.asc',{headers:_h}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/daily_log?user_id=eq.'+uid+'&order=log_date.desc',{headers:_h}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/settings?user_id=eq.'+uid,{headers:_h}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/horse_reviews?user_id=eq.'+uid+'&order=date.desc',{headers:_h}).then(function(r){return r.json();})
     ]);
 
     // ── Bank ──
@@ -536,7 +540,7 @@ async function exportData(){
   if(btn){btn.textContent='⏳ Exporting...';btn.disabled=true;}
   try{
     const uid=SUPA_USER_ID;
-    const h={'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON};
+    const h={'apikey':SUPA_ANON,'Authorization':'Bearer '+_rpToken()};
     const get=function(table,params){
       return fetch(SUPA_URL+'/rest/v1/'+table+'?user_id=eq.'+uid+(params?'&'+params:''),{headers:h}).then(function(r){
         if(!r.ok)throw new Error(table+' fetch failed: '+r.status);

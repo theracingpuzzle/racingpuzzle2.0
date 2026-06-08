@@ -13,6 +13,8 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-apple.png">
 <title>The Racing Puzzle</title>
+<!-- Supabase JS client — used for auth only (session persistence + auto token refresh) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link rel="stylesheet" href="css/app.css?v=1780755691">
 
 <link rel="stylesheet" href="css/racecards.css?v=1780755691">
@@ -399,6 +401,18 @@ RACING <span class="logo-accent">PUZZLE</span>
         </div>
         <div id="cp-set">
 
+          <!-- ── Account ── -->
+          <div class="blk">
+            <div class="bttl">👤 Account</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+              <div>
+                <div style="font-size:12px;color:var(--mut);margin-bottom:2px;">Signed in as</div>
+                <div id="auth-user-email" style="font-size:14px;font-weight:600;color:var(--txt);word-break:break-all;">—</div>
+              </div>
+              <button class="btn bout" onclick="authSignOut()" style="white-space:nowrap;flex-shrink:0;">Sign Out</button>
+            </div>
+          </div>
+
           <!-- ── Real Bank ── -->
           <div class="blk">
             <div class="bttl">Real Bank</div>
@@ -592,6 +606,47 @@ RACING <span class="logo-accent">PUZZLE</span>
   </div>
 </div>
 
+<!-- ── AUTH OVERLAY ── shown only when no session exists ── -->
+<div id="auth-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:var(--navy);flex-direction:column;align-items:center;justify-content:center;padding:32px;">
+  <div style="width:100%;max-width:360px;">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="width:40px;height:3px;border-radius:2px;background:var(--gld2);margin:0 auto 16px;"></div>
+      <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:28px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#fff;">
+        RACING <span style="color:var(--gld2);">PUZZLE</span>
+      </div>
+      <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:8px;">
+        Real &nbsp;·&nbsp; Virtual &nbsp;·&nbsp; Disciplined
+      </div>
+    </div>
+    <!-- Card -->
+    <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:28px 24px;">
+      <div id="auth-title" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:20px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;margin-bottom:20px;">Welcome Back</div>
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;">Email</label>
+        <input id="auth-email" type="email" autocomplete="email" placeholder="your@email.com"
+          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none;"
+          onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()">
+      </div>
+      <div style="margin-bottom:6px;">
+        <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;">Password</label>
+        <input id="auth-password" type="password" autocomplete="current-password" placeholder="••••••••"
+          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none;"
+          onkeydown="if(event.key==='Enter')authSubmit('signin')">
+      </div>
+      <div id="auth-pw-hint" style="display:none;font-size:11px;color:rgba(255,255,255,.35);margin-bottom:14px;">Minimum 6 characters</div>
+      <div id="auth-error" style="min-height:18px;font-size:12px;color:#ef4444;margin-bottom:12px;"></div>
+      <button id="auth-submit-btn" onclick="authSubmit('signin')"
+        style="width:100%;padding:14px;border-radius:10px;border:none;background:var(--gld2);color:#fff;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:14px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">
+        Sign In
+      </button>
+    </div>
+    <div id="auth-toggle-text" style="text-align:center;margin-top:18px;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:rgba(255,255,255,.45);">
+      New here? <a href="#" onclick="authSetMode('signup');return false;" style="color:var(--gld2);text-decoration:none;font-weight:700;">Create an account</a>
+    </div>
+  </div>
+</div>
+
 <div id="splash" style="position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;touch-action:none;">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;">
     <div style="width:52px;height:4px;border-radius:2px;background:var(--gld2);margin-bottom:22px;"></div>
@@ -651,6 +706,7 @@ RACING <span class="logo-accent">PUZZLE</span>
 <script src="js/state.js?v=1780755691"></script>
 <script src="js/utils.js?v=1780755691"></script>
 <script src="js/supabase.js?v=1780755691"></script>
+<script src="js/auth.js?v=1780755691"></script>
 <script src="js/racing-api.js?v=1780755691"></script>
 <script src="js/racecards.js?v=1780755691"></script>
 <script src="js/ui-shell.js?v=1780755691"></script>

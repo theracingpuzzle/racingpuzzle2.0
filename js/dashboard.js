@@ -447,7 +447,7 @@ function renderStats(){
   // ── Track bar chart ──
   function bar(id,data){const el=document.getElementById(id);if(!el)return;if(!Object.keys(data).length){el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Not enough data.</div>';return;}const mx=Math.max(...Object.values(data).map(Math.abs),1);el.innerHTML=Object.entries(data).map(([k,v])=>{const pct=Math.abs(v)/mx*100,neg=v<0,lbl=(v>=0?'+£':'-£')+Math.abs(v).toFixed(2);return'<div class="brow"><div class="blbl" title="'+k+'">'+String(k).slice(0,14)+'</div><div class="btrk"><div class="bfil '+(neg?'nb':'pb')+'" style="width:'+pct.toFixed(1)+'%;"><span class="bval">'+lbl+'</span></div></div></div>';}).join('');}
   const tkD={};set.forEach(b=>{const k=b.track||'Unknown';tkD[k]=(tkD[k]||0)+(pnl(b)||0);});
-  const tkSorted=[...Object.entries(tkD).filter(([,v])=>v>=0).sort((a,b)=>b[1]-a[1]),...Object.entries(tkD).filter(([,v])=>v<0).sort((a,b)=>a[1]-b[1])];
+  const tkSorted=[...Object.entries(tkD).filter(([,v])=>v>=0).sort((a,b)=>b[1]-a[1]),...Object.entries(tkD).filter(([,v])=>v<0).sort((a,b)=>b[1]-a[1])];
   bar('st-trk',Object.fromEntries(tkSorted));
 
   // ── Jockey + Trainer tables (combined real + virtual) ──

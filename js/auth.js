@@ -123,8 +123,9 @@ async function authSubmit(mode) {
     } else {
       await authSignIn(email, password);
     }
-    // Success — reload so the full boot sequence runs cleanly with the new session
-    location.reload();
+    // Success — hide login overlay and boot straight into the app
+    authHideLogin();
+    await bootApp();
   } catch(e) {
     if (errEl) { errEl.style.color = '#ef4444'; errEl.textContent = e.message; }
   } finally {

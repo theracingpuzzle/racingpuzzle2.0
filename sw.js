@@ -6,7 +6,7 @@
 // Bump CACHE_VERSION whenever you deploy a meaningful update — this forces
 // the old cache to be cleared and a fresh copy of all assets to be fetched.
 
-const CACHE_VERSION = 'rp-v1';
+const CACHE_VERSION = 'rp-v4';
 
 const APP_SHELL = [
   './',

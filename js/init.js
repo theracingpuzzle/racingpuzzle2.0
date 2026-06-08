@@ -9,9 +9,8 @@ async function bootApp() {
   const dot          = document.getElementById('supa-dot');
   const splashStatus = document.getElementById('splash-status');
 
-  if (splashStatus) { splashStatus.textContent = 'Syncing your data…'; splashStatus.style.display = 'block'; }
-
   if (SUPA_URL && SUPA_ANON && SUPA_USER_ID) {
+    if (splashStatus) splashStatus.textContent = 'Syncing your data…';
     if (dot) { dot.style.background = '#f59e0b'; dot.title = 'Supabase: syncing...'; }
     try {
       await supaLoad();
@@ -27,8 +26,6 @@ async function bootApp() {
       if (dot) { dot.style.background = '#f59e0b'; dot.title = 'Supabase: offline'; }
     }
   }
-
-  if (splashStatus) splashStatus.style.display = 'none';
 
   // Show the signed-in user email in settings (if element exists)
   const emailEl = document.getElementById('auth-user-email');
@@ -57,8 +54,9 @@ async function bootApp() {
     if (typeof loadTodayMeetings === 'function') loadTodayMeetings();
   }, 800);
 
-  // Dismiss the splash screen — small delay lets the browser paint first
-  setTimeout(enterApp, 80);
+  // Dismiss the splash screen immediately
+  const _splash = document.getElementById('splash');
+  if (_splash) _splash.style.display = 'none';
 }
 
 // ── Auth-first startup ─────────────────────────────────────────────────────────
@@ -69,9 +67,9 @@ async function bootApp() {
       // Already logged in — boot and auto-dismiss splash
       await bootApp();
     } else {
-      // No session — hide the Enter button and show login overlay
-      const enterBtn = document.querySelector('#splash button');
-      if (enterBtn) enterBtn.style.display = 'none';
+      // No session — hide splash and show login overlay
+      const _splash = document.getElementById('splash');
+      if (_splash) _splash.style.display = 'none';
       authShowLogin();
     }
   } catch(e) {
@@ -102,9 +100,8 @@ function _supaPing() {
 
 function enterApp() {
   const s = document.getElementById('splash');
-  s.style.transition = 'opacity .35s ease';
-  s.style.opacity = '0';
-  setTimeout(function() { s.style.display = 'none'; }, 360);
+  if (!s) return;
+  s.style.display = 'none';
   updHdr();
   renderBkCard();
 }

@@ -531,28 +531,68 @@ async function _syncReviews(){
   await _supaUpsert('horse_reviews',rows);
 }
 
-function exportData(){
-  const payload={
-    exportedAt:new Date().toISOString(),
-    schema:'racing-puzzle-v2',
-    bets:(D.bets||[]),
-    virtualBets:((D.vBank&&D.vBank.bets)||[]),
-    bank:D.bank||{},
-    vBank:{start:(D.vBank&&D.vBank.start)||500,current:(D.vBank&&D.vBank.current)||500},
-    watchlist:(D.watchlist||[]),
-    reviews:(D.reviews||[]),
-    rules:(D.rules||[]),
-    dailyLog:(D.dailyLog||[]),
-    settings:(D.settings||{})
-  };
-  const json=JSON.stringify(payload,null,2);
-  const blob=new Blob([json],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  const date=new Date().toISOString().slice(0,10);
-  a.href=url;a.download='racing-puzzle-export-'+date+'.json';
-  document.body.appendChild(a);a.click();
-  document.body.removeChild(a);URL.revokeObjectURL(url);
+async function exportData(){
+  const btn=document.getElementById('export-btn');
+  if(btn){btn.textContent='⏳ Exporting...';btn.disabled=true;}
+  try{
+    const uid=SUPA_USER_ID;
+    const h={'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON};
+    const get=function(table,params){
+      return fetch(SUPA_URL+'/rest/v1/'+table+'?user_id=eq.'+uid+(params?'&'+params:''),{headers:h}).then(function(r){
+        if(!r.ok)throw new Error(table+' fetch failed: '+r.status);
+        return r.json();
+      });
+    };
+    // Fetch all tables in parallel — raw Supabase rows, nothing left behind
+    const [bankRows,betRows,profileRows,obsRows,targetRows,reviewRows,ruleRows,logRows,settingRows]=await Promise.all([
+      get('bank'),
+      get('bets','order=created_at.asc'),
+      get('horse_profiles'),
+      get('profile_observations'),
+      get('profile_targets'),
+      get('horse_reviews','order=date.desc'),
+      get('rules','order=sort_order.asc'),
+      get('daily_log','order=log_date.desc'),
+      get('settings')
+    ]);
+    const payload={
+      exportedAt:new Date().toISOString(),
+      schema:'racing-puzzle-v3',
+      // Raw Supabase rows — complete and restorable
+      bank:bankRows||[],
+      bets:betRows||[],
+      horse_profiles:profileRows||[],
+      profile_observations:obsRows||[],
+      profile_targets:targetRows||[],
+      horse_reviews:reviewRows||[],
+      rules:ruleRows||[],
+      daily_log:logRows||[],
+      settings:settingRows||[]
+    };
+    const counts=[
+      (betRows||[]).filter(function(b){return!b.is_virtual;}).length+' real bets',
+      (betRows||[]).filter(function(b){return b.is_virtual;}).length+' virtual bets',
+      (profileRows||[]).length+' horse profiles',
+      (obsRows||[]).length+' observations',
+      (targetRows||[]).length+' targets',
+      (reviewRows||[]).length+' reviews'
+    ].join(', ');
+    const json=JSON.stringify(payload,null,2);
+    const blob=new Blob([json],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const date=new Date().toISOString().slice(0,10);
+    a.href=url;a.download='racing-puzzle-export-'+date+'.json';
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);URL.revokeObjectURL(url);
+    showSupaBanner('✅ Export complete — '+counts,'ok');
+  }catch(e){
+    console.error('[Export]',e);
+    showSupaBanner('❌ Export failed: '+e.message,'error');
+    alert('Export failed: '+e.message+'\n\nCheck your Supabase connection and try again.');
+  }finally{
+    if(btn){btn.textContent='Export Data';btn.disabled=false;}
+  }
 }
 
 function importDataPrompt(){
@@ -564,35 +604,112 @@ function importDataPrompt(){
     reader.onload=function(e){
       try{
         const p=JSON.parse(e.target.result);
-        if(!p.schema||p.schema!=='racing-puzzle-v2'){
+        const isV3=p.schema==='racing-puzzle-v3';
+        const isV2=p.schema==='racing-puzzle-v2';
+        if(!isV3&&!isV2){
           alert('Unrecognised file format. Make sure you are importing a Racing Puzzle export.');return;
         }
-        if(!confirm('This will replace ALL current data with the imported file. Are you sure?'))return;
-        if(Array.isArray(p.bets))D.bets=p.bets;
-        if(p.bank)D.bank=p.bank;
-        if(p.vBank){D.vBank=D.vBank||{};D.vBank.start=p.vBank.start;D.vBank.current=p.vBank.current;}
-        if(Array.isArray(p.virtualBets)){D.vBank=D.vBank||{};D.vBank.bets=p.virtualBets;}
-        if(Array.isArray(p.watchlist))D.watchlist=p.watchlist;
-        if(Array.isArray(p.reviews))D.reviews=p.reviews;
-        if(Array.isArray(p.rules))D.rules=p.rules;
-        if(Array.isArray(p.dailyLog))D.dailyLog=p.dailyLog;
-        if(p.settings)D.settings=p.settings;
-        saveLocal();updHdr();
-        // Push to Supabase immediately (bypass debounce) then reload
-        const betsCount=p.bets.length;
-        const virtCount=(p.virtualBets||[]).length;
-        if(SUPA_URL&&SUPA_ANON&&SUPA_USER_ID){
-          showSupaBanner('⏳ Syncing to Supabase...','info');
-          _supaFlushSilent().then(function(errors){
-            if(errors.length){showSupaBanner('⚠️ Sync error: '+errors[0],'error');}
-            else{showSupaBanner('☁ Synced — '+betsCount+' bets, '+virtCount+' virtual','ok');}
-            location.reload();
-          }).catch(function(e){
-            showSupaBanner('❌ Sync failed: '+e.message,'error');
-            location.reload();
-          });
+        const realCount=isV3?(p.bets||[]).filter(function(b){return!b.is_virtual;}).length:(p.bets||[]).length;
+        const virtCount=isV3?(p.bets||[]).filter(function(b){return b.is_virtual;}).length:(p.virtualBets||[]).length;
+        const profileCount=isV3?(p.horse_profiles||[]).length:(p.watchlist||[]).length;
+        const reviewCount=isV3?(p.horse_reviews||[]).length:(p.reviews||[]).length;
+        const obsCount=isV3?(p.profile_observations||[]).length:0;
+        const targetsCount=isV3?(p.profile_targets||[]).length:0;
+        const summary=[
+          realCount+' real bets',
+          virtCount+' virtual bets',
+          profileCount+' horse profiles',
+          reviewCount+' reviews',
+          obsCount+' observations',
+          targetsCount+' targets'
+        ].join(', ');
+        if(!confirm('This will replace ALL current data with the imported file.\n\nImporting: '+summary+'\n\nAre you sure?'))return;
+
+        if(isV3){
+          // v3: raw Supabase rows — upsert directly, no translation needed
+          if(!SUPA_URL||!SUPA_ANON||!SUPA_USER_ID){
+            alert('Supabase not configured. Cannot import v3 backup without a connection.');return;
+          }
+          showSupaBanner('⏳ Importing to Supabase...','info');
+          const uid=SUPA_USER_ID;
+          // Re-stamp all rows with current user_id (safe for migration between accounts)
+          const stamp=function(rows){return(rows||[]).map(function(r){return Object.assign({},r,{user_id:uid});});};
+          const steps=[
+            // Clear then restore bank
+            function(){return _supa('DELETE','bank',null,'user_id=eq.'+uid).then(function(){
+              const rows=stamp(p.bank);if(rows.length)return _supaUpsert('bank',rows);
+            });},
+            // Bets: delete all then upsert
+            function(){return _supa('DELETE','bets',null,'user_id=eq.'+uid).then(function(){
+              const rows=stamp(p.bets);if(rows.length)return _supaUpsert('bets',rows);
+            });},
+            // Profiles: delete all then upsert
+            function(){return _supa('DELETE','horse_profiles',null,'user_id=eq.'+uid).then(function(){
+              const rows=stamp(p.horse_profiles);if(rows.length)return _supaUpsert('horse_profiles',rows);
+            });},
+            // Observations: delete all then upsert
+            function(){return _supa('DELETE','profile_observations',null,'user_id=eq.'+uid).then(function(){
+              const rows=stamp(p.profile_observations);if(rows.length)return _supaUpsert('profile_observations',rows);
+            });},
+            // Targets: delete all then upsert
+            function(){return _supa('DELETE','profile_targets',null,'user_id=eq.'+uid).then(function(){
+              const rows=stamp(p.profile_targets);if(rows.length)return _supaUpsert('profile_targets',rows);
+            });},
+            // Reviews: delete all then upsert
+            function(){return _supa('DELETE','horse_reviews',null,'user_id=eq.'+uid).then(function(){
+              const rows=stamp(p.horse_reviews);if(rows.length)return _supaUpsert('horse_reviews',rows);
+            });},
+            // Rules: delete all then re-insert
+            function(){return _supa('DELETE','rules',null,'user_id=eq.'+uid).then(function(){
+              const rows=stamp(p.rules);if(rows.length)return _supaUpsert('rules',rows);
+            });},
+            // Daily log: delete all then re-insert
+            function(){return _supa('DELETE','daily_log',null,'user_id=eq.'+uid).then(function(){
+              const rows=stamp(p.daily_log);if(rows.length)return _supaUpsert('daily_log',rows);
+            });},
+            // Settings: delete all then re-insert
+            function(){return _supa('DELETE','settings',null,'user_id=eq.'+uid).then(function(){
+              const rows=stamp(p.settings);if(rows.length)return _supaUpsert('settings',rows);
+            });}
+          ];
+          // Run steps sequentially
+          steps.reduce(function(chain,step){return chain.then(step);},Promise.resolve())
+            .then(function(){
+              showSupaBanner('✅ Import complete — '+summary,'ok');
+              return supaLoad();
+            })
+            .then(function(){saveLocal();location.reload();})
+            .catch(function(err){
+              console.error('[Import v3]',err);
+              showSupaBanner('❌ Import failed: '+err.message,'error');
+              alert('Import failed: '+err.message);
+            });
+
         } else {
-          location.reload();
+          // v2 legacy: translate local-state format back into D, then flush to Supabase
+          if(Array.isArray(p.bets))D.bets=p.bets;
+          if(p.bank)D.bank=p.bank;
+          if(p.vBank){D.vBank=D.vBank||{};D.vBank.start=p.vBank.start;D.vBank.current=p.vBank.current;}
+          if(Array.isArray(p.virtualBets)){D.vBank=D.vBank||{};D.vBank.bets=p.virtualBets;}
+          if(Array.isArray(p.watchlist))D.watchlist=p.watchlist;
+          if(Array.isArray(p.reviews))D.reviews=p.reviews;
+          if(Array.isArray(p.rules))D.rules=p.rules;
+          if(Array.isArray(p.dailyLog))D.dailyLog=p.dailyLog;
+          if(p.settings)D.settings=p.settings;
+          saveLocal();updHdr();
+          if(SUPA_URL&&SUPA_ANON&&SUPA_USER_ID){
+            showSupaBanner('⏳ Syncing to Supabase...','info');
+            _supaFlushSilent().then(function(errors){
+              if(errors.length){showSupaBanner('⚠️ Sync error: '+errors[0],'error');}
+              else{showSupaBanner('✅ Imported — '+realCount+' bets, '+profileCount+' profiles','ok');}
+              location.reload();
+            }).catch(function(err){
+              showSupaBanner('❌ Sync failed: '+err.message,'error');
+              location.reload();
+            });
+          } else {
+            location.reload();
+          }
         }
       }catch(err){alert('Failed to parse file: '+err.message);}
     };

@@ -484,7 +484,7 @@ RACING <span class="logo-accent">PUZZLE</span>
           <div class="blk">
             <div class="bttl">📤 Export / Import</div>
             <div style="display:flex;gap:9px;flex-wrap:wrap;">
-              <button class="btn bgrn" onclick="exportData()">Export Data</button>
+              <button id="export-btn" class="btn bgrn" onclick="exportData()">Export Data</button>
               <label class="btn bout" style="cursor:pointer;">Import Data<input type="file" accept=".json" onchange="importData(this)" style="display:none;"></label>
               <button class="btn bdng" onclick="clrAll()">Clear All Data</button>
             </div>
@@ -667,6 +667,21 @@ RACING <span class="logo-accent">PUZZLE</span>
 <!-- Hidden elements kept for JS compatibility (AI Coach removed from UI) -->
 <input type="hidden" id="apikey-inp">
 <input type="hidden" id="ai-limit-inp" value="10">
+
+<script>
+  // Register service worker for offline support and PWA install
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js')
+        .then(function (reg) {
+          console.log('[SW] Registered, scope:', reg.scope);
+        })
+        .catch(function (err) {
+          console.warn('[SW] Registration failed:', err);
+        });
+    });
+  }
+</script>
 <span id="apikey-status" style="display:none;"></span>
 <div id="ai-usage-display" style="display:none;"></div>
 </body>

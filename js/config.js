@@ -32,27 +32,19 @@ const CARDS = [
 const TKS = ['Eagle Farm','Greyville','Ascot','Aintree','Ayr','Bath','Brighton','Carlisle','Catterick','Chelmsford City','Cheltenham','Chester','Chepstow','Cork','Curragh','Doncaster','Down Royal','Dundalk','Epsom','Exeter','Fakenham','Ffos Las','Galway','Goodwood','Gowran Park','Hamilton','Haydock','Hereford','Hexham','Huntingdon','Kelso','Kempton','Leopardstown','Leicester','Limerick','Lingfield','Ludlow','Market Rasen','Musselburgh','Naas','Navan','Newbury','Newcastle','Newmarket','Newton Abbot','Nottingham','Perth','Plumpton','Pontefract','Punchestown','Redcar','Ripon','Salisbury','Sandown','Sedgefield','Sligo','Southwell','Stratford','Taunton','Thirsk','Tipperary','Towcester','Tramore','Uttoxeter','Warwick','Wincanton','Windsor','Wolverhampton','Worcester','Yarmouth','York'].sort();
 
 // ─── PRE-BET CHECKLIST ───
-const CKS = [
-  {t:'I can state in one sentence exactly why this horse wins',s:"If I can't articulate it clearly, I'm guessing"},
-  {t:'My reason is based on my own form study — not a tip or gut feel',s:'I did the work. Not borrowed conviction from a tweet or forum'},
-  {t:'Going is suitable — horse has proven form on today\'s ground',s:'Check last 3+ runs on similar conditions, not just assumed'},
-  {t:'Distance is proven or the step up/down is well evidenced',s:'Won or placed over this trip, or clear form reason to back the change'},
-  {t:'Race conditions suit — class, weights, and draw considered',s:'How does the race set up? Is my horse getting in well or fighting uphill?'},
-  {t:'I have estimated the true probability and the price is value',s:'My P% is meaningfully greater than what the odds imply'},
-  {t:'I have assessed the whole field — not tunnel-visioned on my pick',s:'Are others well-treated, unexpectedly dangerous, or drifting for a reason?'},
-  {t:'I am NOT chasing a loss or trying to recover a bad run',s:'This bet stands entirely on its own merits — yesterday is irrelevant'},
-  {t:'This is NOT a boredom or entertainment bet',s:'There is genuine evidence here — not just an itch to have something on'},
-  {t:'Stake fits the staking plan — not inflated or reduced by emotion',s:'Following the rules, not the feeling. Same unit as always'}
-];
-
 // ─── OWN SELECTION CHECKLIST ───
 const CKS_OWN = [
   {
     id:'research-time',
     t:'How long did I spend researching?',
-    s:'Quick glance → Deep study',
-    type:'scale',
-    scaleMin:'Quick glance',scaleMax:'Deep study'
+    s:'Be honest — this shapes your score',
+    type:'multi',
+    options:[
+      {label:'Quick glance',score:0},
+      {label:'10–15 mins',score:33},
+      {label:'30+ mins',score:66},
+      {label:'Deep study',score:100}
+    ]
   },
   {
     id:'form-distance',
@@ -70,12 +62,12 @@ const CKS_OWN = [
   },
   {
     id:'ratings',
-    t:'If a handicap — did I work on the ratings?',
+    t:'Did I work on the handicap ratings?',
     s:'Have I compared official ratings and looked for the edge?',
     type:'multi',
+    autoSkipIfNotHandicap:true,
     options:[
       {label:'Yes — ratings worked',score:100},
-      {label:'N/A — not a handicap',score:75},
       {label:'No',score:0}
     ]
   },

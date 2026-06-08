@@ -680,20 +680,6 @@ function _lboBackToChecklist(){
   }
 }
 
-function goFromChecklist(){
-  const done=cks.filter(Boolean).length;
-  if(done===0){alert('Run through the checklist first.');return;}
-  const mode=_pendingRCBet?(_pendingRCBet.mode||( done>=9?'real':'virt')):(done>=9?'real':'virt');
-  if(_pendingRCBet){
-    // Close checklist overlay, open logbet overlay
-    document.getElementById('prebet-overlay').style.display='none';
-    openLogbetOverlay(mode);
-  } else {
-    // Normal flow — use swipe cards
-    goTo(CARDS.findIndex(c=>c.id==='today'));
-    setTimeout(()=>setLBMode(mode),300);
-  }
-}
 
 let rcSwResultsData = [], rcSwResultsView = 'course', rcSwResultsOpenCourse = '';
 const _rcResTimeOpen = {}; // tracks which time-view result races are expanded

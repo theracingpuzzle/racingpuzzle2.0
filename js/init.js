@@ -40,7 +40,6 @@ bldDots();
   // Now render with correct data
   goTo(0, true);
   updHdr();
-  renderPrebet();
   renderToday();
   renderBkCard();
   if(typeof renderCmdRules==='function')renderCmdRules();

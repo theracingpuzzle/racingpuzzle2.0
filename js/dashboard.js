@@ -299,33 +299,103 @@ function renderStats(){
   // ── Checklist score vs outcome ──
   const ckEl=document.getElementById('st-ck-table');
   if(ckEl){
-    const bands=[{lbl:'0–5 (Low)',min:0,max:5},{lbl:'6–8 (Partial)',min:6,max:8},{lbl:'9–11 (Strong)',min:9,max:11}];
-    const allCkBets=disciplineSet.filter(b=>b.checklistScore!=null);
-    if(allCkBets.length<3){ckEl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Log more bets via the Pre-Bet checklist to unlock this insight.</div>';}
-    else{ckEl.innerHTML='<table style="width:100%;font-size:12px;border-collapse:collapse;">'
-      +'<thead><tr>'
-      +'<th style="text-align:left;font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Score</th>'
-      +'<th style="text-align:right;font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Bets</th>'
-      +'<th style="text-align:right;font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">SR%</th>'
-      +'<th style="text-align:right;font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">P&L</th>'
-      +'<th style="text-align:right;font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">ROI</th>'
-      +'</tr></thead><tbody>'
-      +bands.map(function(band){
-        const bb=allCkBets.filter(b=>b.checklistScore>=band.min&&b.checklistScore<=band.max);
-        if(!bb.length)return'<tr><td style="padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);">'+band.lbl+'</td><td colspan="4" style="text-align:center;font-style:italic;color:var(--mut);padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);">no data</td></tr>';
-        const bst=bb.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
-        const bp=bb.reduce((a,b)=>a+((parseFloat(b.returns)||0)-(parseFloat(b.stake)||0)),0);
-        const bw=bb.filter(b=>b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'))).length;
-        const bsr=bb.length>0?(bw/bb.length*100):0;
-        const broi=bst>0?(bp/bst*100):0;
-        const col=band.min>=9?'rgba(38,168,101,.08)':band.min>=6?'rgba(232,228,220,.06)':'rgba(196,58,58,.06)';
-        return'<tr style="background:'+col+';">'
-          +'<td style="padding:8px 0 8px 6px;border-bottom:1px solid rgba(28,50,80,.4);">'+band.lbl+'</td>'
-          +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:var(--mut);">'+bb.length+'</td>'
-          +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);">'+bsr.toFixed(0)+'%</td>'
-          +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:'+(bp>=0?'var(--grn)':'var(--red)')+';">'+fmt(bp)+'</td>'
-          +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:'+(broi>=0?'var(--grn)':'var(--red)')+';">'+broi.toFixed(1)+'%</td></tr>';
-      }).join('')+'</tbody></table>';}
+    const ckBets=disciplineSet.filter(function(b){return b.checklistAnswers&&Object.keys(b.checklistAnswers).length>0;});
+    if(ckBets.length<3){
+      ckEl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Log more bets via the checklist to unlock these insights.</div>';
+    } else {
+      // Helper: ROI row for a subset of bets
+      function ckSubStats(bb){
+        if(!bb.length)return null;
+        const st=bb.reduce(function(a,b){return a+(parseFloat(b.stake)||0);},0);
+        const p=bb.reduce(function(a,b){return a+(pnl(b)||0);},0);
+        const w=bb.filter(function(b){return b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'));}).length;
+        return{n:bb.length,sr:bb.length>0?(w/bb.length*100):0,p,roi:st>0?(p/st*100):0};
+      }
+      function ckRow(label,bb,isGood){
+        const s=ckSubStats(bb);
+        if(!s)return'<tr><td style="padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--mut);">'+label+'</td><td colspan="3" style="text-align:center;font-size:11px;font-style:italic;color:var(--mut);padding:6px 0;border-bottom:1px solid var(--bdr);">no data</td></tr>';
+        const roiCol=s.roi>=0?'var(--grn)':'var(--red)';
+        const dot=isGood===true?'<span style="color:var(--grn);margin-right:4px;">●</span>':isGood===false?'<span style="color:var(--red);margin-right:4px;">●</span>':'';
+        return'<tr><td style="padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;">'+dot+label+'</td>'
+          +'<td style="font-family:monospace;text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);color:var(--mut);font-size:11px;">'+s.n+'</td>'
+          +'<td style="font-family:monospace;text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:11px;">'+s.sr.toFixed(0)+'%</td>'
+          +'<td style="font-family:monospace;text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);color:'+roiCol+';font-size:11px;">'+s.roi.toFixed(1)+'%</td>'
+          +'</tr>';
+      }
+      const thead='<table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:16px;">'
+        +'<thead><tr>'
+        +'<th style="text-align:left;font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);"></th>'
+        +'<th style="font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);text-align:right;">Bets</th>'
+        +'<th style="font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);text-align:right;">SR%</th>'
+        +'<th style="font-family:monospace;font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);text-align:right;">ROI</th>'
+        +'</tr></thead><tbody>';
+      function ckSection(title,rows){
+        return'<div style="font-family:monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:14px 0 4px;">'+title+'</div>'
+          +thead+rows+'</tbody></table>';
+      }
+      let html='';
+      // 1. Research time (multi-choice)
+      const rtBets=ckBets.filter(function(b){return b.checklistAnswers['research-time']!=null;});
+      if(rtBets.length>=3){
+        html+=ckSection('Research Time',
+          ['Quick glance','10–15 mins','30+ mins','Deep study'].map(function(lbl,i){
+            return ckRow(lbl,rtBets.filter(function(b){return b.checklistAnswers['research-time']===lbl;}),i===0?false:i>=2?true:null);
+          }).join('')
+        );
+      }
+      // 2. Checked form & distance
+      const fdBets=ckBets.filter(function(b){return b.checklistAnswers['form-distance'];});
+      if(fdBets.length>=3){
+        html+=ckSection('Checked Form & Distance',
+          ckRow('Yes',fdBets.filter(function(b){return b.checklistAnswers['form-distance']==='yes';}),true)
+          +ckRow('No',fdBets.filter(function(b){return b.checklistAnswers['form-distance']==='no';}),false)
+        );
+      }
+      // 3. Watched video
+      const vidBets=ckBets.filter(function(b){return b.checklistAnswers['video'];});
+      if(vidBets.length>=3){
+        html+=ckSection('Watched Replay',
+          ckRow('Yes',vidBets.filter(function(b){return b.checklistAnswers['video']==='yes';}),true)
+          +ckRow('No',vidBets.filter(function(b){return b.checklistAnswers['video']==='no';}),false)
+        );
+      }
+      // 3b. Handicap ratings — only handicap races (exclude N/A)
+      const ratingsBets=ckBets.filter(function(b){return b.checklistAnswers['ratings']&&b.checklistAnswers['ratings']!=='N/A — not a handicap';});
+      if(ratingsBets.length>=3){
+        html+=ckSection('Handicap Ratings (handicaps only)',
+          ckRow('Yes — worked ratings',ratingsBets.filter(function(b){return b.checklistAnswers['ratings']==='Yes — ratings worked';}),true)
+          +ckRow('No',ratingsBets.filter(function(b){return b.checklistAnswers['ratings']==='No';}),false)
+        );
+      }
+      // 4. Price assessment
+      const priceBets=ckBets.filter(function(b){return b.checklistAnswers['price'];});
+      if(priceBets.length>=3){
+        html+=ckSection('Price Assessment',
+          ['Value','Fair','Marginal','Forced'].map(function(lbl,i){
+            return ckRow(lbl,priceBets.filter(function(b){return b.checklistAnswers['price']===lbl;}),i===0?true:i>=2?false:null);
+          }).join('')
+        );
+      }
+      // 5. Why reached for device
+      const whyBets=ckBets.filter(function(b){return b.checklistAnswers['why'];});
+      if(whyBets.length>=3){
+        html+=ckSection('Why You Placed the Bet',
+          ['Planned','Spotted it','Tipster','Impulse'].map(function(lbl,i){
+            return ckRow(lbl,whyBets.filter(function(b){return b.checklistAnswers['why']===lbl;}),i===0?true:i===3?false:null);
+          }).join('')
+        );
+      }
+      // 6. Time of day
+      const todBets=ckBets.filter(function(b){return b.checklistAnswers['time-of-day'];});
+      if(todBets.length>=3){
+        html+=ckSection('Time of Day',
+          ['Morning','Afternoon','Evening','Late'].map(function(lbl,i){
+            return ckRow(lbl,todBets.filter(function(b){return b.checklistAnswers['time-of-day']===lbl;}),i===0?true:i>=3?false:null);
+          }).join('')
+        );
+      }
+      ckEl.innerHTML=html||'<div style="color:var(--mut);font-style:italic;font-size:13px;">Keep logging bets to unlock per-question insights.</div>';
+    }
   }
   const confEl=document.getElementById('st-conf-table');
   if(confEl){

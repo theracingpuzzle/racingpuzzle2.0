@@ -363,6 +363,12 @@ async function supaLoad(){
       D.vBank=D.vBank||{};
       D.vBank.start=b.virtual_start;
       D.vBank.current=b.virtual_current;
+    } else {
+      // New user — no bank row yet, start from zero
+      D.bank={start:0,current:0};
+      D.vBank=D.vBank||{};
+      D.vBank.start=0;
+      D.vBank.current=0;
     }
 
     // ── Bets (split back into real and virtual) ──

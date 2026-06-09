@@ -39,7 +39,7 @@ async function bootApp() {
   rfrTL();
   renderChips();
   seedRules();
-  renderSourceDropdowns();
+  if (typeof renderSources === 'function') renderSources();
 
   const _cd = document.getElementById('cdate');
   if (_cd) _cd.value = td();

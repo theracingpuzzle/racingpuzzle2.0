@@ -483,13 +483,9 @@ RACING <span class="logo-accent">PUZZLE</span>
           <!-- ── Racing API ── -->
           <div class="blk">
             <div class="bttl">🏇 Racing API</div>
-            <div class="body-mut">Connect to <strong class="gld">theracingapi.com</strong> to load today's racecards and results.</div>
-            <div class="fg"><label>Username (email)</label><input type="text" id="racing-api-user" placeholder="" autocomplete="off" autocapitalize="none"></div>
-            <div class="fg"><label>Password</label><input type="password" id="racing-api-pass" autocomplete="off"></div>
+            <div style="font-size:13px;color:var(--mut);margin-bottom:12px;">Live racecards and results via <strong style="color:var(--txt);">theracingapi.com</strong> — managed server-side.</div>
             <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;">
-              <button class="btn bgrn" onclick="saveRacingCreds()">Save Credentials</button>
               <button class="btn bout" onclick="testRacingAPI()">Test Connection</button>
-              <button class="btn bdng" onclick="clearRacingCreds()">Clear &amp; Reset</button>
               <span style="font-family:monospace;font-size:11px;" id="racing-api-status"></span>
             </div>
           </div>

@@ -38,12 +38,11 @@ function saveRacingCreds(){
 }
 
 async function callRacingAPI(endpoint, params={}){
-  const creds=getRacingCreds();
-  if(!creds.username||!creds.password)throw new Error('Racing API credentials not set — go to Command → Settings');
+  // Credentials are stored as Cloudflare Worker secrets — never sent from the client
   const resp=await fetch('https://racing-proxy.theracingpuzzle.workers.dev',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({type:'racing',username:creds.username,password:creds.password,endpoint,params})
+    body:JSON.stringify({type:'racing',endpoint,params})
   });
   if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.error||'API error '+resp.status);}
   return await resp.json();
@@ -52,9 +51,7 @@ async function callRacingAPI(endpoint, params={}){
 async function testRacingAPI(){
   const st=document.getElementById('racing-api-status');
   if(st){st.innerHTML='<div style="font-family:monospace;font-size:11px;color:var(--mut);">Testing…</div>';}
-  const creds=getRacingCreds();
-  const today=new Date().toISOString().slice(0,10);
-  const lines=['User: '+(creds.username||'EMPTY'),'Pass: '+(creds.password?creds.password.length+' chars':'EMPTY'),'---'];
+  const lines=['Credentials: stored server-side (Cloudflare Worker)','---'];
   const tests=[
     {label:'racecards/free (today)',endpoint:'racecards/free',params:{}},
     {label:'racecards/tomorrow/free',endpoint:'racecards/tomorrow/free',params:{}},
@@ -63,7 +60,7 @@ async function testRacingAPI(){
   for(const t of tests){
     try{
       const resp=await fetch('https://racing-proxy.theracingpuzzle.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({type:'racing',username:creds.username,password:creds.password,endpoint:t.endpoint,params:t.params})});
+        body:JSON.stringify({type:'racing',endpoint:t.endpoint,params:t.params})});
       const data=await resp.json().catch(()=>({}));
       if(resp.status===200){
         const cnt=(data.racecards||data.results||data.races||[]).length;

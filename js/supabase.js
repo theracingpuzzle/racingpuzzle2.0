@@ -324,8 +324,10 @@ async function _syncSettings(){
   const rows=Object.keys(s).filter(function(k){return !specialKeys.has(k);}).map(function(k){
     return{user_id:uid,key:k,value:s[k],updated_at:new Date().toISOString()};
   });
-  if(D.sources&&D.sources.length){
-    rows.push({user_id:uid,key:'sources',value:JSON.stringify(D.sources),updated_at:new Date().toISOString()});
+  // Sources live in D.settings.sources — sync that (D.sources was the old location)
+  const srcList=D.settings.sources||D.sources||[];
+  if(srcList.length){
+    rows.push({user_id:uid,key:'sources',value:JSON.stringify(srcList),updated_at:new Date().toISOString()});
   }
   rows.push({user_id:uid,key:'cksOwn',value:JSON.stringify(D.cksOwn||[]),updated_at:new Date().toISOString()});
   rows.push({user_id:uid,key:'cksTip',value:JSON.stringify(D.cksTip||[]),updated_at:new Date().toISOString()});
@@ -437,11 +439,14 @@ async function supaLoad(){
     }
 
     // ── Settings ──
+    // Always reset user-specific lists so a new user never sees a previous user's data
+    D.settings=D.settings||{};
+    D.settings.sources=[];
+    D.sources=[];
     if(Array.isArray(settingRows)){
-      D.settings=D.settings||{};
       settingRows.forEach(function(s){
         if(s.key==='sources'){
-          try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.sources=parsed;}
+          try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length){D.settings.sources=parsed;D.sources=parsed;}}
           catch(e){}
         } else if(s.key==='cksOwn'){
           try{const parsed=JSON.parse(s.value);if(Array.isArray(parsed)&&parsed.length)D.cksOwn=parsed;}

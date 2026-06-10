@@ -54,9 +54,6 @@ async function bootApp() {
     if (typeof loadTodayMeetings === 'function') loadTodayMeetings();
   }, 800);
 
-  // Dismiss the splash screen immediately
-  const _splash = document.getElementById('splash');
-  if (_splash) _splash.style.display = 'none';
 }
 
 // ── Auth-first startup ─────────────────────────────────────────────────────────
@@ -64,17 +61,18 @@ async function bootApp() {
   try {
     const hasSession = await authInit();
     if (hasSession) {
-      // Already logged in — boot and auto-dismiss splash
       await bootApp();
     } else {
-      // No session — hide splash and show login overlay
-      const _splash = document.getElementById('splash');
-      if (_splash) _splash.style.display = 'none';
       authShowLogin();
     }
   } catch(e) {
     console.error('[Auth] init failed:', e.message);
-    await bootApp();
+    // Try to render with whatever local data we have
+    try { await bootApp(); } catch(e2) { console.error('[Boot] failed:', e2.message); }
+  } finally {
+    // Always dismiss the splash — no matter what happened above
+    const _splash = document.getElementById('splash');
+    if (_splash) _splash.style.display = 'none';
   }
 })();
 

@@ -1369,6 +1369,21 @@ function _wlpBuildHTML(e){
   h+='<ellipse cx="35" cy="12" rx="13" ry="6" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>';
   h+='</svg></div>';
 
+  // ── Betting record for this horse ──
+  const horseName=(e.horse||'').toLowerCase().trim();
+  const horseBets=(D.bets||[]).filter(function(b){
+    return (b.horse||'').toLowerCase().trim()===horseName
+      && b.result && b.result!=='pending' && b.result!=='void' && b.result!=='nr';
+  });
+  const horseWins=horseBets.filter(function(b){
+    return b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'));
+  });
+  const horseStaked=horseBets.reduce(function(a,b){return a+(parseFloat(b.stake)||0);},0);
+  const horseReturns=horseBets.reduce(function(a,b){return a+(parseFloat(b.returns)||0);},0);
+  const horsePnl=horseReturns-horseStaked;
+  const horseSR=horseBets.length>0?(horseWins.length/horseBets.length*100):null;
+  const horseROI=horseStaked>0?(horsePnl/horseStaked*100):null;
+
   h+='<div class="wlp-stats">';
   // My Rating
   h+='<div class="wlp-stat-row"><span class="wlp-stat-left">⭐ My Rating</span>';
@@ -1378,6 +1393,18 @@ function _wlpBuildHTML(e){
   h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🏆 OR Edge</span>';
   h+=edge!==null?'<span class="wlp-edge-badge" style="background:'+edgeCol+'20;color:'+edgeCol+';">'+(edge>0?'+':'')+edge+' pts</span>':'<span class="wlp-stat-sm" style="color:var(--mut);">—</span>';
   h+='</div>';
+  // Betting record
+  if(horseBets.length>0){
+    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🎲 Backed</span>';
+    h+='<span class="wlp-stat-sm">'+horseWins.length+'/'+horseBets.length+' &nbsp;<span style="color:var(--mut);">SR '+horseSR.toFixed(0)+'%</span></span></div>';
+    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">💰 P&amp;L</span>';
+    h+='<span class="wlp-stat-sm" style="color:'+(horsePnl>=0?'#4ade80':'#f87171')+';">'+(horsePnl>=0?'+':'')+horsePnl.toFixed(2)+'</span></div>';
+    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">📈 ROI</span>';
+    h+='<span class="wlp-stat-sm" style="color:'+(horseROI>=0?'#4ade80':'#f87171')+';">'+horseROI.toFixed(1)+'%</span></div>';
+  } else {
+    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🎲 Backed</span>';
+    h+='<span class="wlp-stat-sm" style="color:var(--mut);">Not yet</span></div>';
+  }
   // Last Entry
   h+='<div class="wlp-stat-row"><span class="wlp-stat-left">📅 Last Entry</span>';
   h+='<span class="wlp-stat-sm">'+fmt(lastDate)+'</span></div>';

@@ -398,7 +398,7 @@ tr:hover td { background: var(--sur2); }
 .supa-banner { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 999; padding: 8px 14px; font-size: 11px; font-weight: 700; text-align: center; }
 
 /* Card headers (Today / Racecards / Results top strip) */
-.card-hdr  { margin: -18px -17px 0; padding: 14px 17px 13px; border-bottom: 1px solid var(--bdr); }
+.card-hdr  { margin: -18px -17px 0; padding: 14px 17px 13px; }
 .card-hdr-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 
 /* Section label — small caps muted */

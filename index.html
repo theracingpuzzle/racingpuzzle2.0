@@ -296,13 +296,21 @@ RACING <span class="logo-accent">PUZZLE</span>
       </div>
     </div>
 
-    <!-- STATS CARD -->
+    <!-- STATS / HISTORY CARD -->
     <div class="card cST" id="c4">
       <div class="cin cin-touch">
         <div class="card-hdr">
           <div class="lbl">Performance</div>
-          <div class="card-title" style="color:#60a5fa;">Stats</div>
+          <div class="card-title" style="color:#60a5fa;" id="stats-card-title">Stats</div>
         </div>
+
+        <!-- ── Top-level Stats / History toggle ── -->
+        <div class="rc-view-tog" style="margin-bottom:16px;" id="stats-hist-tog">
+          <button id="sh-tog-stats" class="rc-view-btn on" onclick="setStatsHistView('stats')">📊 Stats</button>
+          <button id="sh-tog-hist"  class="rc-view-btn off" onclick="setStatsHistView('hist')">📋 History</button>
+        </div>
+
+        <!-- ══ STATS PANE ══ -->
         <div id="cp-stats">
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center;">
             <div class="rc-view-tog" style="margin-bottom:0;">
@@ -350,8 +358,9 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div id="st-trainer"></div>
           </div>
         </div>
-        <div class="card-sec-divider">History</div>
-        <div id="cp-hist">
+
+        <!-- ══ HISTORY PANE ══ -->
+        <div id="cp-hist" style="display:none;">
           <div class="hist-tog">
             <button id="hist-tog-real" class="hist-tog-btn on" onclick="setHistMode('real')">Real</button>
             <button id="hist-tog-virt" class="hist-tog-btn off" onclick="setHistMode('virt')">Virtual</button>
@@ -389,6 +398,7 @@ RACING <span class="logo-accent">PUZZLE</span>
             </div>
           </div>
         </div>
+
       </div>
     </div>
 

@@ -1479,11 +1479,27 @@ function _wlpBuildHTML(e){
   h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">3</div><span class="wlp-section-title" style="font-size:11px;">Targets</span></div>';
   h+='<span class="wlp-section-action" style="font-size:16px;" onclick="'+editFn+'">+</span></div>';
   if(targets.length){
+    const todayStr=td();
     targets.forEach(function(t){
-      h+='<div class="wlp-target-item"><span class="wlp-target-icon">🏇</span>';
+      const isPast=t.date&&t.date<=todayStr;
+      // Check if a review already exists for this target race on or around that date
+      const alreadyReviewed=isPast&&(D.reviews||[]).some(function(r){
+        return r.profileId===e.id&&r.date===t.date;
+      });
+      h+='<div class="wlp-target-item"><span class="wlp-target-icon">'+(isPast?'📋':'🏇')+'</span>';
       h+='<div style="flex:1;min-width:0;"><div class="wlp-target-race">'+esc(t.race||'—')+'</div><div class="wlp-target-meta">'+esc(t.track||'—')+'</div></div>';
-      h+='<div style="text-align:right;flex-shrink:0;"><div class="wlp-target-date">'+(t.date?fmt(t.date):'TBC')+'</div>';
+      h+='<div style="text-align:right;flex-shrink:0;">';
+      h+='<div class="wlp-target-date" style="color:'+(isPast?'var(--mut)':'var(--gld)')+';">'+(t.date?fmt(t.date):'TBC')+'</div>';
       if(t.condition)h+='<div class="wlp-target-cond">'+esc(t.condition)+'</div>';
+      if(isPast){
+        if(alreadyReviewed){
+          h+='<div style="font-size:10px;color:#4ade80;margin-top:4px;">✓ Reviewed</div>';
+        }else{
+          // Build onclick to open review pre-filled with target race details
+          const rv='openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\''+esc(t.track||'')+'\',\'\',\''+esc(t.race||'')+'\',\'\',\'\',\'\')';
+          h+='<button onclick="'+rv+'" style="margin-top:5px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.05em;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.4);color:#fb923c;border-radius:6px;cursor:pointer;">Review ✍️</button>';
+        }
+      }
       h+='</div></div>';
     });
   }else{

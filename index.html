@@ -104,11 +104,8 @@ RACING <span class="logo-accent">PUZZLE</span>
           </div>
         </div>
 
-        <!-- ── WATCHLIST RUNNING TODAY ── -->
-        <div id="t-wl-alerts" class="mt20" style="display:none;"></div>
-
-        <!-- ── EDGE ALERTS (profiler horses where MR > OR) ── -->
-        <div id="t-edge-alerts" class="mt20" style="display:none;"></div>
+        <!-- ── RUNNING TODAY (watchlist + edge combined) ── -->
+        <div id="t-today-alerts" class="mt20" style="display:none;"></div>
 
         <!-- ── NEXT RACE ── -->
         <div id="t-next-race" class="mt20" style="display:none;">
@@ -305,7 +302,7 @@ RACING <span class="logo-accent">PUZZLE</span>
         </div>
 
         <!-- ── Top-level Stats / History toggle ── -->
-        <div class="rc-view-tog" style="margin-bottom:16px;" id="stats-hist-tog">
+        <div class="rc-view-tog" style="margin-bottom:16px;width:100%;" id="stats-hist-tog">
           <button id="sh-tog-stats" class="rc-view-btn on" onclick="setStatsHistView('stats')">📊 Stats</button>
           <button id="sh-tog-hist"  class="rc-view-btn off" onclick="setStatsHistView('hist')">📋 History</button>
         </div>

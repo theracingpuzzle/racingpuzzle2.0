@@ -71,7 +71,7 @@ function _showTodayDemo(){
           return '<div class="t-alert-row-pur t-row-sb-gap">'
             + '<div><div class="t-heading">'+a.horse+'</div>'
             + '<div class="t-muted">'+a.time+' · '+a.course+' · '+a.race+'</div>'
-            + '<div class="t-jockey">J: '+a.jockey+'</div></div>'
+            + '<div class="t-jockey">J: '+fmtJockey(a.jockey)+'</div></div>'
             + '<span class="t-profile-btn">Profile →</span>'
             + '</div>';
         }).join('')
@@ -137,7 +137,6 @@ async function loadTodayMeetings(){
     if(stEl)stEl.textContent=courses.length+' meetings';
     rfrTL();
     checkWatchlistRunners(races);
-    renderEdgeAlerts(races);
     renderNextRace();
   }catch(e){if(stEl)stEl.textContent='';}
 }
@@ -231,10 +230,13 @@ function markStudyDone(){
   renderStudyReminder();
 }
 
+// ── Combined "Running Today" — watchlist + edge in one section ──
 async function checkWatchlistRunners(races){
   const wl=getWL();
-  const watching=wl.filter(e=>e.horse);
-  if(!watching.length){const alertEl=document.getElementById('t-wl-alerts');if(alertEl)alertEl.style.display='none';return;}
+  const watching=wl.filter(function(e){return e.horse;});
+  const alertEl=document.getElementById('t-today-alerts');
+  if(!watching.length){if(alertEl)alertEl.style.display='none';return;}
+
   const alerts=[];
   (races||[]).forEach(function(race){
     const time=race.off||race.off_time||race.time||'—';
@@ -253,28 +255,47 @@ async function checkWatchlistRunners(races){
           const storedOR=String(w.currentRating||'').trim();
           const orChanged=racecardOR&&racecardOR!==storedOR;
           if(orChanged){
-            const prev=storedOR;
             w.currentRating=racecardOR;
             if(!w.orHistory)w.orHistory=[];
-            w.orHistory.unshift({or:racecardOR,prev:prev,date:td(),auto:true});
+            w.orHistory.unshift({or:racecardOR,prev:storedOR,date:td(),auto:true});
             if(w.orHistory.length>20)w.orHistory=w.orHistory.slice(0,20);
             save();
           }
-          if(!alerts.find(a=>a.horse.toLowerCase()===horseName)){
-            alerts.push({horse:r.horse||r.name,course,time,raceName,jockey:r.jockey||'',raceDist,raceGoing,raceClass,wlEntry:w,orUpdated:orChanged?racecardOR:null,orPrev:orChanged?storedOR:null});
+          if(!alerts.find(function(a){return a.horse.toLowerCase()===horseName;})){
+            // Calculate edge (myRating vs currentRating)
+            const mr=parseFloat(w.myRating);
+            const or=parseFloat(orChanged?racecardOR:storedOR||w.currentRating);
+            const edge=(mr&&or&&mr>or)?Math.round(mr-or):0;
+            alerts.push({
+              horse:r.horse||r.name,course,time,raceName,
+              jockey:r.jockey||'',raceDist,raceGoing,raceClass,
+              wlEntry:w,
+              orUpdated:orChanged?racecardOR:null,
+              orPrev:orChanged?storedOR:null,
+              edge,mr,or
+            });
           }
         }
       });
     });
   });
-  const alertEl=document.getElementById('t-wl-alerts');if(!alertEl)return;
+
+  if(!alertEl)return;
   if(!alerts.length){alertEl.style.display='none';window._wlAlerts=[];return;}
+
+  // Edge horses first (highest edge), then by time
+  alerts.sort(function(a,b){
+    if(b.edge!==a.edge)return b.edge-a.edge;
+    return(a.time||'').localeCompare(b.time||'');
+  });
+
   window._wlAlerts=alerts; // stored for PDF generation
   alertEl.style.display='block';
   const todayStr=td();
+
   alertEl.innerHTML='<div class="t-alert-pur">'
     +'<div class="t-wl-hdr">'
-      +'<div class="t-alert-lbl-pur">Watchlist Running Today</div>'
+      +'<div class="t-alert-lbl-pur">🏇 Running Today</div>'
       +'<button onclick="generateWatchlistPDF()" class="t-pdf-btn">↓ PDF</button>'
     +'</div>'
     +alerts.map(function(a){
@@ -282,13 +303,18 @@ async function checkWatchlistRunners(races){
       const alreadyReviewed=(D.reviews||[]).some(function(r){
         return r.profileId===wid&&r.date===todayStr;
       });
+      const edgeBadge=a.edge>0
+        ?'<span class="t-edge-badge" style="margin-left:7px;">MR '+a.mr+' · OR '+a.or+' · +'+a.edge+'</span>'
+        :'';
       return'<div class="t-alert-row-pur">'
         +'<div class="t-row-sb-gap">'
           +'<div class="t-flex-info">'
-            +'<div class="t-horse-name">'+a.horse+'</div>'
+            +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">'
+              +'<span class="t-horse-name">'+a.horse+'</span>'+edgeBadge
+            +'</div>'
             +'<div class="t-muted">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
-            +(a.jockey?'<div class="t-jockey">J: '+a.jockey+'</div>':'')
-            +(a.orUpdated?'<div style="font-size:10px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
+            +(a.jockey?'<div class="t-jockey">J: '+fmtJockey(a.jockey)+'</div>':'')
+            +(a.orUpdated?'<div style="font-size:10px;color:var(--gld);margin-top:2px;">OR: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
           +'</div>'
           +'<div class="t-flex-col-end">'
             +(alreadyReviewed
@@ -301,7 +327,8 @@ async function checkWatchlistRunners(races){
         +'</div>'
       +'</div>';
     }).join('')
-  +'</div></div>';
+  +'</div>';
+
   setTimeout(function(){
     alertEl.querySelectorAll('.t-wl-review-btn').forEach(function(btn){
       btn.addEventListener('click',function(ev){
@@ -331,7 +358,6 @@ async function checkWatchlistRunners(races){
         var time=btn.getAttribute('data-time')||'';
         if(!course)return;
         navTo('races');
-        // Step 1: open meeting, then step 2: open the specific race
         setTimeout(function(){
           rcSwSelectCourse(course);
           setTimeout(function(){
@@ -493,7 +519,7 @@ function generateWatchlistPDF(){
 
       // ── Trainer & jockey ──
       const jt=[];
-      if(a.jockey)jt.push({lbl:'J: '+a.jockey,col:GREEN});
+      if(a.jockey)jt.push({lbl:'J: '+fmtJockey(a.jockey),col:GREEN});
       if(w.trainer)jt.push({lbl:'T: '+w.trainer,col:ORANGE});
       if(jt.length){
         let px=TX;
@@ -744,7 +770,6 @@ function renderToday(){
   if(window._todayMeetingsCache){
     const races=window._todayMeetingsCache.racecards||window._todayMeetingsCache.races||[];
     checkWatchlistRunners(races);
-    renderEdgeAlerts(races);
     renderNextRace();
   }
 
@@ -825,47 +850,7 @@ function doCheckIn(){
   renderCheckIn();
 }
 
-function renderEdgeAlerts(races){
-  const el=document.getElementById('t-edge-alerts');
-  if(!el) return;
-  const wl=getWL();
-  const edges=[];
-  (races||[]).forEach(function(race){
-    const course=race.course||race.venue||'';
-    const time=race.off||race.off_time||race.time||'';
-    (race.runners||race.horses||[]).forEach(function(r){
-      const name=(r.horse||r.name||'').toLowerCase().trim();
-      wl.forEach(function(w){
-        const wn=(w.horse||'').toLowerCase().trim();
-        if(name&&wn&&name===wn){
-          const mr=parseFloat(w.myRating);
-          const or=parseFloat(w.currentRating);
-          if(mr&&or&&mr>or){
-            const edge=mr-or;
-            if(!edges.find(e=>e.horse.toLowerCase()===name)){
-              edges.push({horse:w.horse,course,time,edge,mr,or});
-            }
-          }
-        }
-      });
-    });
-  });
-  if(!edges.length){el.style.display='none';return;}
-  edges.sort(function(a,b){return b.edge-a.edge;});
-  el.style.display='block';
-  el.innerHTML='<div class="t-alert-grn">'
-    +'<div class="t-alert-lbl-grn">⭐ Edge Running Today</div>'
-    +edges.map(function(e){
-      return'<div class="t-alert-row-grn" onclick="navTo(\'tracker\')">'
-        +'<div>'
-          +'<div class="t-heading">'+e.horse+'</div>'
-          +'<div class="mm">'+e.time+' · '+e.course+'</div>'
-        +'</div>'
-        +'<span class="t-edge-badge">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
-        +'</div>';
-    }).join('')
-  +'</div>';
-}
+// renderEdgeAlerts merged into checkWatchlistRunners above
 
 function renderTodayBets(tb, vtb){
   const le=document.getElementById('tbets');

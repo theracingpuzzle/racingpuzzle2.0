@@ -1,6 +1,8 @@
 // ─── UTILS ─── formatting, odds, returns
 
 function fmt(n){const v=parseFloat(n)||0;return(v>=0?'+':'')+'£'+Math.abs(v).toFixed(2);}
+// Ensures a space between jockey name and apprentice claim e.g. "J.Smith(5)" → "J.Smith (5)"
+function fmtJockey(j){return(j||'—').replace(/([a-zA-Z])\(/g,'$1 (');}
 function fp(n){return'£'+(parseFloat(n)||0).toFixed(2);}
 
 function fo(s){if(!s)return 0;s=String(s).trim().toUpperCase().replace(/\s/g,'');if(s==='EVS'||s==='EVENS'||s==='1/1')return 2;const m=s.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);if(m){const n=parseFloat(m[1]),d=parseFloat(m[2]);return d>0?parseFloat((n/d+1).toFixed(4)):0;}const n=parseFloat(s);return isNaN(n)?0:n;}

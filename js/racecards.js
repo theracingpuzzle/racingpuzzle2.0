@@ -490,7 +490,7 @@ function rcSwRenderRunners(idx, course, el){
     const name=stripCountrySuffix(r.horse||r.name||'—');
     const no=r.number||r.saddle_cloth||(i+1);
     const draw=r.draw?'('+r.draw+')':'';
-    const jock=r.jockey||r.jockeyName||'—';
+    const jock=fmtJockey(r.jockey||r.jockeyName);
     const trainer=r.trainer||r.trainerName||'—';
     const age=r.age?r.age+'yo':'';
     const form=r.form||'';
@@ -1056,7 +1056,7 @@ async function rcLoadResults(){
           +places.map(function(r,i){
             const pos=r.position||r.place||(i+1);
             const horse=stripCountrySuffix(r.horse||r.name||'—');
-            const jock=r.jockey||'—';
+            const jock=fmtJockey(r.jockey);
             const trainer=r.trainer||'—';
             const sp=r.sp||r.starting_price||'—';
             const ofr=r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||rcGetOFR(horse)||'';

@@ -1141,52 +1141,87 @@ const _RC_SL_REASONS = {
 
 // ── Step 1: Race picker ────────────────────────────────────────────
 function rcSlRenderPicker(container){
-  // Flatten all races across all meetings
-  const allRaces=[];
+  // Group by meeting (same as Course view)
+  const meetings={};
   rcSwCurrentRaces.forEach(function(meeting){
     const course=meeting.course||meeting.venue||'Unknown';
     if(meeting.runners){
-      allRaces.push({race:meeting, course:course});
+      if(!meetings[course])meetings[course]=[];
+      meetings[course].push(meeting);
     } else {
-      (meeting.races||[]).forEach(function(r){ allRaces.push({race:r, course:course}); });
+      (meeting.races||[]).forEach(function(r){
+        if(!meetings[course])meetings[course]=[];
+        meetings[course].push(r);
+      });
     }
   });
-  allRaces.sort(function(a,b){
-    return timeToMins(a.race.off||a.race.off_time||a.race.time||'')
-          -timeToMins(b.race.off||b.race.off_time||b.race.time||'');
+
+  // Flatten sorted for index lookup
+  const allRaces=[];
+  const sorted=Object.keys(meetings).sort(function(a,b){return a.localeCompare(b);});
+  sorted.forEach(function(course){
+    meetings[course].slice().sort(function(a,b){
+      return timeToMins(a.off||a.off_time||a.time||'')-timeToMins(b.off||b.off_time||b.time||'');
+    }).forEach(function(r){ allRaces.push({race:r,course:course}); });
   });
+  window._rcSlAllRaces=allRaces;
 
   if(!allRaces.length){
     const d=document.createElement('div');
     d.className='rc-empty';d.style.marginTop='20px';
-    d.textContent='No races loaded. Refresh the card first.';
+    d.textContent='No races loaded — refresh the card first.';
     container.appendChild(d);
     return;
   }
 
+  // Build grouped HTML matching Course view style
+  let html='<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Select a race to shortlist</div>';
+  sorted.forEach(function(course){
+    const races=meetings[course].slice().sort(function(a,b){
+      return timeToMins(a.off||a.off_time||a.time||'')-timeToMins(b.off||b.off_time||b.time||'');
+    });
+    const flag=rcCountryFlag(rcCourseCountry(course));
+    const type=rcMeetingType(races);
+    const span=rcTimeSpan(races);
+    const count=races.length;
+    html+='<div class="rc-meeting">'
+      +'<div class="rc-meeting-hdr rc-mtg-pur">'
+        +'<span class="rc-meeting-flag">'+flag+'</span>'
+        +'<div class="rc-meeting-info">'
+          +'<div class="rc-mtg-course">'+course+'</div>'
+          +'<div class="rc-mtg-meta">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
+        +'</div>'
+      +'</div>'
+      +races.map(function(r){
+        const idx=allRaces.findIndex(function(a){return a.race===r&&a.course===course;});
+        const time=r.off||r.off_time||r.time||'—';
+        const name=r.race_name||r.name||r.title||'Race';
+        const cnt=(r.runners||r.horses||[]).filter(function(h){
+          return !h.non_runner&&!h.isNonRunner&&(''+h.number).toUpperCase()!=='NR';
+        }).length;
+        const dist=formatDist(r.distance_round||r.distance_f||r.distance||r.dist||'');
+        const going=r.going||'';
+        return'<div class="rc-race-row rc-sl-race-row" onclick="rcSlStartRace('+idx+')">'
+          +'<div class="rc-race-hdr" style="pointer-events:none;">'
+            +'<div class="rc-race-hdr-left">'
+              +'<div class="rc-race-time">'+time+'</div>'
+              +'<div class="rc-race-name">'+name+'</div>'
+              +'<div class="rc-race-meta-row">'
+                +(dist?'<span class="rc-dist-chip">'+dist+'</span>':'')
+                +(going?'<span class="rc-dist-chip">'+going+'</span>':'')
+                +'<span class="rc-race-runners-lbl">'+cnt+' runners</span>'
+              +'</div>'
+            +'</div>'
+            +'<span style="color:#a78bfa;font-size:20px;flex-shrink:0;">›</span>'
+          +'</div>'
+        +'</div>';
+      }).join('')
+    +'</div>';
+  });
+
   const wrap=document.createElement('div');
   wrap.style.cssText='margin-top:12px;';
-  wrap.innerHTML='<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Pick a race to review</div>'
-    +allRaces.map(function(item,i){
-      const r=item.race;
-      const time=r.off||r.off_time||r.time||'—';
-      const name=r.race_name||r.name||'';
-      const cnt=(r.runners||r.horses||[]).length;
-      const dist=formatDist(r.distance_round||r.distance_f||r.distance||r.dist||'');
-      return'<div class="rc-sl-picker-row" onclick="rcSlStartRace('+i+')" data-idx="'+i+'">'
-        +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:15px;font-weight:800;color:var(--txt);">'+item.course+' <span style="color:var(--gld);">'+time+'</span></div>'
-          +(name?'<div style="font-size:11px;color:var(--mut);margin-top:1px;">'+name+'</div>':'')
-        +'</div>'
-        +'<div style="text-align:right;flex-shrink:0;">'
-          +(dist?'<div style="font-size:11px;color:var(--mut);">'+dist+'</div>':'')
-          +'<div style="font-size:10px;color:var(--mut);">'+cnt+' runners</div>'
-        +'</div>'
-      +'</div>';
-    }).join('');
-
-  // Store reference so rcSlStartRace can look up by index
-  window._rcSlAllRaces=allRaces;
+  wrap.innerHTML=html;
   container.appendChild(wrap);
 }
 
@@ -1213,10 +1248,7 @@ function rcSlRenderCard(){
   const uiEl=document.getElementById('sw-rc-ui');
   if(!uiEl)return;
 
-  if(_rcSlIdx>=_rcSlRunners.length){
-    rcSlRenderSummary();
-    return;
-  }
+  if(_rcSlIdx>=_rcSlRunners.length){ rcSlRenderSummary(); return; }
 
   const r=_rcSlRunners[_rcSlIdx];
   const total=_rcSlRunners.length;
@@ -1233,15 +1265,15 @@ function rcSlRenderCard(){
   const wt=r.weight||r.lbs||r.stone_lbs||'';
   const sp=r.sp||r.price||r.odds||'';
   const time=_rcSlRace.off||_rcSlRace.off_time||_rcSlRace.time||'—';
+  const dist=formatDist(_rcSlRace.distance_round||_rcSlRace.distance_f||_rcSlRace.distance||_rcSlRace.dist||'');
+  const going=_rcSlRace.going||'';
 
-  // Check for profile notes
+  // Profile notes from Puzzle Profiler
   const wl=getWL();
   const nl=name.toLowerCase().trim();
   const prof=wl.find(function(w){return(w.horse||'').toLowerCase().trim()===nl;});
   const profMeta=prof?(_RC_SL_REASONS[prof.reason||'eye-catcher']||_RC_SL_REASONS['eye-catcher']):null;
   const edge=prof?(function(){const mr=parseFloat(prof.myRating),or=parseFloat(prof.currentRating);return(mr&&or)?mr-or:null;}()):null;
-
-  // Already shortlisted?
   const alreadyIn=_rcSlShortlist.some(function(s){return s.name===name;});
 
   const toggleHTML='<div class="rc-view-tog" style="width:100%;">'
@@ -1250,86 +1282,116 @@ function rcSlRenderCard(){
     +'<button class="rc-view-btn on" style="background:#a78bfa;color:#0f1724;">Shortlist</button>'
     +'</div>';
 
-  // Profile panel HTML (compact)
+  // Profile panel — reuses existing rc-profile-panel styles
   let profHtml='';
   if(prof){
-    profHtml='<div class="rc-sl-profile-note">'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
-        +'<span style="font-size:13px;">'+profMeta.emoji+'</span>'
-        +'<span style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:'+profMeta.col+';">'+profMeta.label+'</span>'
+    profHtml='<div class="rc-profile-panel" style="margin:0 -14px;border-top:1px solid var(--bdr);border-radius:0;">'
+      +'<div class="rc-pp-header">'
+        +'<span class="rc-pp-reason-badge" style="border-color:'+profMeta.col+';color:'+profMeta.col+';">'+profMeta.emoji+' '+profMeta.label+'</span>'
+        +(prof.myRating?'<span class="rc-pp-mr">MR '+prof.myRating+'</span>':'')
+        +(prof.currentRating?'<span class="rc-pp-or">OR '+prof.currentRating+'</span>':'')
         +(edge!==null?(edge>0?'<span class="rc-sl-edge-pos">▲ +'+edge+'</span>':(edge<0?'<span class="rc-sl-edge-neg">▼ '+edge+'</span>':'')):'')
-        +(prof.myRating?'<span style="font-size:10px;color:var(--mut);">MR '+prof.myRating+'</span>':'')
-        +(prof.currentRating?'<span style="font-size:10px;color:var(--mut);">OR '+prof.currentRating+'</span>':'')
       +'</div>'
-      +(prof.reasonNote?'<div style="font-size:12px;color:var(--txt);line-height:1.5;font-style:italic;margin-bottom:6px;">"'+prof.reasonNote+'"</div>':'')
-      +(prof.trainerIntel?'<div style="font-size:11px;color:var(--mut);margin-bottom:4px;">🗣 '+prof.trainerIntel+'</div>':'')
-      +(prof.conditionsNotes?'<div style="font-size:11px;color:var(--mut);">📋 '+prof.conditionsNotes+'</div>':'')
+      +(prof.reasonNote?'<div class="rc-pp-note">"'+prof.reasonNote+'"</div>':'')
+      +(prof.trainerIntel?'<div class="rc-pp-intel">'+prof.trainerIntel+'</div>':'')
+      +(prof.conditionsNotes?'<div class="rc-pp-cond-notes">'+prof.conditionsNotes+'</div>':'')
     +'</div>';
   }
 
   uiEl.innerHTML=toggleHTML
     +'<div id="rc-sl-card-wrap">'
 
-      // Progress bar
-      +'<div class="rc-sl-progress">'
-        +'<div style="flex:1;background:var(--sur2);border-radius:4px;height:4px;overflow:hidden;">'
-          +'<div style="width:'+pct+'%;height:100%;background:#a78bfa;border-radius:4px;transition:width .3s;"></div>'
-        +'</div>'
-        +'<span class="rc-sl-progress-lbl">'+(_rcSlIdx+1)+' / '+total+'</span>'
-        +(_rcSlShortlist.length?'<span class="rc-sl-count-badge">✓ '+_rcSlShortlist.length+'</span>':'')
-      +'</div>'
-
-      // The card itself
-      +'<div class="rc-sl-card" id="rc-sl-card">'
-
-        // Header: number + draw + race info
-        +'<div class="rc-sl-card-header">'
-          +'<div class="rc-sl-cloth">'+no+(draw?' <span style="font-size:11px;color:var(--mut);">'+draw+'</span>':'')+'</div>'
-          +'<div style="font-size:10px;color:var(--mut);text-align:right;">'
-            +_rcSlCourse+' · '+time
+    // ── Race context header (matches rc-meeting-hdr style) ──
+    +'<div class="rc-meeting rc-sl-race-header">'
+      +'<div class="rc-meeting-hdr rc-mtg-pur" style="cursor:default;border-radius:12px;">'
+        +'<div class="rc-meeting-info">'
+          +'<div style="display:flex;align-items:baseline;gap:10px;">'
+            +'<span class="rc-mtg-course">'+time+'</span>'
+            +'<span style="font-size:14px;font-weight:700;color:rgba(255,255,255,.9);">'+_rcSlCourse+'</span>'
+          +'</div>'
+          +'<div class="rc-mtg-meta">'
+            +(_rcSlRace.race_name||_rcSlRace.name||'')
+            +(dist?' · '+dist:'')
+            +(going?' · '+going:'')
           +'</div>'
         +'</div>'
-
-        // Horse name
-        +'<div class="rc-sl-horse-name">'+name+'</div>'
-
-        // Key stats row
-        +'<div class="rc-sl-stats">'
-          +(sp?'<div class="rc-sl-stat"><div class="rc-sl-stat-lbl">Price</div><div class="rc-sl-stat-val" style="color:var(--gld);">'+sp+'</div></div>':'')
-          +(rpr?'<div class="rc-sl-stat"><div class="rc-sl-stat-lbl">OR</div><div class="rc-sl-stat-val">'+rpr+'</div></div>':'')
-          +(age?'<div class="rc-sl-stat"><div class="rc-sl-stat-lbl">Age</div><div class="rc-sl-stat-val">'+age+'</div></div>':'')
-          +(wt?'<div class="rc-sl-stat"><div class="rc-sl-stat-lbl">Weight</div><div class="rc-sl-stat-val">'+wt+'</div></div>':'')
+        // Progress pill on right
+        +'<div style="text-align:right;flex-shrink:0;">'
+          +'<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.9);">'+(_rcSlIdx+1)+' / '+total+'</div>'
+          +(_rcSlShortlist.length?'<div style="font-size:10px;color:#c4b5fd;margin-top:2px;">★ '+_rcSlShortlist.length+' picked</div>':'')
         +'</div>'
+      +'</div>'
+      // Progress bar underneath header
+      +'<div style="height:3px;background:rgba(255,255,255,.15);">'
+        +'<div style="width:'+pct+'%;height:100%;background:#a78bfa;transition:width .3s;"></div>'
+      +'</div>'
+    +'</div>'
 
-        // Form
-        +(form?'<div class="rc-sl-form-row"><span class="rc-sl-form-lbl">Form</span><span class="rc-sl-form">'+form+'</span></div>':'')
+    // ── Runner card (matches rc-runner row style but full-width card) ──
+    +'<div class="rc-sl-card rc-meeting" id="rc-sl-card">'
 
-        // Jockey / Trainer
-        +'<div class="rc-sl-connections">'
-          +(jock?'<div class="rc-sl-conn-row"><span class="rc-sl-conn-lbl">J</span><span>'+jock+'</span></div>':'')
-          +(trainer?'<div class="rc-sl-conn-row"><span class="rc-sl-conn-lbl">T</span><span>'+trainer+'</span></div>':'')
+      // Cloth number + name row
+      +'<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 14px 10px;">'
+        +'<div class="rc-cloth" style="font-size:20px;padding-top:2px;">'+no+(draw?'<div style="font-size:9px;color:var(--mut);font-weight:600;margin-top:2px;">'+draw+'</div>':'')+'</div>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:22px;font-weight:900;color:var(--txt);letter-spacing:.2px;line-height:1.1;">'+name+'</div>'
+          +(age?'<div style="font-size:12px;color:var(--mut);margin-top:3px;">'+age+(wt?' · '+wt:'')+'</div>':'')
         +'</div>'
-
-        // Profile notes (if exists)
-        +profHtml
-
+        // OR badge top-right
+        +(rpr?'<span class="rc-or" style="font-size:13px;padding:4px 9px;flex-shrink:0;">'+rpr+'</span>':'')
       +'</div>'
 
-      // Action buttons
-      +'<div class="rc-sl-actions">'
-        +'<button class="rc-sl-btn-pass" onclick="rcSlPass()">✕ Pass</button>'
-        +(alreadyIn
-          ?'<button class="rc-sl-btn-shortlist" style="background:rgba(167,139,250,.15);border-color:#a78bfa;color:#a78bfa;" onclick="rcSlUnshortlist()">✓ Added</button>'
-          :'<button class="rc-sl-btn-shortlist" onclick="rcSlAdd()">★ Shortlist</button>'
-        )
-      +'</div>'
+      // Info bar: Price / OR / dist chips
+      +(sp||rpr||dist?
+        '<div class="rc-info-bar">'
+          +(sp?'<div class="rc-info-item"><div class="rc-info-lbl">Price</div><div class="rc-info-val" style="color:var(--gld);">'+sp+'</div></div>':'')
+          +(rpr?'<div class="rc-info-item"><div class="rc-info-lbl">OR</div><div class="rc-info-val">'+rpr+'</div></div>':'')
+          +(dist?'<div class="rc-info-item"><div class="rc-info-lbl">Distance</div><div class="rc-info-val">'+dist+'</div></div>':'')
+          +(going?'<div class="rc-info-item"><div class="rc-info-lbl">Going</div><div class="rc-info-val">'+going+'</div></div>':'')
+        +'</div>'
+      :'')
 
-      // Skip to summary
-      +(_rcSlShortlist.length?'<div style="text-align:center;margin-top:10px;"><button class="btn bout bsm" onclick="rcSlRenderSummary()">Review shortlist ('+_rcSlShortlist.length+') →</button></div>':'')
+      // Form row
+      +(form?
+        '<div style="padding:8px 14px;border-bottom:1px solid var(--bdr);">'
+          +'<div class="rc-runner-detail-row">'
+            +'<span class="rc-detail-lbl">Form</span>'
+            +'<span class="rc-runner-form" style="font-size:14px;letter-spacing:2px;color:var(--txt);font-family:var(--font-ui);">'+form+'</span>'
+          +'</div>'
+        +'</div>'
+      :'')
+
+      // Jockey / Trainer rows
+      +(jock||trainer?
+        '<div style="padding:8px 14px;'+(profHtml?'':'border-radius:0 0 12px 12px;')+'">'
+          +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
+          +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
+        +'</div>'
+      :'')
+
+      // Profile panel (if exists)
+      +profHtml
+
+    +'</div>'
+
+    // ── Pass / Shortlist buttons ──
+    +'<div class="rc-sl-actions">'
+      +'<button class="rc-sl-btn-pass" onclick="rcSlPass()">✕  Pass</button>'
+      +(alreadyIn
+        ?'<button class="rc-sl-btn-shortlist rc-sl-btn-added" onclick="rcSlUnshortlist()">★  Added</button>'
+        :'<button class="rc-sl-btn-shortlist" onclick="rcSlAdd()">★  Shortlist</button>'
+      )
+    +'</div>'
+
+    // Review shortlist link
+    +(_rcSlShortlist.length
+      ?'<div style="text-align:center;margin-top:10px;">'
+        +'<button class="btn bout bsm" onclick="rcSlRenderSummary()">Review shortlist ('+_rcSlShortlist.length+') →</button>'
+      +'</div>'
+      :'')
 
     +'</div>';
 
-  // Wire up swipe gestures on the card
   _rcSlBindSwipe(document.getElementById('rc-sl-card'));
 }
 

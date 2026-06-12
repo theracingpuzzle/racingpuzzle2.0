@@ -155,98 +155,21 @@
    SHORTLIST MODE — Tinder-style runner cards
 ═══════════════════════════════════════════════════════════ */
 
-/* Race picker list */
-.rc-sl-picker-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 14px; border-radius: 10px;
-  background: var(--sur2); border: 1px solid var(--bdr);
-  margin-bottom: 8px; cursor: pointer; transition: border-color .15s;
-}
-.rc-sl-picker-row:hover { border-color: #a78bfa; }
+/* Purple meeting header variant for shortlist */
+.rc-mtg-pur { background: rgba(109,40,217,.55); }
 
-/* Progress bar */
-.rc-sl-progress {
-  display: flex; align-items: center; gap: 10px;
-  margin: 10px 0 14px;
-}
-.rc-sl-progress-lbl {
-  font-size: 10px; color: var(--mut); white-space: nowrap;
-  font-family: var(--font-ui);
-}
-.rc-sl-count-badge {
-  font-size: 10px; font-weight: 800; color: #a78bfa;
-  background: rgba(167,139,250,.12); border: 1px solid rgba(167,139,250,.3);
-  padding: 2px 8px; border-radius: 10px; white-space: nowrap;
-}
+/* Clickable race rows in picker */
+.rc-sl-race-row { cursor: pointer; transition: background .1s; }
+.rc-sl-race-row:active .rc-race-hdr { background: var(--bdr); }
+.rc-sl-race-header { margin-bottom: 10px; }
 
-/* The card */
+/* The swipeable runner card — extends rc-meeting */
 .rc-sl-card {
-  background: var(--sur2); border: 1px solid var(--bdr);
-  border-radius: 16px; padding: 20px 18px;
-  will-change: transform; user-select: none;
-  touch-action: pan-y;
+  will-change: transform; user-select: none; touch-action: pan-y;
+  margin-bottom: 0;
 }
 
-.rc-sl-card-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 10px;
-}
-.rc-sl-cloth {
-  font-family: var(--font-ui); font-size: 18px; font-weight: 900;
-  color: var(--gld); min-width: 28px;
-}
-.rc-sl-horse-name {
-  font-size: 26px; font-weight: 900; color: var(--txt);
-  letter-spacing: .3px; line-height: 1.1; margin-bottom: 14px;
-}
-
-/* Stats grid */
-.rc-sl-stats {
-  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
-}
-.rc-sl-stat {
-  background: var(--sur); border: 1px solid var(--bdr);
-  border-radius: 8px; padding: 6px 12px; text-align: center; min-width: 56px;
-}
-.rc-sl-stat-lbl {
-  font-size: 8px; font-weight: 800; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mut); margin-bottom: 2px;
-}
-.rc-sl-stat-val {
-  font-family: var(--font-ui); font-size: 15px; font-weight: 700; color: var(--txt);
-}
-
-/* Form */
-.rc-sl-form-row {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
-}
-.rc-sl-form-lbl {
-  font-size: 9px; font-weight: 800; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--mut); flex-shrink: 0;
-}
-.rc-sl-form {
-  font-family: var(--font-ui); font-size: 14px; font-weight: 700;
-  color: var(--txt); letter-spacing: 2px;
-}
-
-/* Connections */
-.rc-sl-connections { margin-bottom: 12px; }
-.rc-sl-conn-row {
-  display: flex; gap: 8px; align-items: baseline;
-  font-size: 13px; color: var(--txt); margin-bottom: 3px;
-}
-.rc-sl-conn-lbl {
-  font-size: 8px; font-weight: 800; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--mut);
-  background: var(--sur); border: 1px solid var(--bdr);
-  padding: 1px 5px; border-radius: 4px; flex-shrink: 0;
-}
-
-/* Profile note panel */
-.rc-sl-profile-note {
-  background: rgba(167,139,250,.06); border: 1px solid rgba(167,139,250,.2);
-  border-radius: 10px; padding: 10px 12px; margin-top: 4px;
-}
+/* Edge badges */
 .rc-sl-edge-pos {
   font-size: 10px; font-weight: 700; color: var(--grn);
   background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.25);
@@ -260,22 +183,25 @@
 
 /* Pass / Shortlist buttons */
 .rc-sl-actions {
-  display: flex; gap: 12px; margin-top: 18px;
+  display: flex; gap: 10px; margin-top: 12px;
 }
 .rc-sl-btn-pass {
-  flex: 1; padding: 14px; border-radius: 12px; font-size: 15px;
+  flex: 1; padding: 14px; border-radius: 10px; font-size: 14px;
   font-weight: 800; letter-spacing: .05em; cursor: pointer;
-  background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25);
+  background: rgba(239,68,68,.07); border: 1px solid rgba(239,68,68,.22);
   color: var(--red); transition: all .12s;
 }
-.rc-sl-btn-pass:active { background: rgba(239,68,68,.18); }
+.rc-sl-btn-pass:active { background: rgba(239,68,68,.16); }
 .rc-sl-btn-shortlist {
-  flex: 1; padding: 14px; border-radius: 12px; font-size: 15px;
+  flex: 1; padding: 14px; border-radius: 10px; font-size: 14px;
   font-weight: 800; letter-spacing: .05em; cursor: pointer;
-  background: rgba(167,139,250,.12); border: 1px solid rgba(167,139,250,.35);
+  background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3);
   color: #a78bfa; transition: all .12s;
 }
-.rc-sl-btn-shortlist:active { background: rgba(167,139,250,.25); }
+.rc-sl-btn-shortlist:active { background: rgba(167,139,250,.22); }
+.rc-sl-btn-added {
+  background: rgba(167,139,250,.18); border-color: #a78bfa;
+}
 
 /* Summary rows */
 .rc-sl-summary-row {

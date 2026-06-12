@@ -117,8 +117,7 @@ function _showTodayDemo(){
 async function loadTodayMeetings(){
   const stEl=document.getElementById('t-meetings-status');
   if(stEl)stEl.textContent='Loading…';
-  const creds=getRacingCreds();
-  if(!creds.username||!creds.password){if(stEl)stEl.textContent='';renderChips();return;}
+  // Credentials are server-side (Cloudflare Worker) — no client check needed
   try{
     if(!window._todayMeetingsCache) window._todayMeetingsCache=await callRacingAPI('racecards/free',{});
     const data=window._todayMeetingsCache;

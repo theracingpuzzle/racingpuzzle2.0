@@ -508,6 +508,41 @@ RACING <span class="logo-accent">PUZZLE</span>
           </div>
 
         </div>
+
+        <!-- ── Responsible Gambling ── -->
+        <div class="card-sec-divider">Responsible Gambling</div>
+        <div class="blk" style="text-align:center;padding-top:18px;padding-bottom:20px;">
+          <div style="display:inline-flex;align-items:center;justify-content:center;gap:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:7px 14px;margin-bottom:16px;">
+            <span style="font-size:15px;font-weight:900;color:#ef4444;font-family:'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.05em;">18+</span>
+            <span style="width:1px;height:14px;background:rgba(239,68,68,.3);display:inline-block;"></span>
+            <span style="font-size:11px;color:rgba(239,68,68,.8);font-family:'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;font-weight:700;">Gamble Responsibly</span>
+          </div>
+          <div style="font-size:12px;color:var(--mut);line-height:1.7;margin-bottom:16px;max-width:320px;margin-left:auto;margin-right:auto;">
+            Gambling should be fun. Never bet more than you can afford to lose. If you're concerned about your gambling, free help is available.
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px;max-width:280px;margin:0 auto;">
+            <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer"
+               style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);text-decoration:none;color:var(--txt);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;">
+              <span style="font-size:16px;">🛡️</span>
+              BeGambleAware.org
+              <span style="margin-left:auto;font-size:10px;opacity:.4;">↗</span>
+            </a>
+            <a href="https://www.gamstop.co.uk" target="_blank" rel="noopener noreferrer"
+               style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);text-decoration:none;color:var(--txt);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;">
+              <span style="font-size:16px;">🚫</span>
+              GamStop — Self-Exclusion
+              <span style="margin-left:auto;font-size:10px;opacity:.4;">↗</span>
+            </a>
+            <a href="https://www.gamblingtherapy.org" target="_blank" rel="noopener noreferrer"
+               style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);text-decoration:none;color:var(--txt);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;">
+              <span style="font-size:16px;">💬</span>
+              Gambling Therapy
+              <span style="margin-left:auto;font-size:10px;opacity:.4;">↗</span>
+            </a>
+          </div>
+          <div style="font-size:10px;color:rgba(255,255,255,.15);margin-top:16px;">National Gambling Helpline: 0808 8020 133 (free, 24/7)</div>
+        </div>
+
         <div class="card-sec-divider">Checklists</div>
         <div id="cp-rules"></div>
       </div>
@@ -515,6 +550,16 @@ RACING <span class="logo-accent">PUZZLE</span>
   </div>
 
   <div class="snav" id="snav" style="display:none;"></div>
+</div>
+
+<!-- RESPONSIBLE GAMBLING STRIP -->
+<div id="rg-strip" style="display:flex;align-items:center;justify-content:center;gap:10px;padding:5px 16px;background:rgba(0,0,0,.35);border-top:1px solid rgba(255,255,255,.06);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.25);flex-wrap:wrap;">
+  <span style="font-size:11px;font-weight:900;color:rgba(239,68,68,.5);border:1px solid rgba(239,68,68,.3);padding:1px 5px;border-radius:3px;">18+</span>
+  <span>Gamble Responsibly</span>
+  <span style="opacity:.4;">·</span>
+  <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer" style="color:rgba(255,255,255,.3);text-decoration:none;" onclick="event.stopPropagation()">BeGambleAware</a>
+  <span style="opacity:.4;">·</span>
+  <a href="https://www.gamstop.co.uk" target="_blank" rel="noopener noreferrer" style="color:rgba(255,255,255,.3);text-decoration:none;" onclick="event.stopPropagation()">GamStop</a>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -631,7 +676,7 @@ RACING <span class="logo-accent">PUZZLE</span>
           style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none;"
           onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()">
       </div>
-      <div style="margin-bottom:6px;">
+      <div id="auth-pw-wrap" style="margin-bottom:6px;">
         <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;">Password</label>
         <input id="auth-password" type="password" autocomplete="current-password" placeholder="••••••••"
           style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none;"
@@ -647,6 +692,64 @@ RACING <span class="logo-accent">PUZZLE</span>
     <div id="auth-toggle-text" style="text-align:center;margin-top:18px;font-family:'Barlow Condensed',sans-serif;font-size:13px;color:rgba(255,255,255,.45);">
       New here? <a href="#" onclick="authSetMode('signup');return false;" style="color:var(--gld2);text-decoration:none;font-weight:700;">Create an account</a>
     </div>
+    <div id="auth-forgot-link" style="text-align:center;margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-size:12px;">
+      <a href="#" onclick="authSetMode('forgot');return false;" style="color:rgba(255,255,255,.3);text-decoration:none;">Forgot password?</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── PASSWORD RESET OVERLAY — shown when user returns from reset email ── -->
+<div id="auth-reset-overlay" style="display:none;position:fixed;inset:0;z-index:10002;background:var(--navy);flex-direction:column;align-items:center;justify-content:center;padding:32px;">
+  <div style="width:100%;max-width:360px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="width:40px;height:3px;border-radius:2px;background:var(--gld2);margin:0 auto 16px;"></div>
+      <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:28px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#fff;">
+        RACING <span style="color:var(--gld2);">PUZZLE</span>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:28px 24px;">
+      <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:20px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;margin-bottom:6px;">Set New Password</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:20px;">Choose a new password for your account.</div>
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;">New Password</label>
+        <input id="reset-password" type="password" placeholder="Minimum 6 characters" autocomplete="new-password"
+          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:15px;outline:none;"
+          onkeydown="if(event.key==='Enter')authSetNewPassword()">
+      </div>
+      <div id="reset-error" style="min-height:18px;font-size:12px;color:#ef4444;margin-bottom:12px;"></div>
+      <button onclick="authSetNewPassword()"
+        style="width:100%;padding:14px;border-radius:10px;border:none;background:var(--gld2);color:#fff;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:14px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">
+        Update Password
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ONBOARDING OVERLAY — shown once to new users
+════════════════════════════════════════════════════════════ -->
+<div id="ob-overlay" style="display:none;position:fixed;inset:0;z-index:10001;background:var(--navy);flex-direction:column;overflow-y:auto;">
+  <div style="width:100%;max-width:400px;margin:0 auto;padding:32px 24px 40px;min-height:100%;display:flex;flex-direction:column;">
+
+    <!-- Top bar: logo + skip -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:28px;height:3px;border-radius:2px;background:var(--gld2);"></div>
+        <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:18px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#fff;">
+          RACING <span style="color:var(--gld2);">PUZZLE</span>
+        </div>
+      </div>
+      <button onclick="obSkip()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);background:transparent;border:none;cursor:pointer;padding:4px 0;">
+        Skip →
+      </button>
+    </div>
+
+    <!-- Step content — swapped by JS -->
+    <div id="ob-content" style="flex:1;"></div>
+
+    <!-- Progress dots -->
+    <div style="display:flex;justify-content:center;gap:8px;margin-top:28px;" id="ob-dots"></div>
+
   </div>
 </div>
 
@@ -717,6 +820,7 @@ RACING <span class="logo-accent">PUZZLE</span>
 <script src="js/virtual.js?v=1780755691"></script>
 <script src="js/watchlist.js?v=1780755691"></script>
 <script src="js/coach.js?v=1780755691"></script>
+<script src="js/onboarding.js"></script>
 <script src="js/init.js?v=1780755691"></script>
 
 

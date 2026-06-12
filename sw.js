@@ -6,7 +6,7 @@
 // Bump CACHE_VERSION whenever you deploy a meaningful update — this forces
 // the old cache to be cleared and a fresh copy of all assets to be fetched.
 
-const CACHE_VERSION = 'rp-v15';
+const CACHE_VERSION = 'rp-v17';
 
 const APP_SHELL = [
   './',
@@ -20,6 +20,7 @@ const APP_SHELL = [
   './js/state.js',
   './js/utils.js',
   './js/supabase.js',
+  './js/auth.js',
   './js/racing-api.js',
   './js/racecards.js',
   './js/ui-shell.js',
@@ -30,6 +31,7 @@ const APP_SHELL = [
   './js/virtual.js',
   './js/watchlist.js',
   './js/coach.js',
+  './js/onboarding.js',
   './js/init.js',
 ];
 

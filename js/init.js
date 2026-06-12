@@ -54,6 +54,9 @@ async function bootApp() {
     if (typeof loadTodayMeetings === 'function') loadTodayMeetings();
   }, 800);
 
+  // Show onboarding for new users — after data loaded so we can detect empty state
+  if (typeof obMaybeShow === 'function') obMaybeShow();
+
 }
 
 // ── Auth-first startup ─────────────────────────────────────────────────────────

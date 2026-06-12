@@ -28,7 +28,28 @@ async function authInit() {
       window._rpAccessToken  = null;
       window._rpUserEmail    = null;
     }
+    // When Supabase redirects back after password reset, event = 'PASSWORD_RECOVERY'
+    if (event === 'PASSWORD_RECOVERY') {
+      authShowResetForm();
+    }
   });
+
+  // Check for a password-recovery hash in the URL (#type=recovery&access_token=...)
+  // Supabase embeds these as URL fragments which the client SDK picks up automatically.
+  const hash = window.location.hash || '';
+  if (hash.includes('type=recovery')) {
+    // Let the SDK parse the fragment and fire PASSWORD_RECOVERY via onAuthStateChange
+    // We just need a session from the fragment — getSession() handles it.
+    const { data } = await _rpAuthClient.auth.getSession();
+    if (data && data.session) {
+      _rpSession             = data.session;
+      SUPA_USER_ID           = data.session.user.id;
+      window._rpAccessToken  = data.session.access_token;
+      window._rpUserEmail    = data.session.user.email;
+    }
+    authShowResetForm();
+    return false; // don't boot the app yet — user must set password first
+  }
 
   const { data } = await _rpAuthClient.auth.getSession();
   if (data && data.session) {
@@ -133,20 +154,111 @@ async function authSubmit(mode) {
   }
 }
 
-// ── Toggle between sign-in and sign-up ────────────────────────────────────────
+// ── Toggle between sign-in, sign-up and forgot-password ──────────────────────
 function authSetMode(mode) {
+  const isForgot = mode === 'forgot';
   const isSignup = mode === 'signup';
   const btn      = document.getElementById('auth-submit-btn');
   const toggle   = document.getElementById('auth-toggle-text');
+  const forgotLk = document.getElementById('auth-forgot-link');
   const title    = document.getElementById('auth-title');
   const errEl    = document.getElementById('auth-error');
   const pwHint   = document.getElementById('auth-pw-hint');
+  const pwField  = document.getElementById('auth-password');
+
+  if (errEl)  errEl.textContent = '';
+
+  if (isForgot) {
+    if (title)   title.textContent    = 'Reset Password';
+    if (btn)     btn.textContent      = 'Send Reset Email';
+    if (btn)     btn.onclick          = function(){ authSendReset(); };
+    if (toggle)  toggle.innerHTML     = '<a href="#" onclick="authSetMode(\'signin\');return false;" style="color:rgba(255,255,255,.35);text-decoration:none;">← Back to Sign In</a>';
+    if (forgotLk) forgotLk.style.display = 'none';
+    const pwWrap = document.getElementById('auth-pw-wrap');
+    if (pwWrap) pwWrap.style.display = 'none';
+    if (pwHint)  pwHint.style.display = 'none';
+    return;
+  }
+
+  // Restore password field if coming back from forgot
+  const pwWrap2 = document.getElementById('auth-pw-wrap');
+  if (pwWrap2) pwWrap2.style.display = '';
+
   if (btn)    btn.textContent      = isSignup ? 'Create Account' : 'Sign In';
   if (btn)    btn.onclick          = function(){ authSubmit(mode); };
   if (toggle) toggle.innerHTML     = isSignup
     ? 'Already have an account? <a href="#" onclick="authSetMode(\'signin\');return false;" style="color:var(--gld2);text-decoration:none;font-weight:700;">Sign in</a>'
     : 'New here? <a href="#" onclick="authSetMode(\'signup\');return false;" style="color:var(--gld2);text-decoration:none;font-weight:700;">Create an account</a>';
   if (title)  title.textContent    = isSignup ? 'Create Account' : 'Welcome Back';
-  if (errEl)  errEl.textContent    = '';
   if (pwHint) pwHint.style.display = isSignup ? 'block' : 'none';
+  if (forgotLk) forgotLk.style.display = isSignup ? 'none' : 'block';
+}
+
+// ── Send password-reset email ─────────────────────────────────────────────────
+async function authSendReset() {
+  const emailEl = document.getElementById('auth-email');
+  const errEl   = document.getElementById('auth-error');
+  const btn     = document.getElementById('auth-submit-btn');
+  const email   = (emailEl || {}).value.trim();
+
+  if (!email) {
+    if (errEl) errEl.textContent = 'Please enter your email address.';
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  if (errEl) errEl.textContent = '';
+
+  try {
+    const { error } = await _rpAuthClient.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    if (error) throw new Error(error.message);
+    if (errEl) { errEl.style.color = '#34d399'; errEl.textContent = 'Reset email sent! Check your inbox.'; }
+    if (btn)   { btn.disabled = false; btn.textContent = 'Resend Email'; }
+  } catch(e) {
+    if (errEl) { errEl.style.color = '#ef4444'; errEl.textContent = e.message; }
+    if (btn)   { btn.disabled = false; btn.textContent = 'Send Reset Email'; }
+  }
+}
+
+// ── Show the set-new-password overlay (after reset-link redirect) ─────────────
+function authShowResetForm() {
+  // Hide the normal auth overlay and any splash
+  const authOv  = document.getElementById('auth-overlay');
+  const splash  = document.getElementById('splash');
+  const resetOv = document.getElementById('auth-reset-overlay');
+  if (authOv)  authOv.style.display  = 'none';
+  if (splash)  splash.style.display  = 'none';
+  if (resetOv) resetOv.style.display = 'flex';
+  // Clean the recovery hash from the URL bar without reloading
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+}
+
+// ── Save the new password ─────────────────────────────────────────────────────
+async function authSetNewPassword() {
+  const pwEl   = document.getElementById('reset-password');
+  const errEl  = document.getElementById('reset-error');
+  const btn    = document.querySelector('#auth-reset-overlay button');
+  const pw     = (pwEl || {}).value;
+
+  if (!pw || pw.length < 6) {
+    if (errEl) errEl.textContent = 'Password must be at least 6 characters.';
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Updating…'; }
+  if (errEl) errEl.textContent = '';
+
+  try {
+    const { error } = await _rpAuthClient.auth.updateUser({ password: pw });
+    if (error) throw new Error(error.message);
+    // Success — password updated, session is active, boot the app
+    const resetOv = document.getElementById('auth-reset-overlay');
+    if (resetOv) resetOv.style.display = 'none';
+    await bootApp();
+  } catch(e) {
+    if (errEl) { errEl.style.color = '#ef4444'; errEl.textContent = e.message; }
+    if (btn)   { btn.disabled = false; btn.textContent = 'Update Password'; }
+  }
 }

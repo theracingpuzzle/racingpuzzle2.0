@@ -1498,7 +1498,6 @@ function rcSlRenderSummary(){
       +'</div>'
       +'<div class="t-flex-col-end" style="gap:6px;">'
         +'<button class="rc-bet-btn" style="font-size:10px;" onclick="rcSlBet('+i+')">Bet 🏇</button>'
-        +'<button class="rc-bet-btn" style="font-size:10px;" onclick="rcSlAddToTracker('+i+')">+ Tracker</button>'
         +'<button style="font-size:10px;background:transparent;border:1px solid var(--bdr);color:var(--mut);padding:4px 8px;border-radius:6px;cursor:pointer;" onclick="rcSlRemove('+i+')">✕</button>'
       +'</div>'
     +'</div>';

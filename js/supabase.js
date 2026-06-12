@@ -105,8 +105,8 @@ async function supaRawTest(){
     log('Step 3: POST test bet row...');
     const r=await fetch(SUPA_URL+'/rest/v1/bets',{
       method:'POST',
-      headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+SUPA_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
-      body:JSON.stringify([{id:'test-bet-001',user_id:'racing-puzzle-default',bet_date:'2026-01-01',horse:'Test Horse',stake:10,is_virtual:false}])
+      headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+_rpToken(),'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify([{id:'test-bet-001',user_id:SUPA_USER_ID,bet_date:'2026-01-01',horse:'Test Horse',stake:10,is_virtual:false}])
     });
     log('Status: '+r.status+' '+r.statusText);
     const body=await r.text();

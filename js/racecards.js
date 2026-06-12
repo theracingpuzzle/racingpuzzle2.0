@@ -93,7 +93,7 @@ function rcSwRenderUI(){
   let html='<div class="rc-view-tog" style="width:100%;">'
     +'<button class="rc-view-btn '+(v==='course'?'on':'off')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
     +'<button class="rc-view-btn '+(v==='time'?'on':'off')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
-    +'<button class="rc-view-btn '+(v==='shortlist'?'on':'off')+'" onclick="rcSwView=\'shortlist\';rcSwRenderUI();" style="'+(v==='shortlist'?'background:#a78bfa;color:#0f1724;':'color:#a78bfa;')+'">Shortlist</button>'
+    +'<button class="rc-view-btn '+(v==='shortlist'?'on':'off')+'" onclick="rcSwView=\'shortlist\';rcSwRenderUI();">Shortlist</button>'
     +'</div>';
 
   uiEl.innerHTML=html;
@@ -1212,7 +1212,7 @@ function rcSlRenderPicker(container){
                 +'<span class="rc-race-runners-lbl">'+cnt+' runners</span>'
               +'</div>'
             +'</div>'
-            +'<span style="color:#a78bfa;font-size:20px;flex-shrink:0;">›</span>'
+            +'<span style="color:var(--blu);font-size:20px;flex-shrink:0;">›</span>'
           +'</div>'
         +'</div>';
       }).join('')
@@ -1279,7 +1279,7 @@ function rcSlRenderCard(){
   const toggleHTML='<div class="rc-view-tog" style="width:100%;">'
     +'<button class="rc-view-btn off" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
     +'<button class="rc-view-btn off" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
-    +'<button class="rc-view-btn on" style="background:#a78bfa;color:#0f1724;">Shortlist</button>'
+    +'<button class="rc-view-btn on">Shortlist</button>'
     +'</div>';
 
   // Profile panel — reuses existing rc-profile-panel styles
@@ -1318,12 +1318,12 @@ function rcSlRenderCard(){
         // Progress pill on right
         +'<div style="text-align:right;flex-shrink:0;">'
           +'<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.9);">'+(_rcSlIdx+1)+' / '+total+'</div>'
-          +(_rcSlShortlist.length?'<div style="font-size:10px;color:#c4b5fd;margin-top:2px;">★ '+_rcSlShortlist.length+' picked</div>':'')
+          +(_rcSlShortlist.length?'<div style="font-size:10px;color:rgba(255,255,255,.75);margin-top:2px;">★ '+_rcSlShortlist.length+' picked</div>':'')
         +'</div>'
       +'</div>'
       // Progress bar underneath header
       +'<div style="height:3px;background:rgba(255,255,255,.15);">'
-        +'<div style="width:'+pct+'%;height:100%;background:#a78bfa;transition:width .3s;"></div>'
+        +'<div style="width:'+pct+'%;height:100%;background:var(--blu);transition:width .3s;"></div>'
       +'</div>'
     +'</div>'
 
@@ -1474,7 +1474,7 @@ function rcSlRenderSummary(){
   const toggleHTML='<div class="rc-view-tog" style="width:100%;">'
     +'<button class="rc-view-btn off" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
     +'<button class="rc-view-btn off" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
-    +'<button class="rc-view-btn on" style="background:#a78bfa;color:#0f1724;">Shortlist</button>'
+    +'<button class="rc-view-btn on">Shortlist</button>'
     +'</div>';
 
   if(!_rcSlShortlist.length){
@@ -1498,7 +1498,7 @@ function rcSlRenderSummary(){
       +'</div>'
       +'<div class="t-flex-col-end" style="gap:6px;">'
         +'<button class="rc-bet-btn" style="font-size:10px;" onclick="rcSlBet('+i+')">Bet 🏇</button>'
-        +'<button class="rc-bet-btn" style="font-size:10px;background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.3);color:#a78bfa;" onclick="rcSlAddToTracker('+i+')">+ Tracker</button>'
+        +'<button class="rc-bet-btn" style="font-size:10px;" onclick="rcSlAddToTracker('+i+')">+ Tracker</button>'
         +'<button style="font-size:10px;background:transparent;border:1px solid var(--bdr);color:var(--mut);padding:4px 8px;border-radius:6px;cursor:pointer;" onclick="rcSlRemove('+i+')">✕</button>'
       +'</div>'
     +'</div>';
@@ -1507,7 +1507,7 @@ function rcSlRenderSummary(){
   uiEl.innerHTML=toggleHTML
     +'<div style="margin-top:12px;">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
-        +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;">★ Your Shortlist ('+_rcSlShortlist.length+')</div>'
+        +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--blu);">★ Your Shortlist ('+_rcSlShortlist.length+')</div>'
         +'<button class="btn bout bsm" onclick="rcSwView=\'shortlist\';rcSwRenderUI();">Review another race</button>'
       +'</div>'
       +'<div class="blk" style="padding:0;">'+rows+'</div>'

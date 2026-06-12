@@ -155,8 +155,8 @@
    SHORTLIST MODE — Tinder-style runner cards
 ═══════════════════════════════════════════════════════════ */
 
-/* Purple meeting header variant for shortlist */
-.rc-mtg-pur { background: rgba(109,40,217,.55); }
+/* Shortlist uses the same blue header as Course/Time tabs */
+.rc-mtg-pur { background: rgba(37,99,235,.65); }
 
 /* Clickable race rows in picker */
 .rc-sl-race-row { cursor: pointer; transition: background .1s; }
@@ -195,12 +195,12 @@
 .rc-sl-btn-shortlist {
   flex: 1; padding: 14px; border-radius: 10px; font-size: 14px;
   font-weight: 800; letter-spacing: .05em; cursor: pointer;
-  background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.3);
-  color: #a78bfa; transition: all .12s;
+  background: rgba(22,163,74,.1); border: 1px solid rgba(22,163,74,.3);
+  color: var(--grn); transition: all .12s;
 }
-.rc-sl-btn-shortlist:active { background: rgba(167,139,250,.22); }
+.rc-sl-btn-shortlist:active { background: rgba(22,163,74,.2); }
 .rc-sl-btn-added {
-  background: rgba(167,139,250,.18); border-color: #a78bfa;
+  background: rgba(22,163,74,.18); border-color: var(--grn);
 }
 
 /* Summary rows */

@@ -63,11 +63,7 @@ async function rcSwLoadMeetings(){
   if(stEl){ stEl.style.display='block'; stEl.textContent='Loading…'; }
   if(uiEl) uiEl.innerHTML='';
   try{
-    const creds=getRacingCreds();
-    if(!creds.username||!creds.password){
-      if(stEl){ stEl.style.display='block'; stEl.textContent='Set API credentials in Settings to load racecards.'; }
-      return;
-    }
+    // Credentials are server-side (Cloudflare Worker) — no client check needed
     // Share cache with today.js to avoid double-fetching
     if(!window._todayMeetingsCache) window._todayMeetingsCache=await callRacingAPI('racecards/free',{});
     const data=window._todayMeetingsCache;

@@ -174,6 +174,8 @@ function authSetMode(mode) {
     if (btn)     btn.onclick          = function(){ authSendReset(); };
     if (toggle)  toggle.innerHTML     = '<a href="#" onclick="authSetMode(\'signin\');return false;" style="color:rgba(255,255,255,.35);text-decoration:none;">← Back to Sign In</a>';
     if (forgotLk) forgotLk.style.display = 'none';
+    const tosHintF = document.getElementById('auth-tos-hint');
+    if (tosHintF) tosHintF.style.display = 'none';
     const pwWrap = document.getElementById('auth-pw-wrap');
     if (pwWrap) pwWrap.style.display = 'none';
     if (pwHint)  pwHint.style.display = 'none';
@@ -192,6 +194,8 @@ function authSetMode(mode) {
   if (title)  title.textContent    = isSignup ? 'Create Account' : 'Welcome Back';
   if (pwHint) pwHint.style.display = isSignup ? 'block' : 'none';
   if (forgotLk) forgotLk.style.display = isSignup ? 'none' : 'block';
+  const tosHint = document.getElementById('auth-tos-hint');
+  if (tosHint) tosHint.style.display = isSignup ? 'block' : 'none';
 }
 
 // ── Send password-reset email ─────────────────────────────────────────────────

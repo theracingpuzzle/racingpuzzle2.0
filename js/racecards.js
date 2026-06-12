@@ -89,20 +89,25 @@ function rcSwRenderUI(){
   const uiEl=document.getElementById('sw-rc-ui');
   if(!uiEl)return;
 
-  const onTime=rcSwView==='time';
-  const _sb_base='font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;transition:all .12s;';
-  let html='<div class="rc-view-tog">'
-    +'<button class="rc-view-btn '+(onTime?'off':'on')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
-    +'<button class="rc-view-btn '+(onTime?'on':'off')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
+  const v=rcSwView;
+  let html='<div class="rc-view-tog" style="width:100%;">'
+    +'<button class="rc-view-btn '+(v==='course'?'on':'off')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
+    +'<button class="rc-view-btn '+(v==='time'?'on':'off')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
+    +'<button class="rc-view-btn '+(v==='shortlist'?'on':'off')+'" onclick="rcSwView=\'shortlist\';rcSwRenderUI();" style="'+(v==='shortlist'?'background:#a78bfa;color:#0f1724;':'color:#a78bfa;')+'">Shortlist</button>'
     +'</div>';
 
   uiEl.innerHTML=html;
 
+  if(v==='shortlist'){
+    rcSlRenderPicker(uiEl);
+    return;
+  }
+
   const listEl=document.createElement('div');
   uiEl.appendChild(listEl);
 
-  if(onTime) rcSwRenderTime(listEl);
-  else       rcSwRenderCourse(listEl);
+  if(v==='time') rcSwRenderTime(listEl);
+  else           rcSwRenderCourse(listEl);
 }
 
 function rcSwRenderTime(listEl){
@@ -1114,3 +1119,371 @@ function rcSetStatus(msg){
   if(el){el.textContent=msg;el.style.display=msg?'block':'none';}
 }
 
+
+// ═══════════════════════════════════════════════════════════════════
+// ─── SHORTLIST MODE ─── Tinder-style runner cards
+// ═══════════════════════════════════════════════════════════════════
+
+let _rcSlShortlist = [];   // accumulated shortlisted runners for this session
+let _rcSlRunners   = [];   // runners in the current race being reviewed
+let _rcSlIdx       = 0;    // current runner index
+let _rcSlRace      = null; // current race object
+let _rcSlCourse    = '';   // current course name
+
+// Reason map (shared with profile panel)
+const _RC_SL_REASONS = {
+  'eye-catcher':  {emoji:'👁', col:'#a78bfa', label:'Eye Catcher'},
+  'future-target':{emoji:'📰', col:'#fb923c', label:'Future Target'},
+  'trainer-intel':{emoji:'🗣', col:'#60a5fa', label:'Trainer Intel'},
+  'form-study':   {emoji:'📊', col:'#ef4444', label:'Form Study'},
+  'tip-source':   {emoji:'💡', col:'#eab308', label:'Tip Source'},
+};
+
+// ── Step 1: Race picker ────────────────────────────────────────────
+function rcSlRenderPicker(container){
+  // Flatten all races across all meetings
+  const allRaces=[];
+  rcSwCurrentRaces.forEach(function(meeting){
+    const course=meeting.course||meeting.venue||'Unknown';
+    if(meeting.runners){
+      allRaces.push({race:meeting, course:course});
+    } else {
+      (meeting.races||[]).forEach(function(r){ allRaces.push({race:r, course:course}); });
+    }
+  });
+  allRaces.sort(function(a,b){
+    return timeToMins(a.race.off||a.race.off_time||a.race.time||'')
+          -timeToMins(b.race.off||b.race.off_time||b.race.time||'');
+  });
+
+  if(!allRaces.length){
+    const d=document.createElement('div');
+    d.className='rc-empty';d.style.marginTop='20px';
+    d.textContent='No races loaded. Refresh the card first.';
+    container.appendChild(d);
+    return;
+  }
+
+  const wrap=document.createElement('div');
+  wrap.style.cssText='margin-top:12px;';
+  wrap.innerHTML='<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Pick a race to review</div>'
+    +allRaces.map(function(item,i){
+      const r=item.race;
+      const time=r.off||r.off_time||r.time||'—';
+      const name=r.race_name||r.name||'';
+      const cnt=(r.runners||r.horses||[]).length;
+      const dist=formatDist(r.distance_round||r.distance_f||r.distance||r.dist||'');
+      return'<div class="rc-sl-picker-row" onclick="rcSlStartRace('+i+')" data-idx="'+i+'">'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:15px;font-weight:800;color:var(--txt);">'+item.course+' <span style="color:var(--gld);">'+time+'</span></div>'
+          +(name?'<div style="font-size:11px;color:var(--mut);margin-top:1px;">'+name+'</div>':'')
+        +'</div>'
+        +'<div style="text-align:right;flex-shrink:0;">'
+          +(dist?'<div style="font-size:11px;color:var(--mut);">'+dist+'</div>':'')
+          +'<div style="font-size:10px;color:var(--mut);">'+cnt+' runners</div>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+
+  // Store reference so rcSlStartRace can look up by index
+  window._rcSlAllRaces=allRaces;
+  container.appendChild(wrap);
+}
+
+// ── Step 2: Start reviewing a race ────────────────────────────────
+function rcSlStartRace(idx){
+  const item=window._rcSlAllRaces[idx];
+  if(!item)return;
+  _rcSlRace=item.race;
+  _rcSlCourse=item.course;
+  // Filter out non-runners
+  _rcSlRunners=(item.race.runners||item.race.horses||[]).filter(function(r){
+    return !r.non_runner&&!r.isNonRunner
+      &&(''+r.number).toUpperCase()!=='NR'
+      &&(''+r.status).toLowerCase()!=='nr'
+      &&(''+r.jockey).toUpperCase()!=='NON-RUNNER';
+  });
+  _rcSlIdx=0;
+  _rcSlShortlist=[];
+  rcSlRenderCard();
+}
+
+// ── Step 3: Render the current runner card ─────────────────────────
+function rcSlRenderCard(){
+  const uiEl=document.getElementById('sw-rc-ui');
+  if(!uiEl)return;
+
+  if(_rcSlIdx>=_rcSlRunners.length){
+    rcSlRenderSummary();
+    return;
+  }
+
+  const r=_rcSlRunners[_rcSlIdx];
+  const total=_rcSlRunners.length;
+  const pct=Math.round((_rcSlIdx/total)*100);
+
+  const name=stripCountrySuffix(r.horse||r.name||'—');
+  const no=r.number||r.saddle_cloth||(_rcSlIdx+1);
+  const draw=r.draw?'('+r.draw+')':'';
+  const jock=fmtJockey(r.jockey||r.jockeyName);
+  const trainer=r.trainer||r.trainerName||'';
+  const age=r.age?r.age+'yo':'';
+  const form=r.form||'';
+  const rpr=r.ofr||r.rpr||r.official_rating||r.officialRating||r.or||'';
+  const wt=r.weight||r.lbs||r.stone_lbs||'';
+  const sp=r.sp||r.price||r.odds||'';
+  const time=_rcSlRace.off||_rcSlRace.off_time||_rcSlRace.time||'—';
+
+  // Check for profile notes
+  const wl=getWL();
+  const nl=name.toLowerCase().trim();
+  const prof=wl.find(function(w){return(w.horse||'').toLowerCase().trim()===nl;});
+  const profMeta=prof?(_RC_SL_REASONS[prof.reason||'eye-catcher']||_RC_SL_REASONS['eye-catcher']):null;
+  const edge=prof?(function(){const mr=parseFloat(prof.myRating),or=parseFloat(prof.currentRating);return(mr&&or)?mr-or:null;}()):null;
+
+  // Already shortlisted?
+  const alreadyIn=_rcSlShortlist.some(function(s){return s.name===name;});
+
+  const toggleHTML='<div class="rc-view-tog" style="width:100%;">'
+    +'<button class="rc-view-btn off" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
+    +'<button class="rc-view-btn off" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
+    +'<button class="rc-view-btn on" style="background:#a78bfa;color:#0f1724;">Shortlist</button>'
+    +'</div>';
+
+  // Profile panel HTML (compact)
+  let profHtml='';
+  if(prof){
+    profHtml='<div class="rc-sl-profile-note">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+        +'<span style="font-size:13px;">'+profMeta.emoji+'</span>'
+        +'<span style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:'+profMeta.col+';">'+profMeta.label+'</span>'
+        +(edge!==null?(edge>0?'<span class="rc-sl-edge-pos">▲ +'+edge+'</span>':(edge<0?'<span class="rc-sl-edge-neg">▼ '+edge+'</span>':'')):'')
+        +(prof.myRating?'<span style="font-size:10px;color:var(--mut);">MR '+prof.myRating+'</span>':'')
+        +(prof.currentRating?'<span style="font-size:10px;color:var(--mut);">OR '+prof.currentRating+'</span>':'')
+      +'</div>'
+      +(prof.reasonNote?'<div style="font-size:12px;color:var(--txt);line-height:1.5;font-style:italic;margin-bottom:6px;">"'+prof.reasonNote+'"</div>':'')
+      +(prof.trainerIntel?'<div style="font-size:11px;color:var(--mut);margin-bottom:4px;">🗣 '+prof.trainerIntel+'</div>':'')
+      +(prof.conditionsNotes?'<div style="font-size:11px;color:var(--mut);">📋 '+prof.conditionsNotes+'</div>':'')
+    +'</div>';
+  }
+
+  uiEl.innerHTML=toggleHTML
+    +'<div id="rc-sl-card-wrap">'
+
+      // Progress bar
+      +'<div class="rc-sl-progress">'
+        +'<div style="flex:1;background:var(--sur2);border-radius:4px;height:4px;overflow:hidden;">'
+          +'<div style="width:'+pct+'%;height:100%;background:#a78bfa;border-radius:4px;transition:width .3s;"></div>'
+        +'</div>'
+        +'<span class="rc-sl-progress-lbl">'+(_rcSlIdx+1)+' / '+total+'</span>'
+        +(_rcSlShortlist.length?'<span class="rc-sl-count-badge">✓ '+_rcSlShortlist.length+'</span>':'')
+      +'</div>'
+
+      // The card itself
+      +'<div class="rc-sl-card" id="rc-sl-card">'
+
+        // Header: number + draw + race info
+        +'<div class="rc-sl-card-header">'
+          +'<div class="rc-sl-cloth">'+no+(draw?' <span style="font-size:11px;color:var(--mut);">'+draw+'</span>':'')+'</div>'
+          +'<div style="font-size:10px;color:var(--mut);text-align:right;">'
+            +_rcSlCourse+' · '+time
+          +'</div>'
+        +'</div>'
+
+        // Horse name
+        +'<div class="rc-sl-horse-name">'+name+'</div>'
+
+        // Key stats row
+        +'<div class="rc-sl-stats">'
+          +(sp?'<div class="rc-sl-stat"><div class="rc-sl-stat-lbl">Price</div><div class="rc-sl-stat-val" style="color:var(--gld);">'+sp+'</div></div>':'')
+          +(rpr?'<div class="rc-sl-stat"><div class="rc-sl-stat-lbl">OR</div><div class="rc-sl-stat-val">'+rpr+'</div></div>':'')
+          +(age?'<div class="rc-sl-stat"><div class="rc-sl-stat-lbl">Age</div><div class="rc-sl-stat-val">'+age+'</div></div>':'')
+          +(wt?'<div class="rc-sl-stat"><div class="rc-sl-stat-lbl">Weight</div><div class="rc-sl-stat-val">'+wt+'</div></div>':'')
+        +'</div>'
+
+        // Form
+        +(form?'<div class="rc-sl-form-row"><span class="rc-sl-form-lbl">Form</span><span class="rc-sl-form">'+form+'</span></div>':'')
+
+        // Jockey / Trainer
+        +'<div class="rc-sl-connections">'
+          +(jock?'<div class="rc-sl-conn-row"><span class="rc-sl-conn-lbl">J</span><span>'+jock+'</span></div>':'')
+          +(trainer?'<div class="rc-sl-conn-row"><span class="rc-sl-conn-lbl">T</span><span>'+trainer+'</span></div>':'')
+        +'</div>'
+
+        // Profile notes (if exists)
+        +profHtml
+
+      +'</div>'
+
+      // Action buttons
+      +'<div class="rc-sl-actions">'
+        +'<button class="rc-sl-btn-pass" onclick="rcSlPass()">✕ Pass</button>'
+        +(alreadyIn
+          ?'<button class="rc-sl-btn-shortlist" style="background:rgba(167,139,250,.15);border-color:#a78bfa;color:#a78bfa;" onclick="rcSlUnshortlist()">✓ Added</button>'
+          :'<button class="rc-sl-btn-shortlist" onclick="rcSlAdd()">★ Shortlist</button>'
+        )
+      +'</div>'
+
+      // Skip to summary
+      +(_rcSlShortlist.length?'<div style="text-align:center;margin-top:10px;"><button class="btn bout bsm" onclick="rcSlRenderSummary()">Review shortlist ('+_rcSlShortlist.length+') →</button></div>':'')
+
+    +'</div>';
+
+  // Wire up swipe gestures on the card
+  _rcSlBindSwipe(document.getElementById('rc-sl-card'));
+}
+
+// ── Swipe gesture binding ──────────────────────────────────────────
+function _rcSlBindSwipe(el){
+  if(!el)return;
+  let startX=0,startY=0,dragging=false;
+  el.addEventListener('touchstart',function(e){
+    startX=e.touches[0].clientX;startY=e.touches[0].clientY;dragging=true;
+    el.style.transition='none';
+  },{passive:true});
+  el.addEventListener('touchmove',function(e){
+    if(!dragging)return;
+    const dx=e.touches[0].clientX-startX;
+    const dy=e.touches[0].clientY-startY;
+    if(Math.abs(dx)>Math.abs(dy)){
+      el.style.transform='translateX('+dx+'px) rotate('+(dx*0.04)+'deg)';
+      el.style.opacity=String(1-Math.abs(dx)/400);
+    }
+  },{passive:true});
+  el.addEventListener('touchend',function(e){
+    if(!dragging)return;dragging=false;
+    const dx=e.changedTouches[0].clientX-startX;
+    el.style.transition='transform .25s,opacity .25s';
+    if(dx>80){
+      el.style.transform='translateX(120%) rotate(15deg)';
+      el.style.opacity='0';
+      setTimeout(rcSlAdd,240);
+    } else if(dx<-80){
+      el.style.transform='translateX(-120%) rotate(-15deg)';
+      el.style.opacity='0';
+      setTimeout(rcSlPass,240);
+    } else {
+      el.style.transform='';el.style.opacity='1';
+    }
+  },{passive:true});
+}
+
+// ── Actions ────────────────────────────────────────────────────────
+function rcSlAdd(){
+  const r=_rcSlRunners[_rcSlIdx];
+  if(!r)return;
+  const name=stripCountrySuffix(r.horse||r.name||'—');
+  if(!_rcSlShortlist.some(function(s){return s.name===name;})){
+    _rcSlShortlist.push({
+      name:name,
+      no:r.number||r.saddle_cloth||(_rcSlIdx+1),
+      jockey:fmtJockey(r.jockey||r.jockeyName),
+      trainer:r.trainer||r.trainerName||'',
+      odds:r.sp||r.price||r.odds||'',
+      or:r.ofr||r.rpr||r.official_rating||r.officialRating||r.or||'',
+      form:r.form||'',
+      course:_rcSlCourse,
+      time:_rcSlRace.off||_rcSlRace.off_time||_rcSlRace.time||'—',
+      raceName:_rcSlRace.race_name||_rcSlRace.name||''
+    });
+  }
+  _rcSlIdx++;
+  rcSlRenderCard();
+}
+
+function rcSlPass(){
+  _rcSlIdx++;
+  rcSlRenderCard();
+}
+
+function rcSlUnshortlist(){
+  const r=_rcSlRunners[_rcSlIdx];
+  if(!r)return;
+  const name=stripCountrySuffix(r.horse||r.name||'—');
+  _rcSlShortlist=_rcSlShortlist.filter(function(s){return s.name!==name;});
+  rcSlRenderCard(); // re-render to show Pass state
+}
+
+// ── Step 4: Summary screen ─────────────────────────────────────────
+function rcSlRenderSummary(){
+  const uiEl=document.getElementById('sw-rc-ui');
+  if(!uiEl)return;
+
+  const toggleHTML='<div class="rc-view-tog" style="width:100%;">'
+    +'<button class="rc-view-btn off" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
+    +'<button class="rc-view-btn off" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
+    +'<button class="rc-view-btn on" style="background:#a78bfa;color:#0f1724;">Shortlist</button>'
+    +'</div>';
+
+  if(!_rcSlShortlist.length){
+    uiEl.innerHTML=toggleHTML
+      +'<div style="text-align:center;padding:40px 20px;">'
+        +'<div style="font-size:32px;margin-bottom:12px;">🤷</div>'
+        +'<div style="font-weight:700;font-size:16px;margin-bottom:8px;">Nothing shortlisted</div>'
+        +'<div style="font-size:13px;color:var(--mut);margin-bottom:20px;">You passed on everyone in this race.</div>'
+        +'<button class="btn bout" onclick="rcSwView=\'shortlist\';rcSwRenderUI();">Pick another race</button>'
+      +'</div>';
+    return;
+  }
+
+  let rows=_rcSlShortlist.map(function(s,i){
+    const esc2=function(v){return(v+'').replace(/'/g,"\\'");};
+    return'<div class="rc-sl-summary-row">'
+      +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:16px;font-weight:800;color:var(--txt);">'+s.name+'</div>'
+        +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'+s.course+' · '+s.time+(s.odds?' · <span style="color:var(--gld);">'+s.odds+'</span>':'')+(s.or?' · OR '+s.or:'')+'</div>'
+        +(s.jockey?'<div style="font-size:11px;color:var(--mut);">J: '+s.jockey+(s.trainer?' · T: '+s.trainer:'')+'</div>':'')
+      +'</div>'
+      +'<div class="t-flex-col-end" style="gap:6px;">'
+        +'<button class="rc-bet-btn" style="font-size:10px;" onclick="rcSlBet('+i+')">Bet 🏇</button>'
+        +'<button class="rc-bet-btn" style="font-size:10px;background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.3);color:#a78bfa;" onclick="rcSlAddToTracker('+i+')">+ Tracker</button>'
+        +'<button style="font-size:10px;background:transparent;border:1px solid var(--bdr);color:var(--mut);padding:4px 8px;border-radius:6px;cursor:pointer;" onclick="rcSlRemove('+i+')">✕</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+
+  uiEl.innerHTML=toggleHTML
+    +'<div style="margin-top:12px;">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
+        +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;">★ Your Shortlist ('+_rcSlShortlist.length+')</div>'
+        +'<button class="btn bout bsm" onclick="rcSwView=\'shortlist\';rcSwRenderUI();">Review another race</button>'
+      +'</div>'
+      +'<div class="blk" style="padding:0;">'+rows+'</div>'
+    +'</div>';
+}
+
+function rcSlBet(idx){
+  const s=_rcSlShortlist[idx];
+  if(!s)return;
+  openBetFlow('real',s.name,s.course,s.time,s.jockey,s.trainer,s.raceName);
+}
+
+function rcSlAddToTracker(idx){
+  const s=_rcSlShortlist[idx];
+  if(!s)return;
+  const wl=getWL();
+  const existing=wl.find(function(w){return(w.horse||'').toLowerCase().trim()===s.name.toLowerCase().trim();});
+  if(existing){
+    alert(s.name+' is already in your Tracker.');
+    return;
+  }
+  wl.push({
+    id:gid(),horse:s.name,trainer:s.trainer,
+    currentRating:s.or,myRating:'',
+    reason:'eye-catcher',reasonNote:'Added from shortlist',
+    orHistory:[],observations:[],targets:[],
+    createdAt:Date.now()
+  });
+  setWL(wl);save();
+  // Update button to show added
+  const btn=document.querySelectorAll('.rc-sl-summary-row')[idx];
+  if(btn){
+    const tBtn=btn.querySelectorAll('button')[1];
+    if(tBtn){tBtn.textContent='✓ Added';tBtn.style.color='var(--grn)';}
+  }
+}
+
+function rcSlRemove(idx){
+  _rcSlShortlist.splice(idx,1);
+  rcSlRenderSummary();
+}

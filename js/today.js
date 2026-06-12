@@ -39,41 +39,38 @@ function _showTodayDemo(){
     + '<div class="t-body">Looking for a well-treated handicapper on decent ground</div></div>'
     + '<span class="t-checkin-emoji">🙂</span></div>';
 
-  // ── Edge alerts ──
-  const ea = document.getElementById('t-edge-alerts');
-  if(ea){
-    ea.style.display = 'block';
-    ea.innerHTML = '<div class="t-alert-grn">'
-      + '<div class="t-alert-lbl-grn">⭐ Edge Running Today</div>'
+  // ── Combined Running Today alert (demo) ──
+  const ta = document.getElementById('t-today-alerts');
+  if(ta){
+    ta.style.display = 'block';
+    ta.innerHTML = '<div class="t-alert-pur">'
+      + '<div class="t-wl-hdr">'
+        + '<div class="t-alert-lbl-pur">🏇 Running Today</div>'
+      + '</div>'
       + [
-          {horse:'Midnight Envoy', course:'Ascot', time:'14:30', mr:92, or:88, edge:4},
-          {horse:'Thistle Down',   course:'York',  time:'16:10', mr:85, or:82, edge:3},
-        ].map(function(e){
-          return '<div class="t-alert-row-grn">'
-            + '<div><div class="t-heading">'+e.horse+'</div>'
-            + '<div class="mm">'+e.time+' · '+e.course+'</div></div>'
-            + '<span class="t-edge-badge">MR '+e.mr+' · OR '+e.or+' · +'+e.edge+'</span>'
-            + '</div>';
-        }).join('')
-      + '</div>';
-  }
-
-  // ── Watchlist alert ──
-  const wa = document.getElementById('t-wl-alerts');
-  if(wa){
-    wa.style.display = 'block';
-    wa.innerHTML = '<div class="wl-alert-wrap">'
-      + '<div class="t-alert-lbl-pur">Watchlist Running Today</div>'
-      + [
-          {horse:'Midnight Envoy', course:'Ascot', time:'14:30', jockey:'F. Dettori', race:'Copper Horse Stakes'},
-          {horse:'Velvet Sunrise',  course:'Newmarket', time:'15:45', jockey:'R. Moore', race:'July Stakes'},
+          {horse:'Midnight Envoy', course:'Ascot',     time:'14:30', jockey:'F. Dettori', race:'Copper Horse Stakes', edge:4, mr:92, or:88},
+          {horse:'Thistle Down',   course:'York',       time:'16:10', jockey:'T. Marquand', race:'Dante Stakes',      edge:3, mr:85, or:82},
+          {horse:'Velvet Sunrise', course:'Newmarket', time:'15:45', jockey:'R. Moore',    race:'July Stakes',        edge:0, mr:0,  or:0},
         ].map(function(a){
-          return '<div class="t-alert-row-pur t-row-sb-gap">'
-            + '<div><div class="t-heading">'+a.horse+'</div>'
-            + '<div class="t-muted">'+a.time+' · '+a.course+' · '+a.race+'</div>'
-            + '<div class="t-jockey">J: '+fmtJockey(a.jockey)+'</div></div>'
-            + '<span class="t-profile-btn">Profile →</span>'
-            + '</div>';
+          const edgeBadge=a.edge>0
+            ?'<span class="t-edge-badge" style="margin-left:7px;">MR '+a.mr+' · OR '+a.or+' · +'+a.edge+'</span>'
+            :'';
+          return '<div class="t-alert-row-pur">'
+            + '<div class="t-row-sb-gap">'
+              + '<div class="t-flex-info">'
+                + '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">'
+                  + '<span class="t-horse-name">'+a.horse+'</span>'+edgeBadge
+                + '</div>'
+                + '<div class="t-muted">'+a.time+' · '+a.course+' · '+a.race+'</div>'
+                + '<div class="t-jockey">J: '+fmtJockey(a.jockey)+'</div>'
+              + '</div>'
+              + '<div class="t-flex-col-end">'
+                + '<button class="t-review-btn">Review ✍️</button>'
+                + '<button class="t-race-btn">Race 🏇</button>'
+                + '<button class="t-profile-btn">Profile →</button>'
+              + '</div>'
+            + '</div>'
+          + '</div>';
         }).join('')
       + '</div>';
   }

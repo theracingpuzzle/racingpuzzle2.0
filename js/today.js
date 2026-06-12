@@ -231,7 +231,18 @@ async function checkWatchlistRunners(races){
   const wl=getWL();
   const watching=wl.filter(function(e){return e.horse;});
   const alertEl=document.getElementById('t-today-alerts');
-  if(!watching.length){if(alertEl)alertEl.style.display='none';return;}
+  if(!watching.length){
+    if(alertEl){
+      alertEl.style.display='block';
+      alertEl.innerHTML='<div class="t-alert-pur" style="text-align:center;padding:20px 16px;">'
+        +'<div style="font-size:28px;margin-bottom:10px;">⭐</div>'
+        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No horses on your Profiler</div>'
+        +'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:14px;">Add horses to your Puzzle Profiler and they\'ll appear here when they\'re declared to run today.</div>'
+        +'<button onclick="navTo(\'watchlist\')" style="padding:9px 18px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Open Profiler →</button>'
+        +'</div>';
+    }
+    return;
+  }
 
   const alerts=[];
   (races||[]).forEach(function(race){
@@ -324,6 +335,9 @@ async function checkWatchlistRunners(races){
       +'</div>';
     }).join('')
   +'</div>';
+
+  // Schedule push notifications for declared Profiler horses
+  if(typeof notifScheduleToday==='function') notifScheduleToday(races, alerts);
 
   setTimeout(function(){
     alertEl.querySelectorAll('.t-wl-review-btn').forEach(function(btn){
@@ -852,7 +866,14 @@ function renderTodayBets(tb, vtb){
   const le=document.getElementById('tbets');
   if(!le) return;
   const allBets=[...tb.map(b=>({...b,_type:'real'})),...vtb.map(b=>({...b,_type:'virt'}))];
-  if(!allBets.length){le.innerHTML='<div class="t-empty">No bets logged today.</div>';return;}
+  if(!allBets.length){
+    le.innerHTML='<div style="text-align:center;padding:28px 16px;">'
+      +'<div style="font-size:32px;margin-bottom:10px;">🎯</div>'
+      +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No bets today</div>'
+      +'<div style="font-size:12px;color:var(--mut);line-height:1.6;">Use the form above to log your first bet of the day.</div>'
+      +'</div>';
+    return;
+  }
   const bg={win:'bw1',place:'bp1',loss:'bl1',pending:'bpend',void:'bnr',nr:'bnr'};
   le.innerHTML=allBets.map(function(b){
     const isV=b._type==='virt';

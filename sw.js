@@ -6,7 +6,7 @@
 // Bump CACHE_VERSION whenever you deploy a meaningful update — this forces
 // the old cache to be cleared and a fresh copy of all assets to be fetched.
 
-const CACHE_VERSION = 'rp-v19';
+const CACHE_VERSION = 'rp-v20';
 
 const APP_SHELL = [
   './',
@@ -33,6 +33,7 @@ const APP_SHELL = [
   './js/coach.js',
   './js/onboarding.js',
   './js/legal.js',
+  './js/notifications.js',
   './js/init.js',
 ];
 
@@ -94,5 +95,31 @@ self.addEventListener('fetch', event => {
           return caches.match('./index.html');
         }
       })
+  );
+});
+
+// ── Push notifications ────────────────────────────────────────────────────────
+self.addEventListener('push', event => {
+  let data = { title: 'Racing Puzzle', body: 'You have an update.' };
+  try { data = event.data ? event.data.json() : data; } catch(e) {}
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Racing Puzzle', {
+      body:    data.body    || '',
+      icon:    data.icon    || './icons/icon-192.png',
+      badge:   data.badge   || './icons/icon-192.png',
+      tag:     data.tag     || 'rp-notification',
+      data:    data.data    || {},
+      vibrate: [200, 100, 200],
+    })
+  );
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      if (list.length > 0) return list[0].focus();
+      return clients.openWindow('./');
+    })
   );
 });

@@ -121,7 +121,18 @@ function renderVirtHist(){
   if(sf)filtered=filtered.filter(function(b){return (b.horse||'').toLowerCase().indexOf(sf)>-1||(b.track||'').toLowerCase().indexOf(sf)>-1;});
   var cnt=document.getElementById('hvcnt');if(cnt)cnt.textContent=filtered.length+' bet'+(filtered.length!==1?'s':'');
   var listEl=document.getElementById('hist-virt-list');if(!listEl)return;
-  if(!filtered.length){listEl.innerHTML='<div class="es">No virtual bets match.</div>';return;}
+  if(!filtered.length){
+    var isFiltered2=rf||sf;
+    listEl.innerHTML=isFiltered2
+      ?'<div class="es">No virtual bets match your filters.</div>'
+      :'<div style="text-align:center;padding:32px 16px;">'
+        +'<div style="font-size:36px;margin-bottom:12px;">🧪</div>'
+        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">No virtual bets yet</div>'
+        +'<div style="font-size:13px;color:var(--mut);line-height:1.65;margin-bottom:18px;">Use the Virtual card to paper-trade selections without risking real money. Great for testing new approaches.</div>'
+        +'<button onclick="navTo(\'today\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Log a Virtual Bet →</button>'
+        +'</div>';
+    return;
+  }
   var bg={win:'bw1',place:'bp1',loss:'bl1',pending:'bpend',void:'bnr',nr:'bnr'};
   var html='';
   for(var li=0;li<filtered.length;li++){
@@ -162,7 +173,18 @@ function renderHist(){
   if(sf)bets=bets.filter(b=>(b.horse||'').toLowerCase().includes(sf)||(b.track||'').toLowerCase().includes(sf));
   const cnt=document.getElementById('hcnt');if(cnt)cnt.textContent=bets.length+' bet'+(bets.length!==1?'s':'');
   const listEl=document.getElementById('hist-list');if(!listEl)return;
-  if(!bets.length){listEl.innerHTML='<div class="es">No bets match.</div>';return;}
+  if(!bets.length){
+    const isFiltered=rf||sf;
+    listEl.innerHTML=isFiltered
+      ?'<div class="es">No bets match your filters.</div>'
+      :'<div style="text-align:center;padding:32px 16px;">'
+        +'<div style="font-size:36px;margin-bottom:12px;">📋</div>'
+        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">No bets logged yet</div>'
+        +'<div style="font-size:13px;color:var(--mut);line-height:1.65;margin-bottom:18px;">Head to Today to log your first real bet. Every bet you log appears here so you can review and settle results.</div>'
+        +'<button onclick="navTo(\'today\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Log a Bet →</button>'
+        +'</div>';
+    return;
+  }
   const bg={win:'bw1',place:'bp1',loss:'bl1',pending:'bpend',void:'bnr',nr:'bnr'};
   listEl.innerHTML=bets.map(b=>{
     const p2=pnl(b),os=b.oddsDisplay||(b.odds||'—');
@@ -233,10 +255,15 @@ function renderStats(){
 
   // If the selected scope has no bets, show empty state
   if(!set.length){
-    const scopeLabel=scope==='real'?'real':scope==='virt'?'virtual':'settled';
+    const statsEmpty='<div style="text-align:center;padding:32px 16px;">'
+      +'<div style="font-size:36px;margin-bottom:12px;">📊</div>'
+      +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">No settled bets yet</div>'
+      +'<div style="font-size:13px;color:var(--mut);line-height:1.65;margin-bottom:18px;">Log your first bet on the Today card and mark it as a win, place or loss to see your stats here.</div>'
+      +'<button onclick="navTo(\'today\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Go to Today →</button>'
+      +'</div>';
     ['st-insights-body','st-src-table','st-conf-table','st-type-table','st-monthly','st-trk','st-ck-table','st-jockey','st-trainer'].forEach(id=>{
       const el=document.getElementById(id);
-      if(el)el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">No '+scopeLabel+' bets settled yet.</div>';
+      if(el)el.innerHTML=id==='st-insights-body'?statsEmpty:'<div style="color:var(--mut);font-style:italic;font-size:13px;padding:8px 0;">Nothing to show yet.</div>';
     });
     const dc=document.getElementById('d-compare');
     const dcblk=document.getElementById('d-compare-blk');

@@ -136,12 +136,20 @@ function renderCoachCard(){
   const msgsEl = document.getElementById('coach-msgs');
   if(msgsEl && !msgsEl.children.length){
     const hasKey = !!key;
-    msgsEl.innerHTML = '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--txt);">'
-      +'<strong style="color:var(--navy);">The Coach is ready.</strong><br><br>'
-      +(hasKey
-        ? 'Your daily briefing is loading... or tap a quick prompt below to get started.'
-        : '⚠️ Add your API key in Command → Settings to activate the Coach.<br><br>The Coach knows your bank, bets, rules and results — and will give you a daily briefing every morning.')
-      +'</div>';
+    if(!hasKey){
+      msgsEl.innerHTML = '<div style="text-align:center;padding:28px 16px;">'
+        +'<div style="font-size:36px;margin-bottom:12px;">🤖</div>'
+        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">Coach needs an API key</div>'
+        +'<div style="font-size:13px;color:var(--mut);line-height:1.65;margin-bottom:8px;">The Coach uses your own Claude API key to give you a personalised daily briefing, analyse your betting patterns, and answer questions about your data.</div>'
+        +'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:18px;">Get a free key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--gld2);text-decoration:none;">console.anthropic.com</a> — the Coach is very token-efficient.</div>'
+        +'<button onclick="navTo(\'settings\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Add API Key in Settings →</button>'
+        +'</div>';
+    } else {
+      msgsEl.innerHTML = '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--txt);">'
+        +'<strong style="color:var(--navy);">The Coach is ready.</strong><br><br>'
+        +'Tap a quick prompt below to get started.'
+        +'</div>';
+    }
   }
 }
 

@@ -313,10 +313,20 @@ function renderWLList(){
   entries=_applyWLFilter(entries);
 
   if(!entries.length){
-    const emptyMsg=_wlFilter
-      ? 'No profiles match the <strong>'+WL_FILTERS.find(function(f){return f.id===_wlFilter;}).label+'</strong> filter.'
-      : (search?'No profiles match "'+search+'"':'No profiles yet — tap + to add your first horse.');
-    el.innerHTML='<div class="wll-empty">'+emptyMsg+'</div>';
+    if(_wlFilter){
+      const filterLabel=WL_FILTERS.find(function(f){return f.id===_wlFilter;}).label;
+      el.innerHTML='<div class="wll-empty">No profiles match the <strong>'+filterLabel+'</strong> filter.</div>';
+    } else if(search){
+      el.innerHTML='<div class="wll-empty">No profiles match "'+search+'".</div>';
+    } else {
+      el.innerHTML='<div style="text-align:center;padding:36px 20px;">'
+        +'<div style="font-size:40px;margin-bottom:14px;">🐴</div>'
+        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:17px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">Your Profiler is empty</div>'
+        +'<div style="font-size:13px;color:var(--mut);line-height:1.65;margin-bottom:6px;">Build private profiles for every horse you follow — track ratings, going preferences, trainer intel, and race targets.</div>'
+        +'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:20px;">When they\'re declared to run, they\'ll appear on your Today card automatically.</div>'
+        +'<button onclick="wlNew()" style="padding:11px 24px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">+ Add First Horse</button>'
+        +'</div>';
+    }
     return;
   }
 

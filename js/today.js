@@ -1014,17 +1014,48 @@ function saveToday(){D.dailyLog=D.dailyLog||[];const ex=D.dailyLog.find(d=>d.dat
 // favourite SR, notable winners) from the Racing API.
 
 async function fetchTodayResults(){
-  // Try dedicated results endpoint — graceful fail, falls back to racecard cache
+  // 1. Use rcSwResultsData if Results tab has already loaded it this session
+  if(typeof rcSwResultsData!=='undefined'&&rcSwResultsData&&rcSwResultsData.length){
+    window._todayResultsCache=rcSwResultsData;
+    return rcSwResultsData;
+  }
+  // 2. Fetch from the correct results endpoint
   try{
-    const data=await callRacingAPI('results/free',{date:td()});
+    const data=await callRacingAPI('results/today/free',{});
     const res=data.results||data.racecards||data.races||[];
-    if(res.length){window._todayResultsCache=res;return res;}
+    if(res.length){
+      window._todayResultsCache=res;
+      // Share with racecards so Results tab benefits too
+      if(typeof rcSwResultsData!=='undefined')rcSwResultsData=res;
+      return res;
+    }
   }catch(e){}
-  // Fallback: racecard data (may already have SP/positions filled in for past races)
+  // 3. Fallback: racecard cache (pre-race data only — no positions)
   const raw=(window._todayMeetingsCache&&
     (window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
   window._todayResultsCache=raw;
   return raw;
+}
+
+// GB + Irish racecourses — excludes international (Sha Tin, Eagle Farm etc.)
+var _TP_GB_TRACKS=new Set(['Ascot','Aintree','Ayr','Bath','Brighton','Carlisle','Catterick',
+  'Chelmsford City','Cheltenham','Chester','Chepstow','Doncaster','Epsom','Exeter',
+  'Fakenham','Ffos Las','Goodwood','Hamilton','Haydock','Hereford','Hexham','Huntingdon',
+  'Kelso','Kempton','Leicester','Lingfield','Ludlow','Market Rasen','Musselburgh',
+  'Newbury','Newcastle','Newmarket','Newton Abbot','Nottingham','Perth','Plumpton',
+  'Pontefract','Redcar','Ripon','Salisbury','Sandown','Sedgefield','Southwell',
+  'Stratford','Taunton','Thirsk','Towcester','Uttoxeter','Warwick','Wincanton',
+  'Windsor','Wolverhampton','Worcester','Yarmouth','York',
+  'Cork','Curragh','Down Royal','Dundalk','Galway','Gowran Park','Leopardstown',
+  'Limerick','Naas','Navan','Punchestown','Sligo','Tipperary','Tramore']);
+
+function _tpIsGB(course){
+  if(!course)return false;
+  // Exact match first, then check if any GB track name is contained in the course string
+  if(_TP_GB_TRACKS.has(course))return true;
+  var c=course.toLowerCase();
+  for(var t of _TP_GB_TRACKS){if(c.indexOf(t.toLowerCase())>-1)return true;}
+  return false;
 }
 
 function _tpBuildItems(races){
@@ -1034,6 +1065,9 @@ function _tpBuildItems(races){
   const trainerRuns={};
   const goingWins={};
   let totalFavs=0,favWins=0,totalRacesResult=0;
+
+  // Filter to GB meetings only
+  races=(races||[]).filter(function(m){return _tpIsGB(m.course||m.venue||'');});
 
   (races||[]).forEach(function(meeting){
     var course=meeting.course||meeting.venue||'';

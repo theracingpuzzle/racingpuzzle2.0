@@ -242,8 +242,11 @@ function renderNextRace(){
   const going=next.race.going||next.race.going_description||'';
 
   el.style.display='block';
+  // Store for the click handler
+  window._nextRaceCourse=course;
+  window._nextRaceTime=raceTime;
   content.innerHTML=
-    '<div class="t-next-card" style="border-left:3px solid '+urgency+';cursor:pointer;" onclick="goTo(1)">'
+    '<div class="t-next-card" style="border-left:3px solid '+urgency+';cursor:pointer;" onclick="goToNextRace()">'
       +'<div style="flex:1;min-width:0;">'
         +'<div class="t-next-title">'+raceTime+(raceTime&&course?' · ':'')+course+'</div>'
         +(raceName?'<div class="mm" style="margin-top:2px;">'+raceName+'</div>':'')
@@ -263,6 +266,27 @@ function renderNextRace(){
   // Refresh every minute so the countdown ticks
   if(window._nextRaceTimer)clearTimeout(window._nextRaceTimer);
   window._nextRaceTimer=setTimeout(renderNextRace,60000);
+}
+
+// Navigate to Racecards and auto-expand the next race's meeting + race row
+function goToNextRace(){
+  const course=window._nextRaceCourse;
+  const time=window._nextRaceTime;
+  if(!course){navTo('races');return;}
+  navTo('races');
+  setTimeout(function(){
+    rcSwSelectCourse(course);
+    setTimeout(function(){
+      var safeId=course.replace(/\W/g,'_');
+      var races=window.rcSwRacesByMeeting&&window.rcSwRacesByMeeting[course];
+      if(!races)return;
+      var idx=races.findIndex(function(r){
+        var t=r.off||r.off_time||r.time||'';
+        return t===time;
+      });
+      if(idx>-1)rcSwToggle(idx,course,safeId,true);
+    },200);
+  },350);
 }
 
 function renderStudyReminder(){

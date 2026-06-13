@@ -637,20 +637,23 @@ function openLogbetOverlay(mode, prefill){
           +'<div class="fg"><label>Track</label><input type="text" id="lbo-f-track" autocomplete="off" value="'+(prefill&&prefill.course?_escAttr(prefill.course):'')+'"></div>'
           +'<div class="fg"><label>Time</label><input type="text" id="lbo-f-time" value="'+(prefill&&prefill.time?_escAttr(prefill.time):'')+'"></div>'
           +'<div class="fg"><label>Odds</label><input type="text" id="lbo-f-odds" style="font-family:monospace;" placeholder="e.g. 5/1" oninput="_lboResChange()"></div>'
-          +'<div class="fg"><label>Stake (£)</label><input type="number" id="lbo-f-stake" step="0.5" min="0" oninput="_lboResChange()"></div>'
-          +'<div class="fg"><label>Type</label><select id="lbo-f-type" onchange="_lboResChange()"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>'
+          +'<div class="fg"><label>Confidence</label>'
+            +'<select id="lbo-f-conf" onchange="_lboCalcStake()">'
+            +'<option value="1">1 — Speculative</option>'
+            +'<option value="2">2 — Interested</option>'
+            +'<option value="3" selected>3 — Solid</option>'
+            +'<option value="4">4 — Strong</option>'
+            +'<option value="5">5 — Best Bet</option>'
+            +'</select>'
+          +'</div>'
+          +'<div class="fg"><label>Type</label><select id="lbo-f-type" onchange="_lboResChange();_lboCalcStake()"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>'
           +'<div class="fg"><label>Jockey</label><input type="text" id="lbo-f-jockey" autocomplete="off" value="'+(prefill&&prefill.jockey?_escAttr(prefill.jockey):'')+'"></div>'
           +'<div class="fg"><label>Trainer</label><input type="text" id="lbo-f-trainer" autocomplete="off" value="'+(prefill&&prefill.trainer?_escAttr(prefill.trainer):'')+'"></div>'
         +'</div>'
+        // Stake guide — tappable, updates on confidence/type change
+        +'<div id="lbo-stake-guide" onclick="_lboApplyStake()" style="display:none;cursor:pointer;margin:10px 0 4px;padding:10px 14px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.25);border-radius:10px;"></div>'
+        +'<div class="fg"><label>Stake (£)</label><input type="number" id="lbo-f-stake" step="0.5" min="0" oninput="_lboResChange();_lboCalcStake()"></div>'
         +'<div class="fg"><label>Source</label><select id="lbo-f-source">'+srcOpts+'</select></div>'
-        +'<div class="fg"><label>Confidence</label>'
-          +'<select id="lbo-f-conf">'
-          +'<option value="1">1 — Speculative</option>'
-          +'<option value="2">2 — Interested</option>'
-          +'<option value="3" selected>3 — Solid</option>'
-          +'<option value="4">4 — Strong</option>'
-          +'<option value="5">5 — Best Bet</option>'
-          +'</select></div>'
         +'<div class="fg"><label>Pre-Race Notes</label><textarea id="lbo-f-prenotes" style="min-height:52px" placeholder="Why are you backing this horse?"></textarea></div>'
       +'</div>'
     +'</div>'
@@ -672,20 +675,11 @@ function openLogbetOverlay(mode, prefill){
     +'</div>'
     +'</div>';
 
-  // Set source to match bet flow
+  // Set source and trigger stake guide
   setTimeout(function(){
     const srcEl=document.getElementById('lbo-f-source');
     if(srcEl)srcEl.value=preSrc;
-    // Auto-suggest stake from staking plan
-    const stakeEl=document.getElementById('lbo-f-stake');
-    if(stakeEl&&(!stakeEl.value||stakeEl.value==='0')){
-      const bank=mode==='virt'?(D.vBank&&D.vBank.current||500):(D.bank&&D.bank.current||0);
-      const plan=D.settings&&D.settings.stakingPlan;
-      let suggested=0;
-      if(plan==='pct'&&D.settings.stakePct&&bank>0){suggested=bank*(parseFloat(D.settings.stakePct)/100);}
-      else if(plan==='level'&&D.settings.stakeLevel){suggested=parseFloat(D.settings.stakeLevel);}
-      if(suggested>0)stakeEl.value=suggested.toFixed(2);
-    }
+    _lboCalcStake();
   },50);
 
   overlay.style.display='block';
@@ -693,6 +687,61 @@ function openLogbetOverlay(mode, prefill){
 
 // Escape helper for HTML attribute values
 function _escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+// Stake guide — mirrors calcStakeGuide() in utils.js but uses lbo-f-* field IDs
+function _lboCalcStake(){
+  const guideEl=document.getElementById('lbo-stake-guide');
+  if(!guideEl)return;
+  const conf=parseInt((document.getElementById('lbo-f-conf')||{value:'3'}).value)||3;
+  const betType=(document.getElementById('lbo-f-type')||{value:'win'}).value;
+  const stakeEl=document.getElementById('lbo-f-stake');
+  const pv=typeof getPointValue==='function'?getPointValue():parseFloat((D.settings&&D.settings.pointValue)||5);
+  const CONF_PTS_LOCAL=[1,1.5,2,2.5,3];
+  const pts=CONF_PTS_LOCAL[conf-1]||2;
+  const isEW=betType==='ew';
+  const suggested=parseFloat((pts*pv).toFixed(2));
+  const current=parseFloat(stakeEl&&stakeEl.value)||0;
+  const mode=window._betFlowState&&window._betFlowState.mode||'real';
+  const accentCol=mode==='virt'?'#ea580c':'#60a5fa';
+
+  if(!pv||pv<=0){
+    guideEl.style.display='block';
+    guideEl.innerHTML='<div style="font-size:12px;color:var(--gld);">⚠️ Set your point value in Settings → Staking Plan.</div>';
+    return;
+  }
+
+  let html='<div style="display:flex;justify-content:space-between;align-items:center;">'
+    +'<div>'
+      +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Suggested Stake</div>'
+      +'<div style="font-family:monospace;font-size:20px;font-weight:700;color:'+accentCol+';">£'+suggested.toFixed(2)+'</div>'
+      +'<div style="font-size:10px;color:var(--mut);margin-top:1px;">'+pts+'pt × £'+pv.toFixed(2)+'/pt'+(isEW?' · EW (£'+(suggested/2).toFixed(2)+' each leg)':'')+'</div>'
+    +'</div>'
+    +'<div style="text-align:right;">';
+  if(current&&current!==suggested){
+    const diffPts=(current/pv).toFixed(2);
+    html+='<div style="font-size:11px;color:var(--mut);">Your entry: £'+current.toFixed(2)+'</div>'
+      +'<div style="font-size:10px;color:var(--mut);">('+diffPts+'pts)</div>';
+  } else {
+    html+='<div style="font-size:11px;color:'+accentCol+';">Tap to apply →</div>';
+  }
+  html+='</div></div>';
+  guideEl.innerHTML=html;
+  guideEl.style.display='block';
+  guideEl.style.borderColor=mode==='virt'?'rgba(234,88,12,.3)':'rgba(96,165,250,.25)';
+  guideEl.style.background=mode==='virt'?'rgba(234,88,12,.08)':'rgba(96,165,250,.08)';
+}
+
+function _lboApplyStake(){
+  const conf=parseInt((document.getElementById('lbo-f-conf')||{value:'3'}).value)||3;
+  const pv=typeof getPointValue==='function'?getPointValue():parseFloat((D.settings&&D.settings.pointValue)||5);
+  const CONF_PTS_LOCAL=[1,1.5,2,2.5,3];
+  const pts=CONF_PTS_LOCAL[conf-1]||2;
+  const suggested=parseFloat((pts*pv).toFixed(2));
+  const stakeEl=document.getElementById('lbo-f-stake');
+  if(stakeEl){stakeEl.value=suggested.toFixed(2);}
+  _lboCalcStake();
+  _lboResChange();
+}
 
 // Auto-calculate returns when result/odds/stake change
 function _lboResChange(){

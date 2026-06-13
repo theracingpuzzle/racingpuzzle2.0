@@ -318,7 +318,7 @@ async function checkWatchlistRunners(races){
     const raceDist=typeof formatDist==='function'?formatDist(race.distance_round||race.distance_f||race.distance||race.dist||''):(race.distance_round||race.distance_f||race.distance||race.dist||'');
     const raceGoing=race.going||race.going_description||'';
     const raceClass=race.race_class||race.class||'';
-    (race.runners||race.horses||[]).forEach(function(r){
+    (race.runners||race.horses||[]).filter(function(r){return !r.non_runner&&!r.isNonRunner;}).forEach(function(r){
       const horseName=(r.horse||r.name||'').toLowerCase().trim();
       const racecardOR=String(r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||(typeof rcGetOFR==='function'?rcGetOFR(r.horse||r.name||''):'')||'').trim();
       watching.forEach(function(w){

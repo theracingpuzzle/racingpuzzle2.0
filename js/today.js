@@ -949,8 +949,8 @@ function doCheckIn(){
   D.dailyLog=D.dailyLog||[];
   let log=D.dailyLog.find(d=>d.date===t);
   if(!log){log={date:t,checkedIn:false,mood:'neutral',notes:'',tracks:[],createdAt:Date.now()};D.dailyLog.push(log);}
-  const mood=document.querySelector('.mood-btn-sm[style*="rgba(232"]');
-  if(mood){const m=mood.getAttribute('onclick').replace("setMood('","").replace("')","");log.mood=m;}
+  // mood is already written to log by setMood() on tap — just ensure a default
+  if(!log.mood)log.mood='neutral';
   const focus=document.getElementById('t-focus');
   if(focus)log.focus=focus.value.trim();
   log.checkedIn=true;
@@ -964,7 +964,29 @@ function undoCheckIn(){
   const log=D.dailyLog&&D.dailyLog.find(d=>d.date===t);
   if(log)log.checkedIn=false;
   save();
-  renderToday();
+  // Re-inject the strip HTML then pre-fill saved values
+  const ci=document.getElementById('tcin');
+  if(ci){
+    ci.innerHTML=
+      '<div id="tmood-btns" style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:9px;">'
+        +'<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);flex-shrink:0;">Today</span>'
+        +'<button class="mood-btn-sm" onclick="setMood(\'poor\')"    id="mood-poor">😔</button>'
+        +'<button class="mood-btn-sm" onclick="setMood(\'neutral\')" id="mood-neutral">😐</button>'
+        +'<button class="mood-btn-sm" onclick="setMood(\'good\')"    id="mood-good">🙂</button>'
+        +'<button class="mood-btn-sm" onclick="setMood(\'great\')"   id="mood-great">😄</button>'
+        +'<input type="text" id="t-focus" placeholder="Focus for today…" autocomplete="off"'
+          +' style="flex:1;min-width:0;background:transparent;border:none;outline:none;font-size:12px;color:var(--txt);padding:0 4px;"'
+          +' onblur="saveFocus(this.value)">'
+        +'<button onclick="doCheckIn()" id="t-checkin-btn"'
+          +' style="flex-shrink:0;padding:4px 10px;border-radius:6px;border:none;background:rgba(22,163,74,.2);color:#4ade80;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;cursor:pointer;">✓</button>'
+      +'</div>';
+    // Pre-fill saved values
+    if(log){
+      const focusEl=document.getElementById('t-focus');
+      if(focusEl&&log.focus)focusEl.value=log.focus;
+      if(log.mood)setMood(log.mood);
+    }
+  }
 }
 
 // renderEdgeAlerts merged into checkWatchlistRunners above

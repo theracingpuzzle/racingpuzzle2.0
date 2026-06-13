@@ -169,3 +169,75 @@
 
 /* ── No bets / empty state ── */
 .t-empty    { color: var(--mut); font-style: italic; font-size: 13px; padding: 4px 0; }
+
+/* ══════════════════════════════════════════════
+   TRACK PULSE — scrolling live ticker
+══════════════════════════════════════════════ */
+.tp-bar {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: rgba(0,0,0,.22);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+  margin: 10px 0 0;
+}
+
+.tp-label {
+  flex-shrink: 0;
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.4);
+  background: rgba(255,255,255,.05);
+  padding: 9px 10px;
+  border-right: 1px solid rgba(255,255,255,.07);
+  line-height: 1;
+}
+
+.tp-track-wrap {
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.tp-track {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  animation: tp-scroll 45s linear infinite;
+}
+
+.tp-track:hover {
+  animation-play-state: paused;
+}
+
+.tp-item {
+  font-size: 12px;
+  color: rgba(232,228,220,.72);
+  padding: 9px 10px;
+  flex-shrink: 0;
+}
+
+.tp-item-highlight {
+  color: #4ade80; /* green — winners */
+}
+
+.tp-item-warn {
+  color: var(--gld); /* amber — low fav SR etc */
+}
+
+.tp-sep {
+  color: rgba(255,255,255,.12);
+  padding: 0 2px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+@keyframes tp-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(50%); }
+}

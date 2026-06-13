@@ -134,6 +134,7 @@ async function loadTodayMeetings(){
     rfrTL();
     checkWatchlistRunners(races);
     renderNextRace();
+    initTrackPulse();
   }catch(e){if(stEl)stEl.textContent='';}
 }
 
@@ -1007,3 +1008,205 @@ function renderOutstanding(){
 }
 function saveToday(){D.dailyLog=D.dailyLog||[];const ex=D.dailyLog.find(d=>d.date===td());const e={date:td(),checkedIn:true,mood:document.getElementById('tmood').value,notes:document.getElementById('tnotes').value.trim(),tracks:getTracks(),createdAt:Date.now()};if(ex)Object.assign(ex,e);else D.dailyLog.push(e);save();updHdr();flash('tsaved');renderToday();}
 
+
+// ─── TRACK PULSE ─────────────────────────────────────────────────────────────
+// Rolling ticker: analyses today's results (jockeys, trainers, going,
+// favourite SR, notable winners) from the Racing API.
+
+async function fetchTodayResults(){
+  // Try dedicated results endpoint — graceful fail, falls back to racecard cache
+  try{
+    const data=await callRacingAPI('results/free',{date:td()});
+    const res=data.results||data.racecards||data.races||[];
+    if(res.length){window._todayResultsCache=res;return res;}
+  }catch(e){}
+  // Fallback: racecard data (may already have SP/positions filled in for past races)
+  const raw=(window._todayMeetingsCache&&
+    (window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
+  window._todayResultsCache=raw;
+  return raw;
+}
+
+function _tpBuildItems(races){
+  const winners=[];
+  const jockeyWins={};
+  const trainerWins={};
+  const trainerRuns={};
+  const goingWins={};
+  let totalFavs=0,favWins=0,totalRacesResult=0;
+
+  (races||[]).forEach(function(meeting){
+    var course=meeting.course||meeting.venue||'';
+    var meetingGoing=meeting.going||meeting.going_description||'';
+    var meetingRaces=meeting.runners?[meeting]:(meeting.races||[]);
+    meetingRaces.forEach(function(race){
+      var raceGoing=race.going||race.going_description||meetingGoing||'';
+      var raceTime=race.off||race.off_time||race.time||'';
+      var runners=(race.runners||race.horses||[]).filter(function(r){
+        return !r.non_runner&&!r.isNonRunner;
+      });
+      if(!runners.length)return;
+      // Detect if this race has a result (any runner has a numeric position)
+      var hasResult=runners.some(function(r){
+        var pos=String(r.position||r.pos||'').trim().toLowerCase();
+        return pos==='1'||pos==='w'||pos==='won'||pos==='1st';
+      });
+      if(!hasResult)return;
+      totalRacesResult++;
+      if(raceGoing){goingWins[raceGoing]=(goingWins[raceGoing]||0)+1;}
+
+      // Identify favourite (lowest SP)
+      var fav=null;
+      runners.forEach(function(r){
+        var sp=fo(r.sp||r.starting_price||'');
+        if(sp>1&&(!fav||sp<fo(fav.sp||fav.starting_price||''))){fav=r;}
+      });
+      if(fav){
+        totalFavs++;
+        var favPos=String(fav.position||fav.pos||'').trim().toLowerCase();
+        if(favPos==='1'||favPos==='w')favWins++;
+      }
+
+      // Collect winner data
+      runners.forEach(function(r){
+        var pos=String(r.position||r.pos||'').trim().toLowerCase();
+        if(pos==='1'||pos==='w'||pos==='won'||pos==='1st'){
+          var jk=r.jockey||r.jockey_name||'';
+          var tr=r.trainer||r.trainer_name||'';
+          var sp=r.sp||r.starting_price||'';
+          var horse=r.horse||r.name||'';
+          if(jk){jockeyWins[jk]=(jockeyWins[jk]||0)+1;}
+          if(tr){trainerWins[tr]=(trainerWins[tr]||0)+1;}
+          winners.push({horse:horse,course:course,time:raceTime,jockey:jk,trainer:tr,sp:sp,going:raceGoing});
+        }
+        // Track trainer runner count (for strike rate)
+        var tr2=r.trainer||r.trainer_name||'';
+        if(tr2)trainerRuns[tr2]=(trainerRuns[tr2]||0)+1;
+      });
+    });
+  });
+
+  var items=[];
+
+  // ── No results yet — show day overview ──
+  if(totalRacesResult===0){
+    var allRaces=[];
+    (races||[]).forEach(function(meeting){
+      var course=meeting.course||meeting.venue||'';
+      var raceList=meeting.runners?[meeting]:(meeting.races||[]);
+      raceList.forEach(function(r){
+        var going=r.going||r.going_description||meeting.going||meeting.going_description||'';
+        allRaces.push({time:r.off||r.off_time||r.time||'',course:course,going:going});
+      });
+    });
+    var courses=[...new Set(allRaces.map(function(r){return r.course;}).filter(Boolean))];
+    var goings=[...new Set(allRaces.map(function(r){return r.going;}).filter(Boolean))];
+    if(allRaces.length){
+      items.push('📋 '+allRaces.length+' races across '+courses.length+' meetings today');
+      if(goings.length){items.push('🌿 Ground: '+goings.slice(0,4).join(' · '));}
+      var sorted=allRaces.filter(function(r){return r.time;}).sort(function(a,b){return timeToMins(a.time)-timeToMins(b.time);});
+      if(sorted.length){items.push('⏰ First off: '+sorted[0].time+' at '+sorted[0].course);}
+      items.push('🔄 Results will appear here as races go off');
+    }
+    return items;
+  }
+
+  // ── Results are in ──
+
+  // Hot jockeys (2+ wins first, then singles)
+  var jkSorted=Object.entries(jockeyWins).sort(function(a,b){return b[1]-a[1];});
+  jkSorted.slice(0,3).forEach(function(entry){
+    var jk=entry[0],w=entry[1];
+    if(w>=2){items.push('🏇 Hot jockey: '+fmtJockey(jk)+' — '+w+' winner'+(w>1?'s':'')+' today');}
+    else{items.push('🏇 '+fmtJockey(jk)+' lands a winner today');}
+  });
+
+  // Hot trainers
+  var trSorted=Object.entries(trainerWins).sort(function(a,b){return b[1]-a[1];});
+  trSorted.slice(0,2).forEach(function(entry){
+    var tr=entry[0],w=entry[1];
+    var runs=trainerRuns[tr]||w;
+    if(w>=2){items.push('🎓 Trainer in form: '+tr+' — '+w+'/'+runs+' today');}
+    else if(runs>=3){items.push('🎓 '+tr+': 1 from '+runs+' runners today');}
+  });
+
+  // Favourite strike rate
+  if(totalFavs>=2){
+    var pct=Math.round(favWins/totalFavs*100);
+    items.push((pct>=50?'⚡':'📉')+' Fav SR: '+favWins+'/'+totalFavs+' ('+pct+'%) today'+(pct>=50?' — follow the market':' — market struggling'));
+  }else if(totalFavs===1){
+    items.push(favWins?'⚡ Favourite won in the only completed race so far':'📉 Favourite beaten in the only result so far');
+  }
+
+  // Going patterns
+  var goingSorted=Object.entries(goingWins).sort(function(a,b){return b[1]-a[1];});
+  if(goingSorted.length){
+    var g=goingSorted[0][0],c=goingSorted[0][1];
+    items.push('🌿 '+c+' race'+(c>1?'s':'')+' completed on '+g+' ground today');
+  }
+
+  // Recent winners — last 5 as individual items
+  var recent=winners.slice(-5).reverse();
+  recent.forEach(function(w){
+    var spLabel=w.sp?(fo(w.sp)>1?' at '+w.sp:''):'';
+    var jkLabel=w.jockey?' — '+fmtJockey(w.jockey):'';
+    items.push('✅ '+w.time+(w.course?' '+w.course:'')+': '+w.horse+spLabel+jkLabel);
+  });
+
+  // Shock result (longest priced winner)
+  var longW=winners.slice().sort(function(a,b){return fo(b.sp)-fo(a.sp);})[0];
+  if(longW&&fo(longW.sp)>=10){
+    items.push('💥 Shock result: '+longW.horse+' ('+longW.sp+') at '+longW.course);
+  }
+
+  // Shortest winner (odds-on)
+  var shortW=winners.filter(function(w){return fo(w.sp)<2;}).sort(function(a,b){return fo(a.sp)-fo(b.sp);})[0];
+  if(shortW){
+    items.push('📌 Odds-on winner: '+shortW.horse+' ('+shortW.sp+') at '+shortW.course);
+  }
+
+  return items.length?items:['📊 '+totalRacesResult+' result'+(totalRacesResult>1?'s':'')+' processed today'];
+}
+
+function renderTrackPulse(){
+  var el=document.getElementById('t-track-pulse');
+  if(!el)return;
+  var races=(window._todayResultsCache||
+    (window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races)))||[];
+  if(!races.length){el.style.display='none';return;}
+
+  var items=_tpBuildItems(races);
+  if(!items.length){el.style.display='none';return;}
+
+  // Double items so the CSS scroll loop is perfectly seamless
+  var doubled=items.concat(items);
+
+  el.style.display='block';
+  el.innerHTML=
+    '<div class="tp-bar">'
+      +'<div class="tp-label">PULSE</div>'
+      +'<div class="tp-track-wrap">'
+        +'<div class="tp-track">'
+          +doubled.map(function(t){
+            var cls='tp-item';
+            if(t.startsWith('✅')||t.startsWith('⚡'))cls+=' tp-item-highlight';
+            else if(t.startsWith('📉')||t.startsWith('💥'))cls+=' tp-item-warn';
+            return'<span class="'+cls+'">'+t+'</span><span class="tp-sep">·</span>';
+          }).join('')
+        +'</div>'
+      +'</div>'
+    +'</div>';
+}
+
+async function initTrackPulse(){
+  await fetchTodayResults();
+  renderTrackPulse();
+  // Refresh every 10 minutes — busts meeting cache so results are fresh
+  if(window._tpRefreshTimer)clearInterval(window._tpRefreshTimer);
+  window._tpRefreshTimer=setInterval(async function(){
+    window._todayMeetingsCache=null;
+    window._todayResultsCache=null;
+    await fetchTodayResults();
+    renderTrackPulse();
+  },10*60*1000);
+}

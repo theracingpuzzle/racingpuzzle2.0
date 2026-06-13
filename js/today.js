@@ -23,56 +23,78 @@ function runTodayDemo(){
 function _showTodayDemo(){
   // ── P&L tiles ──
   const pe = document.getElementById('tpnl');
-  if(pe){ pe.textContent = '+£42.50'; pe.style.color = 'var(--blu)'; }
+  if(pe){ pe.textContent = '+£68.00'; pe.style.color = '#4ade80'; }
   const vpe = document.getElementById('t-virt-pnl');
-  if(vpe){ vpe.textContent = '+£18.00'; vpe.style.color = 'var(--ora)'; }
+  if(vpe){ vpe.textContent = '+£34.50'; vpe.style.color = '#4ade80'; }
+  const rbs = document.getElementById('t-real-bank-sub');
+  if(rbs) rbs.textContent = '£368.00';
+  const vbs = document.getElementById('t-virt-bank-sub');
+  if(vbs) vbs.textContent = '£534.50';
 
-  // ── Bet limit tile ──
+  // ── Bet strip ──
   const bl = document.getElementById('tbetlimit');
-  if(bl) bl.innerHTML = '<div class="t-bet-lbl">Bets Today</div>'
-    + '<div class="t-bet-val">2 <span class="t-muted">/ 3</span></div>';
+  if(bl) bl.innerHTML =
+    '<div style="display:flex;align-items:center;gap:5px;padding:5px 2px;">'
+    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);">Last 5</span>'
+    +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#3b82f6;"></span>'
+    +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#3b82f6;"></span>'
+    +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#ea580c;"></span>'
+    +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.08);"></span>'
+    +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.08);"></span>'
+    +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#3b82f6;margin-left:6px;"></span>'
+    +'<span style="font-size:9px;color:var(--mut);">Real</span>'
+    +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#ea580c;margin-left:4px;"></span>'
+    +'<span style="font-size:9px;color:var(--mut);">Virtual</span>'
+    +'<span style="flex:1;"></span>'
+    +'<span style="font-size:11px;color:var(--mut);font-weight:600;">3 of 5 bets today</span>'
+    +'</div>';
 
   // ── Check-in ──
   const ci = document.getElementById('tcin');
-  if(ci) ci.innerHTML = '<div class="t-checkin">'
-    + '<div><div class="t-checkin-lbl">✓ Checked in</div>'
-    + '<div class="t-body">Looking for a well-treated handicapper on decent ground</div></div>'
-    + '<span class="t-checkin-emoji">🙂</span></div>';
+  if(ci) ci.innerHTML =
+    '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:9px;">'
+    +'<span style="font-size:16px;flex-shrink:0;">🙂</span>'
+    +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#4ade80;">Good mindset</div>'
+      +'<div style="font-size:12px;color:var(--txt);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Watching the Gosden runners — looks a strong day at Ascot</div>'
+    +'</div>'
+    +'</div>';
 
-  // ── Combined Running Today alert (demo) ──
+  // ── Running Today — iconic horses / real races ──
   const ta = document.getElementById('t-today-alerts');
   if(ta){
     ta.style.display = 'block';
     ta.innerHTML = '<div class="t-alert-pur">'
-      + '<div class="t-wl-hdr">'
-        + '<div class="t-alert-lbl-pur">🏇 Running Today</div>'
-      + '</div>'
+      + '<div class="t-wl-hdr"><div class="t-alert-lbl-pur">🏇 Running Today</div></div>'
       + [
-          {horse:'Midnight Envoy', course:'Ascot',     time:'14:30', jockey:'F. Dettori', race:'Copper Horse Stakes', edge:4, mr:92, or:88},
-          {horse:'Thistle Down',   course:'York',       time:'16:10', jockey:'T. Marquand', race:'Dante Stakes',      edge:3, mr:85, or:82},
-          {horse:'Velvet Sunrise', course:'Newmarket', time:'15:45', jockey:'R. Moore',    race:'July Stakes',        edge:0, mr:0,  or:0},
+          // Frankel — 2000 Guineas, Newmarket 2011
+          {horse:'Frankel',       course:'Newmarket', time:'14:00', jockey:'T. Queally',   race:"2000 Guineas (Group 1)",        edge:8, mr:140, or:132},
+          // Enable — King George VI & QE Stakes, Ascot 2017
+          {horse:'Enable',        course:'Ascot',     time:'15:45', jockey:'F. Dettori',   race:'King George VI & QE Stakes (G1)',edge:5, mr:128, or:123},
+          // Kauto Star — Cheltenham Gold Cup 2009
+          {horse:'Kauto Star',    course:'Cheltenham',time:'15:20', jockey:'R. Walsh',      race:'Cheltenham Gold Cup (Grade 1)', edge:0, mr:0,   or:0},
         ].map(function(a){
           const edgeBadge=a.edge>0
             ?'<span class="t-edge-badge" style="margin-left:7px;">MR '+a.mr+' · OR '+a.or+' · +'+a.edge+'</span>'
             :'';
           return '<div class="t-alert-row-pur">'
-            + '<div class="t-row-sb-gap">'
-              + '<div class="t-flex-info">'
-                + '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">'
-                  + '<span class="t-horse-name">'+a.horse+'</span>'+edgeBadge
-                + '</div>'
-                + '<div class="t-muted">'+a.time+' · '+a.course+' · '+a.race+'</div>'
-                + '<div class="t-jockey">J: '+fmtJockey(a.jockey)+'</div>'
-              + '</div>'
-              + '<div class="t-flex-col-end">'
-                + '<button class="t-review-btn">Review ✍️</button>'
-                + '<button class="t-race-btn">Race 🏇</button>'
-                + '<button class="t-profile-btn">Profile →</button>'
-              + '</div>'
-            + '</div>'
-          + '</div>';
+            +'<div class="t-row-sb-gap">'
+              +'<div class="t-flex-info">'
+                +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">'
+                  +'<span class="t-horse-name">'+a.horse+'</span>'+edgeBadge
+                +'</div>'
+                +'<div class="t-muted">'+a.time+' · '+a.course+' · '+a.race+'</div>'
+                +'<div class="t-jockey">J: '+fmtJockey(a.jockey)+'</div>'
+              +'</div>'
+              +'<div class="t-flex-col-end">'
+                +'<button class="t-review-btn">Review ✍️</button>'
+                +'<button class="t-race-btn">Race 🏇</button>'
+                +'<button class="t-profile-btn">Profile →</button>'
+              +'</div>'
+            +'</div>'
+          +'</div>';
         }).join('')
-      + '</div>';
+      +'</div>';
   }
 
   // ── Next race ──
@@ -80,32 +102,47 @@ function _showTodayDemo(){
   const nrc = document.getElementById('t-next-race-content');
   if(nr && nrc){
     nr.style.display = 'block';
-    nrc.innerHTML = '<div class="t-alert-blu">'
-      + '<div class="t-alert-lbl-blu">⏰ Next Race</div>'
-      + '<div class="row-sb">'
-      + '<div><div class="t-next-title">Ascot — 14:30</div>'
-      + '<div class="mm">Copper Horse Stakes · 12 runners</div></div>'
-      + '<div class="t-next-count" style="color:var(--blu);">8m</div>'
-      + '</div></div>';
+    nrc.innerHTML =
+      '<div class="t-next-card" style="border-left:3px solid #f87171;">'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div class="t-next-title">14:00 · Newmarket</div>'
+          +'<div class="mm" style="margin-top:2px;">2000 Guineas (Group 1)</div>'
+          +'<div class="mm" style="margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;">'
+            +'<span>14 runners</span><span>· 1m</span><span>· Good to Firm</span>'
+          +'</div>'
+        +'</div>'
+        +'<div style="text-align:right;flex-shrink:0;">'
+          +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:20px;font-weight:900;line-height:1.1;color:#f87171;">8m</div>'
+          +'<div style="font-size:10px;opacity:.6;letter-spacing:.05em;text-transform:uppercase;">away</div>'
+          +'<div class="t-next-cta">Racecards →</div>'
+        +'</div>'
+      +'</div>';
   }
 
-  // ── Today's bets ──
+  // ── Today's bets — real historical results ──
   const le = document.getElementById('tbets');
   if(le){
     le.innerHTML = [
-      {horse:'Midnight Envoy', track:'Ascot',    time:'14:30', odds:'7/2',  stake:10, result:'win',     returns:45,  type:'real'},
-      {horse:'Velvet Sunrise',  track:'Newmarket',time:'15:45', odds:'5/1',  stake:5,  result:'loss',    returns:0,   type:'real'},
-      {horse:'Thistle Down',    track:'York',     time:'16:10', odds:'9/4',  stake:8,  result:'pending', returns:0,   type:'virt'},
+      // Frankel 2000 Guineas 2011 — SP 1/2, Tom Queally
+      {horse:"Frankel",       track:'Newmarket', time:'14:00', odds:'1/2',  stake:20, result:'win',     returns:30,   type:'real',  race:'2000 Guineas'},
+      // Sea The Stars Epsom Derby 2009 — SP 11/4, Mick Kinane
+      {horse:'Sea The Stars', track:'Epsom',     time:'15:00', odds:'11/4', stake:10, result:'win',     returns:37.5, type:'real',  race:'Epsom Derby'},
+      // Enable King George 2017 — SP 8/13, Frankie Dettori
+      {horse:'Enable',        track:'Ascot',     time:'15:45', odds:'8/13', stake:15, result:'pending', returns:0,    type:'virt',  race:'King George'},
     ].map(function(b){
       const isV=b.type==='virt';
       const p=b.result==='win'?b.returns-b.stake:b.result==='loss'?-b.stake:null;
       const bgMap={win:'bw1',loss:'bl1',pending:'bpend'};
       return '<div class="mb '+(b.result)+'" style="border-left-color:'+(isV?'var(--ora)':'')+';cursor:pointer;">'
-        +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span class="t-virt-lbl">VIRT</span>':'')+'</div>'
-        +'<div class="mm">'+b.track+' · '+b.time+' · <span style="font-family:var(--font-ui);">'+b.odds+'</span></div></div>'
-        +'<div class="mbr"><span class="bdg '+(bgMap[b.result]||'bpend')+'">'+b.result+'</span>'
-        +'<div class="mp '+(p===null?'':p>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p===null?'—':fmt(p))+'</div></div>'
-        +'</div>';
+        +'<div class="mbl">'
+          +'<div class="mh">'+b.horse+(isV?' <span class="t-virt-lbl">VIRT</span>':'')+'</div>'
+          +'<div class="mm">'+b.track+' · '+b.time+' · '+b.race+' · <span style="font-family:var(--font-ui);">'+b.odds+'</span></div>'
+        +'</div>'
+        +'<div class="mbr">'
+          +'<span class="bdg '+(bgMap[b.result]||'bpend')+'">'+b.result+'</span>'
+          +'<div class="mp '+(p===null?'':p>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p===null?'—':fmt(p))+'</div>'
+        +'</div>'
+      +'</div>';
     }).join('');
   }
 }

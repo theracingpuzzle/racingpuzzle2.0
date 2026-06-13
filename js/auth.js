@@ -109,6 +109,41 @@ function authHideLogin() {
   if (el) el.style.display = 'none';
 }
 
+// ── Profile modal ─────────────────────────────────────────────────────────────
+function profileOpen() {
+  const overlay = document.getElementById('profile-overlay');
+  if (!overlay) return;
+
+  // Populate email + avatar initials
+  const email    = window._rpUserEmail || '—';
+  const emailEl  = document.getElementById('profile-email');
+  const avatarEl = document.getElementById('profile-avatar');
+  if (emailEl) emailEl.textContent = email;
+  if (avatarEl) avatarEl.textContent = email && email !== '—'
+    ? email.charAt(0).toUpperCase()
+    : '?';
+
+  // Populate stats from global state D
+  const betsEl     = document.getElementById('profile-stat-bets');
+  const profilesEl = document.getElementById('profile-stat-profiles');
+  const bankEl     = document.getElementById('profile-stat-bank');
+  if (typeof D !== 'undefined') {
+    if (betsEl)     betsEl.textContent     = (D.bets || []).length;
+    if (profilesEl) profilesEl.textContent = (D.watchlist || []).length;
+    if (bankEl) {
+      const b = (D.bank && D.bank.current) || 0;
+      bankEl.textContent = '£' + (b % 1 === 0 ? b : b.toFixed(0));
+    }
+  }
+
+  overlay.style.display = 'flex';
+}
+
+function profileClose() {
+  const overlay = document.getElementById('profile-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
 // ── Form submit handler ───────────────────────────────────────────────────────
 async function authSubmit(mode) {
   const email    = (document.getElementById('auth-email')   || {}).value.trim();

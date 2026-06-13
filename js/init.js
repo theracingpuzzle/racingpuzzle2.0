@@ -27,9 +27,14 @@ async function bootApp() {
     }
   }
 
-  // Show the signed-in user email in settings (if element exists)
-  const emailEl = document.getElementById('auth-user-email');
-  if (emailEl && window._rpUserEmail) emailEl.textContent = window._rpUserEmail;
+  // Show user initial in the header profile button
+  if (window._rpUserEmail) {
+    const btn = document.getElementById('hdr-profile-btn');
+    if (btn) {
+      const initial = window._rpUserEmail.charAt(0).toUpperCase();
+      btn.innerHTML = '<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:14px;font-weight:900;color:var(--gld2);">' + initial + '</span>';
+    }
+  }
 
   goTo(0, true);
   updHdr();

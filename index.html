@@ -43,7 +43,7 @@ RACING <span class="logo-accent">PUZZLE</span>
           <span id="hvbank-wrap" class="hdr-bal-val" style="color:#fb923c;">£<span id="hvbank">0.00</span><span id="hvbank-arrow" class="hdr-bal-arrow"></span></span>
         </div>
       </div>
-      <button class="hdr-profile-btn" onclick="navTo('settings')" title="Profile &amp; Settings">
+      <button class="hdr-profile-btn" id="hdr-profile-btn" onclick="profileOpen()" title="Account &amp; Profile">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="10" cy="7" r="3"/>
           <path d="M3 18c0-3.866 3.134-7 7-7s7 3.134 7 7"/>
@@ -408,22 +408,6 @@ RACING <span class="logo-accent">PUZZLE</span>
         </div>
         <div id="cp-set">
 
-          <!-- ── Account ── -->
-          <div class="blk">
-            <div class="bttl">👤 Account</div>
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
-              <div>
-                <div style="font-size:12px;color:var(--mut);margin-bottom:2px;">Signed in as</div>
-                <div id="auth-user-email" style="font-size:14px;font-weight:600;color:var(--txt);word-break:break-all;">—</div>
-              </div>
-              <button class="btn bout" onclick="authSignOut()" style="white-space:nowrap;flex-shrink:0;">Sign Out</button>
-            </div>
-            <div style="border-top:1px solid var(--bdr);padding-top:14px;">
-              <div style="font-size:12px;color:var(--mut);margin-bottom:10px;">Permanently delete your account and all associated data. This cannot be undone.</div>
-              <button class="btn bdng" onclick="authDeleteAccountPrompt()" id="del-acct-btn">🗑 Delete Account</button>
-            </div>
-          </div>
-
           <!-- ── Notifications ── -->
           <div class="blk">
             <div class="bttl">🔔 Notifications</div>
@@ -740,6 +724,67 @@ RACING <span class="logo-accent">PUZZLE</span>
     <div style="padding:14px 20px;border-top:1px solid var(--bdr);flex-shrink:0;">
       <button onclick="document.getElementById('tos-overlay').style.display='none'" style="width:100%;padding:13px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Close</button>
     </div>
+  </div>
+</div>
+
+<!-- ── USER PROFILE MODAL ── -->
+<div id="profile-overlay" style="display:none;position:fixed;inset:0;z-index:10003;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;" onclick="if(event.target===this)profileClose()">
+  <div style="width:100%;max-width:520px;background:var(--sur);border-radius:20px 20px 0 0;overflow:hidden;">
+
+    <!-- Drag handle -->
+    <div style="display:flex;justify-content:center;padding:12px 0 0;">
+      <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);"></div>
+    </div>
+
+    <!-- Avatar + email -->
+    <div style="text-align:center;padding:20px 24px 18px;">
+      <div id="profile-avatar" style="width:64px;height:64px;border-radius:50%;background:var(--navy);border:2px solid rgba(255,255,255,.15);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:26px;font-weight:900;color:var(--gld2);">?</div>
+      <div style="font-size:12px;color:var(--mut);margin-bottom:4px;letter-spacing:.05em;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Signed in as</div>
+      <div id="profile-email" style="font-size:15px;font-weight:600;color:var(--txt);word-break:break-all;">—</div>
+    </div>
+
+    <!-- Stats strip -->
+    <div style="display:flex;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">
+      <div style="flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--bdr);">
+        <div id="profile-stat-bets" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:900;color:var(--txt);">0</div>
+        <div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Bets</div>
+      </div>
+      <div style="flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--bdr);">
+        <div id="profile-stat-profiles" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:900;color:var(--txt);">0</div>
+        <div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Profiles</div>
+      </div>
+      <div style="flex:1;padding:14px 8px;text-align:center;">
+        <div id="profile-stat-bank" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:900;color:var(--txt);">£0</div>
+        <div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Bank</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="padding:16px 20px;">
+      <button onclick="authSignOut()" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--txt);text-align:left;cursor:pointer;margin-bottom:10px;font-family:inherit;">
+        <span style="font-size:18px;flex-shrink:0;">🚪</span>
+        <div style="flex:1;">
+          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;">Sign Out</div>
+          <div style="font-size:11px;color:var(--mut);margin-top:1px;">You'll need to sign back in to access your data</div>
+        </div>
+        <span style="color:var(--mut);font-size:16px;">›</span>
+      </button>
+
+      <button onclick="profileClose();authDeleteAccountPrompt();" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.05);color:var(--txt);text-align:left;cursor:pointer;font-family:inherit;">
+        <span style="font-size:18px;flex-shrink:0;">🗑️</span>
+        <div style="flex:1;">
+          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#ef4444;">Delete Account</div>
+          <div style="font-size:11px;color:var(--mut);margin-top:1px;">Permanently removes all your data</div>
+        </div>
+        <span style="color:rgba(239,68,68,.4);font-size:16px;">›</span>
+      </button>
+    </div>
+
+    <!-- Close -->
+    <div style="padding:0 20px 28px;">
+      <button onclick="profileClose()" style="width:100%;padding:13px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">Close</button>
+    </div>
+
   </div>
 </div>
 

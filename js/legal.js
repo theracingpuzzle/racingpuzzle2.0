@@ -177,56 +177,52 @@ async function authDeleteAccount() {
   if (errEl) errEl.textContent = '';
 
   try {
-    const uid   = SUPA_USER_ID;
     const token = _rpToken();
-    const base  = SUPA_URL + '/rest/v1/';
-    const hdrs  = { 'apikey': SUPA_ANON, 'Authorization': 'Bearer ' + token };
+    const hdrs  = { 'apikey': SUPA_ANON, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
 
-    // Delete all user rows from every table in dependency order
-    const tables = [
-      'profile_observations',
-      'profile_targets',
-      'horse_reviews',
-      'horse_profiles',
-      'bets',
-      'daily_log',
-      'rules',
-      'settings',
-      'bank'
-    ];
+    // ── Step 1: Call the Edge Function — deletes data rows + auth user server-side ──
+    // The Edge Function uses the service role key so it can call auth.admin.deleteUser.
+    const fnUrl = SUPA_URL + '/functions/v1/delete-user';
+    const fnRes = await fetch(fnUrl, { method: 'POST', headers: hdrs });
 
-    for (var i = 0; i < tables.length; i++) {
-      await fetch(base + tables[i] + '?user_id=eq.' + encodeURIComponent(uid), {
-        method: 'DELETE',
-        headers: hdrs
-      });
+    if (!fnRes.ok) {
+      // Edge Function not yet deployed — fall back to client-side data deletion only
+      if (fnRes.status === 404 || fnRes.status === 401) {
+        await _authDeleteDataOnly(token, hdrs);
+      } else {
+        const body = await fnRes.json().catch(function(){ return {}; });
+        throw new Error(body.error || ('Server error ' + fnRes.status));
+      }
     }
 
-    // Delete the Supabase Auth user
-    // Note: deleteUser requires the service role key on the server side.
-    // Client-side we call the edge function or rely on Supabase's own user deletion.
-    // The best client-available approach is to sign out — data is already gone.
-    // If you have a Supabase edge function for user deletion, call it here instead.
+    // ── Step 2: Sign out and wipe local state ────────────────────────────────
     if (_rpAuthClient && _rpAuthClient.auth) {
-      // This works when email provider is configured with "Secure email change" off
-      // or when using the Supabase admin API. For full deletion, set up an edge function.
-      try {
-        await _rpAuthClient.auth.admin.deleteUser(uid);
-      } catch(_) {
-        // admin.deleteUser not available client-side — sign out and clear data
-      }
       await _rpAuthClient.auth.signOut();
     }
-
-    // Wipe local state
     localStorage.clear();
-    // Redirect to reload — auth screen will appear
     window.location.reload();
 
   } catch(e) {
     if (errEl) { errEl.style.color = '#ef4444'; errEl.textContent = 'Error: ' + e.message; }
     if (btn) { btn.disabled = false; btn.textContent = 'Delete My Account'; btn.style.opacity = ''; }
   }
+}
+
+// Fallback: delete all data rows client-side when Edge Function isn't deployed yet
+async function _authDeleteDataOnly(token, hdrs) {
+  const uid  = SUPA_USER_ID;
+  const base = SUPA_URL + '/rest/v1/';
+  const tables = [
+    'profile_observations', 'profile_targets', 'horse_reviews',
+    'horse_profiles', 'bets', 'daily_log', 'rules', 'settings', 'bank'
+  ];
+  for (var i = 0; i < tables.length; i++) {
+    await fetch(base + tables[i] + '?user_id=eq.' + encodeURIComponent(uid), {
+      method: 'DELETE', headers: hdrs
+    });
+  }
+  // Can't delete auth user without service role — sign out is the best we can do
+  if (_rpAuthClient && _rpAuthClient.auth) await _rpAuthClient.auth.signOut();
 }
 
 // Wire the disabled state to the button opacity

@@ -603,12 +603,20 @@ function openLogbetOverlay(mode, prefill){
   const accentCol=mode==='virt'?'#fb923c':'#60a5fa';
   if(mode==='virt'){
     if(typeEl){typeEl.textContent='Virtual Bet';typeEl.style.color=accentCol;}
-    if(titleEl){titleEl.textContent='Virtual Bet';titleEl.style.color=accentCol;}
+    if(titleEl){titleEl.textContent=prefill&&prefill.horse?prefill.horse:'Virtual Bet';titleEl.style.color=accentCol;}
     if(hdr)hdr.style.borderBottom='none';
   } else {
     if(typeEl){typeEl.textContent='Real Bet';typeEl.style.color=accentCol;}
-    if(titleEl){titleEl.textContent='Real Bet';titleEl.style.color=accentCol;}
+    if(titleEl){titleEl.textContent=prefill&&prefill.horse?prefill.horse:'Log Bet';titleEl.style.color=accentCol;}
     if(hdr)hdr.style.borderBottom='none';
+  }
+  // Show horse subtitle (time · course) if prefilled
+  const subEl=document.getElementById('lbo-horse-sub');
+  if(subEl&&prefill&&prefill.horse){
+    subEl.textContent=(prefill.time||'')+(prefill.time&&prefill.course?' · ':''+(prefill.course||''));
+    subEl.style.display='block';
+  } else if(subEl){
+    subEl.style.display='none';
   }
   const accentBar=document.getElementById('lbo-accent-bar');
   if(accentBar)accentBar.style.background=accentCol;

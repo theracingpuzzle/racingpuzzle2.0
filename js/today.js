@@ -161,40 +161,106 @@ function renderNextRace(){
   const el=document.getElementById('t-next-race');
   const content=document.getElementById('t-next-race-content');
   if(!el||!content)return;
-  // Use races from the swipe card if already loaded, otherwise skip
-  const races=rcSwCurrentRaces||[];
-  if(!races.length){el.style.display='none';return;}
+
+  // Prefer the shared cache; fall back to rcSwCurrentRaces
+  const raw=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))
+    || (typeof rcSwCurrentRaces!=='undefined'?rcSwCurrentRaces:[]);
+  if(!raw||!raw.length){el.style.display='none';return;}
+
+  // Flatten meetings → individual races (same logic as rcSwRenderTime)
+  const flat=[];
+  raw.forEach(function(meeting){
+    const course=meeting.course||meeting.venue||'Unknown';
+    if(meeting.runners){
+      // Meeting IS the race
+      flat.push({race:meeting,course:course});
+    } else {
+      (meeting.races||[]).forEach(function(r){
+        flat.push({race:r,course:course});
+      });
+    }
+  });
+  if(!flat.length){el.style.display='none';return;}
+
+  // Use td() for the date string (local date, avoids UTC offset issues in BST)
+  const todayStr=td();
   const now=new Date();
-  const todayStr=now.toISOString().slice(0,10);
-  // Split races into upcoming (future) and past
-  const allTimed=races.map(function(r){
-    const t=r.off||r.off_time||r.time||'';
+
+  // Build timed list using timeToMins for consistency with racecards
+  const allTimed=flat.map(function(item){
+    const t=item.race.off||item.race.off_time||item.race.time||'';
     if(!t)return null;
-    const dt=new Date(todayStr+'T'+t+':00');
-    if(isNaN(dt))return null;
-    return{race:r,dt,diff:Math.round((dt-now)/60000)};
+    // Parse to a full Date using local date + time string
+    const parts=t.split(':');
+    if(parts.length<2)return null;
+    let h=parseInt(parts[0],10),m=parseInt(parts[1],10);
+    // Apply PM convention: before 09:30 = evening
+    if(h<9||(h===9&&m<30))h+=12;
+    const dt=new Date(todayStr+'T'+(String(h).padStart(2,'0'))+':'+String(m).padStart(2,'0')+':00');
+    if(isNaN(dt.getTime()))return null;
+    return{race:item.race,course:item.course,dt,diff:Math.round((dt-now)/60000)};
   }).filter(Boolean);
-  const upcoming=allTimed.filter(function(r){return r.diff>0;}).sort(function(a,b){return a.diff-b.diff;});
-  const past=allTimed.filter(function(r){return r.diff<=0;}).sort(function(a,b){return b.diff-a.diff;});
-  // Always show: next upcoming race, or if all done show the most recent race
+
+  if(!allTimed.length){el.style.display='none';return;}
+
+  const upcoming=allTimed.filter(function(r){return r.diff>-5;}).sort(function(a,b){return a.diff-b.diff;});
+  const past=allTimed.filter(function(r){return r.diff<=-5;}).sort(function(a,b){return b.diff-a.diff;});
+
+  // Show the soonest upcoming; if all races finished show the most recent
   const next=upcoming.length?upcoming[0]:past.length?past[0]:null;
   if(!next){el.style.display='none';return;}
+
   const mins=next.diff;
-  const hrs=Math.floor(Math.abs(mins)/60);
-  const m=Math.abs(mins)%60;
-  const countdown=mins>0?(mins<1?'Starting now':hrs>0?hrs+'h '+m+'m':m+'m'):'Result pending';
-  const course=next.race.course||next.race.venue||'';
-  const name=next.race.race_name||next.race.name||'';
-  const runners=(next.race.runners||[]).length;
-  const urgency=mins<=0?'var(--mut)':mins<30?'var(--red)':mins<60?CLR_WATCH:'var(--grn)';
+  const absMins=Math.abs(mins);
+  const hrs=Math.floor(absMins/60);
+  const remMins=absMins%60;
+
+  let countdown,countdownSub='';
+  if(mins<=-5){
+    countdown='Result pending';
+  } else if(mins<=2){
+    countdown='Starting now';
+  } else if(hrs>0){
+    countdown=hrs+'h '+remMins+'m';
+    countdownSub='away';
+  } else {
+    countdown=remMins+'m';
+    countdownSub='away';
+  }
+
+  // Colour: red <15m, amber <45m, green otherwise, grey if past
+  const urgency=mins<=-5?'var(--mut)':mins<=15?'var(--red)':mins<=45?'var(--gld)':'var(--grn)';
+
+  const course=next.course;
+  const raceName=next.race.race_name||next.race.name||next.race.title||'';
+  const raceTime=next.race.off||next.race.off_time||next.race.time||'';
+  const runners=(next.race.runners||next.race.horses||[]).filter(function(r){
+    return !r.non_runner&&!r.isNonRunner;
+  }).length;
+  const dist=typeof formatDist==='function'
+    ?formatDist(next.race.distance_round||next.race.distance_f||next.race.distance||next.race.dist||''):'';
+  const going=next.race.going||next.race.going_description||'';
+
   el.style.display='block';
-  content.innerHTML='<div class="t-next-card" style="border-left:3px solid '+urgency+';" onclick="goTo(1)">'
-    +'<div><div class="t-next-title">'+(next.race.off||next.race.time||'')+' '+course+'</div>'
-    +'<div class="mm">'+name+(runners?' · '+runners+' runners':'')+'</div></div>'
-    +'<div class="t-next-count" style="color:'+urgency+';"><div>'+countdown+'</div>'
-    +'<div class="t-next-cta">Racecards →</div></div>'
+  content.innerHTML=
+    '<div class="t-next-card" style="border-left:3px solid '+urgency+';cursor:pointer;" onclick="goTo(1)">'
+      +'<div style="flex:1;min-width:0;">'
+        +'<div class="t-next-title">'+raceTime+(raceTime&&course?' · ':'')+course+'</div>'
+        +(raceName?'<div class="mm" style="margin-top:2px;">'+raceName+'</div>':'')
+        +'<div class="mm" style="margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;">'
+          +(runners?'<span>'+runners+' runners</span>':'')
+          +(dist?'<span>· '+dist+'</span>':'')
+          +(going?'<span>· '+going+'</span>':'')
+        +'</div>'
+      +'</div>'
+      +'<div class="t-next-count" style="color:'+urgency+';text-align:right;flex-shrink:0;">'
+        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:20px;font-weight:900;line-height:1.1;">'+countdown+'</div>'
+        +(countdownSub?'<div style="font-size:10px;opacity:.6;letter-spacing:.05em;text-transform:uppercase;">'+countdownSub+'</div>':'')
+        +'<div class="t-next-cta">Racecards →</div>'
+      +'</div>'
     +'</div>';
-  // Refresh every minute
+
+  // Refresh every minute so the countdown ticks
   if(window._nextRaceTimer)clearTimeout(window._nextRaceTimer);
   window._nextRaceTimer=setTimeout(renderNextRace,60000);
 }

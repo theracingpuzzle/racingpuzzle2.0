@@ -623,7 +623,7 @@ function openLogbetOverlay(mode, prefill){
     '<div class="em-body" style="padding-bottom:100px;">'
     // Section 1 — Bet Details
     +'<div class="em-section">'
-      +'<div class="em-sec-hdr"><span class="em-sec-num">1</span><span class="em-sec-title">Bet Details</span></div>'
+      +'<div class="em-sec-hdr" style="background:#1d4ed8;border-bottom-color:rgba(255,255,255,.15);"><span class="em-sec-num" style="background:rgba(255,255,255,.2);color:#fff;">1</span><span class="em-sec-title" style="color:#fff;">Bet Details</span></div>'
       +'<div class="em-sec-body">'
         +'<div class="g2">'
           +'<div class="fg"><label>Horse</label><input type="text" id="lbo-f-horse" autocomplete="off" value="'+(prefill&&prefill.horse?_escAttr(prefill.horse):'')+'"></div>'
@@ -649,7 +649,7 @@ function openLogbetOverlay(mode, prefill){
     +'</div>'
     // Section 2 — Result (optional — can settle now or leave pending)
     +'<div class="em-section">'
-      +'<div class="em-sec-hdr"><span class="em-sec-num">2</span><span class="em-sec-title">Result <span style="font-weight:400;color:var(--mut);font-size:11px;">(optional — settle later)</span></span></div>'
+      +'<div class="em-sec-hdr" style="background:#ea580c;border-bottom-color:rgba(255,255,255,.15);"><span class="em-sec-num" style="background:rgba(255,255,255,.2);color:#fff;">2</span><span class="em-sec-title" style="color:#fff;">Result <span style="font-weight:400;color:rgba(255,255,255,.65);font-size:11px;">(optional — settle later)</span></span></div>'
       +'<div class="em-sec-body">'
         +'<div class="g2">'
           +'<div class="fg"><label>Result</label><select id="lbo-f-result" onchange="_lboResChange()"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>'

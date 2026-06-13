@@ -503,8 +503,8 @@ function _betFlowShowChecklist(){
     +`<div style="position:sticky;bottom:0;background:var(--sur);border-top:1px solid var(--bdr);padding:12px 18px env(safe-area-inset-bottom,16px);flex-shrink:0;">`
       +`<div id="_bflow-rec" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:12px;font-weight:700;color:var(--mut);margin-bottom:10px;min-height:18px;letter-spacing:.03em;"></div>`
       +`<div style="display:flex;gap:8px;">`
-        +`<button id="_bflow-btn-real" onclick="_betFlowProceed('real')" style="flex:1;padding:15px 10px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;">💷 Real Bet</button>`
-        +`<button id="_bflow-btn-virt" onclick="_betFlowProceed('virt')" style="flex:1;padding:15px 10px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;">🏦 Virtual</button>`
+        +`<button id="_bflow-btn-real" onclick="_betFlowProceed('real')" style="flex:1;padding:15px 10px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;">Real Bet</button>`
+        +`<button id="_bflow-btn-virt" onclick="_betFlowProceed('virt')" style="flex:1;padding:15px 10px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;">Virtual</button>`
       +`</div>`
     +`</div>`;
 }

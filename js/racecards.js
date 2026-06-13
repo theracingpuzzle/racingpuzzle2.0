@@ -577,75 +577,189 @@ function closePrebetOverlay(){
   _pendingRCBet=null;
 }
 
+// ─── LOG BET OVERLAY — edit-modal style ───────────────────────────────────────
+// Renders a form identical in layout to #emod (the edit bet screen).
+// Pre-fills from `prefill` ({horse,course,time,jockey,trainer}) and the
+// bet-flow state for source/mode.  Saves via _lboSave().
+
 function openLogbetOverlay(mode, prefill){
   const overlay=document.getElementById('logbet-overlay');
-  const src=document.getElementById('c_LOGBET_OLD');
-  if(src){
-    src.style.display='block';
-    src.style.position='static';
-    src.style.height='auto';
-    src.style.overflow='visible';
-    // Hide old card header (Record label, title, Real/Virtual toggle)
-    const cin=src.querySelector('.cin');
-    if(cin){const hdr=cin.children[0];if(hdr)hdr.style.display='none';}
-    // Hide bank tiles in both forms
-    ['lb-real-bank-amt','vb-mini-amt'].forEach(function(id){
-      const el=document.getElementById(id);
-      if(el){const tile=el.closest('.g2,div[style*="grid"]')||el.parentElement.parentElement;if(tile)tile.style.display='none';}
-    });
-    const tgt=document.getElementById('lbo-content');
-    if(tgt){tgt.style.paddingBottom='90px';tgt.innerHTML='';tgt.appendChild(src);}
-  }
-  // Header colouring
+  if(!overlay)return;
+  const accentCol=mode==='virt'?'#fb923c':'#60a5fa';
+  const typeLabel=mode==='virt'?'Virtual Bet':'Real Bet';
+
+  // ── Update sticky header elements ──
   const typeEl=document.getElementById('lbo-type-lbl');
   const titleEl=document.getElementById('lbo-title');
-  const hdr=document.getElementById('lbo-header');
-  const accentCol=mode==='virt'?'#fb923c':'#60a5fa';
-  if(mode==='virt'){
-    if(typeEl){typeEl.textContent='Virtual Bet';typeEl.style.color=accentCol;}
-    if(titleEl){titleEl.textContent=prefill&&prefill.horse?prefill.horse:'Virtual Bet';titleEl.style.color=accentCol;}
-    if(hdr)hdr.style.borderBottom='none';
-  } else {
-    if(typeEl){typeEl.textContent='Real Bet';typeEl.style.color=accentCol;}
-    if(titleEl){titleEl.textContent=prefill&&prefill.horse?prefill.horse:'Log Bet';titleEl.style.color=accentCol;}
-    if(hdr)hdr.style.borderBottom='none';
-  }
-  // Show horse subtitle (time · course) if prefilled
-  const subEl=document.getElementById('lbo-horse-sub');
-  if(subEl&&prefill&&prefill.horse){
-    subEl.textContent=(prefill.time||'')+(prefill.time&&prefill.course?' · ':''+(prefill.course||''));
-    subEl.style.display='block';
-  } else if(subEl){
-    subEl.style.display='none';
-  }
   const accentBar=document.getElementById('lbo-accent-bar');
+  const subEl=document.getElementById('lbo-horse-sub');
+  if(typeEl){typeEl.textContent=typeLabel;typeEl.style.color=accentCol;}
+  if(titleEl){titleEl.textContent=prefill&&prefill.horse?prefill.horse:'Log Bet';titleEl.style.color=accentCol;}
   if(accentBar)accentBar.style.background=accentCol;
-  setLBMode(mode);
-  renderLogBetCard();
-  // Pre-fill from pending
-  const _fill=prefill||_pendingRCBet;
-  if(_fill){
-    const pre=mode==='real'?'lb':'vb';
-    setTimeout(function(){
-      const he=document.getElementById(pre+'h');if(he&&_fill.horse)he.value=_fill.horse;
-      const te=document.getElementById(pre+'t')||document.getElementById('lbt');if(te&&_fill.course)te.value=_fill.course;
-      const ti=document.getElementById(pre+'time');if(ti&&_fill.time)ti.value=_fill.time;
-      const je=document.getElementById(pre+'jockey');if(je&&_fill.jockey)je.value=_fill.jockey;
-      const tr=document.getElementById(pre+'trainer');if(tr&&_fill.trainer)tr.value=_fill.trainer;
-      if(mode==='real')calcLiveStake();else calcVirtStake();
-    },80);
+  if(subEl){
+    const parts=[];
+    if(prefill&&prefill.time)parts.push(prefill.time);
+    if(prefill&&prefill.course)parts.push(prefill.course);
+    if(parts.length){subEl.textContent=parts.join(' · ');subEl.style.display='block';}
+    else subEl.style.display='none';
   }
-  // Add sticky close button at bottom if not already there
-  let closeBar=document.getElementById('lbo-close-bar');
-  if(!closeBar){
-    closeBar=document.createElement('div');
-    closeBar.id='lbo-close-bar';
-    closeBar.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:202;padding:12px 17px env(safe-area-inset-bottom,16px);background:var(--bg);border-top:1px solid var(--bdr);';
-    closeBar.innerHTML='<button onclick="_lboBackToChecklist()" class="rc-close-bar-btn">← Back to Checklist</button>';
-    document.body.appendChild(closeBar);
-  }
-  closeBar.style.display='block';
+
+  // ── Source options ──
+  const srcOpts=(function(){
+    const saved=(D.settings&&D.settings.sources&&D.settings.sources.length)?D.settings.sources:[];
+    const labels=saved.map(function(s){return typeof s==='object'?s.label:s;});
+    const all=['Own Form Study'].concat(labels.filter(function(s){return s!=='Own Form Study';}));
+    return all.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
+  })();
+
+  // Determine pre-selected source from bet flow state
+  const bfs=window._betFlowState||{};
+  const preSrc=bfs.source==='tip'?(bfs.tipSource||'Own Form Study'):'Own Form Study';
+
+  // ── Render edit-modal-style form into #lbo-content ──
+  const tgt=document.getElementById('lbo-content');
+  if(!tgt)return;
+  tgt.innerHTML=
+    '<div class="em-body" style="padding-bottom:100px;">'
+    // Section 1 — Bet Details
+    +'<div class="em-section">'
+      +'<div class="em-sec-hdr"><span class="em-sec-num">1</span><span class="em-sec-title">Bet Details</span></div>'
+      +'<div class="em-sec-body">'
+        +'<div class="g2">'
+          +'<div class="fg"><label>Horse</label><input type="text" id="lbo-f-horse" autocomplete="off" value="'+(prefill&&prefill.horse?_escAttr(prefill.horse):'')+'"></div>'
+          +'<div class="fg"><label>Track</label><input type="text" id="lbo-f-track" autocomplete="off" value="'+(prefill&&prefill.course?_escAttr(prefill.course):'')+'"></div>'
+          +'<div class="fg"><label>Time</label><input type="text" id="lbo-f-time" value="'+(prefill&&prefill.time?_escAttr(prefill.time):'')+'"></div>'
+          +'<div class="fg"><label>Odds</label><input type="text" id="lbo-f-odds" style="font-family:monospace;" placeholder="e.g. 5/1" oninput="_lboResChange()"></div>'
+          +'<div class="fg"><label>Stake (£)</label><input type="number" id="lbo-f-stake" step="0.5" min="0" oninput="_lboResChange()"></div>'
+          +'<div class="fg"><label>Type</label><select id="lbo-f-type" onchange="_lboResChange()"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>'
+          +'<div class="fg"><label>Jockey</label><input type="text" id="lbo-f-jockey" autocomplete="off" value="'+(prefill&&prefill.jockey?_escAttr(prefill.jockey):'')+'"></div>'
+          +'<div class="fg"><label>Trainer</label><input type="text" id="lbo-f-trainer" autocomplete="off" value="'+(prefill&&prefill.trainer?_escAttr(prefill.trainer):'')+'"></div>'
+        +'</div>'
+        +'<div class="fg"><label>Source</label><select id="lbo-f-source">'+srcOpts+'</select></div>'
+        +'<div class="fg"><label>Confidence</label>'
+          +'<select id="lbo-f-conf">'
+          +'<option value="1">1 — Speculative</option>'
+          +'<option value="2">2 — Interested</option>'
+          +'<option value="3" selected>3 — Solid</option>'
+          +'<option value="4">4 — Strong</option>'
+          +'<option value="5">5 — Best Bet</option>'
+          +'</select></div>'
+        +'<div class="fg"><label>Pre-Race Notes</label><textarea id="lbo-f-prenotes" style="min-height:52px" placeholder="Why are you backing this horse?"></textarea></div>'
+      +'</div>'
+    +'</div>'
+    // Section 2 — Result (optional — can settle now or leave pending)
+    +'<div class="em-section">'
+      +'<div class="em-sec-hdr"><span class="em-sec-num">2</span><span class="em-sec-title">Result <span style="font-weight:400;color:var(--mut);font-size:11px;">(optional — settle later)</span></span></div>'
+      +'<div class="em-sec-body">'
+        +'<div class="g2">'
+          +'<div class="fg"><label>Result</label><select id="lbo-f-result" onchange="_lboResChange()"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>'
+          +'<div class="fg"><label>Returns (£)</label><input type="number" id="lbo-f-returns" step="0.01" min="0" placeholder="Auto-calculated"></div>'
+        +'</div>'
+        +'<div class="fg"><label>Post-Race Notes</label><textarea id="lbo-f-postnotes" placeholder="What happened? What did I learn?" style="min-height:52px"></textarea></div>'
+      +'</div>'
+    +'</div>'
+    // Actions
+    +'<div class="em-actions">'
+      +'<button class="em-save-btn" onclick="_lboSave()" style="background:'+accentCol+';color:'+(mode==='virt'?'#141414':'#fff')+';">Log '+(mode==='virt'?'Virtual':'Real')+' Bet</button>'
+      +'<button class="em-cancel-btn" onclick="_lboBackToChecklist()">← Back</button>'
+    +'</div>'
+    +'</div>';
+
+  // Set source to match bet flow
+  setTimeout(function(){
+    const srcEl=document.getElementById('lbo-f-source');
+    if(srcEl)srcEl.value=preSrc;
+    // Auto-suggest stake from staking plan
+    const stakeEl=document.getElementById('lbo-f-stake');
+    if(stakeEl&&(!stakeEl.value||stakeEl.value==='0')){
+      const bank=mode==='virt'?(D.vBank&&D.vBank.current||500):(D.bank&&D.bank.current||0);
+      const plan=D.settings&&D.settings.stakingPlan;
+      let suggested=0;
+      if(plan==='pct'&&D.settings.stakePct&&bank>0){suggested=bank*(parseFloat(D.settings.stakePct)/100);}
+      else if(plan==='level'&&D.settings.stakeLevel){suggested=parseFloat(D.settings.stakeLevel);}
+      if(suggested>0)stakeEl.value=suggested.toFixed(2);
+    }
+  },50);
+
   overlay.style.display='block';
+}
+
+// Escape helper for HTML attribute values
+function _escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+// Auto-calculate returns when result/odds/stake change
+function _lboResChange(){
+  const res=(document.getElementById('lbo-f-result')||{value:'pending'}).value;
+  const odRaw=(document.getElementById('lbo-f-odds')||{value:''}).value.trim();
+  const stake=parseFloat((document.getElementById('lbo-f-stake')||{value:0}).value)||0;
+  const bt=(document.getElementById('lbo-f-type')||{value:'win'}).value;
+  const retEl=document.getElementById('lbo-f-returns');
+  if(!retEl)return;
+  const od=fo(odRaw);
+  if(res==='pending'||res==='void'||res==='nr'){retEl.value='';return;}
+  if(stake>0&&od>=1){retEl.value=calcReturns(res,stake,od,bt,'');}
+}
+
+// Save the new bet from the overlay form
+function _lboSave(){
+  const horse=(document.getElementById('lbo-f-horse')||{value:''}).value.trim();
+  const track=(document.getElementById('lbo-f-track')||{value:''}).value.trim();
+  const time=(document.getElementById('lbo-f-time')||{value:''}).value.trim();
+  const odRaw=(document.getElementById('lbo-f-odds')||{value:''}).value.trim();
+  const stake=parseFloat((document.getElementById('lbo-f-stake')||{value:0}).value)||0;
+  const bt=(document.getElementById('lbo-f-type')||{value:'win'}).value;
+  const jockey=(document.getElementById('lbo-f-jockey')||{value:''}).value.trim();
+  const trainer=(document.getElementById('lbo-f-trainer')||{value:''}).value.trim();
+  const source=(document.getElementById('lbo-f-source')||{value:'Own Form Study'}).value;
+  const conf=parseInt((document.getElementById('lbo-f-conf')||{value:'3'}).value)||3;
+  const preNotes=(document.getElementById('lbo-f-prenotes')||{value:''}).value.trim();
+  const result=(document.getElementById('lbo-f-result')||{value:'pending'}).value;
+  const postNotes=(document.getElementById('lbo-f-postnotes')||{value:''}).value.trim();
+  const od=fo(odRaw);
+  if(!horse){alert('Enter a horse name.');return;}
+  if(!stake||stake<=0){alert('Enter a valid stake.');return;}
+  if(!od||od<1){alert('Enter valid odds — e.g. 5/1 or EVS');return;}
+
+  // Daily limit check
+  const _limit=D.settings&&D.settings.dailyLimit?D.settings.dailyLimit:5;
+  const mode=window._betFlowState&&window._betFlowState.mode||'real';
+  if(mode==='real'){
+    const _today=D.bets.filter(function(b){return b.date===td();}).length;
+    if(_today>=_limit&&!confirm('⚠️ You\'ve reached your daily limit of '+_limit+' bets. Log anyway?'))return;
+  }
+
+  const autoRet=calcReturns(result,stake,od,bt,'');
+  const returns=parseFloat((document.getElementById('lbo-f-returns')||{value:0}).value)||autoRet;
+
+  const bet={
+    id:gid(), date:td(), horse, track, time, jockey, trainer,
+    odds:od, oddsDisplay:odRaw||String(od), stake, betType:bt,
+    conf, source, notes:preNotes, postNotes,
+    checklistScore:_pendingCkScore||0,
+    checklistAnswers:Object.assign({},_pendingCkAnswers),
+    result, returns, betBanked:false, createdAt:Date.now()
+  };
+  _pendingCkScore=0; _pendingCkAnswers={};
+
+  if(mode==='virt'){
+    const vb=getVBank();
+    // Deduct stake; add returns if already settled
+    vb.current=parseFloat((vb.current-stake).toFixed(2));
+    if(result&&result!=='pending'&&result!=='nr'&&result!=='void'){
+      vb.current=parseFloat((vb.current+returns).toFixed(2));
+    }
+    vb.bets=vb.bets||[];
+    vb.bets.push(bet);
+  } else {
+    applyBankDelta(bet,null,0);
+    D.bets.push(bet);
+  }
+
+  save(); updHdr(); refreshRacecardHighlights();
+  // Close and navigate
+  closeLogbetOverlay();
+  renderToday();
+  if(typeof renderVBMini==='function')renderVBMini();
 }
 
 function closeLogbetOverlay(){
@@ -1111,11 +1225,6 @@ function rcBetFromRunner(event, horse, course, time, jockey, trainer, raceName){
 function _rcDoLogBet(s){
   const _pf={horse:s.horse,course:s.course,time:s.time,jockey:s.jockey,trainer:s.trainer};
   openLogbetOverlay(s.mode, _pf);
-  setTimeout(function(){
-    const pre=s.mode==='real'?'lb':'vb';
-    const src=document.getElementById(pre+'src');
-    if(src)src.value=s.source==='own'?'Own Form Study':(s.tipSource||'Own Form Study');
-  },200);
 }
 
 function rcSetStatus(msg){

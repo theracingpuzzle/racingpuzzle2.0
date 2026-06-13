@@ -195,7 +195,7 @@ function getSourceOptions(){
   return all.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
 }
 function populateSourceDropdowns(){
-  ['lbsrc','vbsrc','em-source'].forEach(function(id){
+  ['lbsrc','vbsrc','em-source','lbo-f-source'].forEach(function(id){
     const el=document.getElementById(id);
     if(el)el.innerHTML=getSourceOptions();
   });
@@ -623,8 +623,11 @@ function _betFlowAutoCapture(i,c){
       // No race time available — fall back to time of day
       band={label:'Unknown',score:50};
     } else {
-      const bands=c.bands||[];
-      band=bands.slice().reverse().find(function(b){return minsUntilRace>=b.minsMin;})||{label:'After start',score:10};
+      // Bands are defined highest-first (120, 60, 20, 0).
+      // Find the highest threshold the user still meets — i.e. the first band
+      // where minsUntilRace >= minsMin, scanning from highest to lowest.
+      const bands=(c.bands||[]).slice().sort(function(a,b){return b.minsMin-a.minsMin;});
+      band=bands.find(function(b){return minsUntilRace>=b.minsMin;})||{label:'After start',score:10};
     }
     const lbl=document.getElementById('_bflow-auto-lbl-'+i);
     if(lbl){lbl.textContent=band.label;lbl.style.color=band.score>=75?'var(--grn)':band.score>=50?'var(--gld)':'var(--red)';}

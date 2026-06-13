@@ -145,27 +145,29 @@ function renderBetLimit(){
   const todayBets=D.bets.filter(b=>b.date===td());
   const todayCount=todayBets.length;
   const remaining=Math.max(0,limit-todayCount);
+  const limitCol=remaining===0?'#f87171':remaining<=1?'#fbbf24':'var(--mut)';
   // Last 5 bets (real + virtual) merged and sorted by most recent
   const realBets=(D.bets||[]).map(function(b){return Object.assign({},b,{_isVirt:false});});
   const virtBets=((D.vBank&&D.vBank.bets)||[]).map(function(b){return Object.assign({},b,{_isVirt:true});});
   const last5=[].concat(realBets,virtBets).sort(function(a,b){return(b.createdAt||0)-(a.createdAt||0);}).slice(0,5);
   const dots=Array.from({length:5},function(_,i){
     const b=last5[i]||null;
-    const col=b?(b._isVirt?'#fb923c':'#60a5fa'):'rgba(255,255,255,.08)';
-    const border=b?col:'rgba(255,255,255,.15)';
+    const col=b?(b._isVirt?'#ea580c':'#3b82f6'):'rgba(255,255,255,.08)';
     const title=b?(b.horse||'')+(b._isVirt?' · Virtual':' · Real'):'';
-    return'<span title="'+title+'" style="display:inline-block;width:11px;height:11px;border-radius:50%;margin-left:4px;background:'+col+';border:1px solid '+border+';flex-shrink:0;"></span>';
+    return'<span title="'+title+'" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+col+';flex-shrink:0;"></span>';
   }).join('');
-  const legend='<span style="font-size:9px;color:var(--mut);font-family:monospace;margin-right:4px;">last 5:</span>';
-  const col=remaining===0?'var(--red)':remaining<=1?'var(--gld)':'var(--grn)';
-  let html='<div style="display:flex;align-items:center;justify-content:flex-end;gap:0;flex-wrap:nowrap;">'
-    +legend+dots+'</div>';
-
-  html+='<div style="display:flex;align-items:center;gap:8px;margin-top:4px;justify-content:flex-end;">'
-    +'<span style="font-size:9px;color:var(--mut);font-family:monospace;display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#60a5fa;"></span>Real</span>'
-    +'<span style="font-size:9px;color:var(--mut);font-family:monospace;display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#fb923c;"></span>Virtual</span>'
+  // Single slim strip: dots · legend · spacer · bets today
+  el.innerHTML=
+    '<div style="display:flex;align-items:center;gap:5px;padding:5px 2px;">'
+      +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);">Last 5</span>'
+      +dots
+      +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#3b82f6;margin-left:6px;"></span>'
+      +'<span style="font-size:9px;color:var(--mut);">Real</span>'
+      +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#ea580c;margin-left:4px;"></span>'
+      +'<span style="font-size:9px;color:var(--mut);">Virtual</span>'
+      +'<span style="flex:1;"></span>'
+      +'<span style="font-size:11px;color:'+limitCol+';font-weight:600;">'+todayCount+' of '+limit+' bets today</span>'
     +'</div>';
-  el.innerHTML=html;
 }
 
 function calcLiveStake(){calcStakeGuide('real');}

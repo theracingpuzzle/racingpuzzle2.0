@@ -73,18 +73,21 @@ RACING <span class="logo-accent">PUZZLE</span>
               <div style="text-align:right;" id="tstreak-tile"></div>
             </div>
           </div>
-          <!-- P&L row: Real · Virtual · Bet count -->
-          <div class="g3">
-            <div class="tile">
-              <div class="tile-lbl">Real P&amp;L</div>
-              <div class="tile-val" style="color:var(--blu);" id="tpnl">£0.00</div>
+          <!-- P&L tiles + bet strip -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+            <div class="t-pnl-tile" style="border-left-color:#3b82f6;">
+              <div class="t-pnl-label" style="color:#3b82f6;">Real Today</div>
+              <div class="t-pnl-value" id="tpnl">£0.00</div>
+              <div class="t-pnl-bank">Bank: <span id="t-real-bank-sub">£0.00</span></div>
             </div>
-            <div class="tile">
-              <div class="tile-lbl">Virtual P&amp;L</div>
-              <div class="tile-val" style="color:var(--ora);" id="t-virt-pnl">£0.00</div>
+            <div class="t-pnl-tile" style="border-left-color:#ea580c;">
+              <div class="t-pnl-label" style="color:#ea580c;">Virtual Today</div>
+              <div class="t-pnl-value" id="t-virt-pnl">£0.00</div>
+              <div class="t-pnl-bank">Bank: <span id="t-virt-bank-sub">£0.00</span></div>
             </div>
-            <div class="tile" id="tbetlimit"></div>
           </div>
+          <!-- Last 5 + bet count strip -->
+          <div id="tbetlimit" style="margin-top:6px;"></div>
         </div>
 
         <!-- ── TRACK PULSE ── -->

@@ -238,3 +238,33 @@
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+/* ── P&L tiles ── */
+.t-pnl-tile {
+  background: var(--sur);
+  border: 1px solid var(--bdr);
+  border-left: 3px solid;
+  border-radius: 9px;
+  padding: 10px 12px;
+}
+.t-pnl-label {
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.t-pnl-value {
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: .5px;
+  margin-bottom: 4px;
+}
+.t-pnl-bank {
+  font-size: 11px;
+  color: var(--mut);
+  letter-spacing: .01em;
+}

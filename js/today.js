@@ -851,7 +851,12 @@ function renderToday(){
   const set=tb.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr');
   const p=set.reduce((a,b)=>a+(pnl(b)||0),0);
   const pe=document.getElementById('tpnl');
-  if(pe){pe.textContent=fmt(p);pe.style.color='var(--blu)';}
+  if(pe){
+    pe.textContent=set.length?fmt(p):'—';
+    pe.style.color=!set.length?'var(--mut)':p>0?'#4ade80':p<0?'#f87171':'var(--mut)';
+  }
+  const realBankSub=document.getElementById('t-real-bank-sub');
+  if(realBankSub)realBankSub.textContent=fp(D.bank&&D.bank.current!=null?D.bank.current:0);
 
   // ── Virtual P&L today ──
   const vb=getVBank();
@@ -859,9 +864,14 @@ function renderToday(){
   const vset=vtb.filter(b=>b.result&&b.result!=='pending'&&b.result!=='nr');
   const vp=vset.reduce((a,b)=>a+((parseFloat(b.returns)||0)-(parseFloat(b.stake)||0)),0);
   const vpe=document.getElementById('t-virt-pnl');
-  if(vpe){vpe.textContent=fmt(vp);vpe.style.color='var(--ora)';}
+  if(vpe){
+    vpe.textContent=vset.length?fmt(vp):'—';
+    vpe.style.color=!vset.length?'var(--mut)':vp>0?'#4ade80':vp<0?'#f87171':'var(--mut)';
+  }
+  const virtBankSub=document.getElementById('t-virt-bank-sub');
+  if(virtBankSub)virtBankSub.textContent=fp(vb.current!=null?vb.current:500);
 
-  // ── Bet limit tile ──
+  // ── Bet strip ──
   renderBetLimit();
 
   // ── Check-in state ──

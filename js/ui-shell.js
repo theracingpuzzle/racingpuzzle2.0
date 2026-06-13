@@ -156,6 +156,44 @@ function renderSwCard(){
   if(id==='settings'){const _sc=document.querySelector('#c5 .cin');if(_sc)_sc.scrollTop=0;if(typeof renderBkCard==='function')renderBkCard();if(typeof renderVBKDisp==='function')renderVBKDisp();if(typeof loadApiKeyField==='function')loadApiKeyField();if(typeof loadStartBankField==='function')loadStartBankField();if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();if(typeof loadAILimitField==='function')loadAILimitField();if(typeof renderSettingsSources==='function')renderSettingsSources();if(typeof renderCmdRules==='function')renderCmdRules();}
 }
 
+// ─── HEADER FLASH — visual confirmation when a balance changes ───
+function flashHdrBalance(mode, deductedAmount){
+  // mode: 'real' | 'virt'
+  const elId = mode==='virt' ? 'hvbank' : 'hbank';
+  const el = document.getElementById(elId);
+  const col = mode==='virt' ? '#ea580c' : '#1d4ed8';
+  if(el){
+    // pulse the number
+    el.style.transition='transform .15s,color .15s';
+    el.style.transform='scale(1.25)';
+    el.style.color=col;
+    setTimeout(function(){
+      el.style.transform='scale(1)';
+      el.style.color='';
+    },700);
+  }
+  // Toast
+  if(deductedAmount&&deductedAmount>0){
+    const label = mode==='virt' ? 'Virtual bank' : 'Real bank';
+    const toast = document.createElement('div');
+    toast.setAttribute('aria-live','polite');
+    toast.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);'
+      +'background:'+col+';color:#fff;font-size:13px;font-weight:600;'
+      +'padding:8px 18px;border-radius:20px;z-index:99999;'
+      +'box-shadow:0 4px 18px rgba(0,0,0,.35);pointer-events:none;'
+      +'opacity:0;transition:opacity .2s;white-space:nowrap;';
+    toast.textContent='−£'+parseFloat(deductedAmount).toFixed(2)+' from '+label;
+    document.body.appendChild(toast);
+    requestAnimationFrame(function(){
+      toast.style.opacity='1';
+      setTimeout(function(){
+        toast.style.opacity='0';
+        setTimeout(function(){ toast.remove(); }, 250);
+      }, 2400);
+    });
+  }
+}
+
 // ─── HEADER ───
 function updHdr(){
   // ── Real bank ──

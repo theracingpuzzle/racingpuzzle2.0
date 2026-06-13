@@ -671,7 +671,7 @@ function openLogbetOverlay(mode, prefill){
     +'</div>'
     // Actions
     +'<div class="em-actions">'
-      +'<button class="em-save-btn" onclick="_lboSave()" style="background:'+solidCol+';color:#fff;">Log '+(mode==='virt'?'Virtual':'Real')+' Bet</button>'
+      +'<button id="lbo-save-btn" data-mode="'+mode+'" class="em-save-btn" onclick="_lboSave()" style="background:'+solidCol+';color:#fff;">Log '+(mode==='virt'?'Virtual':'Real')+' Bet</button>'
       +'<button class="em-cancel-btn" onclick="_lboBackToChecklist()">← Back</button>'
     +'</div>'
     +'</div>';
@@ -702,7 +702,8 @@ function _lboCalcStake(){
   const isEW=betType==='ew';
   const suggested=parseFloat((pts*pv).toFixed(2));
   const current=parseFloat(stakeEl&&stakeEl.value)||0;
-  const mode=window._lboMode||'real';
+  const _sb=document.getElementById('lbo-save-btn');
+  const mode=(_sb&&_sb.getAttribute('data-mode'))||window._lboMode||'real';
   const accentCol=mode==='virt'?'#ea580c':'#60a5fa';
 
   if(!pv||pv<=0){
@@ -777,9 +778,10 @@ function _lboSave(){
   if(!stake||stake<=0){alert('Enter a valid stake.');return;}
   if(!od||od<1){alert('Enter valid odds — e.g. 5/1 or EVS');return;}
 
-  // Daily limit check
+  // Resolve mode: primary = data-mode attr baked into save button at render time; fallback = window._lboMode
+  const _saveBtn=document.getElementById('lbo-save-btn');
+  const mode=(_saveBtn&&_saveBtn.getAttribute('data-mode'))||window._lboMode||'real';
   const _limit=D.settings&&D.settings.dailyLimit?D.settings.dailyLimit:5;
-  const mode=window._lboMode||'real'; // set by openLogbetOverlay — always reflects the user's Real/Virtual choice
   if(mode==='real'){
     const _today=D.bets.filter(function(b){return b.date===td();}).length;
     if(_today>=_limit&&!confirm('⚠️ You\'ve reached your daily limit of '+_limit+' bets. Log anyway?'))return;
@@ -813,11 +815,15 @@ function _lboSave(){
     D.bets.push(bet);
   }
 
-  save(); updHdr(); refreshRacecardHighlights();
+  save();
+  updHdr();
+  if(typeof flashHdrBalance==='function')flashHdrBalance(mode, stake);
+  refreshRacecardHighlights();
   // Close and navigate
   closeLogbetOverlay();
   renderToday();
   if(typeof renderVBMini==='function')renderVBMini();
+  if(typeof renderRealBankMini==='function')renderRealBankMini();
 }
 
 function closeLogbetOverlay(){

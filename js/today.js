@@ -1088,26 +1088,110 @@ function _tpBuildItems(races){
 
   var items=[];
 
-  // ── No results yet — show day overview ──
+  // ── No results yet — mine the racecard data for rich pre-race intel ──
   if(totalRacesResult===0){
     var allRaces=[];
+    var jockeyMounts={};
+    var trainerMounts={};
+    var biggestFields=[];
+    var notableRaces=[];
+    var highRatedHorses=[];
+    var courseGoings={};
+
     (races||[]).forEach(function(meeting){
       var course=meeting.course||meeting.venue||'';
+      var meetingGoingRaw=meeting.going||meeting.going_description||'';
       var raceList=meeting.runners?[meeting]:(meeting.races||[]);
-      raceList.forEach(function(r){
-        var going=r.going||r.going_description||meeting.going||meeting.going_description||'';
-        allRaces.push({time:r.off||r.off_time||r.time||'',course:course,going:going});
+      raceList.forEach(function(race){
+        var raceGoing=race.going||race.going_description||meetingGoingRaw||'';
+        var raceTime=race.off||race.off_time||race.time||'';
+        var raceName=race.race_name||race.name||race.title||'';
+        var raceClass=String(race.race_class||race.class||'').trim();
+        var runners=(race.runners||race.horses||[]).filter(function(r){return !r.non_runner&&!r.isNonRunner;});
+
+        // Going per course (first race's going for that course)
+        if(course&&raceGoing&&!courseGoings[course])courseGoings[course]=raceGoing;
+
+        allRaces.push({time:raceTime,course:course,going:raceGoing,name:raceName,raceClass:raceClass,runnerCount:runners.length});
+
+        // Notable races — Group/Grade 1/2/3 or Listed
+        if(raceName&&(/\bGroup\b|\bGrade\b|\bGr\b|\bG1\b|\bG2\b|\bG3\b|\bListed\b/i.test(raceName)||/\bGroup\b|\bGrade\b/i.test(raceClass))){
+          notableRaces.push({name:raceName,time:raceTime,course:course,runners:runners.length});
+        }
+
+        // Biggest fields
+        if(runners.length>=12){
+          biggestFields.push({course:course,time:raceTime,count:runners.length,name:raceName});
+        }
+
+        runners.forEach(function(r){
+          var jk=r.jockey||r.jockey_name||'';
+          var tr=r.trainer||r.trainer_name||'';
+          var orRating=parseFloat(r.ofr||r['or']||r.official_rating||r.officialRating||0);
+          var horse=r.horse||r.name||'';
+          if(jk)jockeyMounts[jk]=(jockeyMounts[jk]||0)+1;
+          if(tr)trainerMounts[tr]=(trainerMounts[tr]||0)+1;
+          if(orRating>=110&&horse){highRatedHorses.push({horse:horse,or:orRating,course:course,time:raceTime,jockey:jk});}
+        });
       });
     });
+
     var courses=[...new Set(allRaces.map(function(r){return r.course;}).filter(Boolean))];
-    var goings=[...new Set(allRaces.map(function(r){return r.going;}).filter(Boolean))];
-    if(allRaces.length){
-      items.push('📋 '+allRaces.length+' races across '+courses.length+' meetings today');
-      if(goings.length){items.push('🌿 Ground: '+goings.slice(0,4).join(' · '));}
-      var sorted=allRaces.filter(function(r){return r.time;}).sort(function(a,b){return timeToMins(a.time)-timeToMins(b.time);});
-      if(sorted.length){items.push('⏰ First off: '+sorted[0].time+' at '+sorted[0].course);}
-      items.push('🔄 Results will appear here as races go off');
+    if(!allRaces.length)return items;
+
+    // Total races and meetings
+    items.push(allRaces.length+' races across '+courses.length+' meetings today');
+
+    // Going — per course, concise
+    var goingParts=Object.entries(courseGoings).slice(0,6).map(function(e){return e[0]+': '+e[1];});
+    if(goingParts.length){items.push('Going — '+goingParts.join(' · '));}
+
+    // First and last race
+    var sorted=allRaces.filter(function(r){return r.time;}).sort(function(a,b){return timeToMins(a.time)-timeToMins(b.time);});
+    if(sorted.length){
+      items.push('First off: '+sorted[0].time+' '+sorted[0].course);
+      if(sorted.length>1){items.push('Last race: '+sorted[sorted.length-1].time+' '+sorted[sorted.length-1].course);}
     }
+
+    // Notable races
+    notableRaces.slice(0,4).forEach(function(r){
+      items.push(r.name+' — '+r.time+' '+r.course+' ('+r.runners+' runners)');
+    });
+
+    // Biggest fields
+    biggestFields.sort(function(a,b){return b.count-a.count;}).slice(0,3).forEach(function(r){
+      items.push('Big field: '+r.count+' runners — '+r.time+' '+r.course+(r.name?' · '+r.name:''));
+    });
+
+    // Busiest jockeys (5+ mounts = serious book)
+    var jkBusy=Object.entries(jockeyMounts).sort(function(a,b){return b[1]-a[1];}).slice(0,4);
+    jkBusy.forEach(function(e){
+      var jk=e[0],m=e[1];
+      if(m>=4)items.push(fmtJockey(jk)+' — '+m+' rides today');
+    });
+
+    // Busiest trainers
+    var trBusy=Object.entries(trainerMounts).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
+    trBusy.forEach(function(e){
+      var tr=e[0],m=e[1];
+      if(m>=5)items.push(tr+' — '+m+' runners declared today');
+    });
+
+    // High-rated horses (OR 110+)
+    highRatedHorses.sort(function(a,b){return b.or-a.or;}).slice(0,4).forEach(function(h){
+      items.push('OR '+h.or+': '+h.horse+' runs '+h.time+' at '+h.course+(h.jockey?' — '+fmtJockey(h.jockey):''));
+    });
+
+    // Watchlist horses running today (cross-reference)
+    var wl=typeof getWL==='function'?getWL():[];
+    var wlNames=wl.map(function(w){return (w.horse||'').toLowerCase().trim();}).filter(Boolean);
+    if(wlNames.length){
+      allRaces.forEach(function(race){
+        // We can't easily get runners from allRaces here — already flattened
+        // so skip — handled by checkWatchlistRunners separately
+      });
+    }
+
     return items;
   }
 

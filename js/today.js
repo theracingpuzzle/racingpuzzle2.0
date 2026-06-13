@@ -892,13 +892,21 @@ function renderCheckIn(){
   const ci=document.getElementById('tcin');
   if(!ci) return;
   if(log&&log.checkedIn){
-    const moodEmoji={poor:'😔',neutral:'😐',good:'🙂',great:'😄'}[log.mood||'neutral']||'😐';
-    ci.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(22,163,74,.06);border:1px solid rgba(22,163,74,.2);border-radius:9px;">'
-      +'<span style="font-size:16px;flex-shrink:0;">'+moodEmoji+'</span>'
-      +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#4ade80;flex-shrink:0;">✓ In</span>'
-      +(log.focus?'<span style="font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">'+log.focus+'</span>':'')
-      +'<button onclick="undoCheckIn()" style="flex-shrink:0;padding:2px 8px;border-radius:5px;border:none;background:transparent;color:var(--mut);font-size:10px;cursor:pointer;opacity:.5;">edit</button>'
-    +'</div>';
+    const moodEmoji ={poor:'😔',neutral:'😐',good:'🙂',great:'😄'}[log.mood||'neutral']||'😐';
+    const moodLabel ={poor:'Below par',neutral:'Neutral',good:'Good mindset',great:'Sharp today'}[log.mood||'neutral']||'Checked in';
+    const moodCol   ={poor:'#f87171',neutral:'var(--mut)',good:'#4ade80',great:'#34d399'}[log.mood||'neutral']||'var(--mut)';
+    ci.innerHTML=
+      '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:9px;">'
+        +'<span style="font-size:16px;flex-shrink:0;">'+moodEmoji+'</span>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:'+moodCol+';">'+moodLabel+'</div>'
+          +(log.focus
+            ?'<div style="font-size:12px;color:var(--txt);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+log.focus+'</div>'
+            :'<div style="font-size:11px;color:var(--mut);font-style:italic;">No focus set for today</div>'
+          )
+        +'</div>'
+        +'<button onclick="undoCheckIn()" style="flex-shrink:0;padding:2px 8px;border-radius:5px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-size:10px;cursor:pointer;">Edit</button>'
+      +'</div>';
   } else {
     // Show check-in strip — restore mood button active state
     const mood=(log&&log.mood)||'neutral';

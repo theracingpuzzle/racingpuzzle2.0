@@ -907,17 +907,15 @@ RACING <span class="logo-accent">PUZZLE</span>
 <div id="logbet-overlay" style="display:none;position:fixed;inset:0;z-index:201;background:var(--bg);overflow-y:scroll;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
   <div style="max-width:520px;margin:0 auto;padding:0 0 140px;">
     <!-- Header bar -->
-    <div style="position:sticky;top:0;z-index:10;background:var(--bg);padding:env(safe-area-inset-top,14px) 17px 0;" id="lbo-header">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 10px;">
+    <div style="position:sticky;top:0;z-index:10;background:#1d4ed8;padding:env(safe-area-inset-top,14px) 17px 12px;" id="lbo-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
         <div style="min-width:0;">
-          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;margin-bottom:3px;" id="lbo-type-lbl">Real Bet</div>
-          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:900;letter-spacing:.03em;text-transform:uppercase;line-height:1.1;" id="lbo-title">Log Bet</div>
-          <div id="lbo-horse-sub" style="font-size:11px;color:var(--mut);margin-top:3px;display:none;"></div>
+          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;margin-bottom:3px;color:rgba(255,255,255,.65);" id="lbo-type-lbl">Real Bet</div>
+          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:900;letter-spacing:.03em;text-transform:uppercase;line-height:1.1;color:#fff;" id="lbo-title">Log Bet</div>
+          <div id="lbo-horse-sub" style="font-size:11px;color:rgba(255,255,255,.7);margin-top:3px;display:none;"></div>
         </div>
-        <button onclick="closeLogbetOverlay()" style="flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1px solid var(--bdr);background:rgba(255,255,255,.06);color:var(--mut);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
+        <button onclick="closeLogbetOverlay()" style="flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
       </div>
-      <!-- Accent bar — colour updated by openLogbetOverlay -->
-      <div id="lbo-accent-bar" style="height:3px;background:#60a5fa;margin:0 -17px;"></div>
     </div>
     <!-- Form injected here -->
     <div id="lbo-content" style="padding:18px 17px 0;"></div>

@@ -588,14 +588,15 @@ function openLogbetOverlay(mode, prefill){
   const accentCol=mode==='virt'?'#fb923c':'#60a5fa';
   const typeLabel=mode==='virt'?'Virtual Bet':'Real Bet';
 
-  // ── Update sticky header elements ──
+  // ── Update sticky header ──
+  const solidCol=mode==='virt'?'#c2410c':'#1d4ed8'; // darker shade so white text is AAA-contrast
+  const hdrEl=document.getElementById('lbo-header');
+  if(hdrEl)hdrEl.style.background=solidCol;
   const typeEl=document.getElementById('lbo-type-lbl');
   const titleEl=document.getElementById('lbo-title');
-  const accentBar=document.getElementById('lbo-accent-bar');
   const subEl=document.getElementById('lbo-horse-sub');
-  if(typeEl){typeEl.textContent=typeLabel;typeEl.style.color=accentCol;}
-  if(titleEl){titleEl.textContent=prefill&&prefill.horse?prefill.horse:'Log Bet';titleEl.style.color=accentCol;}
-  if(accentBar)accentBar.style.background=accentCol;
+  if(typeEl)typeEl.textContent=typeLabel;
+  if(titleEl)titleEl.textContent=prefill&&prefill.horse?prefill.horse:'Log Bet';
   if(subEl){
     const parts=[];
     if(prefill&&prefill.time)parts.push(prefill.time);
@@ -621,9 +622,9 @@ function openLogbetOverlay(mode, prefill){
   if(!tgt)return;
   tgt.innerHTML=
     '<div class="em-body" style="padding-bottom:100px;">'
-    // Section 1 — Bet Details
+    // Section 1 — Bet Details (default styling)
     +'<div class="em-section">'
-      +'<div class="em-sec-hdr" style="background:#1d4ed8;border-bottom-color:rgba(255,255,255,.15);"><span class="em-sec-num" style="background:rgba(255,255,255,.2);color:#fff;">1</span><span class="em-sec-title" style="color:#fff;">Bet Details</span></div>'
+      +'<div class="em-sec-hdr"><span class="em-sec-num">1</span><span class="em-sec-title">Bet Details</span></div>'
       +'<div class="em-sec-body">'
         +'<div class="g2">'
           +'<div class="fg"><label>Horse</label><input type="text" id="lbo-f-horse" autocomplete="off" value="'+(prefill&&prefill.horse?_escAttr(prefill.horse):'')+'"></div>'
@@ -647,9 +648,9 @@ function openLogbetOverlay(mode, prefill){
         +'<div class="fg"><label>Pre-Race Notes</label><textarea id="lbo-f-prenotes" style="min-height:52px" placeholder="Why are you backing this horse?"></textarea></div>'
       +'</div>'
     +'</div>'
-    // Section 2 — Result (optional — can settle now or leave pending)
+    // Section 2 — Result (coloured to match mode)
     +'<div class="em-section">'
-      +'<div class="em-sec-hdr" style="background:#ea580c;border-bottom-color:rgba(255,255,255,.15);"><span class="em-sec-num" style="background:rgba(255,255,255,.2);color:#fff;">2</span><span class="em-sec-title" style="color:#fff;">Result <span style="font-weight:400;color:rgba(255,255,255,.65);font-size:11px;">(optional — settle later)</span></span></div>'
+      +'<div class="em-sec-hdr" style="background:'+solidCol+';border-bottom-color:rgba(255,255,255,.15);"><span class="em-sec-num" style="background:rgba(255,255,255,.2);color:#fff;">2</span><span class="em-sec-title" style="color:#fff;">Result <span style="font-weight:400;color:rgba(255,255,255,.65);font-size:11px;">(optional — settle later)</span></span></div>'
       +'<div class="em-sec-body">'
         +'<div class="g2">'
           +'<div class="fg"><label>Result</label><select id="lbo-f-result" onchange="_lboResChange()"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>'
@@ -660,7 +661,7 @@ function openLogbetOverlay(mode, prefill){
     +'</div>'
     // Actions
     +'<div class="em-actions">'
-      +'<button class="em-save-btn" onclick="_lboSave()" style="background:'+accentCol+';color:'+(mode==='virt'?'#141414':'#fff')+';">Log '+(mode==='virt'?'Virtual':'Real')+' Bet</button>'
+      +'<button class="em-save-btn" onclick="_lboSave()" style="background:'+solidCol+';color:#fff;">Log '+(mode==='virt'?'Virtual':'Real')+' Bet</button>'
       +'<button class="em-cancel-btn" onclick="_lboBackToChecklist()">← Back</button>'
     +'</div>'
     +'</div>';

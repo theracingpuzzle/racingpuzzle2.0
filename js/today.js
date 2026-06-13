@@ -23,9 +23,9 @@ function runTodayDemo(){
 function _showTodayDemo(){
   // ── P&L tiles ──
   const pe = document.getElementById('tpnl');
-  if(pe){ pe.textContent = '+£68.00'; pe.style.color = '#4ade80'; }
+  if(pe){ pe.textContent = '+£68.00'; pe.style.color = '#3b82f6'; }
   const vpe = document.getElementById('t-virt-pnl');
-  if(vpe){ vpe.textContent = '+£34.50'; vpe.style.color = '#4ade80'; }
+  if(vpe){ vpe.textContent = '+£34.50'; vpe.style.color = '#ea580c'; }
   const rbs = document.getElementById('t-real-bank-sub');
   if(rbs) rbs.textContent = '£368.00';
   const vbs = document.getElementById('t-virt-bank-sub');

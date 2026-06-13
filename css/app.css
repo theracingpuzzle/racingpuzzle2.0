@@ -418,7 +418,8 @@ tr:hover td { background: var(--sur2); }
 .tile-val  { font-size: 17px; font-weight: 700; }
 
 /* Mood / emoji buttons */
-.mood-btn  { flex: 1; padding: 7px 4px; border-radius: 8px; border: 1px solid var(--bdr); background: transparent; font-size: 15px; cursor: pointer; }
+.mood-btn    { flex: 1; padding: 7px 4px; border-radius: 8px; border: 1px solid var(--bdr); background: transparent; font-size: 15px; cursor: pointer; }
+.mood-btn-sm { padding: 2px 3px; border-radius: 5px; border: 1px solid transparent; background: transparent; font-size: 16px; cursor: pointer; line-height: 1; flex-shrink: 0; transition: border-color .1s, background .1s; }
 
 /* Check-in / alert box */
 .alert-box { border-radius: 11px; padding: 12px 14px; }

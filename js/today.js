@@ -893,20 +893,20 @@ function renderCheckIn(){
   if(!ci) return;
   if(log&&log.checkedIn){
     const moodEmoji={poor:'😔',neutral:'😐',good:'🙂',great:'😄'}[log.mood||'neutral']||'😐';
-    ci.innerHTML='<div class="t-checkin">'
-      +'<div>'
-        +'<div class="t-checkin-lbl">✓ Checked in</div>'
-        +(log.focus?'<div class="t-body">'+log.focus+'</div>':'<div class="t-no-focus">No focus set</div>')
-      +'</div>'
-      +'<span class="t-checkin-emoji">'+moodEmoji+'</span>'
-      +'</div>';
+    ci.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(22,163,74,.06);border:1px solid rgba(22,163,74,.2);border-radius:9px;">'
+      +'<span style="font-size:16px;flex-shrink:0;">'+moodEmoji+'</span>'
+      +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#4ade80;flex-shrink:0;">✓ In</span>'
+      +(log.focus?'<span style="font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">'+log.focus+'</span>':'')
+      +'<button onclick="undoCheckIn()" style="flex-shrink:0;padding:2px 8px;border-radius:5px;border:none;background:transparent;color:var(--mut);font-size:10px;cursor:pointer;opacity:.5;">edit</button>'
+    +'</div>';
   } else {
-    // Show check-in form — restore mood button active state
+    // Show check-in strip — restore mood button active state
     const mood=(log&&log.mood)||'neutral';
-    document.querySelectorAll('#tmood-btns button').forEach(function(b){
+    document.querySelectorAll('.mood-btn-sm').forEach(function(b){
       const m=b.getAttribute('onclick').replace("setMood('","").replace("')","");
-      b.style.background=m===mood?'rgba(232,228,220,.15)':'transparent';
-      b.style.borderColor=m===mood?'rgba(232,228,220,.4)':'var(--bdr)';
+      b.style.background=m===mood?'rgba(232,228,220,.12)':'transparent';
+      b.style.borderColor=m===mood?'rgba(232,228,220,.3)':'transparent';
+      b.style.opacity=m===mood?'1':'.5';
     });
     const tf=document.getElementById('t-focus');
     if(tf&&log&&log.focus) tf.value=log.focus;
@@ -914,11 +914,11 @@ function renderCheckIn(){
 }
 
 function setMood(mood){
-  document.querySelectorAll('#tmood-btns button').forEach(function(b){
-    b.style.background='transparent';b.style.borderColor='var(--bdr)';
+  document.querySelectorAll('.mood-btn-sm').forEach(function(b){
+    b.style.background='transparent';b.style.borderColor='transparent';b.style.opacity='.5';
   });
   const btn=document.getElementById('mood-'+mood);
-  if(btn){btn.style.background='rgba(232,228,220,.15)';btn.style.borderColor='rgba(232,228,220,.4)';}
+  if(btn){btn.style.background='rgba(232,228,220,.12)';btn.style.borderColor='rgba(232,228,220,.3)';btn.style.opacity='1';}
   const t=td();
   D.dailyLog=D.dailyLog||[];
   let log=D.dailyLog.find(d=>d.date===t);
@@ -941,7 +941,7 @@ function doCheckIn(){
   D.dailyLog=D.dailyLog||[];
   let log=D.dailyLog.find(d=>d.date===t);
   if(!log){log={date:t,checkedIn:false,mood:'neutral',notes:'',tracks:[],createdAt:Date.now()};D.dailyLog.push(log);}
-  const mood=document.querySelector('#tmood-btns button[style*="rgba(232"]');
+  const mood=document.querySelector('.mood-btn-sm[style*="rgba(232"]');
   if(mood){const m=mood.getAttribute('onclick').replace("setMood('","").replace("')","");log.mood=m;}
   const focus=document.getElementById('t-focus');
   if(focus)log.focus=focus.value.trim();
@@ -949,6 +949,14 @@ function doCheckIn(){
   log.checkedInAt=Date.now();
   save();
   renderCheckIn();
+}
+
+function undoCheckIn(){
+  const t=td();
+  const log=D.dailyLog&&D.dailyLog.find(d=>d.date===t);
+  if(log)log.checkedIn=false;
+  save();
+  renderToday();
 }
 
 // renderEdgeAlerts merged into checkWatchlistRunners above

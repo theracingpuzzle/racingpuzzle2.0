@@ -628,9 +628,9 @@ function openLogbetOverlay(mode, prefill){
   if(!tgt)return;
   tgt.innerHTML=
     '<div class="em-body" style="padding-bottom:100px;">'
-    // Section 1 — Bet Details (default styling)
+    // Section 1 — Bet Details (coloured to match mode)
     +'<div class="em-section">'
-      +'<div class="em-sec-hdr"><span class="em-sec-num">1</span><span class="em-sec-title">Bet Details</span></div>'
+      +'<div class="em-sec-hdr" style="background:'+solidCol+';border-bottom-color:rgba(255,255,255,.15);"><span class="em-sec-num" style="background:rgba(255,255,255,.2);color:#fff;">1</span><span class="em-sec-title" style="color:#fff;">Bet Details</span></div>'
       +'<div class="em-sec-body">'
         +'<div class="g2">'
           +'<div class="fg"><label>Horse</label><input type="text" id="lbo-f-horse" autocomplete="off" value="'+(prefill&&prefill.horse?_escAttr(prefill.horse):'')+'"></div>'

@@ -589,15 +589,21 @@ function openLogbetOverlay(mode, prefill){
   const typeLabel=mode==='virt'?'Virtual Bet':'Real Bet';
 
   // ── Update sticky header ──
-  const solidCol=mode==='virt'?'#c2410c':'#1d4ed8'; // darker shade so white text is AAA-contrast
+  const solidCol=mode==='virt'?'#ea580c':'#1d4ed8';
   const hdrEl=document.getElementById('lbo-header');
   if(hdrEl)hdrEl.style.background=solidCol;
+
   const typeEl=document.getElementById('lbo-type-lbl');
   const titleEl=document.getElementById('lbo-title');
   const subEl=document.getElementById('lbo-horse-sub');
-  if(typeEl)typeEl.textContent=typeLabel;
-  if(titleEl)titleEl.textContent=prefill&&prefill.horse?prefill.horse:'Log Bet';
+  const closeBtn=hdrEl&&hdrEl.querySelector('button');
+
+  // Force white text regardless of any cached CSS/HTML state
+  if(typeEl){typeEl.textContent=typeLabel;typeEl.style.color='rgba(255,255,255,.7)';}
+  if(titleEl){titleEl.textContent=prefill&&prefill.horse?prefill.horse:'Log Bet';titleEl.style.color='#fff';}
+  if(closeBtn){closeBtn.style.color='#fff';closeBtn.style.borderColor='rgba(255,255,255,.3)';closeBtn.style.background='rgba(255,255,255,.15)';}
   if(subEl){
+    subEl.style.color='rgba(255,255,255,.75)';
     const parts=[];
     if(prefill&&prefill.time)parts.push(prefill.time);
     if(prefill&&prefill.course)parts.push(prefill.course);

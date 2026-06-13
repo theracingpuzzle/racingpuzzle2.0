@@ -978,20 +978,33 @@ function delBetEM(){
   if(isVirt){
     const vb=getVBank();
     const bet=vb.bets.find(x=>x.id===id);
-    // Reverse virtual bank delta
-    if(bet&&bet.result&&bet.result!=='pending'&&bet.result!=='nr'){
+    if(bet){
+      const isPending=!bet.result||bet.result==='pending';
       const outlay=(parseFloat(bet.stake)||0)*(bet.betType==='ew'?2:1);
-      const betPnl=(parseFloat(bet.returns)||0)-outlay;
-      vb.current=parseFloat(((vb.current||0)-betPnl).toFixed(2));
+      if(isPending){
+        // Stake was pre-deducted on log — restore it
+        vb.current=parseFloat(((vb.current||0)+outlay).toFixed(2));
+      } else if(bet.result!=='nr'&&bet.result!=='void'){
+        // Settled — reverse the P&L
+        const betPnl=(parseFloat(bet.returns)||0)-outlay;
+        vb.current=parseFloat(((vb.current||0)-betPnl).toFixed(2));
+      }
     }
     vb.bets=vb.bets.filter(x=>x.id!==id);
   } else {
     const bet=D.bets.find(x=>x.id===id);
-    // Reverse real bank delta if it was already banked
-    if(bet&&bet.betBanked&&bet.result&&bet.result!=='pending'&&bet.result!=='nr'&&bet.result!=='void'){
-      const outlay=ewOutlay(bet);
-      const betPnl=(parseFloat(bet.returns)||0)-outlay;
-      D.bank.current=parseFloat(((D.bank.current||0)-betPnl).toFixed(2));
+    if(bet){
+      const isPending=!bet.result||bet.result==='pending';
+      if(isPending&&bet.betBanked){
+        // Stake was pre-deducted — restore it
+        const outlay=ewOutlay(bet);
+        D.bank.current=parseFloat(((D.bank.current||0)+outlay).toFixed(2));
+      } else if(bet.betBanked&&bet.result&&bet.result!=='pending'&&bet.result!=='nr'&&bet.result!=='void'){
+        // Settled — reverse the P&L
+        const outlay=ewOutlay(bet);
+        const betPnl=(parseFloat(bet.returns)||0)-outlay;
+        D.bank.current=parseFloat(((D.bank.current||0)-betPnl).toFixed(2));
+      }
     }
     D.bets=D.bets.filter(x=>x.id!==id);
   }

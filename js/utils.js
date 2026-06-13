@@ -57,18 +57,41 @@ function ewOutlay(bet){
   return parseFloat(bet.stake)||0;
 }
 function applyBankDelta(bet,oldResult,oldReturns){
+  // Accounting model:
+  //   betBanked=true  + pending   → stake was pre-deducted on log (new model)
+  //   betBanked=true  + settled   → full P&L applied
+  //   betBanked=false + pending   → nothing deducted yet (legacy bets before this change)
+  //   betBanked=false + settled   → shouldn't happen in practice
   if(!D.bank||typeof D.bank!=='object')D.bank={start:0,current:0};
-  if(bet.betBanked&&oldResult&&oldResult!=='pending'){
-    const oldOutlay=ewOutlay({...bet,result:oldResult});
+  const oldPending=!oldResult||oldResult==='pending';
+
+  // ── Reverse previous bank impact ──
+  if(bet.betBanked&&!oldPending){
+    // Was settled: reverse the P&L that was applied at settlement
+    const oldOutlay=ewOutlay(bet);
     const oldPnl=(parseFloat(oldReturns)||0)-oldOutlay;
     D.bank.current=parseFloat(((D.bank.current||0)-oldPnl).toFixed(2));
+  } else if(bet.betBanked&&oldPending){
+    // Was pending with stake pre-deducted: restore the stake
+    const outlay=ewOutlay(bet);
+    D.bank.current=parseFloat(((D.bank.current||0)+outlay).toFixed(2));
   }
-  if(bet.result&&bet.result!=='pending'){
+
+  // ── Apply new bank impact ──
+  const newPending=!bet.result||bet.result==='pending';
+  if(newPending){
+    // Pre-deduct stake immediately
+    const outlay=ewOutlay(bet);
+    D.bank.current=parseFloat(((D.bank.current||0)-outlay).toFixed(2));
+    bet.betBanked=true; // flag: stake is out
+  } else if(bet.result!=='nr'&&bet.result!=='void'){
+    // Settled win/place/loss: apply full P&L (stake+returns netted)
     const outlay=ewOutlay(bet);
     const newPnl=(parseFloat(bet.returns)||0)-outlay;
     D.bank.current=parseFloat(((D.bank.current||0)+newPnl).toFixed(2));
     bet.betBanked=true;
   }
+  // NR / void: no bank movement; betBanked unchanged
 }
 
 function calcStakeGuide(mode){

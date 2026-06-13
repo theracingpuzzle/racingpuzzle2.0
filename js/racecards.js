@@ -585,6 +585,7 @@ function closePrebetOverlay(){
 function openLogbetOverlay(mode, prefill){
   const overlay=document.getElementById('logbet-overlay');
   if(!overlay)return;
+  window._lboMode=mode; // stash for _lboSave — do not rely on _betFlowState which may lag
   const accentCol=mode==='virt'?'#fb923c':'#60a5fa';
   const typeLabel=mode==='virt'?'Virtual Bet':'Real Bet';
 
@@ -701,7 +702,7 @@ function _lboCalcStake(){
   const isEW=betType==='ew';
   const suggested=parseFloat((pts*pv).toFixed(2));
   const current=parseFloat(stakeEl&&stakeEl.value)||0;
-  const mode=window._betFlowState&&window._betFlowState.mode||'real';
+  const mode=window._lboMode||'real';
   const accentCol=mode==='virt'?'#ea580c':'#60a5fa';
 
   if(!pv||pv<=0){
@@ -778,7 +779,7 @@ function _lboSave(){
 
   // Daily limit check
   const _limit=D.settings&&D.settings.dailyLimit?D.settings.dailyLimit:5;
-  const mode=window._betFlowState&&window._betFlowState.mode||'real';
+  const mode=window._lboMode||'real'; // set by openLogbetOverlay — always reflects the user's Real/Virtual choice
   if(mode==='real'){
     const _today=D.bets.filter(function(b){return b.date===td();}).length;
     if(_today>=_limit&&!confirm('⚠️ You\'ve reached your daily limit of '+_limit+' bets. Log anyway?'))return;
@@ -799,7 +800,7 @@ function _lboSave(){
 
   if(mode==='virt'){
     const vb=getVBank();
-    // Deduct stake; add returns if already settled
+    // Deduct stake; add returns if already settled at log time
     vb.current=parseFloat((vb.current-stake).toFixed(2));
     if(result&&result!=='pending'&&result!=='nr'&&result!=='void'){
       vb.current=parseFloat((vb.current+returns).toFixed(2));
@@ -807,6 +808,7 @@ function _lboSave(){
     vb.bets=vb.bets||[];
     vb.bets.push(bet);
   } else {
+    // Pre-deduct stake from real bank immediately (applyBankDelta handles this via betBanked flag)
     applyBankDelta(bet,null,0);
     D.bets.push(bet);
   }

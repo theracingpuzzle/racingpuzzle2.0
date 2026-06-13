@@ -291,20 +291,24 @@ function recalcBanks(){
   // ── Real bank ──
   D.bank=D.bank||{start:0,current:0};
   D.bank.current=D.bank.start||0;
-  // Clear betBanked flags so applyBankDelta replays cleanly
+  // Clear betBanked flags so applyBankDelta replays cleanly from scratch
   (D.bets||[]).forEach(function(b){ b.betBanked=false; });
+  // Process all bets: applyBankDelta now handles both pending (deduct stake) and settled (P&L)
   (D.bets||[]).forEach(function(b){
-    if(b.result&&b.result!=='pending'){
-      applyBankDelta(b,null,0);
-    }
+    applyBankDelta(b,null,0);
   });
 
   // ── Virtual bank ──
   const vb=getVBank();
   vb.current=vb.start||500;
   (vb.bets||[]).forEach(function(b){
-    if(b.result&&b.result!=='pending'&&b.result!=='nr'){
-      const outlay=(parseFloat(b.stake)||0)*(b.betType==='ew'?2:1);
+    const isPending=!b.result||b.result==='pending';
+    const outlay=(parseFloat(b.stake)||0)*(b.betType==='ew'?2:1);
+    if(isPending){
+      // Pending: deduct stake
+      vb.current=parseFloat((vb.current-outlay).toFixed(2));
+    } else if(b.result!=='nr'&&b.result!=='void'){
+      // Settled: apply full P&L
       const betPnl=(parseFloat(b.returns)||0)-outlay;
       vb.current=parseFloat((vb.current+betPnl).toFixed(2));
     }
@@ -695,6 +699,7 @@ function _betFlowProceed(chosenMode){
   const rawScore=total>0?(activeCks.reduce(function(a,v){return a+(typeof v==='number'?v:(v?1:0));},0)/total*100):0;
   _pendingCkScore=Math.round(rawScore);
   _pendingCkAnswers=Object.assign({},_flowCkAnswers);
+  _betFlowState.mode=chosenMode; // persist the confirmed choice back onto state
   const s=Object.assign({},_betFlowState,{mode:chosenMode});
   _betFlowClose(function(){_rcDoLogBet(s);});
 }

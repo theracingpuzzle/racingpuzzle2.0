@@ -175,26 +175,26 @@
 ══════════════════════════════════════════════ */
 .tp-bar {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   overflow: hidden;
-  background: rgba(0,0,0,.22);
-  border: 1px solid rgba(255,255,255,.07);
-  border-radius: 10px;
+  background: #f5c500;
+  border-radius: 8px;
   margin: 10px 0 0;
 }
 
 .tp-label {
   flex-shrink: 0;
   font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 900;
-  letter-spacing: .18em;
+  letter-spacing: .2em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.4);
-  background: rgba(255,255,255,.05);
-  padding: 9px 10px;
-  border-right: 1px solid rgba(255,255,255,.07);
-  line-height: 1;
+  color: #000;
+  background: #000;
+  color: #f5c500;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
 }
 
 .tp-track-wrap {
@@ -207,37 +207,34 @@
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  transform: translateX(-50%);
-  animation: tp-scroll 45s linear infinite;
-}
-
-.tp-track:hover {
-  animation-play-state: paused;
+  animation: tp-scroll 55s linear infinite;
 }
 
 .tp-item {
   font-size: 12px;
-  color: rgba(232,228,220,.72);
+  font-weight: 700;
+  color: #000;
   padding: 9px 10px;
   flex-shrink: 0;
 }
 
 .tp-item-highlight {
-  color: #4ade80; /* green — winners */
+  color: #166534; /* dark green on yellow */
 }
 
 .tp-item-warn {
-  color: var(--gld); /* amber — low fav SR etc */
+  color: #92400e; /* dark amber on yellow */
 }
 
 .tp-sep {
-  color: rgba(255,255,255,.12);
-  padding: 0 2px;
-  font-size: 14px;
+  color: rgba(0,0,0,.3);
+  padding: 0 4px;
+  font-size: 16px;
+  font-weight: 900;
   flex-shrink: 0;
 }
 
 @keyframes tp-scroll {
   0%   { transform: translateX(0); }
-  100% { transform: translateX(50%); }
+  100% { transform: translateX(-50%); }
 }

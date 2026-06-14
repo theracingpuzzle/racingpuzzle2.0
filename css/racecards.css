@@ -56,8 +56,8 @@
 .rc-runner { display:flex; align-items:center; padding:10px 14px; border-bottom:1px solid var(--bdr); gap:10px; background:var(--sur); transition:background .1s; }
 .rc-runner:last-child { border-bottom:none; }
 .rc-runner-nr { opacity:.4; }
-.rc-runner-bet-real { background:rgba(37,99,235,.05); border-left:3px solid var(--blu); padding-left:11px; }
-.rc-runner-bet-virt { background:rgba(234,88,12,.05); border-left:3px solid var(--ora); padding-left:11px; }
+.rc-runner-bet-real { background:rgba(59,130,246,.1); border-left:3px solid #3b82f6; padding-left:11px; }
+.rc-runner-bet-virt { background:rgba(234,88,12,.1); border-left:3px solid #ea580c; padding-left:11px; }
 
 /* Cloth number */
 .rc-cloth { width:28px; text-align:center; font-size:15px; font-weight:900; color:var(--navy); flex-shrink:0; }

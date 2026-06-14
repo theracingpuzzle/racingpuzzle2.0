@@ -397,12 +397,21 @@ function rcSwRenderMeetingRaces(course, el){
     const isG1=rname.includes('group 1');const isG2=rname.includes('group 2');
     const isG3=rname.includes('group 3');const isListed=rname.includes('listed');
     const nameCol=isG1||isG2?'#f59e0b':isG3?'#a78bfa':isListed?'#a78bfa':'var(--txt)';
+    const _rbt=getRaceBetType(course,time);
+    const _betDot=_rbt==='real'
+      ?'<span title="Real bet placed" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#3b82f6;flex-shrink:0;margin-left:6px;box-shadow:0 0 0 2px rgba(59,130,246,.25);"></span>'
+      :_rbt==='virt'
+      ?'<span title="Virtual bet placed" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ea580c;flex-shrink:0;margin-left:6px;box-shadow:0 0 0 2px rgba(234,88,12,.25);"></span>'
+      :'';
     return'<div id="sw-row-'+safeId+'-'+i+'" class="rc-race-row">'
       +'<div onclick="rcSwToggle('+i+',\''+course.replace(/\'/g,"\\'")+'\',\''+safeId+'\',true)" class="rc-race-hdr">'
         +'<div class="rc-race-hdr-left">'
-          +'<div class="rc-race-time">'+time+'</div>'
+          +'<div style="display:flex;align-items:center;">'
+            +'<div class="rc-race-time">'+time+'</div>'
+            +_betDot
+          +'</div>'
           +'<div class="rc-race-meta-row">'+(dist?'<span class="rc-dist-chip">'+dist+'</span>':'')+runners+' runners</div>'
-          +'<div class="rc-race-name">'+name+'</div>'
+          +'<div class="rc-race-name" style="color:'+nameCol+';">'+name+'</div>'
         +'</div>'
         +'<span id="sw-chev-'+safeId+'-'+i+'" class="rc-chev">›</span>'
       +'</div>'
@@ -430,6 +439,23 @@ function rcSwToggle(idx, course, safeId, inMeeting){
   if(!rEl.dataset.rendered){rcSwRenderRunners(idx,course,rEl);rEl.dataset.rendered='1';}
   const row=document.getElementById('sw-row-'+safeId+'-'+idx);
   if(row)setTimeout(function(){row.scrollIntoView({behavior:'smooth',block:'start'});},50);
+}
+
+// Returns 'real', 'virt', or '' for whether any bet exists on a given race
+function getRaceBetType(course, time){
+  const today=td();
+  const c=(course||'').trim().toLowerCase();
+  const hasBet=function(bets){
+    return (bets||[]).some(function(b){
+      return b.date===today
+        &&(!c||(b.track||'').trim().toLowerCase()===c||!b.track)
+        &&(!time||b.time===time||b.raceTime===time||!b.time);
+    });
+  };
+  if(hasBet(D.bets))return 'real';
+  const vb=getVBank();
+  if(hasBet((vb&&vb.bets)||[]))return 'virt';
+  return '';
 }
 
 function getBetHighlight(horseName, course, time){
@@ -972,9 +998,13 @@ function rcSwRaceCard(race, course){
               : '<span class="rc-your-bet rc-your-bet-loss">Your Bet</span>')
           : '';
         const wlEntry = getWL().find(function(w){return(w.horse||'').toLowerCase().trim()===hn;});
+        const _rGoing = esc(race.going||race.going_description||'');
+        const _rDate  = esc(race.date||td());
+        const _rDist  = esc(race.distance_f||race.distance_round||race.distance||'');
+        const _rPos   = String(pos);
         const watchBtn = wlEntry
           ? '<button class="rc-watch-btn rc-watch-btn-on">\u2713 Watching</button>'
-          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\')" class="rc-watch-btn rc-watch-btn-add">+ Watch</button>';
+          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\')" class="rc-watch-btn rc-watch-btn-add">+ Watch</button>';
         return '<div class="rc-res-runner">'
           + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
           + '<div class="rc-runner-main">'
@@ -1270,13 +1300,29 @@ async function rcLoadResults(){
   }
 }
 
-function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr){
+function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, time, date, distF, position){
+  // Resolve result from finishing position
+  var posNum=parseInt(position)||0;
+  var resultVal=posNum===1?'win':posNum>=2&&posNum<=3?'place':posNum>3?'loss':'';
+  // Build the initial observation pre-filled from the results page
+  var initialObs=[];
+  if(raceName||course||going||date){
+    initialObs=[{
+      id:gid(),
+      date:date||td(),
+      raceName:course||'',
+      track:course||'',
+      going:going||'',
+      result:resultVal,
+      notes:''
+    }];
+  }
   openWLForm(null, {
-    horse: horse,
-    trainer: trainer,
-    jockey: jockey,
+    horse:    horse,
+    trainer:  trainer,
+    jockey:   jockey,
     currentRating: ofr||'',
-    notes: 'Noted from results on '+td()
+    observations:  initialObs
   });
 }
 

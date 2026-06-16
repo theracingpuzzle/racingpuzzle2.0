@@ -84,7 +84,7 @@
 .rc-wl-pill { font-size:12px; }
 
 /* Runner action column */
-.rc-runner-actions { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+.rc-runner-actions { display:flex; flex-direction:row; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:5px; flex-shrink:0; }
 
 /* Bet button */
 .rc-bet-btn { font-size:10px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; padding:6px 12px; border-radius:6px; border:1px solid rgba(37,99,235,.25); background:rgba(37,99,235,.06); color:var(--blu); cursor:pointer; white-space:nowrap; transition:all .12s; }
@@ -128,7 +128,7 @@
 .rc-pos-3 { color:var(--ora); }
 .rc-pos-n { color:var(--mut); }
 .rc-runner-main { flex:1; min-width:0; }
-.rc-runner-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+.rc-runner-right { display:flex; flex-direction:row; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:5px; flex-shrink:0; }
 .rc-sp { font-size:14px; color:var(--gld); font-weight:800; letter-spacing:.3px; }
 
 /* Watch buttons — same shape, colour only differs */

@@ -481,7 +481,7 @@ function openWLEditReview(reviewId){
       if(btn)wlRvwToggle(btn);
     });
     // Result UX (hide beaten if win)
-    if(r.result==='win'){
+    if(r.result==='win'||r.result==='nr'||r.result==='missed'){
       const beatenRow=document.getElementById('rvw-beaten-row');
       if(beatenRow)beatenRow.style.display='none';
     }
@@ -539,7 +539,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'</div>'
     +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" value="'+(raceDist||'')+'" placeholder="e.g. 1m2f"></div>'
     +'<div class="fg"><label>Result</label><div class="rvw-btn-group">'
-    +['win','place','unplaced','nr'].map(function(r){const cols={win:'var(--grn)',place:'var(--gld)',unplaced:'var(--red)',nr:'var(--mut)'};return'<button data-result="'+r+'" data-grp="result" class="rvw-btn" style="--rvw-col:'+cols[r]+'" onclick="wlRvwToggle(this)">'+r+'</button>';}).join('')
+    +[{k:'win',lbl:'Win'},{k:'place',lbl:'Place'},{k:'unplaced',lbl:'Unplaced'},{k:'nr',lbl:'NR'},{k:'missed',lbl:'Missed Target'}].map(function(r){const cols={win:'var(--grn)',place:'var(--gld)',unplaced:'var(--red)',nr:'var(--mut)',missed:'#a78bfa'};return'<button data-result="'+r.k+'" data-grp="result" class="rvw-btn" style="--rvw-col:'+cols[r.k]+'" onclick="wlRvwToggle(this)">'+r.lbl+'</button>';}).join('')
     +'</div></div>'
     +'<div class="g2">'
       +'<div class="fg"><label>Finish Position</label><input type="text" id="rvw-pos" placeholder="e.g. 3rd"></div>'
@@ -595,6 +595,9 @@ function wlRvwToggle(btn){
     const beatenRow=document.getElementById('rvw-beaten-row');
     if(result==='win'){
       if(posEl)posEl.value='1st';
+      if(beatenRow)beatenRow.style.display='none';
+    } else if(result==='nr'||result==='missed'){
+      if(posEl)posEl.value='';
       if(beatenRow)beatenRow.style.display='none';
     } else {
       if(posEl&&posEl.value==='1st')posEl.value='';
@@ -739,7 +742,7 @@ function openWLForm(id,prefill){
   +(function(){
     const pid=e?e.id:'';
     const rvws=pid?(D.reviews||[]).filter(function(r){return r.profileId===pid;}).slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');}):[];
-    const RCOL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'var(--mut)',loss:'#f87171'};
+    const RCOL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'var(--mut)',loss:'#f87171',missed:'#a78bfa'};
     return'<div class="wlf-section">'
       +'<div class="wlf-sec-hdr"><div class="wlf-sec-num">3</div><span class="wlf-sec-title">Race Reviews</span></div>'
       +'<div class="wlf-sec-body">'
@@ -1546,7 +1549,7 @@ function _wlpBuildHTML(e){
   // SECTION 5: REVIEWS
   const profileReviews=(D.reviews||[]).filter(function(r){return r.profileId===e.id;}).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
   const VERDICT_META={upgrade:{col:'#4ade80',label:'Upgrade ↑'},hold:{col:'#60a5fa',label:'Hold →'},downgrade:{col:'#f87171',label:'Downgrade ↓'}};
-  const RESULT_COL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'#3a3a5c'};
+  const RESULT_COL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'#3a3a5c',missed:'#a78bfa'};
   h+='<div class="wlp-section">';
   h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">4</div><span class="wlp-section-title">Race Reviews</span></div>';
   h+='<span class="wlp-section-action" onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\'\')">Add +</span></div>';

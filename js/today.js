@@ -948,7 +948,7 @@ function renderToday(){
   const pe=document.getElementById('tpnl');
   if(pe){
     pe.textContent=set.length?fmt(p):'—';
-    pe.style.color=!set.length?'var(--mut)':p>0?'#4ade80':p<0?'#f87171':'var(--mut)';
+    pe.style.color=!set.length?'var(--mut)':'#60a5fa';
   }
   const realBankSub=document.getElementById('t-real-bank-sub');
   if(realBankSub)realBankSub.textContent=fp(D.bank&&D.bank.current!=null?D.bank.current:0);
@@ -961,7 +961,7 @@ function renderToday(){
   const vpe=document.getElementById('t-virt-pnl');
   if(vpe){
     vpe.textContent=vset.length?fmt(vp):'—';
-    vpe.style.color=!vset.length?'var(--mut)':vp>0?'#4ade80':vp<0?'#f87171':'var(--mut)';
+    vpe.style.color=!vset.length?'var(--mut)':'#fb923c';
   }
   const virtBankSub=document.getElementById('t-virt-bank-sub');
   if(virtBankSub)virtBankSub.textContent=fp(vb.current!=null?vb.current:500);
@@ -1445,7 +1445,7 @@ function renderTrackPulse(){
   el.style.display='block';
   el.innerHTML=
     '<div class="tp-bar">'
-      +'<div class="tp-label">PULSE</div>'
+      +'<div class="tp-label"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><rect x="2" y="9" width="4" height="6" rx="1"/><path d="M6 9l6-6v18l-6-6"/></svg></div>'
       +'<div class="tp-track-wrap">'
         +'<div class="tp-track">'
           +doubled.map(function(t){

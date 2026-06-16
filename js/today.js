@@ -355,6 +355,37 @@ function markStudyDone(){
 }
 
 // ── Combined "Running Today" — watchlist + edge in one section ──
+// Cross-reference a watched horse against today's results cache (already fetched for Track Pulse).
+// Returns {position, result, beatenDistance, sp, going} once the race has actually finished, else null.
+function _wlFindResult(horseName, course){
+  const results=window._todayResultsCache||[];
+  if(!results.length)return null;
+  const hn=(horseName||'').toLowerCase().trim();
+  const cn=(course||'').toLowerCase().trim();
+  for(let i=0;i<results.length;i++){
+    const race=results[i];
+    const rc=(race.course||race.venue||'').toLowerCase().trim();
+    if(cn&&rc&&rc!==cn)continue;
+    const runners=race.runners||race.horses||[];
+    for(let j=0;j<runners.length;j++){
+      const r=runners[j];
+      const rn=(r.horse||r.name||'').toLowerCase().trim();
+      if(rn!==hn)continue;
+      const pos=r.position||r.place||'';
+      if(!pos)continue; // race hasn't returned a result for this runner yet
+      const posNum=parseInt(pos)||0;
+      const result=posNum===1?'win':(posNum>=2&&posNum<=3?'place':(posNum>3?'unplaced':''));
+      return{
+        position:String(pos),result:result,
+        beatenDistance:r.btn||r.beaten_distance||'',
+        sp:r.sp||'',
+        going:race.going||race.going_description||''
+      };
+    }
+  }
+  return null;
+}
+
 async function checkWatchlistRunners(races){
   const wl=getWL();
   const watching=wl.filter(function(e){return e.horse;});
@@ -408,13 +439,15 @@ async function checkWatchlistRunners(races){
             const mr=parseFloat(w.myRating);
             const or=parseFloat(orChanged?racecardOR:storedOR||w.currentRating);
             const edge=(mr&&or&&mr>or)?Math.round(mr-or):0;
+            const resultInfo=_wlFindResult(r.horse||r.name,course);
             alerts.push({
               horse:r.horse||r.name,course,time,raceName,
               jockey:r.jockey||'',raceDist,raceGoing,raceClass,
               wlEntry:w,
               orUpdated:orChanged?racecardOR:null,
               orPrev:orChanged?storedOR:null,
-              edge,mr,or
+              edge,mr,or,
+              resultInfo
             });
           }
         }
@@ -448,21 +481,30 @@ async function checkWatchlistRunners(races){
       const edgeBadge=a.edge>0
         ?'<span class="t-edge-badge" style="margin-left:7px;">MR '+a.mr+' · OR '+a.or+' · +'+a.edge+'</span>'
         :'';
+      const ri=a.resultInfo;
+      const finishBadge=ri
+        ?'<span style="font-size:10px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:6px;margin-left:5px;'
+          +(ri.result==='win'?'background:rgba(22,163,74,.15);color:var(--grn);':ri.result==='place'?'background:rgba(217,119,6,.15);color:var(--gld);':'background:rgba(220,38,38,.12);color:var(--red);')
+          +'">Finished '+ri.position+(ri.sp?' · '+ri.sp:'')+'</span>'
+        :'';
+      const reviewBtn=alreadyReviewed
+        ?'<span class="t-reviewed-badge">✓ Reviewed</span>'
+        :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" data-dist="'+(a.raceDist||'')+'" data-going="'+(a.raceGoing||'')+'" data-class="'+(a.raceClass||'')+'"'
+          +(ri?' data-result="'+ri.result+'" data-pos="'+ri.position+'" data-beaten="'+(ri.beatenDistance||'')+'"':'')
+          +' class="t-wl-review-btn t-review-btn"'+(ri?' style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);"':'')+'>'
+          +(ri?'✓ Confirm Review':'Review ✍️')+'</button>';
       return'<div class="t-alert-row-pur">'
         +'<div class="t-row-sb-gap">'
           +'<div class="t-flex-info">'
             +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">'
-              +'<span class="t-horse-name">'+a.horse+'</span>'+edgeBadge
+              +'<span class="t-horse-name">'+a.horse+'</span>'+edgeBadge+finishBadge
             +'</div>'
             +'<div class="t-muted">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
             +(a.jockey?'<div class="t-jockey">J: '+fmtJockey(a.jockey)+'</div>':'')
             +(a.orUpdated?'<div style="font-size:10px;color:var(--gld);margin-top:2px;">OR: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
           +'</div>'
           +'<div class="t-flex-col-end">'
-            +(alreadyReviewed
-              ?'<span class="t-reviewed-badge">✓ Reviewed</span>'
-              :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" data-dist="'+(a.raceDist||'')+'" data-going="'+(a.raceGoing||'')+'" data-class="'+(a.raceClass||'')+'" class="t-wl-review-btn t-review-btn">Review ✍️</button>'
-            )
+            +reviewBtn
             +'<button data-course="'+a.course+'" data-time="'+a.time+'" class="t-wl-race-btn t-race-btn">Race 🏇</button>'
             +'<button data-wlid="'+wid+'" class="t-wl-profile-btn t-profile-btn">Profile →</button>'
           +'</div>'
@@ -486,7 +528,10 @@ async function checkWatchlistRunners(races){
           btn.getAttribute('data-race'),
           btn.getAttribute('data-dist')||'',
           btn.getAttribute('data-going')||'',
-          btn.getAttribute('data-class')||''
+          btn.getAttribute('data-class')||'',
+          btn.getAttribute('data-result')||'',
+          btn.getAttribute('data-pos')||'',
+          btn.getAttribute('data-beaten')||''
         );
       });
     });
@@ -1411,12 +1456,22 @@ function renderTrackPulse(){
 async function initTrackPulse(){
   await fetchTodayResults();
   renderTrackPulse();
+  // Results are now in — re-check watching horses so any that have finished
+  // get their review auto-filled instead of just declared-to-run
+  if(typeof checkWatchlistRunners==='function'&&window._todayMeetingsCache){
+    const races=window._todayMeetingsCache.racecards||window._todayMeetingsCache.races||[];
+    if(races.length)checkWatchlistRunners(races);
+  }
   // Refresh every 10 minutes — busts meeting cache so results are fresh
   if(window._tpRefreshTimer)clearInterval(window._tpRefreshTimer);
   window._tpRefreshTimer=setInterval(async function(){
-    window._todayMeetingsCache=null;
     window._todayResultsCache=null;
+    try{ window._todayMeetingsCache=await callRacingAPI('racecards/free',{}); }catch(e){}
     await fetchTodayResults();
     renderTrackPulse();
+    if(typeof checkWatchlistRunners==='function'&&window._todayMeetingsCache){
+      const races=window._todayMeetingsCache.racecards||window._todayMeetingsCache.races||[];
+      if(races.length)checkWatchlistRunners(races);
+    }
   },10*60*1000);
 }

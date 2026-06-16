@@ -510,7 +510,7 @@ function openWLEditReview(reviewId){
     }
   },50);
 }
-function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,raceGoing,raceClass){
+function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,raceGoing,raceClass,prefillResult,prefillPos,prefillBeaten){
   const existing=document.getElementById('wl-review-modal');if(existing)existing.remove();
   const wl=getWL();
   const entry=wl.find(function(x){return x.id===profileId;});
@@ -561,6 +561,21 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'</div></div>';
   document.body.appendChild(modal);
   modal.addEventListener('click',function(ev){if(ev.target===modal)modal.remove();});
+
+  // Auto-populate from a known race result (already fetched for Track Pulse / results tab)
+  if(prefillResult){
+    setTimeout(function(){
+      const rbtn=modal.querySelector('.rvw-btn[data-grp="result"][data-result="'+prefillResult+'"]');
+      if(rbtn)wlRvwToggle(rbtn);
+      const posEl=document.getElementById('rvw-pos');
+      if(posEl&&prefillPos)posEl.value=prefillPos;
+      const beatenEl=document.getElementById('rvw-beaten');
+      if(beatenEl&&prefillBeaten)beatenEl.value=prefillBeaten;
+      // Flag the banner so the user knows this was pre-filled, not manually entered
+      const sub=modal.querySelector('.wlr-sub');
+      if(sub)sub.innerHTML+=' <span style="color:var(--grn);font-weight:700;">· Auto-filled from result ⚡</span>';
+    },0);
+  }
 }
 
 function wlRvwToggle(btn){

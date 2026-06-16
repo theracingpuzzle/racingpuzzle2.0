@@ -528,6 +528,7 @@ function rcSwRenderRunners(idx, course, el){
     const _pr2=_wl2.find(function(w){return(w.horse||'').toLowerCase().trim()===_nl2;});
     const _PM2={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#fb923c'},'trainer-intel':{emoji:'🗣',col:'#60a5fa'},'form-study':{emoji:'📊',col:'#ef4444'},'tip-source':{emoji:'💡',col:'#eab308'}};
     const _pm2=_pr2?_PM2[_pr2.reason||'eye-catcher']:null;
+    const _qr2=D.ratings&&D.ratings[_nl2];
     const pid='sw-profile-'+course.replace(/\W/g,'_')+'-'+i;
     return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'">'
       +'<div class="rc-cloth">'+(isNR?'<span class="rc-nr-chip">NR</span>':'<span>'+no+'</span>')+'</div>'
@@ -544,6 +545,7 @@ function rcSwRenderRunners(idx, course, el){
             +(age?'<span class="rc-runner-age" style="font-size:0.72em;color:var(--mut);margin-left:4px;">'+age+'</span>':'')
             +(rpr?'<span class="rc-or">'+rpr+'</span>':'')
             +(_badge?'<span class="rc-wl-pill">'+_pm.emoji+'</span>':'')
+            +(_qr2?'<span style="font-size:10px;font-weight:800;background:rgba(234,179,8,.18);color:#854d0e;border:1px solid rgba(234,179,8,.4);border-radius:6px;padding:2px 7px;margin-left:5px;">MR '+_qr2.mr+'</span>':'')
             +(draw?'<span class="rc-runner-age">'+draw+'</span>':'')
           +'</div>'
           +(form
@@ -556,6 +558,7 @@ function rcSwRenderRunners(idx, course, el){
       +'<div class="rc-runner-actions">'
         +(isNR?''
           :'<button onclick="rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\')\" class="rc-bet-btn">Bet</button>')
+        +(!isNR?'<button onclick="rcQuickRate(event,\''+name.replace(/'/g,"\\'")+'\',\''+rpr+'\')\" class="rc-rate-btn" title="Rate this horse" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:#eab308;border-radius:7px;padding:5px 9px;font-size:13px;cursor:pointer;margin-left:4px;">\u2605</button>':'')
         +(_pr2&&!isNR?'<button onclick="rcToggleProfile(\''+pid+'\',this)" class="rc-profile-tog" style="border-color:'+_pm2.col+';color:'+_pm2.col+';">\u25bc</button>':'')
       +'</div>'
     +'</div>'
@@ -1005,12 +1008,16 @@ function rcSwRaceCard(race, course){
         const watchBtn = wlEntry
           ? '<button class="rc-watch-btn rc-watch-btn-on">\u2713 Watching</button>'
           : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\')" class="rc-watch-btn rc-watch-btn-add">+ Watch</button>';
+        const _qrRes=D.ratings&&D.ratings[hn];
+        const _mrBadgeRes=_qrRes?'<span style="font-size:10px;font-weight:800;background:rgba(234,179,8,.18);color:#854d0e;border:1px solid rgba(234,179,8,.4);border-radius:6px;padding:2px 7px;margin-left:5px;">MR '+_qrRes.mr+'</span>':'';
+        const rateBtnRes='<button onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\')" class="rc-rate-btn" title="Rate this horse" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:#eab308;border-radius:7px;padding:5px 9px;font-size:13px;cursor:pointer;margin-left:4px;">\u2605</button>';
         return '<div class="rc-res-runner">'
           + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
           + '<div class="rc-runner-main">'
             + '<div class="rc-runner-name-row">'
               + '<span class="rc-runner-name">'+horse+'</span>'
               + (ofr?'<span class="rc-or">'+ofr+'</span>':'')
+              + _mrBadgeRes
               + betBadge
             + '</div>'
             + (jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
@@ -1018,6 +1025,7 @@ function rcSwRaceCard(race, course){
           + '</div>'
           + '<div class="rc-runner-right">'
             + (sp?'<span class="rc-sp">'+sp+'</span>':'')
+            + rateBtnRes
             + watchBtn
           + '</div>'
         + '</div>';
@@ -1329,6 +1337,79 @@ function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, 
 function rcBetFromRunner(event, horse, course, time, jockey, trainer, raceName){
   event.stopPropagation();
   openBetFlow('real', horse, course, time, jockey, trainer, raceName);
+}
+
+// ── Quick MR Rating ──────────────────────────────────────────────────────────
+function rcQuickRate(event, horse, or_val){
+  event.stopPropagation();
+  const key=(horse||'').toLowerCase().trim();
+  const existing=D.ratings[key]||{};
+  const overlay=document.createElement('div');
+  overlay.id='rc-qr-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;';
+  overlay.innerHTML=
+    '<div style="background:var(--sur);border-radius:16px 16px 0 0;padding:22px 20px 34px;width:100%;max-width:520px;box-shadow:0 -4px 30px rgba(0,0,0,.35);">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'
+      +'<div>'
+        +'<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:3px;">Quick Rating</div>'
+        +'<div style="font-size:19px;font-weight:800;color:var(--txt);">'+horse+'</div>'
+      +'</div>'
+      +'<button onclick="document.getElementById(\'rc-qr-overlay\').remove()" style="background:var(--bdr);border:none;border-radius:50%;width:30px;height:30px;font-size:18px;color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:14px;">'
+      +'<div style="flex:1;">'
+        +'<label style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:block;">My Rating (MR)</label>'
+        +'<input id="qr-mr" type="number" min="0" max="200" value="'+(existing.mr||or_val||'')+'" placeholder="e.g. 115" style="width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:18px;font-weight:700;text-align:center;">'
+      +'</div>'
+      +'<div style="flex:1;">'
+        +'<label style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:block;">Official Rating</label>'
+        +'<div style="padding:10px 12px;border-radius:9px;border:1px solid var(--bdr);background:rgba(0,0,0,.05);color:var(--mut);font-size:18px;font-weight:700;text-align:center;">'+(or_val||'—')+'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="margin-bottom:14px;">'
+      +'<label style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:block;">Note (optional)</label>'
+      +'<input id="qr-note" type="text" value="'+(existing.note||'')+'" placeholder="e.g. Underrated by handicapper…" style="width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;">'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;">'
+      +'<button onclick="rcSaveQuickRate(\''+horse.replace(/'/g,"\\'")+'\',' +(or_val||'\'\'')+ ')" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--gld);color:#000;font-size:14px;font-weight:800;cursor:pointer;">★ Save Rating</button>'
+      +'<button onclick="rcPromoteToProfile(\''+horse.replace(/'/g,"\\'")+'\',' +(or_val||'\'\'')+ ')" style="padding:12px 14px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-size:12px;font-weight:700;cursor:pointer;">Full Profile</button>'
+    +'</div>'
+    +'</div>';
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
+  document.body.appendChild(overlay);
+  setTimeout(function(){const inp=document.getElementById('qr-mr');if(inp){inp.focus();inp.select();}},100);
+}
+
+function rcSaveQuickRate(horse, or_val){
+  const key=(horse||'').toLowerCase().trim();
+  const mr=parseInt(document.getElementById('qr-mr').value)||0;
+  const note=(document.getElementById('qr-note').value||'').trim();
+  if(!mr){alert('Please enter a rating.');return;}
+  D.ratings[key]={horse:horse,mr:mr,note:note,or:String(or_val||''),date:td()};
+  save();
+  const overlay=document.getElementById('rc-qr-overlay');
+  if(overlay){
+    overlay.innerHTML='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;">'
+      +'<div style="font-size:40px;margin-bottom:10px;">★</div>'
+      +'<div style="font-size:17px;font-weight:700;">Rating saved: MR '+mr+'</div>'
+      +'<div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:5px;">'+horse+'</div>'
+      +'</div>';
+    overlay.style.alignItems='center';
+    setTimeout(function(){overlay.remove();},1200);
+  }
+}
+
+function rcPromoteToProfile(horse, or_val){
+  const key=(horse||'').toLowerCase().trim();
+  const mr=parseInt((document.getElementById('qr-mr')||{}).value)||0;
+  const note=(document.getElementById('qr-note').value||'').trim();
+  if(mr){
+    D.ratings[key]={horse:horse,mr:mr,note:note,or:String(or_val||''),date:td()};
+    save();
+  }
+  const overlay=document.getElementById('rc-qr-overlay');
+  if(overlay)overlay.remove();
+  openWLForm(null,{horse:horse,currentRating:String(or_val||''),myRating:mr?String(mr):''});
 }
 
 // Called by _betFlowProceed in betting.js once checklist is complete

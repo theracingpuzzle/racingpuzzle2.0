@@ -2,7 +2,8 @@
 // Central data object — single source of truth
 let D = {
   bets: [], bank: {start:0, current:0}, rules: [], dailyLog: [],
-  impulse: [], vBank: {start:0, current:0, bets:[]}, watchlist: [], reviews: []
+  impulse: [], vBank: {start:0, current:0, bets:[]}, watchlist: [], reviews: [],
+  ratings: {}  // quick MR ratings — keyed by lowercase horse name
 };
 
 function load() {
@@ -17,6 +18,7 @@ function load() {
       if (!D.bank || typeof D.bank !== 'object') D.bank = {start:0, current:0};
       if (!D.vBank || typeof D.vBank !== 'object') D.vBank = {start:0, current:0, bets:[]};
       if (!Array.isArray(D.vBank.bets)) D.vBank.bets = [];
+      if (!D.ratings || typeof D.ratings !== 'object') D.ratings = {};
       if (Array.isArray(D.watchlist)) {
         D.watchlist.forEach(w => { if (w.notes && !w.conditionsNotes) w.conditionsNotes = w.notes; });
       }

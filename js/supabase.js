@@ -487,7 +487,7 @@ async function supaLoad(){
       D.reviews=reviewRows.map(function(r){return{
         id:r.id,profileId:r.profile_id,
         date:r.date||'',raceName:r.race_name||'',course:r.course||'',
-        result:r.result||'',position:r.position||'',beatenDistance:r.beaten_distance||'',
+        result:r.result||'',position:r.position||'',beatenDistance:r.beaten_distance||'',odds:r.odds||'',
         verdict:r.verdict||'',mrAdjustment:r.mr_adjustment||0,
         goingConfirmed:r.going_confirmed||'',backNextTime:r.back_next_time||'',
         notes:r.notes||'',source:r.source||'manual',
@@ -566,6 +566,7 @@ async function _syncReviews(){
     id:r.id,user_id:uid,profile_id:r.profileId,
     date:r.date||null,race_name:r.raceName||null,course:r.course||null,
     result:r.result||null,position:r.position||null,beaten_distance:r.beatenDistance||null,
+    odds:r.odds||null,
     verdict:r.verdict||null,mr_adjustment:r.mrAdjustment||0,
     going_confirmed:r.goingConfirmed||null,back_next_time:r.backNextTime||null,
     notes:r.notes||null,source:r.source||'manual',

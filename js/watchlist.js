@@ -469,6 +469,7 @@ function openWLEditReview(reviewId){
     const dist=document.getElementById('rvw-dist');if(dist)dist.value=r.distance||'';
     const pos=document.getElementById('rvw-pos');if(pos)pos.value=r.position||'';
     const beaten=document.getElementById('rvw-beaten');if(beaten)beaten.value=r.beatenDistance||'';
+    const odds=document.getElementById('rvw-odds');if(odds)odds.value=r.odds||'';
     const mr=document.getElementById('rvw-mr-adj');if(mr)mr.value=r.mrAdjustment||0;
     const notes=document.getElementById('rvw-notes');if(notes)notes.value=r.notes||'';
     const goingPre=document.getElementById('rvw-going-prefill');if(goingPre)goingPre.value=r.going||'';
@@ -493,6 +494,7 @@ function openWLEditReview(reviewId){
         r.distance=(document.getElementById('rvw-dist')||{value:''}).value.trim();
         r.position=(document.getElementById('rvw-pos').value||'').trim();
         r.beatenDistance=(document.getElementById('rvw-beaten').value||'').trim();
+        r.odds=(document.getElementById('rvw-odds')||{value:''}).value.trim();
         r.result=_rvwGet('result')||r.result;
         r.verdict=_rvwGet('verdict')||r.verdict;
         r.goingConfirmed=_rvwGet('going')||r.goingConfirmed;
@@ -543,6 +545,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
       +'<div class="fg"><label>Finish Position</label><input type="text" id="rvw-pos" placeholder="e.g. 3rd"></div>'
       +'<div class="fg" id="rvw-beaten-row"><label>Beaten Distance</label><input type="text" id="rvw-beaten" placeholder="e.g. 2.5L"></div>'
     +'</div>'
+    +'<div class="fg"><label>Odds</label><input type="text" id="rvw-odds" placeholder="e.g. 7/2 or 4.50"></div>'
     +'<div class="fg"><label>Verdict</label><div class="rvw-btn-group">'
     +[{k:'upgrade',col:'var(--grn)',lbl:'Upgrade ↑'},{k:'hold',col:'var(--blu)',lbl:'Hold →'},{k:'downgrade',col:'var(--red)',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="--rvw-col:'+v.col+'" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
     +'</div></div>'
@@ -623,6 +626,7 @@ function saveWLReview(profileId,horse,course){
     result:_rvwGet('result'),
     position:(document.getElementById('rvw-pos').value||'').trim(),
     beatenDistance:(document.getElementById('rvw-beaten').value||'').trim(),
+    odds:(document.getElementById('rvw-odds')||{value:''}).value.trim(),
     verdict:_rvwGet('verdict'),
     mrAdjustment:mrAdj,
     goingConfirmed:_rvwGet('going'),
@@ -741,7 +745,7 @@ function openWLForm(id,prefill){
       +'<div class="wlf-sec-body">'
       +(rvws.length
         ? rvws.map(function(r){const rc=RCOL[r.result||'']||'var(--mut)';return'<div class="wlf-rvw-row">'
-            +'<div class="wlf-rvw-meta"><span>'+r.date+'</span>'+(r.raceName?'<span class="wlf-rvw-dot">·</span><span>'+r.raceName+'</span>':'')+'<span class="wlf-rvw-badge" style="color:'+rc+';">'+(r.result||'').toUpperCase()+'</span></div>'
+            +'<div class="wlf-rvw-meta"><span>'+r.date+'</span>'+(r.raceName?'<span class="wlf-rvw-dot">·</span><span>'+r.raceName+'</span>':'')+(r.odds?'<span class="wlf-rvw-dot">·</span><span style="color:var(--gld);font-weight:700;">'+r.odds+'</span>':'')+'<span class="wlf-rvw-badge" style="color:'+rc+';">'+(r.result||'').toUpperCase()+'</span></div>'
             +(r.notes?'<div class="wlf-rvw-notes">'+r.notes+'</div>':'')
             +'</div>';}).join('')
         : '<div style="font-size:12px;color:var(--mut);padding:8px 0;">No race reviews yet — use the <strong>Review ✍️</strong> button on the Today page after each run.</div>')

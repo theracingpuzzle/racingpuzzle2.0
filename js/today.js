@@ -1409,22 +1409,9 @@ function _tpBuildItems(races){
   // Recent winners — last 5 as individual items
   var recent=winners.slice(-5).reverse();
   recent.forEach(function(w){
-    var spLabel=w.sp?(fo(w.sp)>1?' at '+w.sp:''):'';
     var jkLabel=w.jockey?' — '+fmtJockey(w.jockey):'';
-    items.push('✅ '+w.time+(w.course?' '+w.course:'')+': '+w.horse+spLabel+jkLabel);
+    items.push('✅ '+w.time+(w.course?' '+w.course:'')+': '+w.horse+jkLabel);
   });
-
-  // Shock result (longest priced winner)
-  var longW=winners.slice().sort(function(a,b){return fo(b.sp)-fo(a.sp);})[0];
-  if(longW&&fo(longW.sp)>=10){
-    items.push('💥 Shock result: '+longW.horse+' ('+longW.sp+') at '+longW.course);
-  }
-
-  // Shortest winner (odds-on)
-  var shortW=winners.filter(function(w){return fo(w.sp)<2;}).sort(function(a,b){return fo(a.sp)-fo(b.sp);})[0];
-  if(shortW){
-    items.push('📌 Odds-on winner: '+shortW.horse+' ('+shortW.sp+') at '+shortW.course);
-  }
 
   return items.length?items:['📊 '+totalRacesResult+' result'+(totalRacesResult>1?'s':'')+' processed today'];
 }

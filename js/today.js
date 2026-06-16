@@ -360,16 +360,20 @@ function markStudyDone(){
 function _wlFindResult(horseName, course){
   const results=window._todayResultsCache||[];
   if(!results.length)return null;
-  const hn=(horseName||'').toLowerCase().trim();
-  const cn=(course||'').toLowerCase().trim();
+  // Strip country suffix e.g. "Frankel (IRE)" — results feed includes it, watchlist entries don't
+  const strip=function(s){return(typeof stripCountrySuffix==='function'?stripCountrySuffix(s||''):(s||'')).toLowerCase().trim();};
+  // Strip trailing track-type qualifiers e.g. "Newcastle (AW)" so course names line up across feeds
+  const normCourse=function(s){return(s||'').replace(/\s*\([^)]*\)\s*$/,'').toLowerCase().trim();};
+  const hn=strip(horseName);
+  const cn=normCourse(course);
   for(let i=0;i<results.length;i++){
     const race=results[i];
-    const rc=(race.course||race.venue||'').toLowerCase().trim();
+    const rc=normCourse(race.course||race.venue||'');
     if(cn&&rc&&rc!==cn)continue;
     const runners=race.runners||race.horses||[];
     for(let j=0;j<runners.length;j++){
       const r=runners[j];
-      const rn=(r.horse||r.name||'').toLowerCase().trim();
+      const rn=strip(r.horse||r.name||'');
       if(rn!==hn)continue;
       const pos=r.position||r.place||'';
       if(!pos)continue; // race hasn't returned a result for this runner yet
@@ -419,10 +423,10 @@ async function checkWatchlistRunners(races){
       if(String(r.number||'').toUpperCase()==='NR')return false;
       return true;
     }).forEach(function(r){
-      const horseName=(r.horse||r.name||'').toLowerCase().trim();
+      const horseName=(typeof stripCountrySuffix==='function'?stripCountrySuffix(r.horse||r.name||''):(r.horse||r.name||'')).toLowerCase().trim();
       const racecardOR=String(r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||(typeof rcGetOFR==='function'?rcGetOFR(r.horse||r.name||''):'')||'').trim();
       watching.forEach(function(w){
-        const wlName=(w.horse||'').toLowerCase().trim();
+        const wlName=(typeof stripCountrySuffix==='function'?stripCountrySuffix(w.horse||''):(w.horse||'')).toLowerCase().trim();
         if(horseName&&wlName&&horseName===wlName){
           // Auto-update OR if racecard has one and it differs from stored value
           const storedOR=String(w.currentRating||'').trim();
@@ -1466,6 +1470,7 @@ async function initTrackPulse(){
   if(window._tpRefreshTimer)clearInterval(window._tpRefreshTimer);
   window._tpRefreshTimer=setInterval(async function(){
     window._todayResultsCache=null;
+    if(typeof rcSwResultsData!=='undefined')rcSwResultsData=[]; // force a real re-fetch — same array the Results tab renders
     try{ window._todayMeetingsCache=await callRacingAPI('racecards/free',{}); }catch(e){}
     await fetchTodayResults();
     renderTrackPulse();

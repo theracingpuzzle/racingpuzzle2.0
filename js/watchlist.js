@@ -510,7 +510,7 @@ function openWLEditReview(reviewId){
     }
   },50);
 }
-function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,raceGoing,raceClass,prefillResult,prefillPos,prefillBeaten){
+function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,raceGoing,raceClass,prefillResult,prefillPos){
   const existing=document.getElementById('wl-review-modal');if(existing)existing.remove();
   const wl=getWL();
   const entry=wl.find(function(x){return x.id===profileId;});
@@ -562,15 +562,15 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
   document.body.appendChild(modal);
   modal.addEventListener('click',function(ev){if(ev.target===modal)modal.remove();});
 
-  // Auto-populate from a known race result (already fetched for Track Pulse / results tab)
+  // Auto-populate from a known race result (already fetched for Track Pulse / results tab).
+  // NOTE: results/today/free does not return beaten distance or SP, so only result + position
+  // can be pre-filled — beaten distance stays a manual field.
   if(prefillResult){
     setTimeout(function(){
       const rbtn=modal.querySelector('.rvw-btn[data-grp="result"][data-result="'+prefillResult+'"]');
       if(rbtn)wlRvwToggle(rbtn);
       const posEl=document.getElementById('rvw-pos');
       if(posEl&&prefillPos)posEl.value=prefillPos;
-      const beatenEl=document.getElementById('rvw-beaten');
-      if(beatenEl&&prefillBeaten)beatenEl.value=prefillBeaten;
       // Flag the banner so the user knows this was pre-filled, not manually entered
       const sub=modal.querySelector('.wlr-sub');
       if(sub)sub.innerHTML+=' <span style="color:var(--grn);font-weight:700;">· Auto-filled from result ⚡</span>';
@@ -913,7 +913,13 @@ function saveWLEntry(id){
   const removedTargetIds=old2?(old2.targets||[]).filter(function(t){return !entry.targets.find(function(n){return n.id===t.id;});}).map(function(t){return t.id;}).filter(Boolean):[];
   if(id){const idx=wl.findIndex(x=>x.id===id);if(idx>-1)wl[idx]=entry;else wl.push(entry);}
   else wl.push(entry);
-  D.watchlist=wl;save();
+  D.watchlist=wl;
+  // If this is a new profile, clean up any orphaned Quick MR Rating for this horse
+  if(!id&&D.ratings){
+    const rKey=(horse||'').toLowerCase().trim();
+    if(D.ratings[rKey])delete D.ratings[rKey];
+  }
+  save();
   // Explicitly delete removed observations and targets from DB (multi-device safe)
   if(removedObsIds.length) supaDeleteObsByIds(removedObsIds).catch(function(){});
   if(removedTargetIds.length) supaDeleteTargetsByIds(removedTargetIds).catch(function(){});

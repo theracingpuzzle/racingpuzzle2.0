@@ -306,25 +306,41 @@ function renderNextRace(){
   window._nextRaceTimer=setTimeout(renderNextRace,60000);
 }
 
-// Navigate to Racecards and auto-expand the next race's meeting + race row
-function goToNextRace(){
-  const course=window._nextRaceCourse;
-  const time=window._nextRaceTime;
+// Navigate to Racecards and auto-expand a specific meeting + race row.
+// Polls for the Races tab to actually finish loading (async fetch + DOM build)
+// instead of guessing a fixed delay — fixes "lands on Races tab but race never opens"
+// on cold loads / slow connections where the old setTimeout(350) fired too early.
+function _rcGoToRace(course, time){
   if(!course){navTo('races');return;}
   navTo('races');
-  setTimeout(function(){
-    rcSwSelectCourse(course);
-    setTimeout(function(){
-      var safeId=course.replace(/\W/g,'_');
-      var races=window.rcSwRacesByMeeting&&window.rcSwRacesByMeeting[course];
-      if(!races)return;
-      var idx=races.findIndex(function(r){
-        var t=r.off||r.off_time||r.time||'';
+  const safeId=course.replace(/\W/g,'_');
+  const deadline=Date.now()+4000;
+  (function waitForMeetingRow(){
+    const row=document.getElementById('swmtg-'+safeId);
+    if(row){
+      rcSwSelectCourse(course);
+      waitForRaceData();
+      return;
+    }
+    if(Date.now()<deadline){setTimeout(waitForMeetingRow,100);}
+    // else: meeting never appeared (course not racing today / bad name) — leave user on Races tab
+  })();
+  function waitForRaceData(){
+    const races=window.rcSwRacesByMeeting&&window.rcSwRacesByMeeting[course];
+    if(races&&races.length){
+      const idx=races.findIndex(function(r){
+        const t=r.off||r.off_time||r.time||'';
         return t===time;
       });
       if(idx>-1)rcSwToggle(idx,course,safeId,true);
-    },200);
-  },350);
+      return;
+    }
+    if(Date.now()<deadline){setTimeout(waitForRaceData,100);}
+  }
+}
+
+function goToNextRace(){
+  _rcGoToRace(window._nextRaceCourse,window._nextRaceTime);
 }
 
 function renderStudyReminder(){
@@ -356,7 +372,12 @@ function markStudyDone(){
 
 // ── Combined "Running Today" — watchlist + edge in one section ──
 // Cross-reference a watched horse against today's results cache (already fetched for Track Pulse).
-// Returns {position, result, beatenDistance, sp, going} once the race has actually finished, else null.
+// Returns {position, result, going} once the race has actually finished, else null.
+// NOTE: results/today/free (the free-tier endpoint) does NOT return beaten distance or SP —
+// confirmed against a live runner payload (fields: horse_id, horse, age, sex, number, position,
+// draw, weight, weight_lbs, headgear, or, jockey, jockey_id, trainer, trainer_id, owner, owner_id,
+// sire, sire_id, dam, dam_id, damsire, damsire_id). Don't re-add those fields here without
+// confirming a paid/upgraded endpoint actually returns them.
 function _wlFindResult(horseName, course){
   const results=window._todayResultsCache||[];
   if(!results.length)return null;
@@ -381,8 +402,6 @@ function _wlFindResult(horseName, course){
       const result=posNum===1?'win':(posNum>=2&&posNum<=3?'place':(posNum>3?'unplaced':''));
       return{
         position:String(pos),result:result,
-        beatenDistance:r.btn||r.beaten_distance||'',
-        sp:r.sp||'',
         going:race.going||race.going_description||''
       };
     }
@@ -489,12 +508,12 @@ async function checkWatchlistRunners(races){
       const finishBadge=ri
         ?'<span style="font-size:10px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:6px;margin-left:5px;'
           +(ri.result==='win'?'background:rgba(22,163,74,.15);color:var(--grn);':ri.result==='place'?'background:rgba(217,119,6,.15);color:var(--gld);':'background:rgba(220,38,38,.12);color:var(--red);')
-          +'">Finished '+ri.position+(ri.sp?' · '+ri.sp:'')+'</span>'
+          +'">Finished '+ri.position+'</span>'
         :'';
       const reviewBtn=alreadyReviewed
         ?'<span class="t-reviewed-badge">✓ Reviewed</span>'
         :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" data-dist="'+(a.raceDist||'')+'" data-going="'+(a.raceGoing||'')+'" data-class="'+(a.raceClass||'')+'"'
-          +(ri?' data-result="'+ri.result+'" data-pos="'+ri.position+'" data-beaten="'+(ri.beatenDistance||'')+'"':'')
+          +(ri?' data-result="'+ri.result+'" data-pos="'+ri.position+'"':'')
           +' class="t-wl-review-btn t-review-btn"'+(ri?' style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);"':'')+'>'
           +(ri?'✓ Confirm Review':'Review ✍️')+'</button>';
       return'<div class="t-alert-row-pur">'
@@ -534,8 +553,7 @@ async function checkWatchlistRunners(races){
           btn.getAttribute('data-going')||'',
           btn.getAttribute('data-class')||'',
           btn.getAttribute('data-result')||'',
-          btn.getAttribute('data-pos')||'',
-          btn.getAttribute('data-beaten')||''
+          btn.getAttribute('data-pos')||''
         );
       });
     });
@@ -548,23 +566,7 @@ async function checkWatchlistRunners(races){
     alertEl.querySelectorAll('.t-wl-race-btn').forEach(function(btn){
       btn.addEventListener('click',function(ev){
         ev.stopPropagation();
-        var course=btn.getAttribute('data-course');
-        var time=btn.getAttribute('data-time')||'';
-        if(!course)return;
-        navTo('races');
-        setTimeout(function(){
-          rcSwSelectCourse(course);
-          setTimeout(function(){
-            var safeId=course.replace(/\W/g,'_');
-            var races=window.rcSwRacesByMeeting&&window.rcSwRacesByMeeting[course];
-            if(!races)return;
-            var idx=races.findIndex(function(r){
-              var t=r.off||r.off_time||r.time||'';
-              return t===time;
-            });
-            if(idx>-1)rcSwToggle(idx,course,safeId,true);
-          },200);
-        },350);
+        _rcGoToRace(btn.getAttribute('data-course'),btn.getAttribute('data-time')||'');
       });
     });
   },0);

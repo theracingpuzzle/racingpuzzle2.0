@@ -107,7 +107,7 @@ function renderVirtHist(){
       var pos=pb.oddsDisplay||(pb.odds||'—');
       pHtml+='<div class="mb pending" data-id="'+pb.id+'" data-virt="1" style="cursor:pointer;border-left-color:#fb923c;">'
         +'<div class="mbl"><div class="mh">'+pb.horse+'</div>'
-        +'<div class="mm">'+pb.date+' · '+(pb.track||'—')+' · <span style="font-family:monospace;">'+pos+'</span> · '+fp(pb.stake)+'</div></div>'
+        +'<div class="mm">'+fdate(pb.date)+' · '+(pb.track||'—')+' · <span style="font-family:monospace;">'+pos+'</span> · '+fp(pb.stake)+'</div></div>'
         +'<div class="mbr"><span class="bdg bpend">pending</span>'
         +'<div style="font-size:10px;color:var(--mut);margin-top:3px;font-family:monospace;">tap to update</div></div></div>';
     }
@@ -141,7 +141,7 @@ function renderVirtHist(){
     var os=b.oddsDisplay||(b.odds||'—');
     html+='<div class="mb '+(b.result||'pending')+'" data-id="'+b.id+'" data-virt="1" style="cursor:pointer;border-left-color:#fb923c;">'
       +'<div class="mbl"><div class="mh">'+b.horse+'</div>'
-      +'<div class="mm">'+b.date+' · '+(b.track||'—')+' · <span style="font-family:monospace;">'+os+'</span></div>'
+      +'<div class="mm">'+fdate(b.date)+' · '+(b.track||'—')+' · <span style="font-family:monospace;">'+os+'</span></div>'
       +'<div class="mm" style="margin-top:2px;">'+fp(b.stake)+' · '+(b.betType||'win').toUpperCase()+(b.source?' · '+b.source.split(' ')[0]:'')+'</div></div>'
       +'<div class="mbr"><span class="bdg '+(bg[b.result]||'bpend')+'">'+(b.result||'pend')+'</span>'
       +'<div class="mp '+(p2===null?'':p2>=0?'pos':'neg')+'" style="margin-top:3px;">'+(p2===null?'—':fmt(p2))+'</div></div></div>';
@@ -161,7 +161,7 @@ function renderHist(){
     pendingEl.innerHTML=pending.length?pending.map(b=>{
       const os=b.oddsDisplay||(b.odds||'—');
       return'<div class="mb pending" onclick="openEM(\''+b.id+'\')" style="cursor:pointer;">'
-        +'<div class="mbl"><div class="mh">'+b.horse+'</div><div class="mm">'+b.date+' · '+b.track+' · <span style="font-family:monospace;">'+os+'</span> · '+fp(b.stake)+'</div></div>'
+        +'<div class="mbl"><div class="mh">'+b.horse+'</div><div class="mm">'+fdate(b.date)+' · '+b.track+' · <span style="font-family:monospace;">'+os+'</span> · '+fp(b.stake)+'</div></div>'
         +'<div class="mbr"><span class="bdg bpend">pending</span><div style="font-size:10px;color:var(--mut);margin-top:3px;font-family:monospace;">tap to update</div></div></div>';
     }).join(''):'';
   }
@@ -191,7 +191,7 @@ function renderHist(){
     return'<div class="mb '+(b.result||'pending')+'" onclick="openEM(\''+b.id+'\')" style="cursor:pointer;">'
       +'<div class="mbl">'
         +'<div class="mh">'+b.horse+'</div>'
-        +'<div class="mm">'+b.date+' · '+b.track+' · <span style="font-family:monospace;">'+os+'</span></div>'
+        +'<div class="mm">'+fdate(b.date)+' · '+b.track+' · <span style="font-family:monospace;">'+os+'</span></div>'
         +'<div class="mm" style="margin-top:2px;">'+fp(b.stake)+' · '+(b.betType||'win').toUpperCase()+(b.source?' · '+b.source.split(' ')[0]:'')+'</div>'
       +'</div>'
       +'<div class="mbr">'
@@ -891,7 +891,7 @@ function _openModal(b,type){
   if(lbl){lbl.textContent=type==='virt'?'Virtual Bet':'Real Bet';lbl.style.color=type==='virt'?'#fb923c':'var(--mut)';}
   document.getElementById('emttl').textContent=b.horse;
   const os=b.oddsDisplay||(b.odds||'—');
-  document.getElementById('emsub').textContent=b.date+(b.track?' · '+b.track:'')+(b.time?' · '+b.time:'')+' · '+os+' · '+fp(b.stake);
+  document.getElementById('emsub').textContent=fdate(b.date)+(b.track?' · '+b.track:'')+(b.time?' · '+b.time:'')+' · '+os+' · '+fp(b.stake);
   const ff=document.getElementById('em-full-fields');
   if(ff)ff.style.display='block';
   document.getElementById('em-horse').value=b.horse||'';

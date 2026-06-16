@@ -4,6 +4,8 @@ function fmt(n){const v=parseFloat(n)||0;return(v>=0?'+':'')+'£'+Math.abs(v).to
 // Ensures a space between jockey name and apprentice claim e.g. "J.Smith(5)" → "J.Smith (5)"
 function fmtJockey(j){return(j||'—').replace(/([a-zA-Z])\(/g,'$1 (');}
 function fp(n){return'£'+(parseFloat(n)||0).toFixed(2);}
+// Converts a stored YYYY-MM-DD date string to DD-MM-YYYY for display
+function fdate(d){if(!d)return d;const p=String(d).split('-');return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:d;}
 
 function fo(s){if(!s)return 0;s=String(s).trim().toUpperCase().replace(/\s/g,'');if(s==='EVS'||s==='EVENS'||s==='1/1')return 2;const m=s.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);if(m){const n=parseFloat(m[1]),d=parseFloat(m[2]);return d>0?parseFloat((n/d+1).toFixed(4)):0;}const n=parseFloat(s);return isNaN(n)?0:n;}
 function dOdds(s){return s?s:'—';}

@@ -149,7 +149,7 @@ async function _supaFlushSilent(){
   const errors=[];
   try{await _supa('POST','profiles',[{id:SUPA_USER_ID,display_name:'Racing Puzzle User',updated_at:new Date().toISOString()}]);}
   catch(e){errors.push('profiles: '+e.message);}
-  const steps=[['bank',_syncBank],['bets',_syncBets],['horse_profiles',_syncProfiles],['rules',_syncRules],['daily_log',_syncDailyLog],['settings',_syncSettings],['horse_reviews',_syncReviews]];
+  const steps=[['bank',_syncBank],['bets',_syncBets],['horse_profiles',_syncProfiles],['rules',_syncRules],['daily_log',_syncDailyLog],['settings',_syncSettings],['horse_reviews',_syncReviews],['mr_ratings',_syncRatings]];
   for(let i=0;i<steps.length;i++){
     try{await steps[i][1]();}
     catch(e){errors.push(steps[i][0]+': '+e.message);console.warn('[Supabase]',steps[i][0],e.message);}
@@ -298,6 +298,27 @@ async function _syncRules(){
   if(rows.length) await _supa('POST','rules',rows);
 }
 
+// ── MR Ratings ──
+async function _syncRatings(){
+  const uid=SUPA_USER_ID;
+  const ratings=D.ratings||{};
+  const rows=Object.keys(ratings).map(function(key){
+    const r=ratings[key];
+    return{
+      id:uid+'_'+key,
+      user_id:uid,
+      horse:r.horse||key,
+      mr:r.mr||'',
+      note:r.note||'',
+      or_val:String(r.or||''),
+      date:r.date||null,
+      updated_at:new Date().toISOString()
+    };
+  });
+  await _supa('DELETE','mr_ratings',null,'user_id=eq.'+uid);
+  if(rows.length) await _supa('POST','mr_ratings',rows);
+}
+
 // ── Daily Log ──
 async function _syncDailyLog(){
   const uid=SUPA_USER_ID;
@@ -346,7 +367,7 @@ async function supaLoad(){
   try{
     // Fetch all tables in parallel
     const _h={'apikey':SUPA_ANON,'Authorization':'Bearer '+_rpToken()};
-    const [bankRows,betRows,profileRows,obsRows,targetRows,ruleRows,logRows,settingRows,reviewRows]=await Promise.all([
+    const [bankRows,betRows,profileRows,obsRows,targetRows,ruleRows,logRows,settingRows,reviewRows,ratingRows]=await Promise.all([
       fetch(SUPA_URL+'/rest/v1/bank?user_id=eq.'+uid,{headers:_h}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/bets?user_id=eq.'+uid+'&order=created_at.asc',{headers:_h}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/horse_profiles?user_id=eq.'+uid,{headers:_h}).then(function(r){return r.json();}),
@@ -355,7 +376,8 @@ async function supaLoad(){
       fetch(SUPA_URL+'/rest/v1/rules?user_id=eq.'+uid+'&order=sort_order.asc',{headers:_h}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/daily_log?user_id=eq.'+uid+'&order=log_date.desc',{headers:_h}).then(function(r){return r.json();}),
       fetch(SUPA_URL+'/rest/v1/settings?user_id=eq.'+uid,{headers:_h}).then(function(r){return r.json();}),
-      fetch(SUPA_URL+'/rest/v1/horse_reviews?user_id=eq.'+uid+'&order=date.desc',{headers:_h}).then(function(r){return r.json();})
+      fetch(SUPA_URL+'/rest/v1/horse_reviews?user_id=eq.'+uid+'&order=date.desc',{headers:_h}).then(function(r){return r.json();}),
+      fetch(SUPA_URL+'/rest/v1/mr_ratings?user_id=eq.'+uid,{headers:_h}).then(function(r){return r.json();})
     ]);
 
     // ── Bank ──
@@ -474,6 +496,16 @@ async function supaLoad(){
         createdAt:new Date(r.created_at).getTime()
       };});
     }
+    // ── MR Ratings ──
+    if(Array.isArray(ratingRows)){
+      D.ratings={};
+      ratingRows.forEach(function(r){
+        const key=(r.horse||'').toLowerCase().trim();
+        if(!key)return;
+        D.ratings[key]={horse:r.horse,mr:r.mr||'',note:r.note||'',or:r.or_val||'',date:r.date||''};
+      });
+    }
+
     // ── needsReview flag onto watchlist entries ──
     if(Array.isArray(D.watchlist)&&Array.isArray(profileRows)){
       const nrMap={};

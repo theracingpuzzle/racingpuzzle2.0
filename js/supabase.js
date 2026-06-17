@@ -192,6 +192,7 @@ async function _syncBets(){
     confidence:b.conf||null,source:b.source||null,
     pre_notes:b.notes||null,post_notes:b.postNotes||null,
     checklist_score:b.checklistScore||0,
+    checklist_answers:b.checklistAnswers&&Object.keys(b.checklistAnswers).length?b.checklistAnswers:null,
     result:b.result||null,returns:b.returns||0,
     bet_banked:!!b.betBanked,
     created_at:b.createdAt?new Date(b.createdAt).toISOString():new Date().toISOString()
@@ -205,6 +206,7 @@ async function _syncBets(){
     confidence:b.conf||null,source:b.source||null,
     pre_notes:b.notes||null,post_notes:b.postNotes||null,
     checklist_score:b.checklistScore||0,
+    checklist_answers:b.checklistAnswers&&Object.keys(b.checklistAnswers).length?b.checklistAnswers:null,
     result:b.result||null,returns:b.returns||0,
     bet_banked:!!b.betBanked,
     created_at:b.createdAt?new Date(b.createdAt).toISOString():new Date().toISOString()
@@ -403,7 +405,7 @@ async function supaLoad(){
         odds:b.odds,oddsDisplay:b.odds_display||'',
         stake:b.stake,betType:b.bet_type,conf:b.confidence,
         source:b.source||'',notes:b.pre_notes||'',postNotes:b.post_notes||'',
-        checklistScore:b.checklist_score||0,
+        checklistScore:b.checklist_score||0,checklistAnswers:b.checklist_answers||{},
         result:b.result,returns:b.returns||0,
         betBanked:!!b.bet_banked,
         createdAt:new Date(b.created_at).getTime()
@@ -415,7 +417,7 @@ async function supaLoad(){
         odds:b.odds,oddsDisplay:b.odds_display||'',
         stake:b.stake,betType:b.bet_type,conf:b.confidence,
         source:b.source||'',notes:b.pre_notes||'',postNotes:b.post_notes||'',
-        checklistScore:b.checklist_score||0,
+        checklistScore:b.checklist_score||0,checklistAnswers:b.checklist_answers||{},
         result:b.result,returns:b.returns||0,
         createdAt:new Date(b.created_at).getTime()
       };});

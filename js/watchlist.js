@@ -468,7 +468,7 @@ function openWLEditReview(reviewId){
   if(!r)return;
   const wl=getWL();
   const entry=wl.find(function(x){return x.id===r.profileId;})||{};
-  openWLPostRaceReview(r.profileId,entry.horse||'',r.course||'','','',r.distance||'',r.going||'','');
+  openWLPostRaceReview(r.profileId,entry.horse||'',r.course||'','',r.raceName||'',r.distance||'',r.going||'','');
   // After modal opens, populate all fields from existing review
   setTimeout(function(){
     const d=document.getElementById('rvw-date');if(d)d.value=r.date||'';
@@ -539,8 +539,8 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
       +'<button onclick="document.getElementById(\'wl-review-modal\').remove()" class="wlr-close">✕</button>'
     +'</div>'
     +'<input type="hidden" id="rvw-going-prefill" value="'+(raceGoing||'')+'">'
-    +'<input type="hidden" id="rvw-racename-prefill" value="'+(raceName||'')+'">'
     +'<div class="wlr-body">'
+    +'<div class="fg"><label>Race Name <span style="color:var(--mut);font-weight:400;">— used for stats &amp; target matching</span></label><input type="text" id="rvw-racename-prefill" value="'+(raceName||'')+'" placeholder="e.g. Goodwood Stakes" autocomplete="off"></div>'
     +'<div class="g2">'
       +'<div class="fg"><label>Date</label><input type="date" id="rvw-date" value="'+td()+'"></div>'
       +'<div class="fg"><label>Course</label><input type="text" id="rvw-course" value="'+(course||'')+'" placeholder="e.g. Haydock"></div>'
@@ -994,6 +994,33 @@ const WLP_CSS = `
   padding-bottom: 40px;
   font-family: var(--font);
   color: var(--txt);
+}
+@media (min-width: 768px) {
+  #wlp-modal {
+    background: rgba(0,0,0,.55);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px 32px;
+  }
+  .wlp-page {
+    max-width: 860px;
+    width: 100%;
+    background: var(--bg);
+    border-radius: 16px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.45);
+    overflow: hidden;
+    margin: 0;
+  }
+  .wlp-sections-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    align-items: start;
+  }
+  .wlp-sections-grid .wlp-section:nth-child(odd) {
+    border-right: 1px solid var(--bdr);
+  }
 }
 /* NAV */
 .wlp-nav {
@@ -1489,6 +1516,7 @@ function _wlpBuildHTML(e){
   }
   h+='</div>'; // hero
 
+  h+='<div class="wlp-sections-grid">';
   // SECTION 1: WHY LOGGED
   h+='<div class="wlp-section">';
   h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">1</div><span class="wlp-section-title">Why Logged</span></div>';
@@ -1589,7 +1617,7 @@ function _wlpBuildHTML(e){
       const rc=RESULT_COL[r.result]||'#3a3a5c';
       h+='<div style="padding:11px 13px;border-bottom:1px solid var(--bdr);">';
       h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">';
-      h+='<div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(r.course||'Race')+(r.distance?' · '+r.distance:'')+'</div>';
+      h+='<div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(r.raceName||r.course||'Race')+(r.course&&r.raceName?' · '+r.course:'')+(r.distance?' · '+r.distance:'')+'</div>';
       h+='<div style="font-size:11px;color:var(--mut);">'+[r.date?_wlpFmt(r.date):''].filter(Boolean).join(' · ')+'</div></div>';
       h+='<div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">';
       if(r.result)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>';
@@ -1614,7 +1642,9 @@ function _wlpBuildHTML(e){
   }
   h+='</div>';
 
-  // SECTION 6: CONDITIONS
+  h+='</div>'; // wlp-sections-grid
+
+  // SECTION 6: CONDITIONS (full width)
   h+='<div class="wlp-section">';
   h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Conditions</span></div><span class="wlp-section-action" onclick="'+editFn+'">Edit ✏️</span></div>';
   h+='<div class="wlp-cond-grid" style="grid-template-columns:repeat('+condItems.length+',1fr);border-bottom:1px solid var(--bdr);">';

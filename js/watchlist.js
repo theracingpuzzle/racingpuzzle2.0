@@ -186,6 +186,7 @@ const WL_FILTERS=[
   {id:'running-today', label:'🏇 Running Today', title:'Horses from your profiler confirmed in today\'s racecards'},
   {id:'no-obs',        label:'👁 No Observations', title:'Profiles with no observations logged yet'},
   {id:'past-target',   label:'📅 Past Target',      title:'Target race dates that have passed — mark if they ran'},
+  {id:'no-date-target',label:'📌 Undated Target',   title:'Profiles with a target race that has no date set yet'},
   {id:'edge',          label:'📈 Edge',              title:'Your rating is above the official rating — potential value'},
 ];
 
@@ -217,6 +218,11 @@ function _applyWLFilter(entries){
     });
     return entries.filter(function(e){
       return runningNames.has((e.horse||'').toLowerCase().trim());
+    });
+  }
+  if(_wlFilter==='no-date-target'){
+    return entries.filter(function(e){
+      return (e.targets||[]).some(function(t){return t.race&&!t.date;});
     });
   }
   if(_wlFilter==='edge'){
@@ -390,6 +396,7 @@ function renderWLList(){
       if(obs.length)subParts.push(obs.length+' obs');
       if(targets.length)subParts.push(targets.length+' target'+(targets.length>1?'s':''));
       if(!obs.length&&!targets.length)subParts.push('No obs or targets yet');
+      if(e.createdAt)subParts.push('Added '+fdate(new Date(e.createdAt).toISOString().slice(0,10)));
 
       html+='<div class="wll-row" style="border-left:none;border-bottom:1px solid var(--bdr);" data-wl-id="'+e.id+'">'
         +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
@@ -502,7 +509,7 @@ function openWLEditReview(reviewId){
         r.mrAdjustment=parseInt((document.getElementById('rvw-mr-adj')||{value:0}).value)||0;
         r.notes=(document.getElementById('rvw-notes').value||'').trim();
         r.going=(document.getElementById('rvw-going-prefill')||{value:''}).value;
-        r.raceName=r.distance||'';
+        r.raceName=(document.getElementById('rvw-racename-prefill')||{value:''}).value.trim()||r.distance||'';
         const idx=(D.reviews||[]).findIndex(function(x){return x.id===reviewId;});
         if(idx>-1)D.reviews[idx]=r;
         save();
@@ -532,6 +539,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
       +'<button onclick="document.getElementById(\'wl-review-modal\').remove()" class="wlr-close">✕</button>'
     +'</div>'
     +'<input type="hidden" id="rvw-going-prefill" value="'+(raceGoing||'')+'">'
+    +'<input type="hidden" id="rvw-racename-prefill" value="'+(raceName||'')+'">'
     +'<div class="wlr-body">'
     +'<div class="g2">'
       +'<div class="fg"><label>Date</label><input type="date" id="rvw-date" value="'+td()+'"></div>'
@@ -619,8 +627,8 @@ function saveWLReview(profileId,horse,course){
   const rvwDist=(document.getElementById('rvw-dist')||{value:''}).value.trim();
   const mrAdjEl=document.getElementById('rvw-mr-adj');
   const mrAdj=mrAdjEl?parseInt(mrAdjEl.value)||0:0;
-  // Build a descriptive raceName from distance + class for display purposes
-  const raceName=rvwDist||'';
+  // Use the prefilled race name (from target) or fall back to distance
+  const raceName=(document.getElementById('rvw-racename-prefill')||{value:''}).value.trim()||rvwDist||'';
 
   const review={
     id:gid(),profileId:profileId,
@@ -933,6 +941,27 @@ function saveWLEntry(id){
   document.getElementById('wl-modal').remove();
   renderWatchlist();
   if(entry.raceDate&&wlView==='cal'){wlCalDate=new Date(entry.raceDate+'T00:00:00');renderWLCal();setTimeout(function(){wlSelectDay(entry.raceDate);},100);}
+}
+
+function wlDeleteReview(reviewId, profileId){
+  if(!confirm('Delete this review permanently?'))return;
+  D.reviews=(D.reviews||[]).filter(function(r){return r.id!==reviewId;});
+  save();
+  openWLProfile(profileId);
+}
+
+function wlDeleteTarget(profileId, targetIdOrRace){
+  const idx=D.watchlist.findIndex(function(x){return x.id===profileId;});
+  if(idx===-1)return;
+  const before=D.watchlist[idx].targets||[];
+  // Match by id first, fall back to race name
+  const removed=before.filter(function(t){return t.id===targetIdOrRace||t.race===targetIdOrRace;});
+  D.watchlist[idx].targets=before.filter(function(t){return t.id!==targetIdOrRace&&t.race!==targetIdOrRace;});
+  D.watchlist[idx].updatedAt=Date.now();
+  const removedIds=removed.map(function(t){return t.id;}).filter(Boolean);
+  if(removedIds.length)supaDeleteTargetsByIds(removedIds).catch(function(){});
+  save();
+  openWLProfile(profileId);
 }
 
 function delWLEntry(id){
@@ -1520,24 +1549,25 @@ function _wlpBuildHTML(e){
     const todayStr=td();
     targets.forEach(function(t){
       const isPast=t.date&&t.date<=todayStr;
-      // Check if a review already exists for this target race on or around that date
-      const alreadyReviewed=isPast&&(D.reviews||[]).some(function(r){
-        return r.profileId===e.id&&r.date===t.date;
+      // Check if a review already exists for this target — match by race name (case-insensitive) since dates may differ
+      const raceLower=(t.race||'').toLowerCase().trim();
+      const alreadyReviewed=(D.reviews||[]).some(function(r){
+        return r.profileId===e.id&&(r.raceName||'').toLowerCase().trim()===raceLower;
       });
       h+='<div class="wlp-target-item"><span class="wlp-target-icon">'+(isPast?'📋':'🏇')+'</span>';
       h+='<div style="flex:1;min-width:0;"><div class="wlp-target-race">'+esc(t.race||'—')+'</div><div class="wlp-target-meta">'+esc(t.track||'—')+'</div></div>';
       h+='<div style="text-align:right;flex-shrink:0;">';
-      h+='<div class="wlp-target-date" style="color:'+(isPast?'var(--mut)':'var(--gld)')+';">'+(t.date?fmt(t.date):'TBC')+'</div>';
+      h+='<div class="wlp-target-date" style="color:'+(isPast?'var(--mut)':'var(--gld)')+';">'+(t.date?fdate(t.date):'TBC')+'</div>';
       if(t.condition)h+='<div class="wlp-target-cond">'+esc(t.condition)+'</div>';
-      if(isPast){
-        if(alreadyReviewed){
-          h+='<div style="font-size:10px;color:#4ade80;margin-top:4px;">✓ Reviewed</div>';
-        }else{
-          // Build onclick to open review pre-filled with target race details
-          const rv='openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\''+esc(t.track||'')+'\',\'\',\''+esc(t.race||'')+'\',\'\',\'\',\'\')';
-          h+='<button onclick="'+rv+'" style="margin-top:5px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.05em;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.4);color:#fb923c;border-radius:6px;cursor:pointer;">Review ✍️</button>';
-        }
+      h+='<div style="display:flex;gap:4px;justify-content:flex-end;margin-top:5px;">';
+      if(alreadyReviewed){
+        h+='<div style="font-size:10px;color:#4ade80;">✓ Reviewed</div>';
+      }else{
+        const rv='openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\''+esc(t.track||'')+'\',\'\',\''+esc(t.race||'')+'\',\'\',\'\',\'\')';
+        h+='<button onclick="'+rv+'" style="padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.05em;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.4);color:#fb923c;border-radius:6px;cursor:pointer;">Review ✍️</button>';
       }
+      h+='<button onclick="wlDeleteTarget(\''+e.id+'\',\''+esc(t.id||t.race)+'\')" style="padding:3px 7px;font-size:10px;font-weight:700;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:6px;cursor:pointer;" title="Remove target">✕</button>';
+      h+='</div>';
       h+='</div></div>';
     });
   }else{
@@ -1573,7 +1603,10 @@ function _wlpBuildHTML(e){
       if(r.backNextTime)chips.push('Back: '+r.backNextTime);
       if(chips.length)h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">'+chips.map(function(c){return'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--mut);">'+c+'</span>';}).join('')+'</div>';
       if(r.notes)h+='<div style="font-size:12px;color:var(--mut);font-style:italic;line-height:1.5;">'+esc(r.notes)+'</div>';
-      h+='<div style="margin-top:8px;"><button onclick="openWLEditReview(\''+r.id+'\')" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--mut);cursor:pointer;">Edit ✏️</button></div>';
+      h+='<div style="margin-top:8px;display:flex;gap:6px;">'
+        +'<button onclick="openWLEditReview(\''+r.id+'\')" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--mut);cursor:pointer;">Edit ✏️</button>'
+        +'<button onclick="wlDeleteReview(\''+r.id+'\',\''+e.id+'\')" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:6px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#f87171;cursor:pointer;">Delete ✕</button>'
+        +'</div>';
       h+='</div>';
     });
   } else {

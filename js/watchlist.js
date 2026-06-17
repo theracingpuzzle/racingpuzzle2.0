@@ -1580,7 +1580,10 @@ function _wlpBuildHTML(e){
       // Check if a review already exists for this target — match by race name (case-insensitive) since dates may differ
       const raceLower=(t.race||'').toLowerCase().trim();
       const alreadyReviewed=(D.reviews||[]).some(function(r){
-        return r.profileId===e.id&&(r.raceName||'').toLowerCase().trim()===raceLower;
+        if(r.profileId!==e.id)return false;
+        const rn=(r.raceName||'').toLowerCase().trim();
+        // Match if race name contains the target name or vice versa (handles partial/abbreviated names)
+        return rn===raceLower||rn.includes(raceLower)||raceLower.includes(rn)||(t.date&&r.date===t.date);
       });
       h+='<div class="wlp-target-item"><span class="wlp-target-icon">'+(isPast?'📋':'🏇')+'</span>';
       h+='<div style="flex:1;min-width:0;"><div class="wlp-target-race">'+esc(t.race||'—')+'</div><div class="wlp-target-meta">'+esc(t.track||'—')+'</div></div>';
@@ -1617,8 +1620,11 @@ function _wlpBuildHTML(e){
       const rc=RESULT_COL[r.result]||'#3a3a5c';
       h+='<div style="padding:11px 13px;border-bottom:1px solid var(--bdr);">';
       h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">';
-      h+='<div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(r.raceName||r.course||'Race')+(r.course&&r.raceName?' · '+r.course:'')+(r.distance?' · '+r.distance:'')+'</div>';
-      h+='<div style="font-size:11px;color:var(--mut);">'+[r.date?_wlpFmt(r.date):''].filter(Boolean).join(' · ')+'</div></div>';
+      h+='<div style="flex:1;min-width:0;">';
+      h+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(r.raceName||r.course||'Race')+'</div>';
+      h+='<div style="font-size:11px;color:var(--mut);margin-top:1px;">'+[r.date?_wlpFmt(r.date):'',r.course||'',r.distance||''].filter(Boolean).join(' · ')+'</div>';
+      if(r.odds)h+='<div style="font-size:11px;font-weight:700;color:var(--gld);margin-top:2px;">'+r.odds+'</div>';
+      h+='</div>';
       h+='<div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">';
       if(r.result)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>';
       if(vm)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;padding:2px 8px;border-radius:5px;background:'+vm.col+'15;border:1px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';

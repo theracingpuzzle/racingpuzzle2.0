@@ -409,19 +409,22 @@ function renderWLList(){
       if(obs.length)subParts.push(obs.length+' obs');
       if(targets.length)subParts.push(targets.length+' target'+(targets.length>1?'s':''));
       if(!obs.length&&!targets.length)subParts.push('No obs or targets yet');
-      if(e.createdAt)subParts.push('Added '+fdate(new Date(e.createdAt).toISOString().slice(0,10)));
+      const addedDate=e.createdAt?'Added '+fdate(new Date(e.createdAt).toISOString().slice(0,10)):'';
 
-      html+='<div class="wll-row" style="border-left:none;border-bottom:1px solid var(--bdr);" data-wl-id="'+e.id+'">'
-        +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
-        +'<div class="wll-main">'
-          +'<div class="wll-name">'+(e.horse||'Unknown')+(e.needsReview?'<span class="wll-review-badge">REVIEW</span>':'')+'</div>'
-          +'<div class="wll-sub">'+subParts.join(' · ')+'</div>'
-          +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
+      html+='<div style="position:relative;border-bottom:1px solid var(--bdr);" data-wl-id="'+e.id+'">'
+        +'<div class="wll-row" style="border-left:none;border-bottom:none;">'
+          +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
+          +'<div class="wll-main">'
+            +'<div class="wll-name">'+(e.horse||'Unknown')+(e.needsReview?'<span class="wll-review-badge">REVIEW</span>':'')+'</div>'
+            +'<div class="wll-sub">'+subParts.join(' · ')+'</div>'
+            +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+REASON_SVG[r]+' '+rm.label+'</div>'
+          +'</div>'
+          +'<div class="wll-right">'
+            +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--navy)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+            +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
+          +'</div>'
         +'</div>'
-        +'<div class="wll-right">'
-          +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--navy)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
-          +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
-        +'</div>'
+        +(addedDate?'<div style="text-align:right;font-size:9px;color:var(--mut);padding:0 12px 5px;letter-spacing:.04em;">'+addedDate+'</div>':'')
       +'</div>';
     });
     if(isOpen){html+='</div>';} // close category wrapper

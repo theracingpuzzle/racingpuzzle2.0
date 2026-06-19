@@ -948,6 +948,24 @@ async function rcSwLoadResults(){
   }
 }
 
+function rcSwDebugRaw(){
+  const listEl = document.getElementById('sw-results-list');
+  if(!listEl) return;
+  const total = rcSwResultsData.length;
+  const summary = rcSwResultsData.map(function(r,i){
+    const time = r.off_time||r.off||r.time||'??:??';
+    const course = r.course||r.venue||'Unknown';
+    const runners = (r.runners||[]).length;
+    return (i+1)+'. '+time+' '+course+' ('+runners+' runners)';
+  }).join('\n');
+  const keys = total ? Object.keys(rcSwResultsData[0]).join(', ') : 'no data';
+  listEl.innerHTML = '<div style="font-family:monospace;font-size:11px;line-height:1.8;padding:12px;background:var(--sur);border:1px solid var(--bdr);border-radius:8px;white-space:pre-wrap;word-break:break-all;">'
+    + '<strong>Total races in rcSwResultsData: '+total+'</strong>\n\n'
+    + '<strong>Race fields (first record):</strong>\n'+keys+'\n\n'
+    + '<strong>All races:</strong>\n'+summary
+    + '</div>';
+}
+
 function rcSwRenderResultsUI(){
   const filterEl = document.getElementById('sw-results-filters');
   if(!filterEl) return;
@@ -961,6 +979,7 @@ function rcSwRenderResultsUI(){
     '<div class="rc-view-tog">'
     + '<button class="rc-view-btn '+(!onT?'on':'off')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
     + '<button class="rc-view-btn '+(onT?'on':'off')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
+    + '<button class="rc-view-btn off" onclick="rcSwDebugRaw()" style="font-size:9px;opacity:.5;">Raw</button>'
     + '</div>';
 
   const listEl = document.getElementById('sw-results-list');

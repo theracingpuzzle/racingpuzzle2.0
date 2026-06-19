@@ -898,6 +898,7 @@ function _lboBackToChecklist(){
 
 
 let rcSwResultsData = [], rcSwResultsView = 'course', rcSwResultsOpenCourse = '';
+let rcSwResultsFetchedAt = 0; // timestamp (ms) of last successful fetch
 const _rcResTimeOpen = {}; // tracks which time-view result races are expanded
 
 function rcSwToggleResTime(idx){
@@ -925,13 +926,15 @@ async function rcSwLoadResults(){
   const stEl = document.getElementById('sw-results-status');
   const listEl = document.getElementById('sw-results-list');
   const filterEl = document.getElementById('sw-results-filters');
-  if(rcSwResultsData.length){ rcSwRenderResultsUI(); return; }
+  // Re-use cached data only if fetched within the last 5 minutes
+  if(rcSwResultsData.length && (Date.now() - rcSwResultsFetchedAt) < 5*60*1000){ rcSwRenderResultsUI(); return; }
   if(stEl){ stEl.style.display='block'; stEl.textContent='Loading results\u2026'; }
   if(listEl) listEl.innerHTML = '';
   if(filterEl) filterEl.style.display = 'none';
   try{
-    const data = await callRacingAPI('results/today/free', {});
+    const data = await callRacingAPI('results/today', {});
     rcSwResultsData = data.results||data.races||[];
+    rcSwResultsFetchedAt = Date.now();
     if(stEl) stEl.style.display = 'none';
     autoMatchBetResults(rcSwResultsData);
     if(!rcSwResultsData.length){

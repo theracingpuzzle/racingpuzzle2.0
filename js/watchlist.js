@@ -337,6 +337,13 @@ function renderWLList(){
   }
 
   const REASON_ORDER=['form-study','eye-catcher','trainer-intel','tip-source','future-target'];
+  const REASON_SVG={
+    'eye-catcher':   '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>',
+    'future-target': '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="1" x2="10" y2="3"/><line x1="10" y1="17" x2="10" y2="19"/><line x1="1" y1="10" x2="3" y2="10"/><line x1="17" y1="10" x2="19" y2="10"/></svg>',
+    'trainer-intel': '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13a8 8 0 1 0-8 5h8v-5z"/></svg>',
+    'form-study':    '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>',
+    'tip-source':    '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2a6 6 0 0 1 4.47 10.06A4 4 0 0 1 13 15H7a4 4 0 0 1-1.47-2.94A6 6 0 0 1 10 2z"/><line x1="8" y1="18" x2="12" y2="18"/><line x1="9" y1="21" x2="11" y2="21"/></svg>',
+  };
   const REASON_META={
     'eye-catcher': {emoji:'🔭',label:'Eye Catcher',  labelPlural:'Eye Catchers',  col:'#a78bfa'},
     'future-target':{emoji:'📰',label:'Future Target',labelPlural:'Future Targets',col:'#34d399'},
@@ -374,8 +381,9 @@ function renderWLList(){
       +'background:'+rm.col+';margin-bottom:'+(isOpen?'0':'8px')+';'
       +'border-radius:'+(isOpen?'10px 10px 0 0':'10px')+';'
       +'transition:border-radius .2s;">'
-      +'<span style="font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#fff;flex:1;">'
-        +rm.emoji+' '+rm.labelPlural
+      +'<span style="display:flex;align-items:center;gap:8px;flex:1;color:#fff;">'
+        +'<span style="display:flex;align-items:center;opacity:.9;">'+REASON_SVG[r]+'</span>'
+        +'<span style="font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;">'+rm.labelPlural+'</span>'
       +'</span>'
       +'<span style="font-family:var(--font);font-size:12px;font-weight:700;color:rgba(255,255,255,.75);margin-right:6px;">'+grp.length+'</span>'
       +'<span style="color:rgba(255,255,255,.85);font-size:18px;line-height:1;display:inline-block;transition:transform .2s;'+(isOpen?'transform:rotate(90deg);':'')+'">›</span>'

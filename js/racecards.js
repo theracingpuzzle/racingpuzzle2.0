@@ -530,7 +530,8 @@ function rcSwRenderRunners(idx, course, el){
     const _pm2=_pr2?_PM2[_pr2.reason||'eye-catcher']:null;
     const _qr2=D.ratings&&D.ratings[_nl2];
     const pid='sw-profile-'+course.replace(/\W/g,'_')+'-'+i;
-    return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'">'
+    const _profileStrip=(!isNR&&!_bh&&_pm2)?'border-left:3px solid '+_pm2.col+';padding-left:11px;':'';
+    return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'" style="'+_profileStrip+'">'
       +'<div class="rc-cloth">'+(isNR?'<span class="rc-nr-chip">NR</span>':'<span>'+no+'</span>')+'</div>'
       +'<div class="rc-runner-body">'
         +(function(){
@@ -538,7 +539,7 @@ function rcSwRenderRunners(idx, course, el){
           const _pr=_wl.find(function(w){return(w.horse||'').toLowerCase().trim()===_nl;});
           const _PM={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#34d399'},'trainer-intel':{emoji:'🗣',col:'#38bdf8'},'form-study':{emoji:'📊',col:'#f59e0b'},'tip-source':{emoji:'💡',col:'#fb7185'}};
           const _pm=_pr?_PM[_pr.reason||'eye-catcher']:null;
-          const _badge=_pr?'<span class="rc-wl-pill" style="color:'+_pm.col+';">'+_pm.emoji+'</span>':'';
+          const _badge='';
           const _nc=isNR?'var(--mut)':_pr?_pm.col:'var(--txt)';
           return'<div class="rc-runner-name-row">'
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'

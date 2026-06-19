@@ -406,7 +406,7 @@ function renderWLList(){
           +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
         +'</div>'
         +'<div class="wll-right">'
-          +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--gld2)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+          +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--navy)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
           +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
         +'</div>'
       +'</div>';
@@ -453,7 +453,7 @@ function renderWLEntry(e){
       +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
     +'</div>'
     +'<div class="wll-right">'
-      +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--gld2)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+      +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--navy)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
       +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
     +'</div>'
   +'</div>';

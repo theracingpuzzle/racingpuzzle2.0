@@ -587,9 +587,9 @@ tr:hover td { background: var(--sur2); }
 
   /* ── Collapsed state ── */
   body.nav-collapsed .bnav { width: 56px; }
-  body.nav-collapsed .bnav-lbl { opacity: 0; pointer-events: none; }
-  body.nav-collapsed .bnav-item { padding: 13px 0; justify-content: center; }
-  body.nav-collapsed .bnav-collapse-btn { width: 100%; }
+  body.nav-collapsed .bnav-lbl { opacity: 0 !important; width: 0 !important; overflow: hidden !important; pointer-events: none; }
+  body.nav-collapsed .bnav-item { padding: 0 !important; justify-content: center !important; align-items: center !important; width: 56px !important; height: 46px !important; }
+  body.nav-collapsed .bnav-collapse-btn { width: 56px !important; justify-content: center !important; }
   body.nav-collapsed .sw-shell { margin-left: 56px; }
   body.nav-collapsed #rg-strip { left: 56px; }
   body.nav-collapsed #bnav-collapse-icon { transform: rotate(180deg); }

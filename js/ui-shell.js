@@ -33,6 +33,16 @@ const NAV_CARD_MAP  = {today:0, races:1, results:2, tracker:3};
   window.addEventListener('orientationchange', function(){ setTimeout(setH, 300); });
 })();
 
+// ─── NAV COLLAPSE (desktop) ───
+(function(){
+  if(localStorage.getItem('rp-nav-collapsed')==='1') document.body.classList.add('nav-collapsed');
+})();
+function toggleNavCollapse(){
+  const collapsed = document.body.classList.toggle('nav-collapsed');
+  localStorage.setItem('rp-nav-collapsed', collapsed ? '1' : '0');
+  setH(); // recalc shell height
+}
+
 // ─── MODE ───
 let mode='sw';
 function setMode(m){

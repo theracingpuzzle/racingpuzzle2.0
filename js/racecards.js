@@ -898,7 +898,6 @@ function _lboBackToChecklist(){
 
 
 let rcSwResultsData = [], rcSwResultsView = 'course', rcSwResultsOpenCourse = '';
-let rcSwResultsFetchedAt = 0; // timestamp (ms) of last successful fetch
 const _rcResTimeOpen = {}; // tracks which time-view result races are expanded
 
 function rcSwToggleResTime(idx){
@@ -926,25 +925,13 @@ async function rcSwLoadResults(){
   const stEl = document.getElementById('sw-results-status');
   const listEl = document.getElementById('sw-results-list');
   const filterEl = document.getElementById('sw-results-filters');
-  // Re-use cached data only if fetched within the last 5 minutes
-  if(rcSwResultsData.length && (Date.now() - rcSwResultsFetchedAt) < 5*60*1000){ rcSwRenderResultsUI(); return; }
+  if(rcSwResultsData.length){ rcSwRenderResultsUI(); return; }
   if(stEl){ stEl.style.display='block'; stEl.textContent='Loading results\u2026'; }
   if(listEl) listEl.innerHTML = '';
   if(filterEl) filterEl.style.display = 'none';
   try{
-    // Fetch page 1 with a high limit, then page 2 if total suggests more exist
-    const data = await callRacingAPI('results/today/free', {limit:200});
-    let races = data.results||data.races||[];
-    // If we got exactly 50, the API likely has more pages — fetch page 2
-    if(races.length === 50){
-      try{
-        const data2 = await callRacingAPI('results/today/free', {limit:200, skip:50});
-        const races2 = data2.results||data2.races||[];
-        races = races.concat(races2);
-      }catch(e2){ /* ignore page 2 errors, use what we have */ }
-    }
-    rcSwResultsData = races;
-    rcSwResultsFetchedAt = Date.now();
+    const data = await callRacingAPI('results/today/free', {});
+    rcSwResultsData = data.results||data.races||[];
     if(stEl) stEl.style.display = 'none';
     autoMatchBetResults(rcSwResultsData);
     if(!rcSwResultsData.length){
@@ -956,30 +943,6 @@ async function rcSwLoadResults(){
   }catch(e){
     if(stEl){ stEl.style.display='block'; stEl.textContent='\u26a0\ufe0f '+e.message; }
   }
-}
-
-function rcSwDebugRaw(){
-  const listEl = document.getElementById('sw-results-list');
-  if(!listEl) return;
-  const total = rcSwResultsData.length;
-  const summary = rcSwResultsData.map(function(r,i){
-    const time = r.off_time||r.off||r.time||'??:??';
-    const course = r.course||r.venue||'Unknown';
-    const runners = (r.runners||[]).length;
-    return (i+1)+'. '+time+' '+course+' ('+runners+' runners)';
-  }).join('\n');
-  const keys = total ? Object.keys(rcSwResultsData[0]).join(', ') : 'no data';
-  listEl.innerHTML = '<div style="font-family:monospace;font-size:11px;line-height:1.8;padding:12px;background:var(--sur);border:1px solid var(--bdr);border-radius:8px;white-space:pre-wrap;word-break:break-all;">'
-    + '<strong>Total races in rcSwResultsData: '+total+'</strong>'+(total===50?' ⚠️ exactly 50 — likely paginated':'')+'\n\n'
-    + '<strong>Race fields (first record):</strong>\n'+keys+'\n\n'
-    + '<strong>All races (earliest first after sort):</strong>\n'
-    + rcSwResultsData.slice().sort(function(a,b){return cmpTime(a.off_time||a.off||a.time||'',b.off_time||b.off||b.time||'');}).map(function(r,i){
-        const time=r.off_time||r.off||r.time||'??:??';
-        const course=r.course||r.venue||'Unknown';
-        const runners=(r.runners||[]).length;
-        return (i+1)+'. '+time+' '+course+' ('+runners+' runners)';
-      }).join('\n')
-    + '</div>';
 }
 
 function rcSwRenderResultsUI(){
@@ -995,7 +958,6 @@ function rcSwRenderResultsUI(){
     '<div class="rc-view-tog">'
     + '<button class="rc-view-btn '+(!onT?'on':'off')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
     + '<button class="rc-view-btn '+(onT?'on':'off')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
-    + '<button class="rc-view-btn off" onclick="rcSwDebugRaw()" style="font-size:9px;opacity:.5;">Raw</button>'
     + '</div>';
 
   const listEl = document.getElementById('sw-results-list');

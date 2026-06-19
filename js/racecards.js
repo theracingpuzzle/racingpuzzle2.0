@@ -932,7 +932,7 @@ async function rcSwLoadResults(){
   if(listEl) listEl.innerHTML = '';
   if(filterEl) filterEl.style.display = 'none';
   try{
-    const data = await callRacingAPI('results/today', {});
+    const data = await callRacingAPI('results/today/free', {});
     rcSwResultsData = data.results||data.races||[];
     rcSwResultsFetchedAt = Date.now();
     if(stEl) stEl.style.display = 'none';

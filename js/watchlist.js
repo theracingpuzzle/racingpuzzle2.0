@@ -338,11 +338,11 @@ function renderWLList(){
 
   const REASON_ORDER=['form-study','eye-catcher','trainer-intel','tip-source','future-target'];
   const REASON_META={
-    'eye-catcher': {emoji:'🔭',label:'Eye Catcher',  labelPlural:'Eye Catchers',  col:CLR_WATCH},
-    'future-target':{emoji:'📰',label:'Future Target',labelPlural:'Future Targets',col:'#fb923c'},
-    'trainer-intel':{emoji:'🗣',label:'Trainer Intel',labelPlural:'Trainer Intel', col:'#60a5fa'},
-    'form-study':   {emoji:'📊',label:'Form Study',   labelPlural:'Form Study',    col:'#ef4444'},
-    'tip-source':   {emoji:'💡',label:'Tip / Source', labelPlural:'Tips & Sources',col:'#eab308'},
+    'eye-catcher': {emoji:'🔭',label:'Eye Catcher',  labelPlural:'Eye Catchers',  col:'#a78bfa'},
+    'future-target':{emoji:'📰',label:'Future Target',labelPlural:'Future Targets',col:'#34d399'},
+    'trainer-intel':{emoji:'🗣',label:'Trainer Intel',labelPlural:'Trainer Intel', col:'#38bdf8'},
+    'form-study':   {emoji:'📊',label:'Form Study',   labelPlural:'Form Study',    col:'#f59e0b'},
+    'tip-source':   {emoji:'💡',label:'Tip / Source', labelPlural:'Tips & Sources',col:'#fb7185'},
   };
 
   const groups={};
@@ -433,7 +433,7 @@ function renderWLList(){
 
 function renderWLEntry(e){
   // Used by calendar day panel
-  const RMAP={'eye-catcher':{emoji:'🔭',col:CLR_WATCH,label:'Eye Catcher'},'future-target':{emoji:'📰',col:'#fb923c',label:'Future Target'},'trainer-intel':{emoji:'🗣',col:'#60a5fa',label:'Trainer Intel'},'form-study':{emoji:'📊',col:'#ef4444',label:'Form Study'},'tip-source':{emoji:'💡',col:'#eab308',label:'Tip / Source'}};
+  const RMAP={'eye-catcher':{emoji:'🔭',col:'#a78bfa',label:'Eye Catcher'},'future-target':{emoji:'📰',col:'#34d399',label:'Future Target'},'trainer-intel':{emoji:'🗣',col:'#38bdf8',label:'Trainer Intel'},'form-study':{emoji:'📊',col:'#f59e0b',label:'Form Study'},'tip-source':{emoji:'💡',col:'#fb7185',label:'Tip / Source'}};
   const rm=RMAP[e.reason||'eye-catcher']||RMAP['eye-catcher'];
   const obs=e.observations||[];
   const targets=e.targets||[];
@@ -698,7 +698,7 @@ function openWLForm(id,prefill){
   const goingHtml=going.map(function(g){const sel=_wlDossier.goingPrefs.includes(g);return'<button type="button" data-going="'+g+'" onclick="wlToggleGoing(this)" class="wlf-going-btn'+(sel?' on':'')+'">'+g+'</button>';}).join('');
   const REASONS=[{value:'eye-catcher',emoji:'🔭',label:'Eye Catcher'},{value:'future-target',emoji:'📰',label:'Future Target'},{value:'trainer-intel',emoji:'🗣',label:'Trainer Intel'},{value:'form-study',emoji:'📊',label:'Form Study'},{value:'tip-source',emoji:'💡',label:'Tip / Source'}];
   const curReason=e?e.reason||'eye-catcher':'eye-catcher';
-  const REASON_COLS={'eye-catcher':CLR_WATCH,'future-target':'#fb923c','trainer-intel':'#60a5fa','form-study':'#ef4444','tip-source':'#eab308'};
+  const REASON_COLS={'eye-catcher':'#a78bfa','future-target':'#34d399','trainer-intel':'#38bdf8','form-study':'#f59e0b','tip-source':'#fb7185'};
   const reasonHtml=REASONS.map(function(r){const sel=r.value===curReason;return'<button type="button" data-reason="'+r.value+'" onclick="wlSelectReason(this)" class="wlf-reason-btn'+(sel?' on':'')+'"><span class="wlf-reason-ico">'+r.emoji+'</span><span class="wlf-reason-lbl">'+r.label+'</span></button>';}).join('');
   modal.innerHTML=
   '<div class="wlf-page">'
@@ -1390,11 +1390,11 @@ function _wlpBuildHTML(e){
   const fmt=_wlpFmt;
 
   const REASONS={
-    'eye-catcher':  {emoji:'🔭',label:'Eye Catcher',  col:CLR_WATCH},
-    'future-target':{emoji:'📰',label:'Future Target', col:'#fb923c'},
-    'trainer-intel':{emoji:'🗣',label:'Trainer Intel', col:'#60a5fa'},
-    'form-study':   {emoji:'📊',label:'Form Study',    col:'#ef4444'},
-    'tip-source':   {emoji:'💡',label:'Tip / Source',  col:'#eab308'},
+    'eye-catcher':  {emoji:'🔭',label:'Eye Catcher',  col:'#a78bfa'},
+    'future-target':{emoji:'📰',label:'Future Target', col:'#34d399'},
+    'trainer-intel':{emoji:'🗣',label:'Trainer Intel', col:'#38bdf8'},
+    'form-study':   {emoji:'📊',label:'Form Study',    col:'#f59e0b'},
+    'tip-source':   {emoji:'💡',label:'Tip / Source',  col:'#fb7185'},
   };
   const WHY_ORDER=['eye-catcher','future-target','trainer-intel','form-study','tip-source'];
   const RESULT_COLS={win:'#4ade80',place:CLR_WATCH,loss:'#f87171'};

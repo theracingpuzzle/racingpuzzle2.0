@@ -526,7 +526,7 @@ function rcSwRenderRunners(idx, course, el){
     const _bh=isNR?'':getBetHighlight(name,course,time);
     const _wl2=getWL();const _nl2=(name||'').toLowerCase().trim();
     const _pr2=_wl2.find(function(w){return(w.horse||'').toLowerCase().trim()===_nl2;});
-    const _PM2={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#fb923c'},'trainer-intel':{emoji:'🗣',col:'#60a5fa'},'form-study':{emoji:'📊',col:'#ef4444'},'tip-source':{emoji:'💡',col:'#eab308'}};
+    const _PM2={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#34d399'},'trainer-intel':{emoji:'🗣',col:'#38bdf8'},'form-study':{emoji:'📊',col:'#f59e0b'},'tip-source':{emoji:'💡',col:'#fb7185'}};
     const _pm2=_pr2?_PM2[_pr2.reason||'eye-catcher']:null;
     const _qr2=D.ratings&&D.ratings[_nl2];
     const pid='sw-profile-'+course.replace(/\W/g,'_')+'-'+i;
@@ -536,7 +536,7 @@ function rcSwRenderRunners(idx, course, el){
         +(function(){
           const _wl=getWL();const _nl=(name||'').toLowerCase().trim();
           const _pr=_wl.find(function(w){return(w.horse||'').toLowerCase().trim()===_nl;});
-          const _PM={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#fb923c'},'trainer-intel':{emoji:'🗣',col:'#60a5fa'},'form-study':{emoji:'📊',col:'#ef4444'},'tip-source':{emoji:'💡',col:'#eab308'}};
+          const _PM={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#34d399'},'trainer-intel':{emoji:'🗣',col:'#38bdf8'},'form-study':{emoji:'📊',col:'#f59e0b'},'tip-source':{emoji:'💡',col:'#fb7185'}};
           const _pm=_pr?_PM[_pr.reason||'eye-catcher']:null;
           const _badge=_pr?'<span class="rc-wl-pill" style="color:'+_pm.col+';">'+_pm.emoji+'</span>':'';
           const _nc=isNR?'var(--mut)':_pr?_pm.col:'var(--txt)';
@@ -1116,7 +1116,7 @@ function rcSwRenderResultsCourse(listEl){
 
 function rcProfilePanelHtml(profiled,panelId){
   if(!profiled)return'';
-  const rm={'eye-catcher':{emoji:'👁',col:'#a78bfa',label:'Eye Catcher'},'future-target':{emoji:'📰',col:'#fb923c',label:'Future Target'},'trainer-intel':{emoji:'🗣',col:'#60a5fa',label:'Trainer Intel'},'form-study':{emoji:'📊',col:'#ef4444',label:'Form Study'},'tip-source':{emoji:'💡',col:'#eab308',label:'Tip Source'}};
+  const rm={'eye-catcher':{emoji:'👁',col:'#a78bfa',label:'Eye Catcher'},'future-target':{emoji:'📰',col:'#34d399',label:'Future Target'},'trainer-intel':{emoji:'🗣',col:'#38bdf8',label:'Trainer Intel'},'form-study':{emoji:'📊',col:'#f59e0b',label:'Form Study'},'tip-source':{emoji:'💡',col:'#fb7185',label:'Tip Source'}};
   const meta=rm[profiled.reason||'eye-catcher']||rm['eye-catcher'];
   const edge=(function(){const mr=parseFloat(profiled.myRating),or=parseFloat(profiled.currentRating);if(!mr||!or)return null;return mr-or;}());
   const edgeHtml=edge===null?''
@@ -1437,10 +1437,10 @@ let _rcSlCourse    = '';   // current course name
 // Reason map (shared with profile panel)
 const _RC_SL_REASONS = {
   'eye-catcher':  {emoji:'👁', col:'#a78bfa', label:'Eye Catcher'},
-  'future-target':{emoji:'📰', col:'#fb923c', label:'Future Target'},
-  'trainer-intel':{emoji:'🗣', col:'#60a5fa', label:'Trainer Intel'},
-  'form-study':   {emoji:'📊', col:'#ef4444', label:'Form Study'},
-  'tip-source':   {emoji:'💡', col:'#eab308', label:'Tip Source'},
+  'future-target':{emoji:'📰', col:'#34d399', label:'Future Target'},
+  'trainer-intel':{emoji:'🗣', col:'#38bdf8', label:'Trainer Intel'},
+  'form-study':   {emoji:'📊', col:'#f59e0b', label:'Form Study'},
+  'tip-source':   {emoji:'💡', col:'#fb7185', label:'Tip Source'},
 };
 
 // ── Step 1: Race picker ────────────────────────────────────────────

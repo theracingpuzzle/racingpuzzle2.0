@@ -510,7 +510,7 @@ tr:hover td { background: var(--sur2); }
   /* Sidebar nav — sits below header */
   .bnav {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
     width: 200px;
     height: calc(100vh - 56px);
     min-height: 0;
@@ -548,7 +548,7 @@ tr:hover td { background: var(--sur2); }
   .bnav-collapse-btn:hover { color: rgba(255,255,255,.7); }
 
   .bnav-item {
-    flex: 0 0 auto;
+    flex: 0 0 auto !important;
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
@@ -558,6 +558,7 @@ tr:hover td { background: var(--sur2); }
     border-radius: 0;
     white-space: nowrap;
     overflow: hidden;
+    width: 100%;
   }
 
   /* Active indicator — left bar instead of top bar */
@@ -588,7 +589,7 @@ tr:hover td { background: var(--sur2); }
   /* ── Collapsed state ── */
   body.nav-collapsed .bnav { width: 56px; }
   body.nav-collapsed .bnav-lbl { opacity: 0; pointer-events: none; }
-  body.nav-collapsed .bnav-item { padding: 13px 0; justify-content: center; }
+  body.nav-collapsed .bnav-item { padding: 13px 0; justify-content: center; width: 56px; }
   body.nav-collapsed .sw-shell { margin-left: 56px; }
   body.nav-collapsed #rg-strip { left: 56px; }
   body.nav-collapsed #bnav-collapse-icon { transform: rotate(180deg); }

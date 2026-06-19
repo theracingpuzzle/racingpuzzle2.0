@@ -426,6 +426,12 @@ async function checkWatchlistRunners(races){
     return;
   }
 
+  const todayStr2=td();
+  // Exclude horses added to the watchlist today — nothing to alert on yet
+  const watching2=watching.filter(function(w){
+    return !w.createdAt||new Date(w.createdAt).toISOString().slice(0,10)!==todayStr2;
+  });
+
   const alerts=[];
   (races||[]).forEach(function(race){
     const time=race.off||race.off_time||race.time||'—';
@@ -444,7 +450,7 @@ async function checkWatchlistRunners(races){
     }).forEach(function(r){
       const horseName=(typeof stripCountrySuffix==='function'?stripCountrySuffix(r.horse||r.name||''):(r.horse||r.name||'')).toLowerCase().trim();
       const racecardOR=String(r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||(typeof rcGetOFR==='function'?rcGetOFR(r.horse||r.name||''):'')||'').trim();
-      watching.forEach(function(w){
+      watching2.forEach(function(w){
         const wlName=(typeof stripCountrySuffix==='function'?stripCountrySuffix(w.horse||''):(w.horse||'')).toLowerCase().trim();
         if(horseName&&wlName&&horseName===wlName){
           // Auto-update OR if racecard has one and it differs from stored value
@@ -510,12 +516,24 @@ async function checkWatchlistRunners(races){
           +(ri.result==='win'?'background:rgba(22,163,74,.15);color:var(--grn);':ri.result==='place'?'background:rgba(217,119,6,.15);color:var(--gld);':'background:rgba(220,38,38,.12);color:var(--red);')
           +'">Finished '+ri.position+'</span>'
         :'';
+      // Don't show review button if the watchlist entry was created today (just added)
+      const addedToday=a.wlEntry&&a.wlEntry.createdAt&&new Date(a.wlEntry.createdAt).toISOString().slice(0,10)===todayStr;
+      // Only show review button once the race has a result or the time has passed
+      const raceMinsPast=(function(){
+        try{const t=a.time||'';const parts=t.match(/(\d+):(\d+)/);if(!parts)return false;
+          const now=new Date();const raceDate=new Date();
+          raceDate.setHours(parseInt(parts[1]),parseInt(parts[2]),0,0);
+          return now>raceDate;}catch(e){return false;}
+      })();
       const reviewBtn=alreadyReviewed
         ?'<span class="t-reviewed-badge">✓ Reviewed</span>'
-        :'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" data-dist="'+(a.raceDist||'')+'" data-going="'+(a.raceGoing||'')+'" data-class="'+(a.raceClass||'')+'"'
-          +(ri?' data-result="'+ri.result+'" data-pos="'+ri.position+'"':'')
-          +' class="t-wl-review-btn t-review-btn"'+(ri?' style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);"':'')+'>'
-          +(ri?'✓ Confirm Review':'Review ✍️')+'</button>';
+        :addedToday?''
+        :(ri||raceMinsPast)
+          ?'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" data-dist="'+(a.raceDist||'')+'" data-going="'+(a.raceGoing||'')+'" data-class="'+(a.raceClass||'')+'"'
+            +(ri?' data-result="'+ri.result+'" data-pos="'+ri.position+'"':'')
+            +' class="t-wl-review-btn t-review-btn"'+(ri?' style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);"':'')+'>'
+            +(ri?'✓ Confirm Review':'Review ✍️')+'</button>'
+          :'';
       return'<div class="t-alert-row-pur">'
         +'<div class="t-row-sb-gap">'
           +'<div class="t-flex-info">'

@@ -19,8 +19,14 @@ const NAV_CARD_MAP  = {today:0, races:1, results:2, tracker:3};
     const sab = tBot.offsetHeight || 0;
     document.body.removeChild(tBot);
 
-    // Shell sits between header (56px) and nav (72px base + safe-area-bottom)
-    document.documentElement.style.setProperty('--shell-h', (window.innerHeight - 56 - sat - 72 - sab) + 'px');
+    // On desktop (≥768px) nav is a sidebar — shell fills full height minus header only
+    const isDesktop = window.innerWidth >= 768;
+    if(isDesktop){
+      document.documentElement.style.setProperty('--shell-h', (window.innerHeight - 56 - sat) + 'px');
+    } else {
+      // Shell sits between header (56px) and nav (72px base + safe-area-bottom)
+      document.documentElement.style.setProperty('--shell-h', (window.innerHeight - 56 - sat - 72 - sab) + 'px');
+    }
   }
   setH();
   window.addEventListener('resize', setH);

@@ -65,7 +65,7 @@ function _showTodayDemo(){
   if(ta){
     ta.style.display = 'block';
     ta.innerHTML = '<div class="t-alert-pur">'
-      + '<div class="t-wl-hdr"><div class="t-alert-lbl-pur">🏇 Running Today</div></div>'
+      + '<div class="t-wl-hdr"><div class="t-alert-lbl-pur" style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7;flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>Running Today</div></div>'
       + [
           // Frankel — 2000 Guineas, Newmarket 2011
           {horse:'Frankel',       course:'Newmarket', time:'14:00', jockey:'T. Queally',   race:"2000 Guineas (Group 1)",        edge:8, mr:140, or:132},
@@ -87,9 +87,8 @@ function _showTodayDemo(){
                 +'<div class="t-jockey">J: '+fmtJockey(a.jockey)+'</div>'
               +'</div>'
               +'<div class="t-flex-col-end">'
-                +'<button class="t-review-btn">Review ✍️</button>'
-                +'<button class="t-race-btn">Race 🏇</button>'
-                +'<button class="t-profile-btn">Profile →</button>'
+                +'<button class="t-review-btn">Review</button>'
+                +'<button style="background:none;border:none;padding:2px 0;cursor:pointer;font-size:10px;color:var(--mut);text-align:right;letter-spacing:.02em;">Profile →</button>'
               +'</div>'
             +'</div>'
           +'</div>';
@@ -499,7 +498,10 @@ async function checkWatchlistRunners(races){
 
   alertEl.innerHTML='<div class="t-alert-pur">'
     +'<div class="t-wl-hdr">'
-      +'<div class="t-alert-lbl-pur">🏇 Running Today</div>'
+      +'<div class="t-alert-lbl-pur" style="display:flex;align-items:center;gap:6px;">'
+        +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7;flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>'
+        +'Running Today'
+      +'</div>'
       +'<button onclick="generateWatchlistPDF()" class="t-pdf-btn">↓ PDF</button>'
     +'</div>'
     +alerts.map(function(a){
@@ -534,6 +536,13 @@ async function checkWatchlistRunners(races){
             +' class="t-wl-review-btn t-review-btn"'+(ri?' style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);"':'')+'>'
             +(ri?'✓ Confirm Review':'Review ✍️')+'</button>'
           :'';
+      // Primary action: review (if available/past) or race (if upcoming)
+      const primaryBtn=reviewBtn
+        ?reviewBtn
+        :'<button data-course="'+a.course+'" data-time="'+a.time+'" class="t-wl-race-btn t-race-btn">'
+          +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>'
+          +' Racecard'
+        +'</button>';
       return'<div class="t-alert-row-pur">'
         +'<div class="t-row-sb-gap">'
           +'<div class="t-flex-info">'
@@ -545,9 +554,8 @@ async function checkWatchlistRunners(races){
             +(a.orUpdated?'<div style="font-size:10px;color:var(--gld);margin-top:2px;">OR: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
           +'</div>'
           +'<div class="t-flex-col-end">'
-            +reviewBtn
-            +'<button data-course="'+a.course+'" data-time="'+a.time+'" class="t-wl-race-btn t-race-btn">Race 🏇</button>'
-            +'<button data-wlid="'+wid+'" class="t-wl-profile-btn t-profile-btn">Profile →</button>'
+            +primaryBtn
+            +(wid?'<button data-wlid="'+wid+'" class="t-wl-profile-btn" style="background:none;border:none;padding:2px 0;cursor:pointer;font-size:10px;color:var(--mut);text-align:right;letter-spacing:.02em;">Profile →</button>':'')
           +'</div>'
         +'</div>'
       +'</div>';
@@ -1033,11 +1041,15 @@ function renderCheckIn(){
   } else {
     // Show check-in strip — restore mood button active state
     const mood=(log&&log.mood)||'neutral';
+    const _moodCols={poor:'var(--red)',neutral:'var(--mut)',good:'var(--grn)',great:'#34d399'};
     document.querySelectorAll('.mood-btn-sm').forEach(function(b){
       const m=b.getAttribute('onclick').replace("setMood('","").replace("')","");
-      b.style.background=m===mood?'rgba(232,228,220,.12)':'transparent';
-      b.style.borderColor=m===mood?'rgba(232,228,220,.3)':'transparent';
-      b.style.opacity=m===mood?'1':'.5';
+      const activeCol=_moodCols[m]||'rgba(232,228,220,.8)';
+      const isActive=m===mood;
+      b.style.background=isActive?'rgba(255,255,255,.06)':'transparent';
+      b.style.borderColor=isActive?activeCol:'var(--bdr)';
+      b.style.color=isActive?activeCol:'var(--mut)';
+      b.style.opacity=isActive?'1':'.4';
     });
     const tf=document.getElementById('t-focus');
     if(tf&&log&&log.focus) tf.value=log.focus;
@@ -1045,11 +1057,13 @@ function renderCheckIn(){
 }
 
 function setMood(mood){
+  const moodCols={poor:'var(--red)',neutral:'var(--mut)',good:'var(--grn)',great:'#34d399'};
   document.querySelectorAll('.mood-btn-sm').forEach(function(b){
-    b.style.background='transparent';b.style.borderColor='transparent';b.style.opacity='.5';
+    b.style.background='transparent';b.style.borderColor='var(--bdr)';b.style.opacity='.4';b.style.color='var(--mut)';
   });
   const btn=document.getElementById('mood-'+mood);
-  if(btn){btn.style.background='rgba(232,228,220,.12)';btn.style.borderColor='rgba(232,228,220,.3)';btn.style.opacity='1';}
+  const activeCol=moodCols[mood]||'rgba(232,228,220,.8)';
+  if(btn){btn.style.background='rgba(255,255,255,.06)';btn.style.borderColor=activeCol;btn.style.opacity='1';btn.style.color=activeCol;}
   const t=td();
   D.dailyLog=D.dailyLog||[];
   let log=D.dailyLog.find(d=>d.date===t);
@@ -1091,14 +1105,22 @@ function undoCheckIn(){
   const ci=document.getElementById('tcin');
   if(ci){
     ci.innerHTML=
-      '<div id="tmood-btns" style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:9px;">'
-        +'<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);flex-shrink:0;">Today</span>'
-        +'<button class="mood-btn-sm" onclick="setMood(\'poor\')"    id="mood-poor">😔</button>'
-        +'<button class="mood-btn-sm" onclick="setMood(\'neutral\')" id="mood-neutral">😐</button>'
-        +'<button class="mood-btn-sm" onclick="setMood(\'good\')"    id="mood-good">🙂</button>'
-        +'<button class="mood-btn-sm" onclick="setMood(\'great\')"   id="mood-great">😄</button>'
+      '<div id="tmood-btns" style="display:flex;align-items:center;gap:5px;padding:6px 10px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:9px;">'
+        +'<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);flex-shrink:0;margin-right:2px;">Mood</span>'
+        +'<button class="mood-btn-sm" onclick="setMood(\'poor\')" id="mood-poor" title="Poor" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;border:1px solid var(--bdr);background:transparent;cursor:pointer;padding:0;color:var(--mut);transition:all .12s;">'
+          +'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>'
+        +'</button>'
+        +'<button class="mood-btn-sm" onclick="setMood(\'neutral\')" id="mood-neutral" title="Neutral" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;border:1px solid var(--bdr);background:transparent;cursor:pointer;padding:0;color:var(--mut);transition:all .12s;">'
+          +'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>'
+        +'</button>'
+        +'<button class="mood-btn-sm" onclick="setMood(\'good\')" id="mood-good" title="Good" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;border:1px solid var(--bdr);background:transparent;cursor:pointer;padding:0;color:var(--mut);transition:all .12s;">'
+          +'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>'
+        +'</button>'
+        +'<button class="mood-btn-sm" onclick="setMood(\'great\')" id="mood-great" title="Great" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;border:1px solid var(--bdr);background:transparent;cursor:pointer;padding:0;color:var(--mut);transition:all .12s;">'
+          +'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>'
+        +'</button>'
         +'<input type="text" id="t-focus" placeholder="Focus for today…" autocomplete="off"'
-          +' style="flex:1;min-width:0;background:transparent;border:none;outline:none;font-size:12px;color:var(--txt);padding:0 4px;"'
+          +' style="flex:1;min-width:0;background:transparent;border:none;outline:none;font-size:12px;color:var(--txt);padding:0 6px;"'
           +' onblur="saveFocus(this.value)">'
         +'<button onclick="doCheckIn()" id="t-checkin-btn"'
           +' style="flex-shrink:0;padding:4px 10px;border-radius:6px;border:none;background:rgba(22,163,74,.2);color:#4ade80;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;cursor:pointer;">✓</button>'

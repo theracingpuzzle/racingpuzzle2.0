@@ -177,22 +177,23 @@
   display: flex;
   align-items: stretch;
   overflow: hidden;
-  background: #f5c500;
-  border-radius: 8px;
+  background: rgba(245,197,0,.15);
+  border: 1px solid rgba(245,197,0,.25);
+  border-radius: 7px;
   margin: 10px 0 0;
 }
 
 .tp-label {
   flex-shrink: 0;
   font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 900;
   letter-spacing: .2em;
   text-transform: uppercase;
-  color: #000;
-  background: #000;
-  color: #f5c500;
-  padding: 0 12px;
+  color: rgba(245,197,0,.9);
+  background: rgba(245,197,0,.12);
+  border-right: 1px solid rgba(245,197,0,.2);
+  padding: 0 10px;
   display: flex;
   align-items: center;
 }
@@ -211,25 +212,25 @@
 }
 
 .tp-item {
-  font-size: 12px;
-  font-weight: 700;
-  color: #000;
-  padding: 9px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(245,197,0,.85);
+  padding: 5px 9px;
   flex-shrink: 0;
 }
 
 .tp-item-highlight {
-  color: #166534; /* dark green on yellow */
+  color: #4ade80; /* green on dark bg */
 }
 
 .tp-item-warn {
-  color: #92400e; /* dark amber on yellow */
+  color: #f59e0b; /* amber on dark bg */
 }
 
 .tp-sep {
-  color: rgba(0,0,0,.3);
+  color: rgba(245,197,0,.25);
   padding: 0 4px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 900;
   flex-shrink: 0;
 }

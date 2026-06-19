@@ -522,39 +522,9 @@ RACING <span class="logo-accent">PUZZLE</span>
 
         </div>
 
-        <!-- ── Responsible Gambling ── -->
-        <div class="card-sec-divider">Responsible Gambling</div>
-        <div class="blk" style="text-align:center;padding-top:18px;padding-bottom:20px;">
-          <div style="display:inline-flex;align-items:center;justify-content:center;gap:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:7px 14px;margin-bottom:16px;">
-            <span style="font-size:15px;font-weight:900;color:#ef4444;font-family:'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.05em;">18+</span>
-            <span style="width:1px;height:14px;background:rgba(239,68,68,.3);display:inline-block;"></span>
-            <span style="font-size:11px;color:rgba(239,68,68,.8);font-family:'Barlow Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;font-weight:700;">Gamble Responsibly</span>
-          </div>
-          <div style="font-size:12px;color:var(--mut);line-height:1.7;margin-bottom:16px;max-width:320px;margin-left:auto;margin-right:auto;">
-            Gambling should be fun. Never bet more than you can afford to lose. If you're concerned about your gambling, free help is available.
-          </div>
-          <div style="display:flex;flex-direction:column;gap:9px;max-width:280px;margin:0 auto;">
-            <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer"
-               style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);text-decoration:none;color:var(--txt);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;">
-              <span style="font-size:16px;">🛡️</span>
-              BeGambleAware.org
-              <span style="margin-left:auto;font-size:10px;opacity:.4;">↗</span>
-            </a>
-            <a href="https://www.gamstop.co.uk" target="_blank" rel="noopener noreferrer"
-               style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);text-decoration:none;color:var(--txt);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;">
-              <span style="font-size:16px;">🚫</span>
-              GamStop — Self-Exclusion
-              <span style="margin-left:auto;font-size:10px;opacity:.4;">↗</span>
-            </a>
-            <a href="https://www.gamblingtherapy.org" target="_blank" rel="noopener noreferrer"
-               style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);text-decoration:none;color:var(--txt);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.05em;">
-              <span style="font-size:16px;">💬</span>
-              Gambling Therapy
-              <span style="margin-left:auto;font-size:10px;opacity:.4;">↗</span>
-            </a>
-          </div>
-          <div style="font-size:10px;color:rgba(255,255,255,.15);margin-top:16px;">National Gambling Helpline: 0808 8020 133 (free, 24/7)</div>
-          <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--bdr);display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+        <!-- Terms links only — full Gamble Aware section is in the page footer -->
+        <div class="blk" style="text-align:center;padding:14px 0 4px;">
+          <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
             <a href="#" onclick="showToS();return false;" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-decoration:none;font-weight:600;">Terms of Service</a>
             <span style="color:var(--bdr);">·</span>
             <a href="#" onclick="showToS('privacy');return false;" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-decoration:none;font-weight:600;">Privacy Policy</a>
@@ -570,15 +540,19 @@ RACING <span class="logo-accent">PUZZLE</span>
   <div class="snav" id="snav" style="display:none;"></div>
 </div>
 
-<!-- RESPONSIBLE GAMBLING STRIP -->
-<div id="rg-strip" style="display:flex;align-items:center;justify-content:center;gap:12px;padding:6px 16px;background:#0d1117;border-top:1px solid rgba(255,255,255,.1);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.5);flex-wrap:wrap;">
+<!-- RESPONSIBLE GAMBLING FOOTER -->
+<footer id="rg-strip" style="display:none;align-items:center;justify-content:center;gap:12px;padding:7px 16px;background:#0d1117;border-top:1px solid rgba(255,255,255,.08);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.5);flex-wrap:wrap;">
   <span style="font-size:11px;font-weight:900;color:#ef4444;border:1px solid rgba(239,68,68,.5);padding:1px 6px;border-radius:3px;letter-spacing:.05em;">18+</span>
   <span style="color:rgba(255,255,255,.6);font-weight:700;">Gamble Responsibly</span>
   <span style="color:rgba(255,255,255,.25);">·</span>
   <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer" style="color:rgba(255,255,255,.55);text-decoration:underline;text-decoration-color:rgba(255,255,255,.2);" onclick="event.stopPropagation()">BeGambleAware</a>
   <span style="color:rgba(255,255,255,.25);">·</span>
   <a href="https://www.gamstop.co.uk" target="_blank" rel="noopener noreferrer" style="color:rgba(255,255,255,.55);text-decoration:underline;text-decoration-color:rgba(255,255,255,.2);" onclick="event.stopPropagation()">GamStop</a>
-</div>
+  <span style="color:rgba(255,255,255,.25);">·</span>
+  <a href="https://www.gamblingtherapy.org" target="_blank" rel="noopener noreferrer" style="color:rgba(255,255,255,.55);text-decoration:underline;text-decoration-color:rgba(255,255,255,.2);" onclick="event.stopPropagation()">Gambling Therapy</a>
+  <span style="color:rgba(255,255,255,.25);">·</span>
+  <span style="color:rgba(255,255,255,.3);">Helpline: 0808 8020 133</span>
+</footer>
 
 <!-- BOTTOM NAV -->
 <nav class="bnav" id="bnav">

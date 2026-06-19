@@ -564,3 +564,20 @@ tr:hover td { background: var(--sur2); }
   /* Recalc shell height for desktop — no bottom nav */
   :root { --shell-h: calc(100vh - 56px) !important; }
 }
+
+/* ── Gamble Aware footer — desktop only ── */
+@media (min-width: 768px) {
+  #rg-strip {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 200px; /* clear the sidebar */
+    right: 0;
+    z-index: 50;
+  }
+  /* Push card content up so it's not hidden behind the footer */
+  .sw-shell {
+    margin-bottom: 34px;
+  }
+  :root { --shell-h: calc(100vh - 56px - 34px) !important; }
+}

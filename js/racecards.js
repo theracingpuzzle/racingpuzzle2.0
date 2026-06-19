@@ -932,8 +932,18 @@ async function rcSwLoadResults(){
   if(listEl) listEl.innerHTML = '';
   if(filterEl) filterEl.style.display = 'none';
   try{
-    const data = await callRacingAPI('results/today/free', {});
-    rcSwResultsData = data.results||data.races||[];
+    // Fetch page 1 with a high limit, then page 2 if total suggests more exist
+    const data = await callRacingAPI('results/today/free', {limit:200});
+    let races = data.results||data.races||[];
+    // If we got exactly 50, the API likely has more pages — fetch page 2
+    if(races.length === 50){
+      try{
+        const data2 = await callRacingAPI('results/today/free', {limit:200, skip:50});
+        const races2 = data2.results||data2.races||[];
+        races = races.concat(races2);
+      }catch(e2){ /* ignore page 2 errors, use what we have */ }
+    }
+    rcSwResultsData = races;
     rcSwResultsFetchedAt = Date.now();
     if(stEl) stEl.style.display = 'none';
     autoMatchBetResults(rcSwResultsData);
@@ -960,9 +970,15 @@ function rcSwDebugRaw(){
   }).join('\n');
   const keys = total ? Object.keys(rcSwResultsData[0]).join(', ') : 'no data';
   listEl.innerHTML = '<div style="font-family:monospace;font-size:11px;line-height:1.8;padding:12px;background:var(--sur);border:1px solid var(--bdr);border-radius:8px;white-space:pre-wrap;word-break:break-all;">'
-    + '<strong>Total races in rcSwResultsData: '+total+'</strong>\n\n'
+    + '<strong>Total races in rcSwResultsData: '+total+'</strong>'+(total===50?' ⚠️ exactly 50 — likely paginated':'')+'\n\n'
     + '<strong>Race fields (first record):</strong>\n'+keys+'\n\n'
-    + '<strong>All races:</strong>\n'+summary
+    + '<strong>All races (earliest first after sort):</strong>\n'
+    + rcSwResultsData.slice().sort(function(a,b){return cmpTime(a.off_time||a.off||a.time||'',b.off_time||b.off||b.time||'');}).map(function(r,i){
+        const time=r.off_time||r.off||r.time||'??:??';
+        const course=r.course||r.venue||'Unknown';
+        const runners=(r.runners||[]).length;
+        return (i+1)+'. '+time+' '+course+' ('+runners+' runners)';
+      }).join('\n')
     + '</div>';
 }
 

@@ -506,7 +506,6 @@ tr:hover td { background: var(--sur2); }
     flex-direction: column;
     align-items: stretch;
     width: 200px;
-    min-height: 100vh;
     height: 100vh;
     min-height: 0;
     border-top: none;
@@ -516,7 +515,11 @@ tr:hover td { background: var(--sur2); }
     order: 0;
     overflow-y: auto;
     justify-content: flex-start;
-    padding-top: 12px;
+    padding-top: calc(56px + 12px); /* sit below fixed header */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 70;
   }
 
   .bnav-item {

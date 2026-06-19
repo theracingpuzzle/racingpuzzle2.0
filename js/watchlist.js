@@ -183,11 +183,16 @@ function wlToggleGroup(r){
 let _wlFilter=null; // null = all, or one of: 'no-obs','past-target','running-today','edge'
 
 const WL_FILTERS=[
-  {id:'running-today', label:'🏇 Running Today', title:'Horses from your profiler confirmed in today\'s racecards'},
-  {id:'no-obs',        label:'👁 No Observations', title:'Profiles with no observations logged yet'},
-  {id:'past-target',   label:'📅 Past Target',      title:'Target race dates that have passed — mark if they ran'},
-  {id:'no-date-target',label:'📌 Undated Target',   title:'Profiles with a target race that has no date set yet'},
-  {id:'edge',          label:'📈 Edge',              title:'Your rating is above the official rating — potential value'},
+  {id:'running-today',  label:'Running Today',   title:'Horses from your profiler confirmed in today\'s racecards',
+    svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v14M5 3l10 3.5L5 10"/></svg>'},
+  {id:'no-obs',         label:'No Observations', title:'Profiles with no observations logged yet',
+    svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><line x1="3" y1="3" x2="17" y2="17"/></svg>'},
+  {id:'past-target',    label:'Past Target',     title:'Target race dates that have passed — mark if they ran',
+    svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v2M13 2v2M7 12l2 2 4-4"/></svg>'},
+  {id:'no-date-target', label:'Undated Target',  title:'Profiles with a target race that has no date set yet',
+    svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v2M13 2v2M10 12v.5M10 15v.1"/></svg>'},
+  {id:'edge',           label:'Edge',            title:'Your rating is above the official rating — potential value',
+    svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 14 7 9 11 12 17 5"/><polyline points="14 5 17 5 17 8"/></svg>'},
 ];
 
 function setWLFilter(id){
@@ -307,7 +312,7 @@ function renderWLList(){
       const btn=document.createElement('button');
       btn.setAttribute('data-fid',f.id);
       btn.title=f.title;
-      btn.textContent=f.label;
+      btn.innerHTML='<span style="display:flex;align-items:center;gap:5px;">'+f.svg+'<span>'+f.label+'</span></span>';
       btn.style.cssText='font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:14px;cursor:pointer;white-space:nowrap;transition:all .12s;'
         +(on?'background:var(--navy);color:#fff;border:1px solid var(--navy);':'background:var(--sur);color:var(--mut);border:1px solid var(--bdr);');
       btn.addEventListener('click',function(){setWLFilter(f.id);});
@@ -704,10 +709,16 @@ function openWLForm(id,prefill){
   const savedDist=e?e.distancePref||'':'';
   _wlDossier.distPrefs=savedDist?savedDist.split(',').map(function(s){return s.trim();}).filter(Boolean):[];
   const goingHtml=going.map(function(g){const sel=_wlDossier.goingPrefs.includes(g);return'<button type="button" data-going="'+g+'" onclick="wlToggleGoing(this)" class="wlf-going-btn'+(sel?' on':'')+'">'+g+'</button>';}).join('');
-  const REASONS=[{value:'eye-catcher',emoji:'🔭',label:'Eye Catcher'},{value:'future-target',emoji:'📰',label:'Future Target'},{value:'trainer-intel',emoji:'🗣',label:'Trainer Intel'},{value:'form-study',emoji:'📊',label:'Form Study'},{value:'tip-source',emoji:'💡',label:'Tip / Source'}];
+  const REASONS=[
+    {value:'eye-catcher', label:'Eye Catcher',  col:'#a78bfa', svg:'<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>'},
+    {value:'future-target',label:'Future Target',col:'#34d399', svg:'<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="1" x2="10" y2="3"/><line x1="10" y1="17" x2="10" y2="19"/><line x1="1" y1="10" x2="3" y2="10"/><line x1="17" y1="10" x2="19" y2="10"/></svg>'},
+    {value:'trainer-intel',label:'Trainer Intel',col:'#38bdf8', svg:'<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13a8 8 0 1 0-8 5h8v-5z"/></svg>'},
+    {value:'form-study',  label:'Form Study',   col:'#f59e0b', svg:'<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>'},
+    {value:'tip-source',  label:'Tip / Source', col:'#fb7185', svg:'<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2a6 6 0 0 1 4.47 10.06A4 4 0 0 1 13 15H7a4 4 0 0 1-1.47-2.94A6 6 0 0 1 10 2z"/><line x1="8" y1="18" x2="12" y2="18"/><line x1="9" y1="21" x2="11" y2="21"/></svg>'},
+  ];
   const curReason=e?e.reason||'eye-catcher':'eye-catcher';
   const REASON_COLS={'eye-catcher':'#a78bfa','future-target':'#34d399','trainer-intel':'#38bdf8','form-study':'#f59e0b','tip-source':'#fb7185'};
-  const reasonHtml=REASONS.map(function(r){const sel=r.value===curReason;return'<button type="button" data-reason="'+r.value+'" onclick="wlSelectReason(this)" class="wlf-reason-btn'+(sel?' on':'')+'"><span class="wlf-reason-ico">'+r.emoji+'</span><span class="wlf-reason-lbl">'+r.label+'</span></button>';}).join('');
+  const reasonHtml=REASONS.map(function(r){const sel=r.value===curReason;return'<button type="button" data-reason="'+r.value+'" onclick="wlSelectReason(this)" class="wlf-reason-btn'+(sel?' on':'')+(sel?' wlf-reason-sel':'')+'" style="'+(sel?'background:'+r.col+';border-color:'+r.col+';color:#fff;':'')+'" data-col="'+r.col+'"><span class="wlf-reason-ico">'+r.svg+'</span><span class="wlf-reason-lbl">'+r.label+'</span></button>';}).join('');
   modal.innerHTML=
   '<div class="wlf-page">'
   +'<div class="wlf-nav">'
@@ -867,7 +878,12 @@ function wlSelectReason(btn){
   const hidden=document.getElementById('wlf-reason');
   if(hidden)hidden.value=val;
   document.querySelectorAll('#wlf-reasons button').forEach(function(b){
-    b.className='wlf-reason-btn'+(b.getAttribute('data-reason')===val?' on':'');
+    const sel=b.getAttribute('data-reason')===val;
+    const col=b.getAttribute('data-col')||'#a78bfa';
+    b.className='wlf-reason-btn'+(sel?' on':'');
+    b.style.background=sel?col:'';
+    b.style.borderColor=sel?col:'';
+    b.style.color=sel?'#fff':'';
   });
 }
 
@@ -1398,11 +1414,11 @@ function _wlpBuildHTML(e){
   const fmt=_wlpFmt;
 
   const REASONS={
-    'eye-catcher':  {emoji:'🔭',label:'Eye Catcher',  col:'#a78bfa'},
-    'future-target':{emoji:'📰',label:'Future Target', col:'#34d399'},
-    'trainer-intel':{emoji:'🗣',label:'Trainer Intel', col:'#38bdf8'},
-    'form-study':   {emoji:'📊',label:'Form Study',    col:'#f59e0b'},
-    'tip-source':   {emoji:'💡',label:'Tip / Source',  col:'#fb7185'},
+    'eye-catcher':  {emoji:'🔭',label:'Eye Catcher',  col:'#a78bfa', svg:'<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>'},
+    'future-target':{emoji:'📰',label:'Future Target', col:'#34d399', svg:'<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="1" x2="10" y2="3"/><line x1="10" y1="17" x2="10" y2="19"/><line x1="1" y1="10" x2="3" y2="10"/><line x1="17" y1="10" x2="19" y2="10"/></svg>'},
+    'trainer-intel':{emoji:'🗣',label:'Trainer Intel', col:'#38bdf8', svg:'<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13a8 8 0 1 0-8 5h8v-5z"/></svg>'},
+    'form-study':   {emoji:'📊',label:'Form Study',    col:'#f59e0b', svg:'<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>'},
+    'tip-source':   {emoji:'💡',label:'Tip / Source',  col:'#fb7185', svg:'<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2a6 6 0 0 1 4.47 10.06A4 4 0 0 1 13 15H7a4 4 0 0 1-1.47-2.94A6 6 0 0 1 10 2z"/><line x1="8" y1="18" x2="12" y2="18"/><line x1="9" y1="21" x2="11" y2="21"/></svg>'},
   };
   const WHY_ORDER=['eye-catcher','future-target','trainer-intel','form-study','tip-source'];
   const RESULT_COLS={win:'#4ade80',place:CLR_WATCH,loss:'#f87171'};
@@ -1447,7 +1463,7 @@ function _wlpBuildHTML(e){
   h+='<div class="wlp-hero-top">';
   h+='<div>';
   h+='<div class="wlp-name-row"><span class="wlp-name">'+esc(e.horse)+'</span></div>';
-  h+='<div><span class="wlp-reason-badge" style="background:'+reason.col+'20;border:1px solid '+reason.col+'40;color:'+reason.col+';">'+reason.emoji+' '+reason.label+'</span></div>';
+  h+='<div><span class="wlp-reason-badge" style="background:'+reason.col+'20;border:1px solid '+reason.col+'40;color:'+reason.col+';display:inline-flex;align-items:center;gap:5px;">'+reason.svg+' '+reason.label+'</span></div>';
   h+='</div>';
   h+='<div class="wlp-or-box"><span class="wlp-or-label">OR</span>';
   h+=or?'<span class="wlp-or-value">'+or+'</span>':'<span class="wlp-or-na">—</span>';
@@ -1488,30 +1504,40 @@ function _wlpBuildHTML(e){
 
   h+='<div class="wlp-stats">';
   // My Rating
-  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">⭐ My Rating</span>';
+  const _si=function(svg){return '<span style="display:inline-flex;align-items:center;opacity:.7;margin-right:5px;">'+svg+'</span>';};
+  const _svgs={
+    star:   '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="10,2 12.5,7.5 18.5,8.2 14,12.5 15.3,18.5 10,15.5 4.7,18.5 6,12.5 1.5,8.2 7.5,7.5"/></svg>',
+    trophy: '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h8v7a4 4 0 0 1-8 0V2z"/><path d="M6 5H3a2 2 0 0 0 2 2"/><path d="M14 5h3a2 2 0 0 1-2 2"/><line x1="10" y1="13" x2="10" y2="16"/><line x1="7" y1="18" x2="13" y2="18"/></svg>',
+    bet:    '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="16" height="11" rx="2"/><path d="M2 9h16"/><circle cx="6" cy="13" r="1" fill="currentColor" stroke="none"/></svg>',
+    pnl:    '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="7"/><path d="M8 4h6a4 4 0 0 1 0 8h-1v4H9v-4H8a4 4 0 0 1 0-8z"/></svg>',
+    roi:    '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 14 7 9 11 12 17 5"/><polyline points="14 5 17 5 17 8"/></svg>',
+    cal:    '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v2M13 2v2"/></svg>',
+    target: '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="1" x2="10" y2="3"/><line x1="10" y1="17" x2="10" y2="19"/><line x1="1" y1="10" x2="3" y2="10"/><line x1="17" y1="10" x2="19" y2="10"/></svg>',
+  };
+  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.star)+'My Rating</span>';
   h+=mr?'<span class="wlp-stat-val" style="color:var(--gld);">'+mr+'</span>':'<span class="wlp-stat-sm" style="color:var(--mut);">Not set</span>';
   h+='</div>';
   // OR Edge
-  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🏆 OR Edge</span>';
+  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.trophy)+'OR Edge</span>';
   h+=edge!==null?'<span class="wlp-edge-badge" style="background:'+edgeCol+'20;color:'+edgeCol+';">'+(edge>0?'+':'')+edge+' pts</span>':'<span class="wlp-stat-sm" style="color:var(--mut);">—</span>';
   h+='</div>';
   // Betting record
   if(horseBets.length>0){
-    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🎲 Backed</span>';
+    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.bet)+'Backed</span>';
     h+='<span class="wlp-stat-sm">'+horseWins.length+'/'+horseBets.length+' &nbsp;<span style="color:var(--mut);">SR '+horseSR.toFixed(0)+'%</span></span></div>';
-    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">💰 P&amp;L</span>';
+    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.pnl)+'P&amp;L</span>';
     h+='<span class="wlp-stat-sm" style="color:'+(horsePnl>=0?'#4ade80':'#f87171')+';">'+(horsePnl>=0?'+':'')+horsePnl.toFixed(2)+'</span></div>';
-    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">📈 ROI</span>';
+    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.roi)+'ROI</span>';
     h+='<span class="wlp-stat-sm" style="color:'+(horseROI>=0?'#4ade80':'#f87171')+';">'+horseROI.toFixed(1)+'%</span></div>';
   } else {
-    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🎲 Backed</span>';
+    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.bet)+'Backed</span>';
     h+='<span class="wlp-stat-sm" style="color:var(--mut);">Not yet</span></div>';
   }
   // Last Entry
-  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">📅 Last Entry</span>';
+  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.cal)+'Last Entry</span>';
   h+='<span class="wlp-stat-sm">'+fmt(lastDate)+'</span></div>';
   // Next Target
-  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">🎯 Next Target</span>';
+  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.target)+'Next Target</span>';
   if(nextTarget){const tw=(nextTarget.race||'').split(' ').slice(0,2).join(' ');h+='<span class="wlp-stat-sm" style="color:var(--gld);font-size:11px;">'+esc(tw)+'</span>';}
   else h+='<span class="wlp-stat-sm" style="color:var(--mut);">None set</span>';
   h+='</div>';
@@ -1532,9 +1558,10 @@ function _wlpBuildHTML(e){
   h+='<div class="wlp-why-grid">';
   WHY_ORDER.forEach(function(rid){
     const r=REASONS[rid];const isActive=(e.reason||'eye-catcher')===rid;
-    h+='<div class="wlp-why-btn'+(isActive?' wlp-why-active':'')+'">';
-    if(isActive)h+='<div class="wlp-why-check">✓</div>';
-    h+='<span class="wlp-why-icon">'+r.emoji+'</span><span class="wlp-why-label">'+r.label+'</span></div>';
+    const activeStyle=isActive?'background:'+r.col+';border-color:'+r.col+';color:#fff;':'';
+    h+='<div class="wlp-why-btn'+(isActive?' wlp-why-active':'')+'" style="'+activeStyle+'">';
+    if(isActive)h+='<div class="wlp-why-check" style="background:rgba(255,255,255,.25);color:#fff;">✓</div>';
+    h+='<span class="wlp-why-icon">'+r.svg+'</span><span class="wlp-why-label">'+r.label+'</span></div>';
   });
   h+='</div>';
   if(e.reasonNote)h+='<div class="wlp-reason-note">"'+esc(e.reasonNote)+'"</div>';

@@ -53,7 +53,7 @@
 /* OR summary line */
 .wll-or-line { font-size:11px; display:flex; align-items:center; gap:4px; margin-top:3px; }
 .wll-or-mr   { color:var(--gld); font-weight:700; }
-.wll-or-or   { color:var(--mut); }
+.wll-or-or   { color:#93c5fd; font-weight:700; }
 .wll-or-sep  { color:var(--mut); margin:0 2px; }
 
 /* ═══════════════════════════════════════════════════════════

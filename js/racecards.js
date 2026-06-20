@@ -89,15 +89,9 @@ function rcSwRenderUI(){
   let html='<div class="rc-view-tog" style="width:100%;">'
     +'<button class="rc-view-btn '+(v==='course'?'on':'off')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
     +'<button class="rc-view-btn '+(v==='time'?'on':'off')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
-    +'<button class="rc-view-btn '+(v==='shortlist'?'on':'off')+'" onclick="rcSwView=\'shortlist\';rcSwRenderUI();">Shortlist</button>'
     +'</div>';
 
   uiEl.innerHTML=html;
-
-  if(v==='shortlist'){
-    rcSlRenderPicker(uiEl);
-    return;
-  }
 
   const listEl=document.createElement('div');
   uiEl.appendChild(listEl);
@@ -567,6 +561,21 @@ function rcSwRenderRunners(idx, course, el){
     +'</div>';
   }).join('');
   el.innerHTML=html;
+
+  // ── Shortlist toggle button (appended after innerHTML so it persists) ──
+  const activeRunners=(race.runners||race.horses||[]).filter(function(r){
+    return !r.non_runner&&!r.isNonRunner&&(''+r.number).toUpperCase()!=='NR'&&(''+r.status).toLowerCase()!=='nr';
+  });
+  if(activeRunners.length>1){
+    const slBtn=document.createElement('div');
+    slBtn.id='rc-sl-toggle-'+course.replace(/\W/g,'_')+'-'+idx;
+    slBtn.style.cssText='padding:10px 12px 6px;';
+    slBtn.innerHTML='<button onclick="rcSlStartFromExpanded(\''+course.replace(/'/g,"\\'")+'\','+idx+')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 14px;border-radius:9px;border:1px solid rgba(139,92,246,.3);background:rgba(139,92,246,.08);color:#a78bfa;font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">'
+      +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+      +'Shortlist runners'
+      +'</button>';
+    el.appendChild(slBtn);
+  }
 }
 
 // ── Overlay flow: Racecard R/V → Checklist overlay → Log Bet overlay → back to Racecards ──
@@ -1530,10 +1539,50 @@ function rcSlRenderPicker(container){
   container.appendChild(wrap);
 }
 
-// ── Step 2: Start reviewing a race ────────────────────────────────
+// ── Entry point from expanded race (inline toggle) ────────────────
+let _rcSlReturnCourse='';
+let _rcSlReturnIdx=0;
+let _rcSlReturnSafeId='';
+
+function rcSlStartFromExpanded(course, raceIdx){
+  const races=rcSwRacesByMeeting[course]||rcSwSortedRaces||[];
+  const race=races[raceIdx];
+  if(!race)return;
+  _rcSlReturnCourse=course;
+  _rcSlReturnIdx=raceIdx;
+  _rcSlReturnSafeId=course.replace(/\W/g,'_');
+  _rcSlRace=race;
+  _rcSlCourse=course;
+  _rcSlRunners=(race.runners||race.horses||[]).filter(function(r){
+    return !r.non_runner&&!r.isNonRunner
+      &&(''+r.number).toUpperCase()!=='NR'
+      &&(''+r.status).toLowerCase()!=='nr'
+      &&(''+r.jockey).toUpperCase()!=='NON-RUNNER';
+  });
+  _rcSlIdx=0;
+  _rcSlShortlist=[];
+  rcSlRenderCard();
+}
+
+function rcSlBackToRace(){
+  // Re-open the meeting and race row
+  rcSwView='course';
+  rcSwRenderUI();
+  if(_rcSlReturnCourse){
+    setTimeout(function(){
+      rcSwToggleMeeting(_rcSlReturnCourse);
+      setTimeout(function(){
+        rcSwToggle(_rcSlReturnIdx,_rcSlReturnCourse,_rcSlReturnSafeId,true);
+      },120);
+    },60);
+  }
+}
+
+// ── Step 2: Start reviewing a race (from race picker tab — kept for compat) ──
 function rcSlStartRace(idx){
   const item=window._rcSlAllRaces[idx];
   if(!item)return;
+  _rcSlReturnCourse=''; // no expanded race to go back to
   _rcSlRace=item.race;
   _rcSlCourse=item.course;
   // Filter out non-runners
@@ -1581,11 +1630,15 @@ function rcSlRenderCard(){
   const edge=prof?(function(){const mr=parseFloat(prof.myRating),or=parseFloat(prof.currentRating);return(mr&&or)?mr-or:null;}()):null;
   const alreadyIn=_rcSlShortlist.some(function(s){return s.name===name;});
 
-  const toggleHTML='<div class="rc-view-tog" style="width:100%;">'
-    +'<button class="rc-view-btn off" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
-    +'<button class="rc-view-btn off" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
-    +'<button class="rc-view-btn on">Shortlist</button>'
-    +'</div>';
+  const _slBackFn=_rcSlReturnCourse?'rcSlBackToRace()':'rcSwView=\'course\';rcSwRenderUI();';
+  const toggleHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+    +'<button onclick="'+_slBackFn+'" style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:4px 0;text-transform:uppercase;">'
+      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
+      +'Back'
+    +'</button>'
+    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);">Shortlist</span>'
+    +'<div style="width:48px;"></div>'
+  +'</div>';
 
   // Profile panel — reuses existing rc-profile-panel styles
   let profHtml='';
@@ -1776,11 +1829,15 @@ function rcSlRenderSummary(){
   const uiEl=document.getElementById('sw-rc-ui');
   if(!uiEl)return;
 
-  const toggleHTML='<div class="rc-view-tog" style="width:100%;">'
-    +'<button class="rc-view-btn off" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
-    +'<button class="rc-view-btn off" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
-    +'<button class="rc-view-btn on">Shortlist</button>'
-    +'</div>';
+  const _slBackFn2=_rcSlReturnCourse?'rcSlBackToRace()':'rcSwView=\'course\';rcSwRenderUI();';
+  const toggleHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+    +'<button onclick="'+_slBackFn2+'" style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:4px 0;text-transform:uppercase;">'
+      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
+      +'Back'
+    +'</button>'
+    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);">Shortlist</span>'
+    +'<div style="width:48px;"></div>'
+  +'</div>';
 
   if(!_rcSlShortlist.length){
     uiEl.innerHTML=toggleHTML

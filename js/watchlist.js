@@ -565,19 +565,19 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'<div class="fg"><label>Result</label><div class="rvw-btn-group">'
     +[{k:'win',lbl:'Win'},{k:'place',lbl:'Place'},{k:'unplaced',lbl:'Unplaced'},{k:'nr',lbl:'NR'},{k:'missed',lbl:'Missed Target'}].map(function(r){const cols={win:'var(--grn)',place:'var(--gld)',unplaced:'var(--red)',nr:'var(--mut)',missed:'#a78bfa'};return'<button data-result="'+r.k+'" data-grp="result" class="rvw-btn" style="--rvw-col:'+cols[r.k]+'" onclick="wlRvwToggle(this)">'+r.lbl+'</button>';}).join('')
     +'</div></div>'
-    +'<div class="g2">'
+    +'<div class="g2" id="rvw-pos-row">'
       +'<div class="fg"><label>Finish Position</label><input type="text" id="rvw-pos" placeholder="e.g. 3rd"></div>'
       +'<div class="fg" id="rvw-beaten-row"><label>Beaten Distance</label><input type="text" id="rvw-beaten" placeholder="e.g. 2.5L"></div>'
     +'</div>'
-    +'<div class="fg"><label>Odds</label><input type="text" id="rvw-odds" placeholder="e.g. 7/2 or 4.50"></div>'
-    +'<div class="fg"><label>Verdict</label><div class="rvw-btn-group">'
+    +'<div class="fg" id="rvw-odds-row"><label>Odds</label><input type="text" id="rvw-odds" placeholder="e.g. 7/2 or 4.50"></div>'
+    +'<div class="fg" id="rvw-verdict-row"><label>Verdict</label><div class="rvw-btn-group">'
     +[{k:'upgrade',col:'var(--grn)',lbl:'Upgrade ↑'},{k:'hold',col:'var(--blu)',lbl:'Hold →'},{k:'downgrade',col:'var(--red)',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="--rvw-col:'+v.col+'" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
     +'</div></div>'
     +(currentMR?'<div class="fg"><label>MR Adjustment <span style="color:var(--mut);font-weight:400;">(current: '+currentMR+')</span></label><input type="number" id="rvw-mr-adj" placeholder="e.g. 5 or -3"></div>':'<input type="hidden" id="rvw-mr-adj" value="0">')
-    +'<div class="fg"><label>Going'+(raceGoing?' <span style="color:var(--mut);font-weight:400;font-size:11px;">('+raceGoing+')</span>':'')+'</label><div class="rvw-btn-group">'
+    +'<div class="fg" id="rvw-going-row"><label>Going'+(raceGoing?' <span style="color:var(--mut);font-weight:400;font-size:11px;">('+raceGoing+')</span>':'')+'</label><div class="rvw-btn-group">'
     +[{k:'confirmed',lbl:'✓ Confirmed'},{k:'mixed',lbl:'~ Mixed'},{k:'against',lbl:'✗ Against'}].map(function(g){return'<button data-going="'+g.k+'" data-grp="going" class="rvw-btn" style="--rvw-col:var(--txt)" onclick="wlRvwToggle(this)">'+g.lbl+'</button>';}).join('')
     +'</div></div>'
-    +'<div class="fg"><label>Back Next Time?</label><div class="rvw-btn-group">'
+    +'<div class="fg" id="rvw-back-row"><label>Back Next Time?</label><div class="rvw-btn-group">'
     +[{k:'yes',col:'var(--grn)',lbl:'Yes'},{k:'depends',col:'var(--gld)',lbl:'Depends'},{k:'no',col:'var(--red)',lbl:'No'}].map(function(b){return'<button data-back="'+b.k+'" data-grp="back" class="rvw-btn" style="--rvw-col:'+b.col+'" onclick="wlRvwToggle(this)">'+b.lbl+'</button>';}).join('')
     +'</div></div>'
     +'<div class="fg"><label>Notes</label><textarea id="rvw-notes" placeholder="What you saw, sectionals, paddock notes…" style="min-height:64px;"></textarea></div>'
@@ -616,12 +616,21 @@ function wlRvwToggle(btn){
   if(grp==='result'){
     const result=btn.dataset.result;
     const posEl=document.getElementById('rvw-pos');
+    const posRow=document.getElementById('rvw-pos-row');
     const beatenRow=document.getElementById('rvw-beaten-row');
-    if(result==='win'){
-      if(posEl)posEl.value='1st';
-      if(beatenRow)beatenRow.style.display='none';
-    } else if(result==='nr'||result==='missed'){
+    const oddsRow=document.getElementById('rvw-odds-row');
+    const verdictRow=document.getElementById('rvw-verdict-row');
+    const goingRow=document.getElementById('rvw-going-row');
+    const backRow=document.getElementById('rvw-back-row');
+    const raceOnly=result==='nr'||result==='missed';
+    // Rows that vanish for NR / Missed Target
+    [posRow,beatenRow,oddsRow,verdictRow,goingRow,backRow].forEach(function(el){
+      if(el)el.style.display=raceOnly?'none':'';
+    });
+    if(raceOnly){
       if(posEl)posEl.value='';
+    } else if(result==='win'){
+      if(posEl)posEl.value='1st';
       if(beatenRow)beatenRow.style.display='none';
     } else {
       if(posEl&&posEl.value==='1st')posEl.value='';

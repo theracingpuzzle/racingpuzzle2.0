@@ -1255,6 +1255,8 @@ const WLP_CSS = `
   text-align: center; line-height: 1.2; color: var(--txt);
 }
 .wlp-why-active .wlp-why-label { color: #fff; }
+.wlp-why-active .wlp-why-icon { color: #fff; opacity: 1; }
+.wlp-why-active .wlp-why-icon svg { stroke: #fff; }
 .wlp-reason-note {
   padding: 0 13px 11px;
   font-family: var(--font); font-size: 13px;
@@ -1366,7 +1368,7 @@ const WLP_CSS = `
   padding: 0 4px; border-right: 1px solid var(--bdr);
 }
 .wlp-cond-cell:last-child { border-right: none; }
-.wlp-cond-icon { font-size: 16px; opacity: .7; }
+.wlp-cond-icon { display:flex; align-items:center; justify-content:center; width:20px; height:20px; opacity:.7; }
 .wlp-cond-label {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 8px; font-weight: 700; letter-spacing: 1px;
@@ -1444,9 +1446,9 @@ function _wlpBuildHTML(e){
   const nextTarget=targets[0]||null;
 
   const condItems=[
-    {icon:'💧',label:'Going',    value:(e.goingPrefs&&e.goingPrefs.length)?e.goingPrefs[0]:'Any',   color:(e.goingPrefs&&e.goingPrefs.length)?'#4ade80':'#3a3a5c'},
-    {icon:'📏',label:'Distance', value:e.distancePref||'—',  color:e.distancePref?'#38bdf8':'#3a3a5c'},
-    {icon:'⭕',label:'Track',    value:e.trackPref||'—',     color:e.trackPref?'#8b5cf6':'#3a3a5c'},
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',label:'Going',    value:(e.goingPrefs&&e.goingPrefs.length)?e.goingPrefs[0]:'Any',   color:(e.goingPrefs&&e.goingPrefs.length)?'#4ade80':'#3a3a5c'},
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><polyline points="8 6 2 12 8 18"/><polyline points="16 6 22 12 16 18"/></svg>',label:'Distance', value:e.distancePref||'—',  color:e.distancePref?'#38bdf8':'#3a3a5c'},
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>',label:'Track',    value:e.trackPref||'—',     color:e.trackPref?'#8b5cf6':'#3a3a5c'},
   ];
 
   const editFn="document.getElementById('wlp-modal').remove();openWLForm('"+e.id+"')";
@@ -1564,7 +1566,7 @@ function _wlpBuildHTML(e){
     const activeStyle=isActive?'background:'+r.col+';border-color:'+r.col+';color:#fff;':'';
     h+='<div class="wlp-why-btn'+(isActive?' wlp-why-active':'')+'" style="'+activeStyle+'">';
     if(isActive)h+='<div class="wlp-why-check" style="background:rgba(255,255,255,.25);color:#fff;">✓</div>';
-    h+='<span class="wlp-why-icon">'+r.svg+'</span><span class="wlp-why-label">'+r.label+'</span></div>';
+    h+='<span class="wlp-why-icon" style="'+(isActive?'color:#fff;opacity:1;':'')+'">'+r.svg+'</span><span class="wlp-why-label" style="'+(isActive?'color:#fff;':'')+'">'+r.label+'</span></div>';
   });
   h+='</div>';
   if(e.reasonNote)h+='<div class="wlp-reason-note">"'+esc(e.reasonNote)+'"</div>';

@@ -25,8 +25,8 @@ const CARDS = [
   {id:'results',  lbl:'Results',  col:'#fb923c'},
   {id:'watch',    lbl:'Tracker',  col:CLR_WATCH},
   {id:'stats',    lbl:'Stats',    col:'#60a5fa'},
-  {id:'settings', lbl:'Settings', col:'#94a3b8'},
   {id:'leagues',  lbl:'Leagues',  col:'#10b981'},
+  {id:'settings', lbl:'Settings', col:'#94a3b8'},
 ];
 
 // ─── TRACKS ───

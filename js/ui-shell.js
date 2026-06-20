@@ -59,7 +59,7 @@ function goHome(){if(mode!=='sw')navTo('today');else goTo(0);}
 // ─── NAV ───
 function navTo(id){
   if(mode!=='sw')setMode('sw');
-  const idx={today:0,races:1,results:2,tracker:3,watch:3,stats:4,settings:5,leagues:6}[id];
+  const idx={today:0,races:1,results:2,tracker:3,watch:3,stats:4,leagues:5,settings:6}[id];
   if(idx!=null)goTo(idx);
 }
 
@@ -150,7 +150,7 @@ function goTo(i,instant=false){
   }
   rpos(0,false);
   // Sync bottom nav
-  const navKeys=['today','races','results','tracker','stats','settings','leagues'];
+  const navKeys=['today','races','results','tracker','stats','leagues','settings'];
   updNav(navKeys[i]||'today');
   renderSwCard();
   const hb=document.getElementById('hbtn');if(hb)hb.classList.toggle('vis',i!==0);
@@ -169,7 +169,7 @@ function renderSwCard(){
   if(id==='results')rcSwLoadResults();
   if(id==='watch')renderWatchlist();
   if(id==='stats'){const _sc=document.querySelector('#c4 .cin');if(_sc)_sc.scrollTop=0;if(typeof renderStats==='function')renderStats();if(typeof renderHist==='function')renderHist();}
-  if(id==='settings'){const _sc=document.querySelector('#c5 .cin');if(_sc)_sc.scrollTop=0;if(typeof renderBkCard==='function')renderBkCard();if(typeof renderVBKDisp==='function')renderVBKDisp();if(typeof loadApiKeyField==='function')loadApiKeyField();if(typeof loadStartBankField==='function')loadStartBankField();if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();if(typeof loadAILimitField==='function')loadAILimitField();if(typeof renderSettingsSources==='function')renderSettingsSources();if(typeof renderCmdRules==='function')renderCmdRules();}
+  if(id==='settings'){const _sc=document.querySelector('#c6 .cin');if(_sc)_sc.scrollTop=0;if(typeof renderBkCard==='function')renderBkCard();if(typeof renderVBKDisp==='function')renderVBKDisp();if(typeof loadApiKeyField==='function')loadApiKeyField();if(typeof loadStartBankField==='function')loadStartBankField();if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();if(typeof loadAILimitField==='function')loadAILimitField();if(typeof renderSettingsSources==='function')renderSettingsSources();if(typeof renderCmdRules==='function')renderCmdRules();}
   if(id==='leagues'){if(typeof lgInit==='function')lgInit();}
 }
 

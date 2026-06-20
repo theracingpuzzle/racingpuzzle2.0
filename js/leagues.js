@@ -159,51 +159,60 @@ function lgRender(){
 function lgRenderError(msg){
   const el=document.getElementById('lg-inner');
   if(!el)return;
-  el.innerHTML='<div style="padding:30px 20px;text-align:center;">'
-    +'<div style="font-size:28px;margin-bottom:12px;">⚠️</div>'
-    +'<div style="font-size:13px;color:var(--mut);line-height:1.6;">'+msg+'</div>'
+  el.innerHTML='<div class="blk" style="text-align:center;">'
+    +'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+    +'<div style="font-size:12px;color:var(--mut);line-height:1.6;">'+msg+'</div>'
     +'</div>';
+}
+
+// ─── Back button (shared) ─────────────────────────────────────────────────────
+function _lgBackBtn(label){
+  return '<button onclick="lgBack()" class="btn-refresh" style="display:inline-flex;align-items:center;gap:4px;margin-bottom:14px;">'
+    +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
+    +(label||'Back')
+  +'</button>';
 }
 
 // ─── Screen 1: My Leagues list ───────────────────────────────────────────────
 function lgRenderList(el){
-  const SVG_TROPHY='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>';
-  let h='<div style="padding:0 0 16px;">';
-  // Header row
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'
-    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);">My Leagues</span>'
-    +'<div style="display:flex;gap:8px;">'
-      +'<button onclick="lgShowJoin()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">Join</button>'
-      +'<button onclick="lgShowCreate()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">+ Create</button>'
-    +'</div>'
+  const SVG_TROPHY='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>';
+  let h='';
+
+  // Action buttons row
+  h+='<div style="display:flex;gap:8px;margin-bottom:14px;">'
+    +'<button onclick="lgShowJoin()" class="btn-refresh" style="flex:1;">Join a League</button>'
+    +'<button onclick="lgShowCreate()" style="flex:1;padding:6px 12px;border-radius:8px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">+ Create</button>'
   +'</div>';
 
   if(!_lgMyLeagues.length){
-    h+='<div style="text-align:center;padding:50px 20px;">'
-      +'<div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:14px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#10b981;margin-bottom:16px;">'+SVG_TROPHY+'</div>'
-      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No leagues yet</div>'
-      +'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:20px;">Create a league with friends or join one with an invite code.</div>'
+    h+='<div class="blk" style="text-align:center;padding:30px 16px;">'
+      +'<div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#10b981;margin-bottom:14px;">'+SVG_TROPHY+'</div>'
+      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No leagues yet</div>'
+      +'<div style="font-size:12px;color:var(--mut);line-height:1.6;">Create a league or join one with a friend\'s invite code.</div>'
     +'</div>';
   }else{
-    _lgMyLeagues.forEach(function(l){
+    h+='<div class="blk" style="padding:0;">';
+    _lgMyLeagues.forEach(function(l,idx){
       const myPicks=_lgMyPicks[l.id]||[];
       const todayPicks=myPicks.filter(function(p){return p.pick_date===_lgToday();});
       const allScore=_lgCalcScore(myPicks,l.scoring);
-      h+='<div onclick="lgOpenLeague(\''+l.id+'\')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;background:var(--sur);border:1px solid var(--bdr);margin-bottom:10px;cursor:pointer;transition:border-color .12s;" onmouseover="this.style.borderColor=\'#10b981\'" onmouseout="this.style.borderColor=\'var(--bdr)\'">'
-        +'<div style="width:40px;height:40px;border-radius:10px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;color:#10b981;flex-shrink:0;">'+SVG_TROPHY+'</div>'
+      const scoreVal=l.scoring==='wins'?allScore.wins+' W':(allScore.score>=0?'+':'')+allScore.score.toFixed(2);
+      const scoreCol=allScore.score>0?'#10b981':allScore.score<0?'#f87171':'var(--txt)';
+      h+='<div onclick="lgOpenLeague(\''+l.id+'\')" style="display:flex;align-items:center;gap:12px;padding:13px 16px;'+(idx?'border-top:1px solid var(--bdr);':'')+'cursor:pointer;">'
+        +'<div style="width:36px;height:36px;border-radius:9px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;color:#10b981;flex-shrink:0;">'+SVG_TROPHY+'</div>'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_lgEsc(l.name)+'</div>'
-          +'<div style="font-size:11px;color:var(--mut);margin-top:1px;">'+(l.scoring==='wins'?'Win count':'£1 level stakes')+(todayPicks.length?' · '+todayPicks.length+' pick'+(todayPicks.length!==1?'s':'')+'  today':'')+'</div>'
+          +'<div style="font-size:10px;color:var(--mut);margin-top:1px;">'+(l.scoring==='wins'?'Win count':'£1 stakes')+(todayPicks.length?' · <span style="color:#10b981;">'+todayPicks.length+' pick'+(todayPicks.length!==1?'s':'')+'</span>':'')+'</div>'
         +'</div>'
         +'<div style="text-align:right;flex-shrink:0;">'
-          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;color:'+(allScore.score>0?'#10b981':allScore.score<0?'#f87171':'var(--txt)')+';">'+(l.scoring==='wins'?allScore.wins+' W':(allScore.score>=0?'+':'')+allScore.score.toFixed(l.scoring==='stakes'?2:0))+'</div>'
-          +'<div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;">'+(l.scoring==='wins'?'wins':'P&L')+'</div>'
+          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;color:'+scoreCol+';">'+scoreVal+'</div>'
+          +'<div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;">'+(l.scoring==='wins'?'wins':'P&L')+'</div>'
         +'</div>'
-        +'<span style="color:var(--mut);font-size:18px;margin-left:4px;">›</span>'
+        +'<span style="color:var(--mut);font-size:16px;margin-left:2px;">›</span>'
       +'</div>';
     });
+    h+='</div>';
   }
-  h+='</div>';
   el.innerHTML=h;
 }
 
@@ -223,7 +232,6 @@ function lgRenderDetail(el){
   const members=_lgMembers[l.id]||[];
   const uid=_lgUid();
 
-  // Build leaderboard
   const board=members.map(function(m){
     const mp=allPicks.filter(function(p){return p.user_id===m.user_id;});
     const s=_lgCalcScore(mp,l.scoring);
@@ -238,88 +246,80 @@ function lgRenderDetail(el){
   const todayPicks=myPicks.filter(function(p){return p.pick_date===_lgToday();});
   const isAdmin=l.created_by===uid;
 
-  let h='';
-  // Back button + title
-  h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">'
-    +'<button onclick="lgBack()" style="display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:0;text-transform:uppercase;">'
-      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Leagues'
-    +'</button>'
-  +'</div>';
+  let h=_lgBackBtn('Leagues');
 
-  // League header card
-  h+='<div style="padding:16px;border-radius:12px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);margin-bottom:16px;">'
-    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">'
+  // League info blk
+  h+='<div class="blk" style="background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.2);">'
+    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
       +'<div>'
-        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:900;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
-        +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Scoring: Win count':'Scoring: £1 level stakes')+'</div>'
+        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:17px;font-weight:900;letter-spacing:.02em;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
+        +'<div style="font-size:10px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Win count scoring':'£1 level stakes scoring')+'</div>'
       +'</div>'
-      +'<div style="text-align:right;">'
-        +'<div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;margin-bottom:3px;">Invite Code</div>'
-        +'<div onclick="lgCopyCode(\''+l.invite_code+'\')" style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;letter-spacing:.2em;color:#10b981;cursor:pointer;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:4px 10px;" title="Tap to copy">'+l.invite_code+'</div>'
-        +'<div style="font-size:9px;color:var(--mut);margin-top:3px;">tap to copy</div>'
+      +'<div style="text-align:right;flex-shrink:0;">'
+        +'<div class="bttl" style="border:none;padding:0;margin-bottom:3px;">Invite</div>'
+        +'<div onclick="lgCopyCode(\''+l.invite_code+'\')" style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;letter-spacing:.18em;color:#10b981;cursor:pointer;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:7px;padding:3px 9px;">'+l.invite_code+'</div>'
+        +'<div style="font-size:9px;color:var(--mut);margin-top:2px;">tap to copy</div>'
       +'</div>'
     +'</div>'
   +'</div>';
 
-  // Today's picks section
-  h+='<div style="margin-bottom:16px;">'
+  // Today's picks blk
+  h+='<div class="blk">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
-      +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);">Today\'s Picks</span>'
-      +'<button onclick="lgShowPick()" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;border:1px solid rgba(16,185,129,.4);background:rgba(16,185,129,.1);color:#10b981;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">+ Add Pick</button>'
+      +'<div class="bttl" style="border:none;padding:0;margin:0;">Today\'s Picks</div>'
+      +'<button onclick="lgShowPick()" class="btn-refresh" style="color:#10b981;border-color:rgba(16,185,129,.4);">+ Add Pick</button>'
     +'</div>';
 
   if(!todayPicks.length){
-    h+='<div style="padding:16px;border-radius:10px;border:1px dashed var(--bdr);text-align:center;font-size:12px;color:var(--mut);">No picks yet today — add a horse from today\'s races</div>';
+    h+='<div style="padding:12px;border-radius:8px;border:1px dashed var(--bdr);text-align:center;font-size:12px;color:var(--mut);">No picks today — tap Add Pick or use the trophy button on any runner</div>';
   }else{
+    h+='<div style="display:flex;flex-direction:column;gap:6px;">';
     todayPicks.forEach(function(p){
       const res=p.result||'pending';
       const resCol=res==='win'?'#10b981':res==='loss'?'#f87171':'var(--mut)';
-      const resBg=res==='win'?'rgba(16,185,129,.12)':res==='loss'?'rgba(248,113,113,.12)':'rgba(255,255,255,.05)';
-      h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:var(--sur);border:1px solid var(--bdr);margin-bottom:6px;">'
+      const resBg=res==='win'?'rgba(16,185,129,.1)':res==='loss'?'rgba(248,113,113,.1)':'rgba(255,255,255,.04)';
+      h+='<div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;background:var(--bg);border:1px solid var(--bdr);">'
         +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:14px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+'</div>'
-          +'<div style="font-size:11px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · '+p.odds:'')+'</div>'
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+'</div>'
+          +'<div style="font-size:10px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · '+p.odds:'')+'</div>'
         +'</div>'
-        +'<div style="display:flex;align-items:center;gap:7px;flex-shrink:0;">'
-          +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:'+resBg+';color:'+resCol+';">'+res+'</span>'
-          +(res==='pending'?'<button onclick="lgRemovePick(\''+p.id+'\',\''+l.id+'\')" style="background:none;border:none;color:var(--mut);font-size:14px;cursor:pointer;padding:0;line-height:1;">✕</button>':'')
+        +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+resBg+';color:'+resCol+';">'+res+'</span>'
+        +(res==='pending'?'<button onclick="lgRemovePick(\''+p.id+'\',\''+l.id+'\')" style="background:none;border:none;color:var(--mut);font-size:13px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;">✕</button>':'')
+      +'</div>';
+    });
+    h+='</div>';
+  }
+  h+='</div>';
+
+  // Leaderboard blk
+  h+='<div class="blk">';
+  h+='<div class="bttl">Leaderboard</div>';
+  if(!board.length){
+    h+='<div style="font-size:12px;color:var(--mut);text-align:center;padding:12px 0;">No members yet</div>';
+  }else{
+    board.forEach(function(entry,i){
+      const pos=i===0?'1st':i===1?'2nd':i===2?'3rd':(i+1)+'th';
+      const scoreDisp=l.scoring==='wins'?entry.s.wins+' W':(entry.s.score>=0?'+':'')+entry.s.score.toFixed(2);
+      const scoreCol=entry.s.score>0?'#10b981':entry.s.score<0?'#f87171':'var(--txt)';
+      h+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;'+(i?'border-top:1px solid var(--bdr);':'')+'background:'+(entry.isMe?'transparent':'transparent')+';">'
+        +'<div style="width:28px;text-align:center;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:900;color:'+(i<3?'var(--txt)':'var(--mut)')+';flex-shrink:0;">'+pos+'</div>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(entry.m.display_name||'Member')+(entry.isMe?' <span style="font-size:9px;color:#10b981;font-weight:800;letter-spacing:.04em;">YOU</span>':'')+'</div>'
+          +'<div style="font-size:10px;color:var(--mut);">'+entry.s.settled+' settled · '+entry.s.wins+' win'+(entry.s.wins!==1?'s':'')+(entry.todayCount?' · '+entry.todayCount+' today':'')+'</div>'
         +'</div>'
+        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;color:'+scoreCol+';flex-shrink:0;">'+scoreDisp+'</div>'
       +'</div>';
     });
   }
   h+='</div>';
 
-  // Leaderboard
-  h+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Leaderboard</div>';
-  if(!board.length){
-    h+='<div style="font-size:12px;color:var(--mut);font-style:italic;text-align:center;padding:16px;">No members yet</div>';
-  }else{
-    board.forEach(function(entry,i){
-      const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-      const pos=i+1;
-      const scoreDisp=l.scoring==='wins'?entry.s.wins+' W':(entry.s.score>=0?'+':'')+entry.s.score.toFixed(2);
-      const scoreCol=entry.s.score>0?'#10b981':entry.s.score<0?'#f87171':'var(--txt)';
-      h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;background:'+(entry.isMe?'rgba(16,185,129,.06)':'var(--sur)')+';border:1px solid '+(entry.isMe?'rgba(16,185,129,.25)':'var(--bdr)')+';margin-bottom:6px;">'
-        +'<div style="width:24px;text-align:center;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:900;color:var(--mut);flex-shrink:0;">'+(medal||pos)+'</div>'
-        +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(entry.m.display_name||'Member')+(entry.isMe?' <span style="font-size:9px;color:#10b981;font-weight:800;">(you)</span>':'')+'</div>'
-          +'<div style="font-size:10px;color:var(--mut);">'+entry.s.settled+' settled · '+entry.s.wins+' win'+(entry.s.wins!==1?'s':'')+(entry.todayCount?' · '+entry.todayCount+' today':'')+'</div>'
-        +'</div>'
-        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:17px;font-weight:900;color:'+scoreCol+';flex-shrink:0;">'+scoreDisp+'</div>'
-      +'</div>';
-    });
-  }
-
-  // Admin: delete league
-  if(isAdmin){
-    h+='<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--bdr);text-align:center;">'
-      +'<button onclick="lgDeleteLeague(\''+l.id+'\')" style="font-size:11px;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;">Delete league</button>'
-    +'</div>';
-  }else{
-    h+='<div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--bdr);text-align:center;">'
-      +'<button onclick="lgLeaveLeague(\''+l.id+'\')" style="font-size:11px;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;">Leave league</button>'
-    +'</div>';
-  }
+  // Footer action
+  h+='<div style="text-align:center;margin-top:4px;">'
+    +(isAdmin
+      ?'<button onclick="lgDeleteLeague(\''+l.id+'\')" style="font-size:11px;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;">Delete league</button>'
+      :'<button onclick="lgLeaveLeague(\''+l.id+'\')" style="font-size:11px;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;">Leave league</button>'
+    )
+  +'</div>';
 
   el.innerHTML=h;
 }
@@ -328,23 +328,21 @@ function lgRenderDetail(el){
 function lgShowCreate(){_lgView='create';lgRender();}
 function lgRenderCreate(el){
   el.innerHTML=
-    '<div>'
-    +'<button onclick="lgBack()" style="display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:0;text-transform:uppercase;margin-bottom:20px;">'
-      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back'
-    +'</button>'
-    +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:20px;">Create League</div>'
-    +'<div class="fg"><label>League Name</label><input id="lg-new-name" type="text" placeholder="e.g. Friday Night Punters" autocomplete="off" style="width:100%;"></div>'
-    +'<div class="fg"><label>Your display name in this league</label><input id="lg-new-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;"></div>'
-    +'<div class="fg"><label>Scoring</label>'
-      +'<div style="display:flex;gap:8px;margin-top:4px;">'
-        +'<button id="lg-sc-stakes" onclick="lgPickScoring(\'stakes\')" class="rc-view-btn on" style="flex:1;">£1 Level Stakes</button>'
-        +'<button id="lg-sc-wins" onclick="lgPickScoring(\'wins\')" class="rc-view-btn off" style="flex:1;">Win Count</button>'
+    _lgBackBtn('Leagues')
+    +'<div class="blk">'
+      +'<div class="bttl">Create League</div>'
+      +'<div class="fg"><label>League Name</label><input id="lg-new-name" type="text" placeholder="e.g. Friday Night Punters" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
+      +'<div class="fg"><label>Your Display Name</label><input id="lg-new-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
+      +'<div class="fg"><label>Scoring Method</label>'
+        +'<div class="rc-view-tog" style="width:100%;margin-top:4px;">'
+          +'<button id="lg-sc-stakes" onclick="lgPickScoring(\'stakes\')" class="rc-view-btn on" style="flex:1;">£1 Stakes</button>'
+          +'<button id="lg-sc-wins" onclick="lgPickScoring(\'wins\')" class="rc-view-btn off" style="flex:1;">Win Count</button>'
+        +'</div>'
+        +'<div style="font-size:11px;color:var(--mut);margin-top:6px;" id="lg-sc-desc">Win at 5/1 = +5pts, loss = −1pt. Rewards value hunting.</div>'
       +'</div>'
-      +'<div style="font-size:11px;color:var(--mut);margin-top:6px;" id="lg-sc-desc">Win at 5/1 = +5pts, loss = −1pt. Rewards value hunting.</div>'
-    +'</div>'
-    +'<button onclick="lgCreateSubmit()" style="width:100%;padding:13px;border-radius:10px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:8px;">Create League</button>'
-    +'<div id="lg-create-err" style="color:var(--red);font-size:12px;margin-top:8px;text-align:center;"></div>'
-  +'</div>';
+      +'<button onclick="lgCreateSubmit()" style="width:100%;padding:11px;border-radius:9px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:4px;">Create League</button>'
+      +'<div id="lg-create-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
+    +'</div>';
 }
 
 let _lgScoring='stakes';
@@ -383,16 +381,14 @@ async function lgCreateSubmit(){
 function lgShowJoin(){_lgView='join';lgRender();}
 function lgRenderJoin(el){
   el.innerHTML=
-    '<div>'
-    +'<button onclick="lgBack()" style="display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:0;text-transform:uppercase;margin-bottom:20px;">'
-      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back'
-    +'</button>'
-    +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:20px;">Join a League</div>'
-    +'<div class="fg"><label>Invite Code</label><input id="lg-join-code" type="text" placeholder="e.g. ABC123" autocomplete="off" style="width:100%;text-transform:uppercase;letter-spacing:.15em;font-size:16px;" maxlength="6" oninput="this.value=this.value.toUpperCase()"></div>'
-    +'<div class="fg"><label>Your display name in this league</label><input id="lg-join-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;"></div>'
-    +'<button onclick="lgJoinSubmit()" style="width:100%;padding:13px;border-radius:10px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:8px;">Join League</button>'
-    +'<div id="lg-join-err" style="color:var(--red);font-size:12px;margin-top:8px;text-align:center;"></div>'
-  +'</div>';
+    _lgBackBtn('Leagues')
+    +'<div class="blk">'
+      +'<div class="bttl">Join a League</div>'
+      +'<div class="fg"><label>Invite Code</label><input id="lg-join-code" type="text" placeholder="ABC123" autocomplete="off" style="width:100%;box-sizing:border-box;text-transform:uppercase;letter-spacing:.15em;font-size:16px;" maxlength="6" oninput="this.value=this.value.toUpperCase()"></div>'
+      +'<div class="fg"><label>Your Display Name</label><input id="lg-join-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
+      +'<button onclick="lgJoinSubmit()" style="width:100%;padding:11px;border-radius:9px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:4px;">Join League</button>'
+      +'<div id="lg-join-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
+    +'</div>';
 }
 
 async function lgJoinSubmit(){
@@ -429,16 +425,10 @@ function lgRenderPick(el){
   const todayPicks=(_lgPicks[l.id]||[]).filter(function(p){return p.user_id===_lgUid()&&p.pick_date===_lgToday();});
   const pickedNames=todayPicks.map(function(p){return(p.horse||'').toLowerCase().trim();});
 
-  let h='<div>'
-    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">'
-      +'<button onclick="_lgView=\'detail\';lgRender();" style="display:flex;align-items:center;gap:4px;background:none;border:none;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:0;text-transform:uppercase;">'
-        +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back'
-      +'</button>'
-    +'</div>'
-    +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);margin-bottom:12px;">Pick Horses — '+_lgToday()+'</div>';
+  let h=_lgBackBtn(_lgEsc(l.name));
 
   if(!races.length){
-    h+='<div style="text-align:center;padding:40px 20px;font-size:13px;color:var(--mut);">No races loaded.<br>Open the Races tab first to load today\'s cards.</div>';
+    h+='<div class="blk" style="text-align:center;padding:30px 16px;font-size:12px;color:var(--mut);">No races loaded yet.<br>Open the Races card first to fetch today\'s cards.</div>';
   }else{
     // Flatten meetings → races
     const flat=[];
@@ -455,20 +445,20 @@ function lgRenderPick(el){
             -(typeof timeToMins==='function'?timeToMins:function(t){return 0;})(b.race.off||b.race.time||'');
     });
 
-    flat.forEach(function(item,fi){
+    flat.forEach(function(item){
       const r=item.race;
       const time=r.off||r.off_time||r.time||'—';
-      const name=r.race_name||r.name||r.title||'Race';
+      const raceName=r.race_name||r.name||r.title||'Race';
       const runners=(r.runners||r.horses||[]).filter(function(x){return !x.non_runner&&!x.isNonRunner;});
       if(!runners.length)return;
-      h+='<div style="margin-bottom:12px;border-radius:10px;border:1px solid var(--bdr);overflow:hidden;">'
-        +'<div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--sur2);cursor:pointer;">'
-          +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;color:var(--txt);">'+time+'</span>'
+      h+='<div class="blk" style="padding:0;margin-bottom:10px;overflow:hidden;">'
+        +'<div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;">'
+          +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:900;color:var(--txt);flex-shrink:0;">'+time+'</span>'
           +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+item.course+'</div>'
-            +'<div style="font-size:10px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+name+'</div>'
+            +'<div style="font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+item.course+'</div>'
+            +'<div style="font-size:10px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+raceName+'</div>'
           +'</div>'
-          +'<span style="color:var(--mut);font-size:16px;">›</span>'
+          +'<span style="color:var(--mut);">›</span>'
         +'</div>'
         +'<div style="display:none;">'
         +runners.map(function(runner){
@@ -476,14 +466,14 @@ function lgRenderPick(el){
           const jock=(typeof fmtJockey==='function'?fmtJockey(runner.jockey||''):runner.jockey||'');
           const odds=runner.sp||runner.price||runner.odds||'';
           const isPicked=pickedNames.includes(horse.toLowerCase().trim());
-          return'<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--bdr);">'
+          return'<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid var(--bdr);">'
             +'<div style="flex:1;min-width:0;">'
               +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+horse+'</div>'
               +'<div style="font-size:10px;color:var(--mut);">'+(jock?'J: '+jock:'')+(odds?' · '+odds:'')+'</div>'
             +'</div>'
             +(isPicked
-              ?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#10b981;">Picked ✓</span>'
-              :'<button onclick="lgAddPickFromCard(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+item.course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+odds+'\')" style="padding:5px 12px;border-radius:7px;border:1px solid rgba(16,185,129,.4);background:rgba(16,185,129,.08);color:#10b981;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Pick</button>'
+              ?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#10b981;">Picked ✓</span>'
+              :'<button onclick="lgAddPickFromCard(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+item.course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+odds+'\')" class="btn-refresh" style="color:#10b981;border-color:rgba(16,185,129,.4);white-space:nowrap;">Pick</button>'
             )
           +'</div>';
         }).join('')
@@ -492,7 +482,6 @@ function lgRenderPick(el){
     });
   }
 
-  h+='</div>';
   el.innerHTML=h;
 }
 
@@ -618,7 +607,7 @@ async function lgSyncResults(results){
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 function lgInit(){
-  // Render placeholder immediately, load async
   lgRender();
-  lgLoad();
+  // Only hit Supabase on first open — avoids re-fetching on every swipe
+  if(!_lgLoaded) lgLoad();
 }

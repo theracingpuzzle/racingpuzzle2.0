@@ -479,6 +479,43 @@ function renderWLEntry(e){
 
 
 // ── POST-RACE REVIEW SHEET ──
+function wlCompletePendingReview(pendingId){
+  const p=(D.pendingReviews||[]).find(function(x){return x.id===pendingId;});
+  if(!p)return;
+  const wl=getWL();
+  const entry=wl.find(function(x){return x.id===p.profileId;})||{};
+  // Open the review modal pre-filled with all saved race data
+  openWLPostRaceReview(p.profileId, entry.horse||p.horse||'', p.course||'', p.result||'', p.raceName||'', p.raceDist||'', p.raceGoing||'', '');
+  setTimeout(function(){
+    const d=document.getElementById('rvw-date');if(d)d.value=p.date||'';
+    const c=document.getElementById('rvw-course');if(c)c.value=p.course||'';
+    const rn=document.getElementById('rvw-racename-prefill');if(rn)rn.value=p.raceName||'';
+    const dist=document.getElementById('rvw-dist');if(dist)dist.value=p.raceDist||'';
+    const going=document.getElementById('rvw-going-prefill');if(going)going.value=p.raceGoing||'';
+    // Select result button if we have it
+    if(p.result){
+      const rbtn=document.querySelector('.rvw-btn[data-grp="result"][data-result="'+p.result+'"]');
+      if(rbtn)wlRvwToggle(rbtn);
+    }
+    // Fill position if we have it
+    if(p.position){
+      const posEl=document.getElementById('rvw-pos');if(posEl)posEl.value=p.position;
+    }
+    // Override save to also clear the pending entry when saved
+    const saveBtn=document.querySelector('#wl-review-modal .btn.bgld');
+    if(saveBtn){
+      const origOnclick=saveBtn.getAttribute('onclick');
+      saveBtn.setAttribute('onclick', 'wlDismissPending(\''+pendingId+'\');'+origOnclick);
+    }
+  },50);
+}
+
+function wlDismissPending(pendingId){
+  if(!D.pendingReviews)return;
+  D.pendingReviews=D.pendingReviews.filter(function(p){return p.id!==pendingId;});
+  save();
+}
+
 function openWLEditReview(reviewId){
   const r=(D.reviews||[]).find(function(x){return x.id===reviewId;});
   if(!r)return;
@@ -1658,6 +1695,46 @@ function _wlpBuildHTML(e){
   }
   h+='</div>';
 
+
+  // SECTION 4b: PENDING REVIEWS (unsaved race data awaiting write-up)
+  const pendingReviews=((D.pendingReviews||[]).filter(function(p){
+    if(p.profileId!==e.id)return false;
+    // Only show if not since been reviewed
+    const reviewed=(D.reviews||[]).some(function(r){return r.profileId===e.id&&r.date===p.date;});
+    return!reviewed;
+  })).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+  if(pendingReviews.length){
+    h+='<div class="wlp-section" style="border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.04);">';
+    h+='<div class="wlp-section-hdr">'
+      +'<div class="wlp-section-left">'
+        +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+        +'<span class="wlp-section-title" style="color:#f59e0b;">Awaiting Review</span>'
+      +'</div>'
+    +'</div>';
+    pendingReviews.forEach(function(p){
+      const RCOL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'#3a3a5c',missed:'#a78bfa'};
+      const rc=RCOL[p.result]||'';
+      h+='<div style="padding:11px 13px;border-top:1px solid rgba(245,158,11,.15);">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">'
+          +'<div style="flex:1;min-width:0;">'
+            +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(p.raceName||p.course||'Race')+'</div>'
+            +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'
+              +[p.date?_wlpFmt(p.date):'',p.course,p.raceDist,p.raceGoing].filter(Boolean).join(' · ')
+            +'</div>'
+            +(p.position?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">Finished: <strong>'+esc(p.position)+'</strong></div>':'')
+          +'</div>'
+          +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'
+            +(p.result&&rc?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+p.result+'</span>':'')
+            +'<button onclick="wlCompletePendingReview(\''+p.id+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;">'
+              +'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>'
+              +'Write Up'
+            +'</button>'
+          +'</div>'
+        +'</div>'
+      +'</div>';
+    });
+    h+='</div>';
+  }
 
   // SECTION 5: REVIEWS
   const profileReviews=(D.reviews||[]).filter(function(r){return r.profileId===e.id;}).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});

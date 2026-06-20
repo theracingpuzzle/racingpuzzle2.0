@@ -202,7 +202,7 @@ function lgRenderList(el){
         +'<div style="width:36px;height:36px;border-radius:9px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;color:#10b981;flex-shrink:0;">'+SVG_TROPHY+'</div>'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_lgEsc(l.name)+'</div>'
-          +'<div style="font-size:10px;color:var(--mut);margin-top:1px;">'+(l.scoring==='wins'?'Win count':'£1 stakes')+(todayPicks.length?' · <span style="color:#10b981;">'+todayPicks.length+' pick'+(todayPicks.length!==1?'s':'')+'</span>':'')+'</div>'
+          +'<div style="font-size:10px;color:var(--mut);margin-top:1px;">'+(l.scoring==='wins'?'Win count':'£1 stakes')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+(todayPicks.length?' · <span style="color:#10b981;">'+todayPicks.length+' pick'+(todayPicks.length!==1?'s':'')+'</span>':'')+'</div>'
         +'</div>'
         +'<div style="text-align:right;flex-shrink:0;">'
           +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;color:'+scoreCol+';">'+scoreVal+'</div>'
@@ -253,7 +253,8 @@ function lgRenderDetail(el){
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
       +'<div>'
         +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:17px;font-weight:900;letter-spacing:.02em;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
-        +'<div style="font-size:10px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Win count scoring':'£1 level stakes scoring')+'</div>'
+        +'<div style="font-size:10px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Win count scoring':'£1 level stakes scoring')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+'</div>'
+        +(_lgIsEnded(l)?'<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;">Competition Ended</div>':'')
       +'</div>'
       +'<div style="text-align:right;flex-shrink:0;">'
         +'<div class="bttl" style="border:none;padding:0;margin-bottom:3px;">Invite</div>'
@@ -267,7 +268,10 @@ function lgRenderDetail(el){
   h+='<div class="blk">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
       +'<div class="bttl" style="border:none;padding:0;margin:0;">Today\'s Picks</div>'
-      +'<button onclick="lgShowPick()" class="btn-refresh" style="color:#10b981;border-color:rgba(16,185,129,.4);">+ Add Pick</button>'
+      +(_lgIsEnded(l)
+        ?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);">Picks closed</span>'
+        :'<button onclick="lgShowPick()" class="btn-refresh" style="color:#10b981;border-color:rgba(16,185,129,.4);">+ Add Pick</button>'
+      )
     +'</div>';
 
   if(!todayPicks.length){
@@ -333,6 +337,7 @@ function lgRenderCreate(el){
       +'<div class="bttl">Create League</div>'
       +'<div class="fg"><label>League Name</label><input id="lg-new-name" type="text" placeholder="e.g. Friday Night Punters" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
       +'<div class="fg"><label>Your Display Name</label><input id="lg-new-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
+      +'<div class="fg"><label>End Date <span style="color:var(--mut);font-weight:400;">(optional)</span></label><input id="lg-new-end" type="date" style="width:100%;box-sizing:border-box;"></div>'
       +'<div class="fg"><label>Scoring Method</label>'
         +'<div class="rc-view-tog" style="width:100%;margin-top:4px;">'
           +'<button id="lg-sc-stakes" onclick="lgPickScoring(\'stakes\')" class="rc-view-btn on" style="flex:1;">£1 Stakes</button>'
@@ -359,6 +364,7 @@ function lgPickScoring(s){
 async function lgCreateSubmit(){
   const name=(document.getElementById('lg-new-name')||{value:''}).value.trim();
   const dname=(document.getElementById('lg-new-dname')||{value:''}).value.trim();
+  const endDate=(document.getElementById('lg-new-end')||{value:''}).value.trim()||null;
   const errEl=document.getElementById('lg-create-err');
   if(!name){if(errEl)errEl.textContent='Please enter a league name.';return;}
   if(!dname){if(errEl)errEl.textContent='Please enter your display name.';return;}
@@ -366,7 +372,7 @@ async function lgCreateSubmit(){
   const leagueId=_lgGid();
   const code=_lgCode();
   try{
-    await _lgFetch('leagues',{method:'POST',body:JSON.stringify({id:leagueId,name,created_by:uid,invite_code:code,scoring:_lgScoring})});
+    await _lgFetch('leagues',{method:'POST',body:JSON.stringify({id:leagueId,name,created_by:uid,invite_code:code,scoring:_lgScoring,end_date:endDate})});
     await _lgFetch('league_members',{method:'POST',body:JSON.stringify({id:_lgGid(),league_id:leagueId,user_id:uid,display_name:dname})});
     await lgLoad();
     const l=_lgMyLeagues.find(function(x){return x.id===leagueId;});
@@ -473,7 +479,10 @@ function lgRenderPick(el){
             +'</div>'
             +(isPicked
               ?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#10b981;">Picked ✓</span>'
-              :'<button onclick="lgAddPickFromCard(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+item.course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+odds+'\')" class="btn-refresh" style="color:#10b981;border-color:rgba(16,185,129,.4);white-space:nowrap;">Pick</button>'
+              :'<div id="lg-pick-wrap-'+_lgEsc(horse.replace(/\s/g,'_'))+'" style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
+                +'<input id="lg-odds-'+_lgEsc(horse.replace(/\s/g,'_'))+'" type="text" inputmode="decimal" placeholder="Odds" value="'+_lgEsc(odds)+'" style="width:64px;padding:5px 7px;font-size:12px;border-radius:7px;border:1px solid var(--bdr);background:var(--inp);color:var(--txt);text-align:center;">'
+                +'<button onclick="lgConfirmPick(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+item.course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+_lgEsc(horse.replace(/\s/g,'_'))+'\')" class="btn-refresh" style="color:#10b981;border-color:rgba(16,185,129,.4);white-space:nowrap;">Pick</button>'
+              +'</div>'
             )
           +'</div>';
         }).join('')
@@ -486,6 +495,12 @@ function lgRenderPick(el){
 }
 
 // ─── Pick actions ─────────────────────────────────────────────────────────────
+function lgConfirmPick(leagueId, horse, course, time, safeKey){
+  const inp=document.getElementById('lg-odds-'+safeKey);
+  const odds=inp?inp.value.trim():'';
+  lgAddPickFromCard(leagueId, horse, course, time, odds);
+}
+
 async function lgAddPickFromCard(leagueId, horse, course, time, odds){
   const uid=_lgUid();
   const pick={id:_lgGid(),league_id:leagueId,user_id:uid,pick_date:_lgToday(),horse,course,race_time:time,odds:odds||null,result:'pending',returns:0};
@@ -503,18 +518,75 @@ async function lgAddPickFromCard(leagueId, horse, course, time, odds){
 // Called from racecard runner row (external entry point)
 async function lgPickFromRacecard(horse, course, time, odds){
   if(!_lgMyLeagues.length){alert('You\'re not in any leagues yet.');return;}
-  if(_lgMyLeagues.length===1){
-    await lgAddPickFromCard(_lgMyLeagues[0].id,horse,course,time,odds);
-    // Brief toast
-    _lgToast('Picked '+horse+' for '+_lgMyLeagues[0].name);
+  // Filter to active leagues only
+  const active=_lgMyLeagues.filter(function(l){return !_lgIsEnded(l);});
+  if(!active.length){_lgToast('All your leagues have ended.');return;}
+  if(active.length===1){
+    await lgAddPickFromCard(active[0].id,horse,course,time,odds);
+    _lgToast('Picked '+horse+' for '+active[0].name);
     return;
   }
-  // Multiple leagues — show selector
-  const names=_lgMyLeagues.map(function(l,i){return i+': '+l.name;}).join('\n');
-  const idx=parseInt(prompt('Pick for which league?\n'+names));
-  if(isNaN(idx)||!_lgMyLeagues[idx])return;
-  await lgAddPickFromCard(_lgMyLeagues[idx].id,horse,course,time,odds);
-  _lgToast('Picked '+horse+' for '+_lgMyLeagues[idx].name);
+  // Multiple active leagues — show bottom sheet selector
+  _lgShowLeaguePicker(horse, course, time, odds, active);
+}
+
+function _lgShowLeaguePicker(horse, course, time, odds, leagues){
+  // Remove any existing picker
+  const old=document.getElementById('lg-picker-sheet');
+  if(old)old.remove();
+
+  const sheet=document.createElement('div');
+  sheet.id='lg-picker-sheet';
+  sheet.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9100;background:var(--sur);border-top:1px solid var(--bdr);border-radius:18px 18px 0 0;padding:0 0 env(safe-area-inset-bottom,0px);box-shadow:0 -4px 24px rgba(0,0,0,.3);';
+
+  let h='<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;">'
+    +'<div>'
+      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;letter-spacing:.02em;color:var(--txt);">Pick for which league?</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-top:1px;">'+horse+'</div>'
+    +'</div>'
+    +'<button onclick="document.getElementById(\'lg-picker-sheet\').remove()" style="background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer;padding:4px 8px;line-height:1;">×</button>'
+  +'</div>'
+  +'<div style="height:1px;background:var(--bdr);margin:0 18px;"></div>';
+
+  leagues.forEach(function(l){
+    const myPicks=(_lgMyPicks[l.id]||[]).filter(function(p){return p.pick_date===_lgToday();});
+    const alreadyPicked=myPicks.some(function(p){return(p.horse||'').toLowerCase().trim()===(horse||'').toLowerCase().trim();});
+    h+='<div onclick="'+( alreadyPicked ? '' : '_lgPickerSelect(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+odds+'\')')+'" '
+      +'style="display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:'+(alreadyPicked?'default':'pointer')+';'+(alreadyPicked?'opacity:.5;':'')+'border-top:1px solid var(--bdr);">'
+      +'<div style="width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;color:#10b981;flex-shrink:0;">'+SVG_TROPHY+'</div>'
+      +'<div style="flex:1;">'
+        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
+        +'<div style="font-size:10px;color:var(--mut);">'+(l.end_date?'Ends '+_lgFmtDate(l.end_date)+' · ':'')+myPicks.length+' pick'+(myPicks.length!==1?'s':'')+'  today</div>'
+      +'</div>'
+      +(alreadyPicked
+        ?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#10b981;">Picked ✓</span>'
+        :'<span style="color:var(--mut);font-size:18px;">›</span>'
+      )
+    +'</div>';
+  });
+
+  h+='<div style="padding:12px 18px;"><button onclick="document.getElementById(\'lg-picker-sheet\').remove()" style="width:100%;padding:10px;border-radius:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">Cancel</button></div>';
+
+  sheet.innerHTML=h;
+
+  // Backdrop
+  const backdrop=document.createElement('div');
+  backdrop.id='lg-picker-backdrop';
+  backdrop.style.cssText='position:fixed;inset:0;z-index:9099;background:rgba(0,0,0,.4);';
+  backdrop.onclick=function(){sheet.remove();backdrop.remove();};
+
+  document.body.appendChild(backdrop);
+  document.body.appendChild(sheet);
+}
+
+async function _lgPickerSelect(leagueId, horse, course, time, odds){
+  const sheet=document.getElementById('lg-picker-sheet');
+  const backdrop=document.getElementById('lg-picker-backdrop');
+  if(sheet)sheet.remove();
+  if(backdrop)backdrop.remove();
+  const l=_lgMyLeagues.find(function(x){return x.id===leagueId;});
+  await lgAddPickFromCard(leagueId, horse, course, time, odds);
+  _lgToast('Picked '+horse+(l?' for '+l.name:''));
 }
 
 function _lgToast(msg){
@@ -568,6 +640,8 @@ function lgCopyCode(code){
 }
 
 function _lgEsc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function _lgFmtDate(d){if(!d)return'';try{const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];}catch(e){return d;}}
+function _lgIsEnded(l){if(!l||!l.end_date)return false;return _lgToday()>l.end_date;}
 
 // ─── Result sync (called from results fetch) ──────────────────────────────────
 // Pass in the results array (same format as window._todayResultsCache)

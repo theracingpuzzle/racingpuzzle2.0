@@ -492,6 +492,47 @@ async function checkWatchlistRunners(races){
   });
 
   window._wlAlerts=alerts; // stored for PDF generation
+
+  // ── Persist pending review snapshots ─────────────────────────────────────
+  // Save each alert to D.pendingReviews so the data survives beyond today.
+  // Only save if not already reviewed and not already saved for this horse+date.
+  if(!D.pendingReviews)D.pendingReviews=[];
+  const todayDateStr=td();
+  let pendingChanged=false;
+  alerts.forEach(function(a){
+    const wid=(a.wlEntry&&a.wlEntry.id)||'';
+    if(!wid)return;
+    // Skip if already fully reviewed
+    const alreadyReviewed=(D.reviews||[]).some(function(r){return r.profileId===wid&&r.date===todayDateStr;});
+    if(alreadyReviewed)return;
+    // Skip if snapshot already saved for this profile + race date
+    const alreadySaved=D.pendingReviews.some(function(p){return p.profileId===wid&&p.date===todayDateStr;});
+    if(alreadySaved){
+      // Update result/position if we now have result info we didn't before
+      if(a.resultInfo){
+        const saved=D.pendingReviews.find(function(p){return p.profileId===wid&&p.date===todayDateStr;});
+        if(saved&&!saved.result){saved.result=a.resultInfo.result||'';saved.position=a.resultInfo.position||'';pendingChanged=true;}
+      }
+      return;
+    }
+    D.pendingReviews.push({
+      id:gid?gid():(Date.now().toString(36)+Math.random().toString(36).slice(2,5)),
+      profileId:wid,
+      horse:a.horse,
+      course:a.course,
+      date:todayDateStr,
+      time:a.time||'',
+      raceName:a.raceName||'',
+      raceDist:a.raceDist||'',
+      raceGoing:a.raceGoing||'',
+      raceClass:a.raceClass||'',
+      result:(a.resultInfo&&a.resultInfo.result)||'',
+      position:(a.resultInfo&&a.resultInfo.position)||'',
+      savedAt:new Date().toISOString(),
+    });
+    pendingChanged=true;
+  });
+  if(pendingChanged)save();
   alertEl.style.display='block';
   const todayStr=td();
 
@@ -1511,6 +1552,10 @@ function renderTrackPulse(){
 async function initTrackPulse(){
   await fetchTodayResults();
   renderTrackPulse();
+  // Results are now in — settle any pending league picks
+  if(typeof lgSyncResults==='function'&&window._todayResultsCache&&window._todayResultsCache.length){
+    lgSyncResults(window._todayResultsCache);
+  }
   // Results are now in — re-check watching horses so any that have finished
   // get their review auto-filled instead of just declared-to-run
   if(typeof checkWatchlistRunners==='function'&&window._todayMeetingsCache){
@@ -1525,6 +1570,10 @@ async function initTrackPulse(){
     try{ window._todayMeetingsCache=await callRacingAPI('racecards/free',{}); }catch(e){}
     await fetchTodayResults();
     renderTrackPulse();
+    // Re-settle picks on each refresh cycle
+    if(typeof lgSyncResults==='function'&&window._todayResultsCache&&window._todayResultsCache.length){
+      lgSyncResults(window._todayResultsCache);
+    }
     if(typeof checkWatchlistRunners==='function'&&window._todayMeetingsCache){
       const races=window._todayMeetingsCache.racecards||window._todayMeetingsCache.races||[];
       if(races.length)checkWatchlistRunners(races);

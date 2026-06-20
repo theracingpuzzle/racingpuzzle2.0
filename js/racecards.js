@@ -407,7 +407,12 @@ function rcSwRenderMeetingRaces(course, el){
           +'<div class="rc-race-meta-row">'+(dist?'<span class="rc-dist-chip">'+dist+'</span>':'')+runners+' runners</div>'
           +'<div class="rc-race-name" style="color:'+nameCol+';">'+name+'</div>'
         +'</div>'
-        +'<span id="sw-chev-'+safeId+'-'+i+'" class="rc-chev">›</span>'
+        +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
+          +'<button onclick="event.stopPropagation();rcSlStartFromExpanded(\''+course.replace(/'/g,"\\'")+'\','+i+')" title="Shortlist runners" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid rgba(139,92,246,.35);background:rgba(139,92,246,.1);color:#a78bfa;cursor:pointer;flex-shrink:0;padding:0;">'
+            +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+          +'</button>'
+          +'<span id="sw-chev-'+safeId+'-'+i+'" class="rc-chev">›</span>'
+        +'</div>'
       +'</div>'
       +'<div class="rc-runners-inline" id="sw-runners-'+safeId+'-'+i+'" data-course="'+course+'" data-idx="'+i+'" style="display:none;"></div>'
     +'</div>';
@@ -561,21 +566,6 @@ function rcSwRenderRunners(idx, course, el){
     +'</div>';
   }).join('');
   el.innerHTML=html;
-
-  // ── Shortlist toggle button (appended after innerHTML so it persists) ──
-  const activeRunners=(race.runners||race.horses||[]).filter(function(r){
-    return !r.non_runner&&!r.isNonRunner&&(''+r.number).toUpperCase()!=='NR'&&(''+r.status).toLowerCase()!=='nr';
-  });
-  if(activeRunners.length>1){
-    const slBtn=document.createElement('div');
-    slBtn.id='rc-sl-toggle-'+course.replace(/\W/g,'_')+'-'+idx;
-    slBtn.style.cssText='padding:10px 12px 6px;';
-    slBtn.innerHTML='<button onclick="rcSlStartFromExpanded(\''+course.replace(/'/g,"\\'")+'\','+idx+')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 14px;border-radius:9px;border:1px solid rgba(139,92,246,.3);background:rgba(139,92,246,.08);color:#a78bfa;font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">'
-      +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
-      +'Shortlist runners'
-      +'</button>';
-    el.appendChild(slBtn);
-  }
 }
 
 // ── Overlay flow: Racecard R/V → Checklist overlay → Log Bet overlay → back to Racecards ──

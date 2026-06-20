@@ -63,7 +63,7 @@ function navTo(id){
   if(idx!=null)goTo(idx);
 }
 
-const _NAV_IDS=['today','races','results','tracker','stats','settings'];
+const _NAV_IDS=['today','races','results','tracker','stats'];
 function updNav(activeId){
   _NAV_IDS.forEach(function(id){
     const el=document.getElementById('bn-'+id);

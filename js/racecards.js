@@ -249,7 +249,12 @@ function rcSwRaceCardPreview(r, course, isNext, isPast){
         +'</div>'
         +'<div class="rc-mtg-meta">'+activeRunners+' runners'+(name?' · '+name:'')+'</div>'
       +'</div>'
-      +'<span id="rcfc-chev-'+idx+'" class="rc-meeting-chevron">›</span>'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
+        +'<button onclick="event.stopPropagation();rcSlStartFromFlat('+idx+')" title="Shortlist runners" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid rgba(139,92,246,.35);background:rgba(139,92,246,.1);color:#a78bfa;cursor:pointer;flex-shrink:0;padding:0;">'
+          +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+        +'</button>'
+        +'<span id="rcfc-chev-'+idx+'" class="rc-meeting-chevron">›</span>'
+      +'</div>'
     +'</div>'
     +'<div id="'+uid+'" style="display:none;"></div>'
     +'</div>';
@@ -1528,6 +1533,20 @@ function rcSlRenderPicker(container){
   wrap.style.cssText='margin-top:12px;';
   wrap.innerHTML=html;
   container.appendChild(wrap);
+}
+
+// ── Entry point from time-view flat race row ──────────────────────
+function rcSlStartFromFlat(flatIdx){
+  const entry=_rcSwFlatRaces[flatIdx];
+  if(!entry||!entry.race)return;
+  const course=entry.course;
+  const race=entry.race;
+  // Ensure the race is registered in rcSwRacesByMeeting so the shortlist can find it
+  if(!rcSwRacesByMeeting[course])rcSwRacesByMeeting[course]=[];
+  let raceIdx=rcSwRacesByMeeting[course].findIndex(function(r){return r===race;});
+  if(raceIdx===-1){rcSwRacesByMeeting[course].push(race);raceIdx=rcSwRacesByMeeting[course].length-1;}
+  // Delegate to the standard expanded-race entry point
+  rcSlStartFromExpanded(course, raceIdx);
 }
 
 // ── Entry point from expanded race (inline toggle) ────────────────

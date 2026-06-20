@@ -59,11 +59,11 @@ function goHome(){if(mode!=='sw')navTo('today');else goTo(0);}
 // ─── NAV ───
 function navTo(id){
   if(mode!=='sw')setMode('sw');
-  const idx={today:0,races:1,results:2,tracker:3,watch:3,stats:4,settings:5}[id];
+  const idx={today:0,races:1,results:2,tracker:3,watch:3,stats:4,settings:5,leagues:6}[id];
   if(idx!=null)goTo(idx);
 }
 
-const _NAV_IDS=['today','races','results','tracker','stats'];
+const _NAV_IDS=['today','races','results','tracker','stats','leagues'];
 function updNav(activeId){
   _NAV_IDS.forEach(function(id){
     const el=document.getElementById('bn-'+id);

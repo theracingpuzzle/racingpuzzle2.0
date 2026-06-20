@@ -76,7 +76,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .hdr-bal   { display: flex; align-items: center; gap: 4px; }
 .hdr-bal-pill { display: flex; align-items: center; gap: 4px; padding: 3px 0; }
 .hdr-bal-lbl  { font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.45); }
-.hdr-bal-val  { font-size: 13px; font-weight: 700; white-space: nowrap; }
+.hdr-bal-val  { font-size: 16px; font-weight: 700; white-space: nowrap; }
 .hdr-bal-arrow { margin-left: 2px; }
 .hdr-bal-sep  { color: rgba(255,255,255,.2); font-size: 14px; margin: 0 2px; line-height: 1; }
 /* Profile icon button */

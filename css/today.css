@@ -106,7 +106,7 @@
 .t-horse-name {
   font-size: 15px; font-weight: 800; letter-spacing: .5px; color: var(--txt);
 }
-.t-jockey { font-size: 11px; color: var(--gld); }
+.t-jockey { font-size: 11px; color: var(--mut); }
 .t-flex-col-end { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; align-items: flex-end; }
 .t-flex-info    { flex: 1; min-width: 0; }
 .t-row-sb-gap   { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }

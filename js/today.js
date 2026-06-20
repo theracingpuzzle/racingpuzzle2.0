@@ -80,11 +80,10 @@ function _showTodayDemo(){
           return '<div class="t-alert-row-pur">'
             +'<div class="t-row-sb-gap">'
               +'<div class="t-flex-info">'
-                +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">'
+                +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:3px;">'
                   +'<span class="t-horse-name">'+a.horse+'</span>'+edgeBadge
                 +'</div>'
-                +'<div class="t-muted">'+a.time+' · '+a.course+' · '+a.race+'</div>'
-                +'<div class="t-jockey">J: '+fmtJockey(a.jockey)+'</div>'
+                +'<div class="t-muted" style="font-size:11px;">'+a.time+' · '+a.course+' · '+a.race+' · J: '+fmtJockey(a.jockey)+'</div>'
               +'</div>'
               +'<div class="t-flex-col-end">'
                 +'<button class="t-review-btn">Review</button>'
@@ -536,6 +535,21 @@ async function checkWatchlistRunners(races){
             +' class="t-wl-review-btn t-review-btn"'+(ri?' style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);"':'')+'>'
             +(ri?'✓ Confirm Review':'Review ✍️')+'</button>'
           :'';
+      // Reason badge — shows why this horse is logged
+      const _REASON_META={
+        'eye-catcher':  {label:'Eye-Catcher', col:'#a78bfa'},
+        'future-target':{label:'Future Target',col:'#34d399'},
+        'trainer-intel':{label:'Trainer Intel',col:'#38bdf8'},
+        'form-study':   {label:'Form Study',  col:'#f59e0b'},
+        'tip-source':   {label:'Tip Source',  col:'#fb7185'},
+      };
+      const _rm=_REASON_META[a.wlEntry&&a.wlEntry.reason]||null;
+      const reasonBadge=_rm
+        ?'<span style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+_rm.col+'18;border:1px solid '+_rm.col+'35;color:'+_rm.col+';">'+_rm.label+'</span>'
+        :'';
+      // Race meta line: time · course · race name · jockey (all muted)
+      const raceMeta=[a.time,a.course,a.raceName].filter(Boolean).join(' · ')
+        +(a.jockey?' · J: '+fmtJockey(a.jockey):'');
       // Primary action: review (if available/past) or race (if upcoming)
       const primaryBtn=reviewBtn
         ?reviewBtn
@@ -546,12 +560,14 @@ async function checkWatchlistRunners(races){
       return'<div class="t-alert-row-pur">'
         +'<div class="t-row-sb-gap">'
           +'<div class="t-flex-info">'
-            +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">'
-              +'<span class="t-horse-name">'+a.horse+'</span>'+edgeBadge+finishBadge
+            +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:3px;">'
+              +'<span class="t-horse-name">'+a.horse+'</span>'
+              +reasonBadge
+              +edgeBadge
+              +finishBadge
             +'</div>'
-            +'<div class="t-muted">'+a.time+' · '+a.course+(a.raceName?' · '+a.raceName:'')+'</div>'
-            +(a.jockey?'<div class="t-jockey">J: '+fmtJockey(a.jockey)+'</div>':'')
-            +(a.orUpdated?'<div style="font-size:10px;color:var(--gld);margin-top:2px;">OR: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
+            +'<div class="t-muted" style="font-size:11px;">'+raceMeta+'</div>'
+            +(a.orUpdated?'<div style="font-size:10px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
           +'</div>'
           +'<div class="t-flex-col-end">'
             +primaryBtn

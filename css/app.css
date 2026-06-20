@@ -164,6 +164,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   touch-action: none;
   border-top: 1px solid rgba(255,255,255,.08);
 }
+/* Hidden on mobile — only shown on desktop via media query */
+.bnav-collapse-btn { display: none; }
+
 .bnav-item {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
   gap: 4px; border: none; background: none; cursor: pointer;

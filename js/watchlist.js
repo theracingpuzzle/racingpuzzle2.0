@@ -131,7 +131,7 @@ function wlSelectDay(dateStr){
   let html=fixtureBanner+dayLabel;
   // Target race cards
   if(dayTargets.length){
-    html+='<div class="wl-day-sec-lbl wl-day-sec-lbl-ora">🎯 Target Races</div>';
+    html+='<div class="wl-day-sec-lbl wl-day-sec-lbl-ora" style="display:flex;align-items:center;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Target Races</div>';
     html+=dayTargets.map(function(d){
       const t=d.target;
       return'<div data-wl-id="'+d.horseId+'" class="wl-day-target">'
@@ -145,7 +145,7 @@ function wlSelectDay(dateStr){
   }
   // Observations
   if(dayObs.length){
-    html+='<div class="wl-day-sec-lbl wl-day-sec-lbl-grn"'+(dayTargets.length?' style="margin-top:10px;"':'')+'>📋 Observations</div>';
+    html+='<div class="wl-day-sec-lbl wl-day-sec-lbl-grn" style="display:flex;align-items:center;gap:5px;'+(dayTargets.length?'margin-top:10px;':'')+'"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Observations</div>';
     html+=dayObs.map(function(d){
       const o=d.obs;
       return'<div data-wl-id="'+d.horseId+'" class="wl-day-obs">'
@@ -781,7 +781,7 @@ function openWLForm(id,prefill){
             +'<div class="wlf-rvw-meta"><span>'+r.date+'</span>'+(r.raceName?'<span class="wlf-rvw-dot">·</span><span>'+r.raceName+'</span>':'')+(r.odds?'<span class="wlf-rvw-dot">·</span><span style="color:var(--gld);font-weight:700;">'+r.odds+'</span>':'')+'<span class="wlf-rvw-badge" style="color:'+rc+';">'+(r.result||'').toUpperCase()+'</span></div>'
             +(r.notes?'<div class="wlf-rvw-notes">'+r.notes+'</div>':'')
             +'</div>';}).join('')
-        : '<div style="font-size:12px;color:var(--mut);padding:8px 0;">No race reviews yet — use the <strong>Review ✍️</strong> button on the Today page after each run.</div>')
+        : '<div style="font-size:12px;color:var(--mut);padding:8px 0;">No race reviews yet — use the <strong>Review</strong> button on the Today page after each run.</div>')
       +(pid?'<button onclick="openWLPostRaceReview(\''+pid+'\',\''+(e?e.horse:'')+'\',\'\',\'\',\'\')" class="wlf-add-btn" style="margin-top:10px;">+ Add Race Review</button>':'')
       +'</div></div>';
   }())
@@ -1457,7 +1457,7 @@ function _wlpBuildHTML(e){
   h+='<div class="wlp-nav">';
   h+='<div class="wlp-back" onclick="document.getElementById(\'wlp-modal\').remove()">← Profiles</div>';
   h+='<div class="wlp-brand">RACING <span class="wlp-brand-accent">PUZZLE</span></div>';
-  h+='<div class="wlp-edit-btn" onclick="'+editFn+'">Edit ✏️</div>';
+  h+='<div class="wlp-edit-btn" onclick="'+editFn+'">Edit</div>';
   h+='</div>';
 
   // HERO
@@ -1557,7 +1557,7 @@ function _wlpBuildHTML(e){
   // SECTION 1: WHY LOGGED
   h+='<div class="wlp-section">';
   h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">1</div><span class="wlp-section-title">Why Logged</span></div>';
-  h+='<span class="wlp-section-action" onclick="'+editFn+'">Edit ✏️</span></div>';
+  h+='<span class="wlp-section-action" onclick="'+editFn+'">Edit</span></div>';
   h+='<div class="wlp-why-grid">';
   WHY_ORDER.forEach(function(rid){
     const r=REASONS[rid];const isActive=(e.reason||'eye-catcher')===rid;
@@ -1623,7 +1623,10 @@ function _wlpBuildHTML(e){
         // Match if race name contains the target name or vice versa (handles partial/abbreviated names)
         return rn===raceLower||rn.includes(raceLower)||raceLower.includes(rn)||(t.date&&r.date===t.date);
       });
-      h+='<div class="wlp-target-item"><span class="wlp-target-icon">'+(isPast?'📋':'🏇')+'</span>';
+      const _tgtIcon=isPast
+        ?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
+        :'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>';
+      h+='<div class="wlp-target-item"><span class="wlp-target-icon">'+_tgtIcon+'</span>';
       h+='<div style="flex:1;min-width:0;"><div class="wlp-target-race">'+esc(t.race||'—')+'</div><div class="wlp-target-meta">'+esc(t.track||'—')+'</div></div>';
       h+='<div style="text-align:right;flex-shrink:0;">';
       h+='<div class="wlp-target-date" style="color:'+(isPast?'var(--mut)':'var(--gld)')+';">'+(t.date?fdate(t.date):'TBC')+'</div>';
@@ -1633,7 +1636,7 @@ function _wlpBuildHTML(e){
         h+='<div style="font-size:10px;color:#4ade80;">✓ Reviewed</div>';
       }else{
         const rv='openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\''+esc(t.track||'')+'\',\'\',\''+esc(t.race||'')+'\',\'\',\'\',\'\')';
-        h+='<button onclick="'+rv+'" style="padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.05em;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.4);color:#fb923c;border-radius:6px;cursor:pointer;">Review ✍️</button>';
+        h+='<button onclick="'+rv+'" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.05em;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.4);color:#fb923c;border-radius:6px;cursor:pointer;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Review</button>';
       }
       h+='<button onclick="wlDeleteTarget(\''+e.id+'\',\''+esc(t.id||t.race)+'\')" style="padding:3px 7px;font-size:10px;font-weight:700;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:6px;cursor:pointer;" title="Remove target">✕</button>';
       h+='</div>';
@@ -1676,7 +1679,7 @@ function _wlpBuildHTML(e){
       if(chips.length)h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">'+chips.map(function(c){return'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--mut);">'+c+'</span>';}).join('')+'</div>';
       if(r.notes)h+='<div style="font-size:12px;color:var(--mut);font-style:italic;line-height:1.5;">'+esc(r.notes)+'</div>';
       h+='<div style="margin-top:8px;display:flex;gap:6px;">'
-        +'<button onclick="openWLEditReview(\''+r.id+'\')" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--mut);cursor:pointer;">Edit ✏️</button>'
+        +'<button onclick="openWLEditReview(\''+r.id+'\')" style="display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--mut);cursor:pointer;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Edit</button>'
         +'<button onclick="wlDeleteReview(\''+r.id+'\',\''+e.id+'\')" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:6px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#f87171;cursor:pointer;">Delete ✕</button>'
         +'</div>';
       h+='</div>';
@@ -1690,7 +1693,7 @@ function _wlpBuildHTML(e){
 
   // SECTION 6: CONDITIONS (full width)
   h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Conditions</span></div><span class="wlp-section-action" onclick="'+editFn+'">Edit ✏️</span></div>';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Conditions</span></div><span class="wlp-section-action" onclick="'+editFn+'">Edit</span></div>';
   h+='<div class="wlp-cond-grid" style="grid-template-columns:repeat('+condItems.length+',1fr);border-bottom:1px solid var(--bdr);">';
   condItems.forEach(function(c){
     const isDash=c.value==='—'||c.value==='Any';
@@ -1699,7 +1702,7 @@ function _wlpBuildHTML(e){
   h+='</div>';
   const intelText=e.trainerIntel||e.conditionsNotes||'';
   if(intelText){
-    h+='<div class="wlp-intel"><span class="wlp-intel-icon">🎓</span><div class="wlp-intel-text">'+esc(intelText)+'</div></div>';
+    h+='<div class="wlp-intel"><span class="wlp-intel-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><div class="wlp-intel-text">'+esc(intelText)+'</div></div>';
   }
   h+='</div>';
 

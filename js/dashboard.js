@@ -285,9 +285,9 @@ function renderStats(){
       const rRet=realBets.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
       const rROI=rSt>0?((rRet-rSt)/rSt*100):0;
       const diff=vROI-rROI;
-      if(diff>8)insights.push('🟢 <strong>Virtual ROI ('+vROI.toFixed(1)+'%) is beating real ('+rROI.toFixed(1)+'%) by '+diff.toFixed(0)+'%.</strong> You may be second-guessing yourself in real betting.');
-      else if(diff<-8)insights.push('💰 Real ROI ('+rROI.toFixed(1)+'%) is beating virtual ('+vROI.toFixed(1)+'%) by '+Math.abs(diff).toFixed(0)+'%. Real money focus sharpens your decisions.');
-      else insights.push('📊 Virtual and real closely aligned ('+vROI.toFixed(1)+'% vs '+rROI.toFixed(1)+'% ROI). Process is consistent.');
+      if(diff>8)insights.push({icon:'grn',msg:'<strong>Virtual ROI ('+vROI.toFixed(1)+'%) is beating real ('+rROI.toFixed(1)+'%) by '+diff.toFixed(0)+'%.</strong> You may be second-guessing yourself in real betting.'});
+      else if(diff<-8)insights.push({icon:'up',msg:'Real ROI ('+rROI.toFixed(1)+'%) is beating virtual ('+vROI.toFixed(1)+'%) by '+Math.abs(diff).toFixed(0)+'%. Real money focus sharpens your decisions.'});
+      else insights.push({icon:'chart',msg:'Virtual and real closely aligned ('+vROI.toFixed(1)+'% vs '+rROI.toFixed(1)+'% ROI). Process is consistent.'});
     }
   }
   // Best source — only when NOT in own study mode (all bets are own study then)
@@ -296,31 +296,46 @@ function renderStats(){
   if(!ownStudyOnly&&srcArr.length>1){
     srcArr.sort((a,b)=>b.roi-a.roi);
     const best=srcArr[0],worst=srcArr[srcArr.length-1];
-    if(best.roi>0)insights.push('✅ <strong style="color:var(--grn);">'+best.k+'</strong> is your best source — ROI of '+best.roi.toFixed(1)+'% from '+best.n+' bets.');
-    if(worst.roi<-10)insights.push('⚠️ <strong style="color:var(--red);">'+worst.k+'</strong> is costing you — ROI of '+worst.roi.toFixed(1)+'% from '+worst.n+' bets. Consider cutting it.');
+    if(best.roi>0)insights.push({icon:'check',msg:'<strong style="color:var(--grn);">'+best.k+'</strong> is your best source — ROI of '+best.roi.toFixed(1)+'% from '+best.n+' bets.'});
+    if(worst.roi<-10)insights.push({icon:'warn',msg:'<strong style="color:var(--red);">'+worst.k+'</strong> is costing you — ROI of '+worst.roi.toFixed(1)+'% from '+worst.n+' bets. Consider cutting it.'});
   }
   // Confidence calibration
   const highConf=disciplineSet.filter(b=>b.conf>=4),lowConf=disciplineSet.filter(b=>b.conf<=2);
   if(highConf.length>=3&&lowConf.length>=3){
     const hcROI=highConf.reduce((a,b)=>a+(pnl(b)||0),0)/highConf.reduce((a,b)=>a+(parseFloat(b.stake)||0),1)*100;
     const lcROI=lowConf.reduce((a,b)=>a+(pnl(b)||0),0)/lowConf.reduce((a,b)=>a+(parseFloat(b.stake)||0),1)*100;
-    if(hcROI>lcROI+10)insights.push('🎯 High-confidence bets (4-5) outperform low-confidence by '+(hcROI-lcROI).toFixed(0)+'% ROI. Back your convictions more.');
-    else if(lcROI>hcROI+10)insights.push('🤔 Your lower-confidence bets are actually outperforming high-confidence by '+(lcROI-hcROI).toFixed(0)+'% ROI. Are you overthinking your best bets?');
-    else insights.push('📊 No significant difference between high and low confidence ROI yet. Keep logging.');
+    if(hcROI>lcROI+10)insights.push({icon:'target',msg:'High-confidence bets (4-5) outperform low-confidence by '+(hcROI-lcROI).toFixed(0)+'% ROI. Back your convictions more.'});
+    else if(lcROI>hcROI+10)insights.push({icon:'info',msg:'Your lower-confidence bets are actually outperforming high-confidence by '+(lcROI-hcROI).toFixed(0)+'% ROI. Are you overthinking your best bets?'});
+    else insights.push({icon:'chart',msg:'No significant difference between high and low confidence ROI yet. Keep logging.'});
   }
   // Chasing pattern — use scope-matched bets, not all bets
   const recentScoped=[...statBets].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,10);
   let consLosses=0;for(const b of recentScoped){if(b.result==='loss')consLosses++;else if(b.result&&b.result!=='pending')break;}
-  if(consLosses>=3)insights.push('🚨 You\'re on <strong style="color:var(--red);">'+consLosses+' consecutive losses</strong>. This is the highest-risk time for chasing. Step back before the next bet.');
+  if(consLosses>=3)insights.push({icon:'alert',msg:'You\'re on <strong style="color:var(--red);">'+consLosses+' consecutive losses</strong>. This is the highest-risk time for chasing. Step back before the next bet.'});
   // Bet frequency
   const today=disciplineSet.filter(b=>b.date===td()).length;
-  if(today>=4)insights.push('⏱️ '+today+' settled bets today. Volume is your enemy — quality over quantity.');
+  if(today>=4)insights.push({icon:'clock',msg:today+' settled bets today. Volume is your enemy — quality over quantity.'});
   // Avg odds insight
-  if(avg>8)insights.push('💡 Your average odds are '+avg.toFixed(1)+'. At this level you need a 12%+ strike rate to profit. Make sure your form study supports this.');
-  else if(avg<2.5)insights.push('💡 Average odds of '+avg.toFixed(1)+' — backing short-priced horses. Strike rate needs to be very high (40%+) to show profit.');
+  if(avg>8)insights.push({icon:'info',msg:'Your average odds are '+avg.toFixed(1)+'. At this level you need a 12%+ strike rate to profit. Make sure your form study supports this.'});
+  else if(avg<2.5)insights.push({icon:'info',msg:'Average odds of '+avg.toFixed(1)+' — backing short-priced horses. Strike rate needs to be very high (40%+) to show profit.'});
 
+  // SVG icon map for insight types
+  const _ISVG={
+    check:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    warn: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    alert:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    grn:  '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
+    up:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><polyline points="18 15 12 9 6 15"/></svg>',
+    chart:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--mut)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+    target:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    info: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    clock:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  };
   const iBody=document.getElementById('st-insights-body');
-  if(iBody)iBody.innerHTML=insights.length?insights.map(i=>'<div style="padding:7px 0;border-bottom:1px solid var(--bdr);line-height:1.6;">'+i+'</div>').join(''):'<div style="color:var(--mut);font-style:italic;">Looking good — no major concerns in your current data.</div>';
+  if(iBody)iBody.innerHTML=insights.length?insights.map(function(i){
+    const svg=_ISVG[i.icon]||_ISVG.info;
+    return'<div style="display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--bdr);line-height:1.6;">'+svg+'<span>'+i.msg+'</span></div>';
+  }).join(''):'<div style="color:var(--mut);font-style:italic;">Looking good — no major concerns in your current data.</div>';
 
   // ── Source leaderboard ──
   const srcEl=document.getElementById('st-src-table');

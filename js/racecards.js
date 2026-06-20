@@ -1135,12 +1135,12 @@ function rcProfilePanelHtml(profiled,panelId){
   +'</div>';
   if(profiled.reasonNote)html+='<div style="font-size:12px;color:var(--txt);line-height:1.5;margin-bottom:7px;font-style:italic;">“'+profiled.reasonNote+'”</div>';
   const conditions=[];
-  if(profiled.goingPrefs&&profiled.goingPrefs.length)conditions.push('⛳ '+profiled.goingPrefs.join(', '));
-  if(profiled.distancePref)conditions.push('⇔ '+profiled.distancePref);
-  if(profiled.trackPref)conditions.push('🏇 '+profiled.trackPref);
+  if(profiled.goingPrefs&&profiled.goingPrefs.length)conditions.push(profiled.goingPrefs.join(', '));
+  if(profiled.distancePref)conditions.push(profiled.distancePref);
+  if(profiled.trackPref)conditions.push(profiled.trackPref);
   if(conditions.length)html+='<div class="rc-pp-cond">'+conditions.join(' · ')+'</div>';
-  if(profiled.trainerIntel)html+='<div class="rc-pp-intel">🗣 '+profiled.trainerIntel+'</div>';
-  if(profiled.conditionsNotes)html+='<div class="rc-pp-cond-notes">📋 '+profiled.conditionsNotes+'</div>';
+  if(profiled.trainerIntel)html+='<div class="rc-pp-intel" style="display:flex;align-items:flex-start;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;opacity:.7;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'+profiled.trainerIntel+'</div>';
+  if(profiled.conditionsNotes)html+='<div class="rc-pp-cond-notes" style="display:flex;align-items:flex-start;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;opacity:.7;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'+profiled.conditionsNotes+'</div>';
   if(obs.length){
     html+='<div class="rc-pp-sec-lbl">Recent observations</div>';
     obs.forEach(function(o){
@@ -1154,7 +1154,7 @@ function rcProfilePanelHtml(profiled,panelId){
   if(targets.length){
     html+='<div class="rc-pp-sec-lbl" style="margin-top:6px;">Targets</div>';
     targets.forEach(function(t){
-      html+='<div class="rc-pp-target">🎯 '+t.race+(t.date?' · '+t.date:'')+(t.track?' · '+t.track:'')+'</div>';
+      html+='<div class="rc-pp-target" style="display:flex;align-items:center;gap:5px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.7;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>'+t.race+(t.date?' · '+t.date:'')+(t.track?' · '+t.track:'')+'</div>';
     });
   }
   html+='</div>';

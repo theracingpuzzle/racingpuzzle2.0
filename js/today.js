@@ -957,7 +957,7 @@ function renderThisWeek(){
 function renderChips(){
   const el=document.getElementById('tchips');if(!el)return;
   const t=getTracks();
-  el.innerHTML=t.length?t.map(n=>'<div class="t-track-chip">🏇 '+n+'<span class="t-track-rm" onclick="rmTrack(\''+n+'\')">×</span></div>').join(''):'<span class="t-no-tracks">No courses added yet — tap Load from API</span>';
+  el.innerHTML=t.length?t.map(n=>'<div class="t-track-chip"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.7;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg> '+n+'<span class="t-track-rm" onclick="rmTrack(\''+n+'\')">×</span></div>').join(''):'<span class="t-no-tracks">No courses added yet — tap Load from API</span>';
 }
 function rfrTL(){const c=[...new Set([...getTracks(),...TKS])];document.querySelectorAll('.tl').forEach(dl=>{dl.innerHTML=c.map(t=>`<option value="${t}">`).join('');});}
 
@@ -1418,8 +1418,8 @@ function _tpBuildItems(races){
   var jkSorted=Object.entries(jockeyWins).sort(function(a,b){return b[1]-a[1];});
   jkSorted.slice(0,3).forEach(function(entry){
     var jk=entry[0],w=entry[1];
-    if(w>=2){items.push('🏇 Hot jockey: '+fmtJockey(jk)+' — '+w+' winner'+(w>1?'s':'')+' today');}
-    else{items.push('🏇 '+fmtJockey(jk)+' lands a winner today');}
+    if(w>=2){items.push('[HOT_JK] Hot jockey: '+fmtJockey(jk)+' — '+w+' winner'+(w>1?'s':'')+' today');}
+    else{items.push('[WIN] '+fmtJockey(jk)+' lands a winner today');}
   });
 
   // Hot trainers
@@ -1427,33 +1427,33 @@ function _tpBuildItems(races){
   trSorted.slice(0,2).forEach(function(entry){
     var tr=entry[0],w=entry[1];
     var runs=trainerRuns[tr]||w;
-    if(w>=2){items.push('🎓 Trainer in form: '+tr+' — '+w+'/'+runs+' today');}
-    else if(runs>=3){items.push('🎓 '+tr+': 1 from '+runs+' runners today');}
+    if(w>=2){items.push('[HOT_TR] Trainer in form: '+tr+' — '+w+'/'+runs+' today');}
+    else if(runs>=3){items.push('[TR] '+tr+': 1 from '+runs+' runners today');}
   });
 
   // Favourite strike rate
   if(totalFavs>=2){
     var pct=Math.round(favWins/totalFavs*100);
-    items.push((pct>=50?'⚡':'📉')+' Fav SR: '+favWins+'/'+totalFavs+' ('+pct+'%) today'+(pct>=50?' — follow the market':' — market struggling'));
+    items.push((pct>=50?'[FAV_UP]':'[FAV_DN]')+' Fav SR: '+favWins+'/'+totalFavs+' ('+pct+'%) today'+(pct>=50?' — follow the market':' — market struggling'));
   }else if(totalFavs===1){
-    items.push(favWins?'⚡ Favourite won in the only completed race so far':'📉 Favourite beaten in the only result so far');
+    items.push(favWins?'[FAV_UP] Favourite won in the only completed race so far':'[FAV_DN] Favourite beaten in the only result so far');
   }
 
   // Going patterns
   var goingSorted=Object.entries(goingWins).sort(function(a,b){return b[1]-a[1];});
   if(goingSorted.length){
     var g=goingSorted[0][0],c=goingSorted[0][1];
-    items.push('🌿 '+c+' race'+(c>1?'s':'')+' completed on '+g+' ground today');
+    items.push(c+' race'+(c>1?'s':'')+' completed on '+g+' ground today');
   }
 
   // Recent winners — last 5 as individual items
   var recent=winners.slice(-5).reverse();
   recent.forEach(function(w){
     var jkLabel=w.jockey?' — '+fmtJockey(w.jockey):'';
-    items.push('✅ '+w.time+(w.course?' '+w.course:'')+': '+w.horse+jkLabel);
+    items.push('[WIN] '+w.time+(w.course?' '+w.course:'')+': '+w.horse+jkLabel);
   });
 
-  return items.length?items:['📊 '+totalRacesResult+' result'+(totalRacesResult>1?'s':'')+' processed today'];
+  return items.length?items:[totalRacesResult+' result'+(totalRacesResult>1?'s':'')+' processed today'];
 }
 
 function renderTrackPulse(){
@@ -1477,9 +1477,14 @@ function renderTrackPulse(){
         +'<div class="tp-track">'
           +doubled.map(function(t){
             var cls='tp-item';
-            if(t.startsWith('✅')||t.startsWith('⚡'))cls+=' tp-item-highlight';
-            else if(t.startsWith('📉')||t.startsWith('💥'))cls+=' tp-item-warn';
-            return'<span class="'+cls+'">'+t+'</span><span class="tp-sep">·</span>';
+            var display=t;
+            if(t.startsWith('[WIN]')){cls+=' tp-item-highlight';display=t.slice(5).trimStart();}
+            else if(t.startsWith('[HOT_JK]')){cls+=' tp-item-highlight';display=t.slice(8).trimStart();}
+            else if(t.startsWith('[HOT_TR]')){cls+=' tp-item-highlight';display=t.slice(8).trimStart();}
+            else if(t.startsWith('[TR]')){display=t.slice(4).trimStart();}
+            else if(t.startsWith('[FAV_UP]')){cls+=' tp-item-highlight';display=t.slice(8).trimStart();}
+            else if(t.startsWith('[FAV_DN]')){cls+=' tp-item-warn';display=t.slice(8).trimStart();}
+            return'<span class="'+cls+'">'+display+'</span><span class="tp-sep">·</span>';
           }).join('')
         +'</div>'
       +'</div>'

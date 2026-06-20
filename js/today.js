@@ -547,9 +547,9 @@ async function checkWatchlistRunners(races){
       const reasonBadge=_rm
         ?'<span style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+_rm.col+'18;border:1px solid '+_rm.col+'35;color:'+_rm.col+';">'+_rm.label+'</span>'
         :'';
-      // Race meta line: time · course · race name · jockey (all muted)
-      const raceMeta=[a.time,a.course,a.raceName].filter(Boolean).join(' · ')
-        +(a.jockey?' · J: '+fmtJockey(a.jockey):'');
+      // Race meta: time · course · race name on first line, jockey on second
+      const raceMeta=[a.time,a.course,a.raceName].filter(Boolean).join(' · ');
+      const jockeyLine=a.jockey?'<div class="t-muted" style="font-size:11px;margin-top:1px;">J: '+fmtJockey(a.jockey)+'</div>':'';
       // Primary action: review (if available/past) or race (if upcoming)
       const primaryBtn=reviewBtn
         ?reviewBtn
@@ -567,6 +567,7 @@ async function checkWatchlistRunners(races){
               +finishBadge
             +'</div>'
             +'<div class="t-muted" style="font-size:11px;">'+raceMeta+'</div>'
+            +jockeyLine
             +(a.orUpdated?'<div style="font-size:10px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
           +'</div>'
           +'<div class="t-flex-col-end">'

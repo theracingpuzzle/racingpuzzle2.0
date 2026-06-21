@@ -1671,10 +1671,43 @@ function rcSlRenderCard(){
     +'</div>';
   }
 
+  // ── Silk colours derived from horse name (deterministic) ──
+  const _slkC=(function(str){
+    let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}
+    const P=[
+      {body:'#7c3aed',accent:'#fbbf24'},{body:'#ef4444',accent:'#ffffff'},
+      {body:'#0ea5e9',accent:'#fbbf24'},{body:'#16a34a',accent:'#fbbf24'},
+      {body:'#db2777',accent:'#ffffff'},{body:'#d97706',accent:'#1e1e2e'},
+      {body:'#0891b2',accent:'#fbbf24'},{body:'#1d4ed8',accent:'#ffffff'},
+      {body:'#be185d',accent:'#fbbf24'},{body:'#065f46',accent:'#ffffff'},
+    ];
+    return P[Math.abs(h)%P.length];
+  })(name);
+
+  // Large Top-Trumps silk SVG
+  const silkSVG='<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    // body/silhouette
+    +'<ellipse cx="60" cy="62" rx="34" ry="38" fill="'+_slkC.body+'"/>'
+    // sash / accent stripe
+    +'<path d="M26 62 Q60 48 94 62 Q60 76 26 62Z" fill="'+_slkC.accent+'" opacity=".7"/>'
+    // cap
+    +'<ellipse cx="60" cy="30" rx="18" ry="10" fill="'+_slkC.body+'"/>'
+    +'<rect x="42" y="26" width="36" height="8" rx="4" fill="'+_slkC.accent+'"/>'
+    // head
+    +'<circle cx="60" cy="22" r="12" fill="#f5d0a9"/>'
+    // goggles
+    +'<ellipse cx="55" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
+    +'<ellipse cx="65" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
+    +'<line x1="60" y1="21" x2="60" y2="21" stroke="rgba(0,0,0,.3)" stroke-width="2"/>'
+    // saddle cloth number
+    +'<rect x="44" y="72" width="32" height="20" rx="5" fill="rgba(0,0,0,.25)"/>'
+    +'<text x="60" y="87" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#fff">'+no+'</text>'
+  +'</svg>';
+
   uiEl.innerHTML=toggleHTML
     +'<div id="rc-sl-card-wrap">'
 
-    // ── Race context header (matches rc-meeting-hdr style) ──
+    // ── Race context header ──
     +'<div class="rc-meeting rc-sl-race-header">'
       +'<div class="rc-meeting-hdr rc-mtg-pur" style="cursor:default;border-radius:12px;">'
         +'<div class="rc-meeting-info">'
@@ -1688,61 +1721,55 @@ function rcSlRenderCard(){
             +(going?' · '+going:'')
           +'</div>'
         +'</div>'
-        // Progress pill on right
         +'<div style="text-align:right;flex-shrink:0;">'
           +'<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.9);">'+(_rcSlIdx+1)+' / '+total+'</div>'
           +(_rcSlShortlist.length?'<div style="font-size:10px;color:rgba(255,255,255,.75);margin-top:2px;">★ '+_rcSlShortlist.length+' picked</div>':'')
         +'</div>'
       +'</div>'
-      // Progress bar underneath header
       +'<div style="height:3px;background:rgba(255,255,255,.15);">'
         +'<div style="width:'+pct+'%;height:100%;background:var(--blu);transition:width .3s;"></div>'
       +'</div>'
     +'</div>'
 
-    // ── Runner card (matches rc-runner row style but full-width card) ──
-    +'<div class="rc-sl-card rc-meeting" id="rc-sl-card">'
+    // ── Top Trumps card ──
+    +'<div class="rc-sl-card rc-meeting" id="rc-sl-card" style="overflow:hidden;padding:0;">'
 
-      // Cloth number + name row
-      +'<div style="display:flex;align-items:flex-start;gap:12px;padding:14px 14px 10px;">'
-        +'<div class="rc-cloth" style="font-size:20px;padding-top:2px;">'+no+(draw?'<div style="font-size:9px;color:var(--mut);font-weight:600;margin-top:2px;">'+draw+'</div>':'')+'</div>'
-        +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:22px;font-weight:900;color:var(--txt);letter-spacing:.2px;line-height:1.1;">'+name+'</div>'
-          +(age?'<div style="font-size:12px;color:var(--mut);margin-top:3px;">'+age+(wt?' · '+wt:'')+'</div>':'')
+      // Silk panel — coloured band with big silk in centre
+      +'<div style="background:linear-gradient(160deg,'+_slkC.body+'dd,'+_slkC.body+'99);padding:20px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;">'
+        // OR chip top-right
+        +(rpr?'<span class="rc-or" style="position:absolute;top:12px;right:12px;font-size:13px;padding:4px 10px;">'+rpr+'</span>':'')
+        // Draw chip top-left
+        +(draw?'<span style="position:absolute;top:12px;left:12px;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.25);color:#fff;padding:3px 8px;border-radius:6px;">Draw '+draw+'</span>':'')
+        // Silk
+        +silkSVG
+        // Horse name below silk
+        +'<div style="text-align:center;">'
+          +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:900;color:#fff;letter-spacing:.3px;line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.4);">'+name+'</div>'
+          +(age||wt?'<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:4px;">'+[age,wt].filter(Boolean).join(' · ')+'</div>':'')
         +'</div>'
-        // OR badge top-right
-        +(rpr?'<span class="rc-or" style="font-size:13px;padding:4px 9px;flex-shrink:0;">'+rpr+'</span>':'')
       +'</div>'
 
-      // Info bar: Price / OR / dist chips
-      +(sp||rpr||dist?
-        '<div class="rc-info-bar">'
-          +(sp?'<div class="rc-info-item"><div class="rc-info-lbl">Price</div><div class="rc-info-val" style="color:var(--gld);">'+sp+'</div></div>':'')
-          +(rpr?'<div class="rc-info-item"><div class="rc-info-lbl">OR</div><div class="rc-info-val">'+rpr+'</div></div>':'')
-          +(dist?'<div class="rc-info-item"><div class="rc-info-lbl">Distance</div><div class="rc-info-val">'+dist+'</div></div>':'')
-          +(going?'<div class="rc-info-item"><div class="rc-info-lbl">Going</div><div class="rc-info-val">'+going+'</div></div>':'')
-        +'</div>'
-      :'')
+      // Stats grid — Top Trumps style rows
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;border-top:2px solid '+_slkC.body+';">'
+        +(sp?'<div style="padding:10px 14px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">'
+          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Price</div>'
+          +'<div style="font-size:18px;font-weight:900;font-family:\'Barlow Condensed\',sans-serif;color:var(--gld);">'+sp+'</div>'
+        +'</div>':'<div style="border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);"></div>')
+        +(form?'<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">'
+          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Form</div>'
+          +'<div style="font-size:15px;font-weight:800;letter-spacing:3px;color:var(--txt);font-family:var(--font-ui);">'+form+'</div>'
+        +'</div>':'<div style="border-bottom:1px solid var(--bdr);"></div>')
+        +(jock?'<div style="padding:10px 14px;border-right:1px solid var(--bdr);'+(trainer?'border-bottom:1px solid var(--bdr);':'')+'">'
+          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Jockey</div>'
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+jock+'</div>'
+        +'</div>':'<div style="border-right:1px solid var(--bdr);'+(trainer?'border-bottom:1px solid var(--bdr);':'')+'""></div>')
+        +(trainer?'<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">'
+          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Trainer</div>'
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+trainer+'</div>'
+        +'</div>':'')
+      +'</div>'
 
-      // Form row
-      +(form?
-        '<div style="padding:8px 14px;border-bottom:1px solid var(--bdr);">'
-          +'<div class="rc-runner-detail-row">'
-            +'<span class="rc-detail-lbl">Form</span>'
-            +'<span class="rc-runner-form" style="font-size:14px;letter-spacing:2px;color:var(--txt);font-family:var(--font-ui);">'+form+'</span>'
-          +'</div>'
-        +'</div>'
-      :'')
-
-      // Jockey / Trainer rows
-      +(jock||trainer?
-        '<div style="padding:8px 14px;'+(profHtml?'':'border-radius:0 0 12px 12px;')+'">'
-          +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
-          +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
-        +'</div>'
-      :'')
-
-      // Profile panel (if exists)
+      // Profile panel (if horse is in Profiler)
       +profHtml
 
     +'</div>'
@@ -1756,7 +1783,6 @@ function rcSlRenderCard(){
       )
     +'</div>'
 
-    // Review shortlist link
     +(_rcSlShortlist.length
       ?'<div style="text-align:center;margin-top:10px;">'
         +'<button class="btn bout bsm" onclick="rcSlRenderSummary()">Review shortlist ('+_rcSlShortlist.length+') →</button>'

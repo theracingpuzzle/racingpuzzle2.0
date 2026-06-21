@@ -322,13 +322,13 @@ RACING <span class="logo-accent">PUZZLE</span>
 
         <!-- ══ STATS PANE ══ -->
         <div id="cp-stats">
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center;">
-            <div class="rc-view-tog" style="margin-bottom:0;">
+          <div style="display:flex;flex-wrap:nowrap;gap:8px;margin-bottom:14px;align-items:center;">
+            <div class="rc-view-tog" style="margin-bottom:0;flex-shrink:0;">
               <button id="st-tog-both" onclick="setStatsScope('both')" class="rc-view-btn on">Both</button>
               <button id="st-tog-real" onclick="setStatsScope('real')" class="rc-view-btn off">Real</button>
               <button id="st-tog-virt" onclick="setStatsScope('virt')" class="rc-view-btn off">Virtual</button>
             </div>
-            <button id="st-tog-own" onclick="toggleOwnStudy()" class="btn-refresh">Own Study Only: Off</button>
+            <button id="st-tog-own" onclick="toggleOwnStudy()" class="btn-refresh" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:11px;">Own Study: Off</button>
           </div>
           <div id="st-summary" style="margin-bottom:14px;"></div>
           <div class="blk" id="st-insights-body"></div>

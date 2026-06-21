@@ -189,7 +189,7 @@ function clrHF(){const hfr=document.getElementById('hfr');const hfs=document.get
 function toggleOwnStudy(){
   window._ownStudyOnly=!window._ownStudyOnly;
   const btn=document.getElementById('st-tog-own');
-  if(btn){btn.textContent='Own Study Only: '+(window._ownStudyOnly?'On':'Off');btn.style.background=window._ownStudyOnly?'var(--navy)':'';btn.style.color=window._ownStudyOnly?'#fff':'';btn.style.borderColor=window._ownStudyOnly?'var(--navy)':'';}
+  if(btn){btn.textContent='Own Study: '+(window._ownStudyOnly?'On':'Off');btn.style.background=window._ownStudyOnly?'var(--navy)':'';btn.style.color=window._ownStudyOnly?'#fff':'';btn.style.borderColor=window._ownStudyOnly?'var(--navy)':'';}
   renderStats();
 }
 
@@ -220,11 +220,9 @@ function renderStats(){
   const vbBets=getVBank().bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
   const realBets=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
   // 'set' = bets used for all breakdowns (source, confidence, track etc.)
-  // For 'both', combine real+virtual so breakdowns show everything.
-  // Headline stats (P&L, ROI, SR) use scope-specific bets so figures are accurate.
   const set=scope==='real'?realBets:scope==='virt'?vbBets:[...realBets,...vbBets.map(function(b){return Object.assign({},b,{_virt:true});})];
-  // Headline metrics always use only the primary scope bets (not mixed for 'both')
-  const statBets=scope==='virt'?vbBets:realBets;
+  // Headline metrics use the scope-matched bets ('both' = combined)
+  const statBets=scope==='virt'?vbBets:scope==='real'?realBets:[...realBets,...vbBets];
   const wins=statBets.filter(b=>b.result==='win');
   const places=statBets.filter(b=>b.result==='place'&&(b.betType==='ew'||b.betType==='place'));
   const staked=statBets.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
@@ -259,10 +257,15 @@ function renderStats(){
   // ── Summary block ──
   const summaryEl=document.getElementById('st-summary');
   if(summaryEl){
-    const pendingCount=(scope==='virt'?getVBank().bets:D.bets).filter(function(b){return !b.result||b.result==='pending';}).length;
-    const bankObj=scope==='virt'?getVBank():D.bank;
-    const bankStart=bankObj.start||0;
-    const bankCurrent=bankObj.current||0;
+    const _vb=getVBank();
+    const pendingCount=scope==='virt'
+      ?_vb.bets.filter(function(b){return !b.result||b.result==='pending';}).length
+      :scope==='real'
+        ?D.bets.filter(function(b){return !b.result||b.result==='pending';}).length
+        :[...D.bets,..._vb.bets].filter(function(b){return !b.result||b.result==='pending';}).length;
+    // Bank: for 'both' show combined start/current across real+virtual
+    const bankStart=scope==='virt'?(_vb.start||0):scope==='real'?(D.bank.start||0):((D.bank.start||0)+(_vb.start||0));
+    const bankCurrent=scope==='virt'?(_vb.current||0):scope==='real'?(D.bank.current||0):((D.bank.current||0)+(_vb.current||0));
     const bankChange=bankCurrent-bankStart;
     const pCol=p>=0?'#10b981':'#f87171';
     const roiCol=roi>=0?'#10b981':'#f87171';

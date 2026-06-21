@@ -25,7 +25,7 @@ function renderCompare(set,p,roi,sr){
       // Grid: metric | real | virtual
       const rows=[
         ['P&L',fmt(p),fmt(vP),p,vP],
-        ['ROI',roi.toFixed(1)+'%',vROI.toFixed(1)+'%',roi,vROI],
+        ['ROI',Math.round(roi)+'%',Math.round(vROI)+'%',roi,vROI],
         ['Strike Rate',sr.toFixed(0)+'%',vSR.toFixed(0)+'%',sr,vSR],
         ['Bank Change',fmt(D.bank.current-(D.bank.start||0)),fmt(vBankDiff),D.bank.current-(D.bank.start||0),vBankDiff],
         ['Bets Settled',set.length+'',''+vset.length,0,0],
@@ -361,9 +361,9 @@ function renderStats(){
       const rRet=realBets.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
       const rROI=rSt>0?((rRet-rSt)/rSt*100):0;
       const diff=vROI-rROI;
-      if(diff>8)insights.push({icon:'grn',msg:'<strong>Virtual ROI ('+vROI.toFixed(1)+'%) is beating real ('+rROI.toFixed(1)+'%) by '+diff.toFixed(0)+'%.</strong> You may be second-guessing yourself in real betting.'});
-      else if(diff<-8)insights.push({icon:'up',msg:'Real ROI ('+rROI.toFixed(1)+'%) is beating virtual ('+vROI.toFixed(1)+'%) by '+Math.abs(diff).toFixed(0)+'%. Real money focus sharpens your decisions.'});
-      else insights.push({icon:'chart',msg:'Virtual and real closely aligned ('+vROI.toFixed(1)+'% vs '+rROI.toFixed(1)+'% ROI). Process is consistent.'});
+      if(diff>8)insights.push({icon:'grn',msg:'<strong>Virtual ROI ('+Math.round(vROI)+'%) is beating real ('+Math.round(rROI)+'%) by '+diff.toFixed(0)+'%.</strong> You may be second-guessing yourself in real betting.'});
+      else if(diff<-8)insights.push({icon:'up',msg:'Real ROI ('+Math.round(rROI)+'%) is beating virtual ('+Math.round(vROI)+'%) by '+Math.abs(diff).toFixed(0)+'%. Real money focus sharpens your decisions.'});
+      else insights.push({icon:'chart',msg:'Virtual and real closely aligned ('+Math.round(vROI)+'% vs '+Math.round(rROI)+'% ROI). Process is consistent.'});
     }
   }
   // Best source — only when NOT in own study mode (all bets are own study then)
@@ -372,8 +372,8 @@ function renderStats(){
   if(!ownStudyOnly&&srcArr.length>1){
     srcArr.sort((a,b)=>b.roi-a.roi);
     const best=srcArr[0],worst=srcArr[srcArr.length-1];
-    if(best.roi>0)insights.push({icon:'check',msg:'<strong style="color:var(--grn);">'+best.k+'</strong> is your best source — ROI of '+best.roi.toFixed(1)+'% from '+best.n+' bets.'});
-    if(worst.roi<-10)insights.push({icon:'warn',msg:'<strong style="color:var(--red);">'+worst.k+'</strong> is costing you — ROI of '+worst.roi.toFixed(1)+'% from '+worst.n+' bets. Consider cutting it.'});
+    if(best.roi>0)insights.push({icon:'check',msg:'<strong style="color:var(--grn);">'+best.k+'</strong> is your best source — ROI of '+Math.round(best.roi)+'% from '+best.n+' bets.'});
+    if(worst.roi<-10)insights.push({icon:'warn',msg:'<strong style="color:var(--red);">'+worst.k+'</strong> is costing you — ROI of '+Math.round(worst.roi)+'% from '+worst.n+' bets. Consider cutting it.'});
   }
   // Confidence calibration
   const highConf=disciplineSet.filter(b=>b.conf>=4),lowConf=disciplineSet.filter(b=>b.conf<=2);
@@ -431,7 +431,7 @@ function renderStats(){
         +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:var(--mut);">'+r.n+'</td>'
         +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'+r.sr.toFixed(0)+'%</td>'
         +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
-        +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+r.roi.toFixed(1)+'%</td>'
+        +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+Math.round(r.roi)+'%</td>'
         +'</tr>').join('')
       +'</tbody></table>';}
   }
@@ -459,7 +459,7 @@ function renderStats(){
         return'<tr><td style="padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;">'+dot+label+'</td>'
           +'<td style="font-family:monospace;text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);color:var(--mut);font-size:11px;">'+s.n+'</td>'
           +'<td style="font-family:monospace;text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:11px;">'+s.sr.toFixed(0)+'%</td>'
-          +'<td style="font-family:monospace;text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);color:'+roiCol+';font-size:11px;">'+s.roi.toFixed(1)+'%</td>'
+          +'<td style="font-family:monospace;text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);color:'+roiCol+';font-size:11px;">'+Math.round(s.roi)+'%</td>'
           +'</tr>';
       }
       const thead='<table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:16px;">'
@@ -563,7 +563,7 @@ function renderStats(){
         +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:var(--mut);">'+r.n+'</td>'
         +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'+r.sr.toFixed(0)+'%</td>'
         +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
-        +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+r.roi.toFixed(1)+'%</td></tr>').join('')
+        +'<td style="font-family:monospace;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+Math.round(r.roi)+'%</td></tr>').join('')
       +'</tbody></table>'
       :'<div style="color:var(--mut);font-style:italic;font-size:13px;">Not enough data.</div>';
   }
@@ -579,7 +579,7 @@ function renderStats(){
       const roi=ts>0?(tp/ts*100):0;
       return'<div class="srow"><span class="srl">'+typeLabels[t]+'<span style="font-family:monospace;font-size:10px;color:var(--mut);margin-left:6px;">x'+tb.length+'</span></span>'
         +'<span class="srv" style="display:flex;gap:12px;align-items:center;">'
-        +'<span style="color:var(--mut);font-size:11px;">ROI '+roi.toFixed(1)+'%</span>'
+        +'<span style="color:var(--mut);font-size:11px;">ROI '+Math.round(roi)+'%</span>'
         +'<span style="color:'+(tp>=0?'var(--grn)':'var(--red)')+';">'+fmt(tp)+'</span></span></div>';
     }).join('')||'<div style="color:var(--mut);font-style:italic;font-size:13px;">Not enough data.</div>';
   }
@@ -622,7 +622,7 @@ function renderStats(){
         +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:var(--mut);">'+r.n+'</td>'
         +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);">'+r.sr.toFixed(0)+'%</td>'
         +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
-        +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+r.roi.toFixed(1)+'%</td>'
+        +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+Math.round(r.roi)+'%</td>'
         +'</tr>').join('')
       +'</tbody></table>';
   }
@@ -829,7 +829,7 @@ function renderCkSignals(set){
               +'<div style="width:'+barW.toFixed(1)+'%;height:100%;background:'+barCol+';border-radius:3px;transition:width .5s;"></div>'
             +'</div>'
             +'<span style="font-family:monospace;font-size:11px;color:'+barCol+';min-width:52px;text-align:right;">'+fmt(r.s.pl)+'</span>'
-            +'<span style="font-family:monospace;font-size:11px;color:'+roiCol+';min-width:52px;text-align:right;">'+r.s.roi.toFixed(1)+'%</span>'
+            +'<span style="font-family:monospace;font-size:11px;color:'+roiCol+';min-width:52px;text-align:right;">'+r.Math.round(s.roi)+'%</span>'
           +'</div>'
         +'</div>';
       }).join('')
@@ -952,8 +952,8 @@ function renderCkTip(){
       +'<td style="padding:7px 0 7px;border-bottom:1px solid var(--bdr);font-size:11px;max-width:130px;line-height:1.3;">'+q.label+'</td>'
       +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:var(--mut);">'+(ys?ys.n:'—')+'</td>'
       +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);">'+(ys?ys.sr.toFixed(0)+'%':'—')+'</td>'
-      +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:'+(ys?(ys.roi>=0?'var(--grn)':'var(--red)'):'var(--mut)')+';">'+(ys?ys.roi.toFixed(1)+'%':'—')+'</td>'
-      +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:'+(ns?(ns.roi>=0?'var(--grn)':'var(--red)'):'var(--mut)')+';">'+(ns?ns.roi.toFixed(1)+'%':'—')+'</td>'
+      +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:'+(ys?(ys.roi>=0?'var(--grn)':'var(--red)'):'var(--mut)')+';">'+(ys?yMath.round(s.roi)+'%':'—')+'</td>'
+      +'<td style="font-family:monospace;text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:'+(ns?(ns.roi>=0?'var(--grn)':'var(--red)'):'var(--mut)')+';">'+(ns?nMath.round(s.roi)+'%':'—')+'</td>'
     +'</tr>';
   }).join('');
 

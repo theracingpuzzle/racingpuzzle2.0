@@ -727,15 +727,48 @@ async function lgSaveOdds(pickId){
     const dbPatch={odds:oddsNum,odds_display:oddsRaw};
     if(pick&&pick.result==='win'&&oddsNum>0)dbPatch.returns=oddsNum;
     await _lgFetch('league_picks?id=eq.'+encodeURIComponent(pickId),{method:'PATCH',body:JSON.stringify(dbPatch)});
-    // Keep the original display string in local cache
+
+    // Find all other picks for the same horse/date in the same league and apply the same odds
+    const matchingIds=[];
+    if(pick){
+      const normHorse=function(s){return(s||'').replace(/\s*\([^)]+\)\s*$/,'').toLowerCase().trim();};
+      const hn=normHorse(pick.horse);
+      const lid=pick.league_id;
+      (_lgPicks[lid]||[]).forEach(function(p){
+        if(p.id!==pickId&&normHorse(p.horse)===hn&&p.pick_date===pick.pick_date&&!p.odds){
+          matchingIds.push(p.id);
+        }
+      });
+    }
+    // Patch sibling picks in parallel (no odds yet only — don't overwrite intentional different odds)
+    await Promise.all(matchingIds.map(function(sid){
+      const sibPatch=Object.assign({},dbPatch);
+      const sib=Object.values(_lgPicks).reduce(function(f,arr){return f||(arr.find(function(p){return p.id===sid;})||null);},null);
+      if(sib&&sib.result==='win'&&oddsNum>0)sibPatch.returns=oddsNum;
+      return _lgFetch('league_picks?id=eq.'+encodeURIComponent(sid),{method:'PATCH',body:JSON.stringify(sibPatch)});
+    }));
+
+    // Update local cache for this pick and all siblings
+    const allIds=new Set([pickId].concat(matchingIds));
     const cachePatch=Object.assign({},dbPatch);
     Object.keys(_lgPicks).forEach(function(lid){
-      _lgPicks[lid]=(_lgPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,cachePatch):p;});
+      _lgPicks[lid]=(_lgPicks[lid]||[]).map(function(p){
+        if(!allIds.has(p.id))return p;
+        const cp=Object.assign({},cachePatch);
+        if(p.result==='win'&&oddsNum>0)cp.returns=oddsNum; else delete cp.returns;
+        return Object.assign({},p,cp);
+      });
     });
     Object.keys(_lgMyPicks).forEach(function(lid){
-      _lgMyPicks[lid]=(_lgMyPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,cachePatch):p;});
+      _lgMyPicks[lid]=(_lgMyPicks[lid]||[]).map(function(p){
+        if(!allIds.has(p.id))return p;
+        const cp=Object.assign({},cachePatch);
+        if(p.result==='win'&&oddsNum>0)cp.returns=oddsNum; else delete cp.returns;
+        return Object.assign({},p,cp);
+      });
     });
-    if(typeof _lgToast==='function')_lgToast('Odds saved ✓');
+    const sibCount=matchingIds.length;
+    if(typeof _lgToast==='function')_lgToast('Odds saved'+(sibCount?' · applied to '+sibCount+' other pick'+(sibCount>1?'s':''):'')+ ' ✓');
     lgRender();
   }catch(e){
     if(wrap)wrap.innerHTML='<span style="font-size:10px;color:#f87171;">Error — tap to retry</span>';

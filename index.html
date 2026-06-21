@@ -435,17 +435,31 @@ RACING <span class="logo-accent">PUZZLE</span>
           <div class="lbl">Configuration</div>
           <div class="card-title" style="color:#94a3b8;">Settings</div>
         </div>
-        <div id="cp-set">
 
-          <!-- ── Notifications ── -->
-          <div class="blk">
-            <div class="bttl">🔔 Notifications</div>
-            <div id="notif-settings-block">
-              <div style="font-size:13px;color:var(--mut);">Loading…</div>
-            </div>
-          </div>
+        <!-- ── Settings Tab Bar ── -->
+        <div class="set-tabs" id="set-tabs">
+          <button class="set-tab on" onclick="setTab('banks',this)">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M6 7V5a4 4 0 0 1 8 0v2"/><line x1="10" y1="11" x2="10" y2="13"/></svg>
+            <span>Banks</span>
+          </button>
+          <button class="set-tab" onclick="setTab('setup',this)">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.5"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42"/></svg>
+            <span>Setup</span>
+          </button>
+          <button class="set-tab" onclick="setTab('racing',this)">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10c0-4 3-7 7-7s7 3 7 7"/><path d="M5 14s1-2 5-2 5 2 5 2"/><circle cx="10" cy="10" r="2"/></svg>
+            <span>Racing</span>
+          </button>
+          <button class="set-tab" onclick="setTab('data',this)">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10M6 9l4 4 4-4"/><path d="M4 15h12"/></svg>
+            <span>Data</span>
+          </button>
+        </div>
 
-          <!-- ── Real Bank ── -->
+        <!-- ── Tab: Banks ── -->
+        <div class="set-panel on" id="set-panel-banks">
+
+          <!-- Real Bank -->
           <div class="blk">
             <div class="bttl">Real Bank</div>
             <div id="bkdisp" style="margin-bottom:14px;"></div>
@@ -466,7 +480,7 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="body-sm" style="margin-top:8px;" id="set-bk-status"></div>
           </div>
 
-          <!-- ── Virtual Bank ── -->
+          <!-- Virtual Bank -->
           <div class="blk">
             <div class="bttl">Virtual Bank</div>
             <div id="vbkdisp" style="margin-bottom:14px;"></div>
@@ -481,7 +495,7 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="body-sm" style="margin-top:8px;" id="set-vbk-status"></div>
           </div>
 
-          <!-- ── Staking Plan ── -->
+          <!-- Staking Plan -->
           <div class="blk">
             <div class="bttl">🎯 Staking Plan</div>
             <div class="body-mut">Points-based staking. Set your <strong class="gld">point value</strong> once — your confidence level determines the stake automatically.</div>
@@ -491,7 +505,20 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="body-sm" style="margin-top:8px;" id="set-pv-status"></div>
           </div>
 
-          <!-- ── Bet Sources ── -->
+        </div>
+
+        <!-- ── Tab: Setup ── -->
+        <div class="set-panel" id="set-panel-setup">
+
+          <!-- Notifications -->
+          <div class="blk">
+            <div class="bttl">🔔 Notifications</div>
+            <div id="notif-settings-block">
+              <div style="font-size:13px;color:var(--mut);">Loading…</div>
+            </div>
+          </div>
+
+          <!-- Bet Sources -->
           <div class="blk">
             <div class="bttl">Bet Sources</div>
             <div id="set-sources-list" class="mb12"></div>
@@ -512,7 +539,16 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div style="font-family:monospace;font-size:11px;color:var(--mut);margin-top:8px;" id="set-src-status"></div>
           </div>
 
-          <!-- ── Racing API ── -->
+          <!-- Checklists -->
+          <div class="card-sec-divider">Checklists</div>
+          <div id="cp-rules"></div>
+
+        </div>
+
+        <!-- ── Tab: Racing ── -->
+        <div class="set-panel" id="set-panel-racing">
+
+          <!-- Racing API -->
           <div class="blk">
             <div class="bttl">🏇 Racing API</div>
             <div style="font-size:13px;color:var(--mut);margin-bottom:12px;">Live racecards and results via <strong style="color:var(--txt);">theracingapi.com</strong> — managed server-side.</div>
@@ -522,7 +558,12 @@ RACING <span class="logo-accent">PUZZLE</span>
             </div>
           </div>
 
-          <!-- ── Export / Import ── -->
+        </div>
+
+        <!-- ── Tab: Data ── -->
+        <div class="set-panel" id="set-panel-data">
+
+          <!-- Export / Import -->
           <div class="blk">
             <div class="bttl">📤 Export / Import</div>
             <div style="display:flex;gap:9px;flex-wrap:wrap;">
@@ -532,19 +573,17 @@ RACING <span class="logo-accent">PUZZLE</span>
             </div>
           </div>
 
-        </div>
-
-        <!-- Terms links only — full Gamble Aware section is in the page footer -->
-        <div class="blk" style="text-align:center;padding:14px 0 4px;">
-          <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
-            <a href="#" onclick="showToS();return false;" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-decoration:none;font-weight:600;">Terms of Service</a>
-            <span style="color:var(--bdr);">·</span>
-            <a href="#" onclick="showToS('privacy');return false;" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-decoration:none;font-weight:600;">Privacy Policy</a>
+          <!-- Terms -->
+          <div class="blk" style="text-align:center;padding:14px 0 4px;">
+            <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+              <a href="#" onclick="showToS();return false;" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-decoration:none;font-weight:600;">Terms of Service</a>
+              <span style="color:var(--bdr);">·</span>
+              <a href="#" onclick="showToS('privacy');return false;" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-decoration:none;font-weight:600;">Privacy Policy</a>
+            </div>
           </div>
+
         </div>
 
-        <div class="card-sec-divider">Checklists</div>
-        <div id="cp-rules"></div>
       </div>
     </div>
 

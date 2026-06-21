@@ -171,7 +171,7 @@ function renderSwCard(){
   if(id==='results')rcSwLoadResults();
   if(id==='watch')renderWatchlist();
   if(id==='stats'){const _sc=document.querySelector('#c4 .cin');if(_sc)_sc.scrollTop=0;if(typeof renderStats==='function')renderStats();if(typeof renderHist==='function')renderHist();}
-  if(id==='settings'){const _sc=document.querySelector('#c6 .cin');if(_sc)_sc.scrollTop=0;if(typeof renderBkCard==='function')renderBkCard();if(typeof renderVBKDisp==='function')renderVBKDisp();if(typeof loadApiKeyField==='function')loadApiKeyField();if(typeof loadStartBankField==='function')loadStartBankField();if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();if(typeof loadAILimitField==='function')loadAILimitField();if(typeof renderSettingsSources==='function')renderSettingsSources();if(typeof renderCmdRules==='function')renderCmdRules();}
+  if(id==='settings'){const _sc=document.querySelector('#c6 .cin');if(_sc)_sc.scrollTop=0;setTab('banks',document.querySelector('.set-tab'));}
   if(id==='leagues'){if(typeof lgInit==='function')lgInit();}
 }
 
@@ -245,4 +245,17 @@ function updHdr(){
   const st=document.getElementById('tstreak-tile');
   if(st){st.innerHTML='<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:800;color:var(--navy);margin-bottom:2px;letter-spacing:1px;">'+streak+'</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);">Day Streak</div>';}
 
+}
+
+// ─── Settings Tabs ────────────────────────────────────────────────────────────
+function setTab(name, btn) {
+  document.querySelectorAll('.set-tab').forEach(function(b){b.classList.remove('on');});
+  document.querySelectorAll('.set-panel').forEach(function(p){p.classList.remove('on');});
+  if(btn) btn.classList.add('on');
+  const panel = document.getElementById('set-panel-'+name);
+  if(panel) panel.classList.add('on');
+  // Trigger any lazy renders needed for this tab
+  if(name==='banks'){if(typeof renderBkCard==='function')renderBkCard();if(typeof renderVBKDisp==='function')renderVBKDisp();if(typeof loadStartBankField==='function')loadStartBankField();}
+  if(name==='setup'){if(typeof renderSettingsSources==='function')renderSettingsSources();if(typeof renderCmdRules==='function')renderCmdRules();}
+  if(name==='racing'){if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();}
 }

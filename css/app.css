@@ -618,3 +618,39 @@ tr:hover td { background: var(--sur2); }
   }
   :root { --shell-h: calc(100vh - 56px - 34px) !important; }
 }
+
+/* ── Settings Tabs ─────────────────────────────────────────────────────────── */
+.set-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.set-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--bdr);
+  background: var(--sur2);
+  color: var(--mut);
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.set-tab svg { opacity: .6; transition: opacity .15s; }
+.set-tab.on {
+  background: rgba(148,163,184,.12);
+  border-color: rgba(148,163,184,.4);
+  color: #94a3b8;
+}
+.set-tab.on svg { opacity: 1; }
+
+.set-panel { display: none; }
+.set-panel.on { display: block; }

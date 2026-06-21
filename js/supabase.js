@@ -241,6 +241,7 @@ async function _syncProfiles(){
     track_pref:e.trackPref||null,
     conditions_notes:e.conditionsNotes||null,
     needs_review:e.needsReview||false,
+    unraced:e.unraced||false,
     created_at:e.createdAt?new Date(e.createdAt).toISOString():new Date().toISOString(),
     updated_at:e.updatedAt?new Date(e.updatedAt).toISOString():new Date().toISOString()
   };});
@@ -440,6 +441,8 @@ async function supaLoad(){
         distancePref:p.distance_pref||'',
         trackPref:p.track_pref||'',
         conditionsNotes:p.conditions_notes||'',
+        needsReview:p.needs_review||false,
+        unraced:p.unraced||false,
         observations:obsMap[p.id]||[],
         targets:targetMap[p.id]||[],
         createdAt:new Date(p.created_at).getTime(),

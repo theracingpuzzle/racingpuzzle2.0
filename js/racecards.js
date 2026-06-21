@@ -276,7 +276,12 @@ function rcSwFullRaceCard(r, course){
         +'<div class="rc-race-name">'+name+'</div>'
         +'<div class="rc-race-meta"><span class="rc-race-count">'+runnerCount+' runners'+(nrCount?' ('+nrCount+' NR)':'')+'</span></div>'
       +'</div>'
-      +'<span id="rcfc-chev-'+idx+'" class="rc-chev">›</span>'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
+        +'<button onclick="event.stopPropagation();rcSlStartFromFlat('+idx+')" title="Shortlist runners" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid rgba(139,92,246,.5);background:rgba(139,92,246,.14);color:#7c3aed;cursor:pointer;flex-shrink:0;padding:0;">'
+          +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+        +'</button>'
+        +'<span id="rcfc-chev-'+idx+'" class="rc-chev">›</span>'
+      +'</div>'
     +'</div>'
     +'<div id="'+uid+'" style="display:none;"></div>'
     +'</div>';

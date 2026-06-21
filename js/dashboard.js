@@ -244,6 +244,7 @@ function renderStats(){
       +'<div style="font-size:13px;color:var(--mut);line-height:1.65;margin-bottom:18px;">Log your first bet on the Today card and mark it as a win, place or loss to see your stats here.</div>'
       +'<button onclick="navTo(\'today\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Go to Today →</button>'
       +'</div>';
+    const sumEl=document.getElementById('st-summary');if(sumEl)sumEl.innerHTML='';
     ['st-insights-body','st-src-table','st-conf-table','st-type-table','st-monthly','st-trk','st-ck-impact','st-ck-signals','st-ck-table','st-ck-tip','st-jockey','st-trainer'].forEach(id=>{
       const el=document.getElementById(id);
       if(el)el.innerHTML=id==='st-insights-body'?statsEmpty:'<div style="color:var(--mut);font-style:italic;font-size:13px;padding:8px 0;">Nothing to show yet.</div>';
@@ -253,6 +254,98 @@ function renderStats(){
     if(dc)dc.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Log real and virtual bets to see the comparison.</div>';
     if(dcblk)dcblk.style.display='none';
     return;
+  }
+
+  // ── Summary block ──
+  const summaryEl=document.getElementById('st-summary');
+  if(summaryEl){
+    const pendingCount=(scope==='virt'?getVBank().bets:D.bets).filter(function(b){return !b.result||b.result==='pending';}).length;
+    const bankObj=scope==='virt'?getVBank():D.bank;
+    const bankStart=bankObj.start||0;
+    const bankCurrent=bankObj.current||0;
+    const bankChange=bankCurrent-bankStart;
+    const pCol=p>=0?'#10b981':'#f87171';
+    const roiCol=roi>=0?'#10b981':'#f87171';
+    const bankCol=bankChange>=0?'#10b981':'#f87171';
+
+    const metric=function(label,value,sub,col){
+      return'<div style="flex:1;min-width:0;padding:14px 8px;text-align:center;border-right:1px solid var(--bdr);last-child:border-right:none;">'
+        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:22px;font-weight:900;color:'+(col||'var(--txt)')+';">'+value+'</div>'
+        +'<div style="font-size:9px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-top:2px;">'+label+'</div>'
+        +(sub?'<div style="font-size:9px;color:var(--mut);margin-top:1px;">'+sub+'</div>':'')
+      +'</div>';
+    };
+
+    // ── Best performer helper ──
+    function bestOf(key){
+      const map={};
+      set.forEach(function(b){
+        const k=(b[key]||'').trim();if(!k||k==='Unknown')return;
+        if(!map[k])map[k]={p:0,n:0,staked:0,w:0};
+        map[k].p+=(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);
+        map[k].n++;
+        map[k].staked+=(parseFloat(b.stake)||0);
+        if(b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place')))map[k].w++;
+      });
+      const rows=Object.entries(map)
+        .filter(function(_ref){return _ref[1].n>=2;})
+        .map(function(_ref){var k=_ref[0],v=_ref[1];return{k,roi:v.staked>0?v.p/v.staked*100:0,p:v.p,n:v.n,sr:v.w/v.n*100};})
+        .sort(function(a,b){return b.roi-a.roi;});
+      return rows[0]||null;
+    }
+
+    const bestJockey=bestOf('jockey');
+    const bestTrainer=bestOf('trainer');
+    const bestSource=bestOf('source');
+    const bestTrack=(function(){
+      const map={};
+      set.forEach(function(b){const k=(b.track||'').trim();if(!k)return;if(!map[k])map[k]={p:0,n:0};map[k].p+=(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);map[k].n++;});
+      const rows=Object.entries(map).filter(function(_ref){return _ref[1].n>=2;}).map(function(_ref){var k=_ref[0],v=_ref[1];return{k,p:v.p,n:v.n};}).sort(function(a,b){return b.p-a.p;});
+      return rows[0]||null;
+    })();
+
+    const perfCard=function(label,item,valueKey){
+      if(!item)return'<div style="flex:1;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);opacity:.35;text-align:center;"><div style="font-size:10px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">'+label+'</div><div style="font-size:11px;color:var(--mut);">No data</div></div>';
+      const val=valueKey==='p'?(item.p>=0?'+':'')+fmt(item.p):(item.roi>=0?'+':'')+item.roi.toFixed(1)+'%';
+      const col=((valueKey==='p'?item.p:item.roi)>=0)?'#10b981':'#f87171';
+      return'<div style="flex:1;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);overflow:hidden;">'
+        +'<div style="font-size:9px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">'+label+'</div>'
+        +'<div style="font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;" title="'+item.k+'">'+item.k+'</div>'
+        +'<div style="font-size:11px;font-weight:800;color:'+col+';">'+val+'</div>'
+        +'<div style="font-size:9px;color:var(--mut);">'+item.n+' bets · '+item.sr.toFixed(0)+'% SR</div>'
+      +'</div>';
+    };
+
+    summaryEl.innerHTML='<div style="border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin-bottom:14px;">'
+      // Row 1 — headline numbers
+      +'<div style="display:flex;border-bottom:1px solid var(--bdr);">'
+        +metric('P&L',(p>=0?'+':'')+fmt(p),'from '+staked.toFixed(0)+' staked',pCol)
+        +metric('ROI',(roi>=0?'+':'')+roi.toFixed(1)+'%',statBets.length+' settled bets',roiCol)
+        +metric('Strike Rate',sr.toFixed(0)+'%',wins.length+' wins',sr>=25?'#10b981':sr>=15?'#f59e0b':'var(--txt)')
+      +'</div>'
+      // Row 2 — bank / odds / pending
+      +'<div style="display:flex;border-bottom:1px solid var(--bdr);">'
+        +metric('Bank',(bankChange>=0?'+':'')+fmt(bankChange),'vs '+fmt(bankStart)+' start',bankCol)
+        +metric('Avg Odds',avg>0?avg.toFixed(1)+'x':'—','decimal',null)
+        +metric('Pending',pendingCount,'awaiting results',pendingCount>0?'#f59e0b':null)
+      +'</div>'
+      // Row 3 — best performers header
+      +'<div style="padding:8px 12px 6px;border-bottom:1px solid var(--bdr);">'
+        +'<div style="font-size:9px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.08em;text-transform:uppercase;">Best Performers (min. 2 bets, by ROI)</div>'
+      +'</div>'
+      // Row 4 — best jockey / trainer / source / track
+      +'<div style="display:flex;">'
+        +perfCard('Jockey',bestJockey,'roi')
+        +perfCard('Trainer',bestTrainer,'roi')
+        +perfCard('Source',bestSource,'roi')
+        +(bestTrack?'<div style="flex:1;min-width:0;padding:11px 10px;overflow:hidden;">'
+          +'<div style="font-size:9px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">Racecourse</div>'
+          +'<div style="font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;" title="'+bestTrack.k+'">'+bestTrack.k+'</div>'
+          +'<div style="font-size:11px;font-weight:800;color:'+(bestTrack.p>=0?'#10b981':'#f87171')+';"> '+(bestTrack.p>=0?'+':'')+fmt(bestTrack.p)+'</div>'
+          +'<div style="font-size:9px;color:var(--mut);">'+bestTrack.n+' bets</div>'
+        +'</div>':'<div style="flex:1;min-width:0;padding:11px 10px;opacity:.35;text-align:center;"><div style="font-size:9px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">Racecourse</div><div style="font-size:11px;color:var(--mut);">No data</div></div>')
+      +'</div>'
+    +'</div>';
   }
 
   // ── Auto-observations ──

@@ -371,6 +371,7 @@ tr:hover td { background: var(--sur2); }
 
 /* Header bank pulse */
 @keyframes pg { 0%,100%{ box-shadow: 0 4px 14px rgba(0,0,0,.15), 0 0 0 0 rgba(30,58,95,.4); } 50%{ box-shadow: 0 4px 14px rgba(0,0,0,.15), 0 0 0 7px rgba(30,58,95,0); } }
+@keyframes lg-spin { to { transform: rotate(360deg); } }
 #hbtn.vis { opacity: 1; pointer-events: auto; animation: pg 2.5s ease-in-out infinite; }
 #hbtn.vis:active { transform: scale(.9); }
 

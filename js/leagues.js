@@ -246,6 +246,7 @@ function lgRenderDetail(el){
   const myPicks=allPicks.filter(function(p){return p.user_id===uid;});
   const todayPicks=myPicks.filter(function(p){return p.pick_date===_lgToday();});
   const isAdmin=l.created_by===uid;
+  const SVG_ADMIN_KEY='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5 18 5l3 3-2.5 2.5"/></svg>';
 
   let h=_lgBackBtn('Leagues');
 
@@ -255,6 +256,7 @@ function lgRenderDetail(el){
       +'<div>'
         +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:17px;font-weight:900;letter-spacing:.02em;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
         +'<div style="font-size:10px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Win count scoring':'£1 level stakes scoring')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+'</div>'
+        +(function(){var admin=members.find(function(m){return m.user_id===l.created_by;});return admin?'<div style="margin-top:5px;display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--mut);">'+SVG_ADMIN_KEY+'<span>League Admin: <strong style="color:var(--txt);">'+_lgEsc(admin.display_name||'Unknown')+'</strong></span></div>':'';})()
         +(_lgIsEnded(l)?'<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;">Competition Ended</div>':'')
       +'</div>'
       +'<div style="text-align:right;flex-shrink:0;">'
@@ -296,6 +298,7 @@ function lgRenderDetail(el){
       h+='<div style="'+(mi>0?'margin-top:10px;border-top:1px solid var(--bdr);padding-top:10px;':'')+'">'
         +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">'
           +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.04em;color:'+(isMe?'#10b981':'var(--txt)')+';">'+_lgEsc(m.display_name||'Member')+'</span>'
+          +(m.user_id===l.created_by?'<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);background:var(--sur2);border:1px solid var(--bdr);border-radius:4px;padding:1px 6px;">'+SVG_ADMIN_KEY+' League Admin</span>':'')
           +(isMe?'<span style="font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#10b981;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:4px;padding:1px 5px;">You</span>':'')
           +'<span style="font-size:10px;color:var(--mut);">'+memberPicks.length+' pick'+(memberPicks.length!==1?'s':'')+'</span>'
         +'</div>'
@@ -342,7 +345,7 @@ function lgRenderDetail(el){
       h+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;'+(i?'border-top:1px solid var(--bdr);':'')+'background:'+(entry.isMe?'transparent':'transparent')+';">'
         +'<div style="width:28px;text-align:center;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:900;color:'+(i<3?'var(--txt)':'var(--mut)')+';flex-shrink:0;">'+pos+'</div>'
         +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(entry.m.display_name||'Member')+(entry.isMe?' <span style="font-size:9px;color:#10b981;font-weight:800;letter-spacing:.04em;">YOU</span>':'')+'</div>'
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(entry.m.display_name||'Member')+(entry.m.user_id===l.created_by?' <span style="display:inline-flex;align-items:center;vertical-align:middle;color:var(--mut);margin-left:3px;" title="League Admin">'+SVG_ADMIN_KEY+'</span>':'')+(entry.isMe?' <span style="font-size:9px;color:#10b981;font-weight:800;letter-spacing:.04em;">YOU</span>':'')+'</div>'
           +'<div style="font-size:10px;color:var(--mut);">'+entry.s.settled+' settled · '+entry.s.wins+' win'+(entry.s.wins!==1?'s':'')+(entry.todayCount?' · '+entry.todayCount+' today':'')+'</div>'
         +'</div>'
         +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;color:'+scoreCol+';flex-shrink:0;">'+scoreDisp+'</div>'
@@ -379,7 +382,7 @@ function lgRenderCreate(el){
         +'</div>'
         +'<div style="font-size:11px;color:var(--mut);margin-top:6px;" id="lg-sc-desc">Win at 5/1 = +5pts, loss = −1pt. Rewards value hunting.</div>'
       +'</div>'
-      +'<button onclick="lgCreateSubmit()" style="width:100%;padding:11px;border-radius:9px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:4px;">Create League</button>'
+      +'<button id="lg-create-btn" onclick="lgCreateSubmit()" style="width:100%;padding:11px;border-radius:9px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:4px;">Create League</button>'
       +'<div id="lg-create-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
     +'</div>';
 }
@@ -395,6 +398,22 @@ function lgPickScoring(s){
   if(desc)desc.textContent=s==='stakes'?'Win at 5/1 = +5pts, loss = −1pt. Rewards value hunting.':'Simply counts your winning picks.';
 }
 
+function _lgSetBtnLoading(btnId, loading, label){
+  const btn=document.getElementById(btnId);
+  if(!btn)return;
+  if(loading){
+    btn.disabled=true;
+    btn.style.opacity='0.7';
+    btn.style.cursor='not-allowed';
+    btn.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:lg-spin .7s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>'+label+'</span>';
+  }else{
+    btn.disabled=false;
+    btn.style.opacity='';
+    btn.style.cursor='pointer';
+    btn.textContent=label;
+  }
+}
+
 async function lgCreateSubmit(){
   const name=(document.getElementById('lg-new-name')||{value:''}).value.trim();
   const dname=(document.getElementById('lg-new-dname')||{value:''}).value.trim();
@@ -402,6 +421,8 @@ async function lgCreateSubmit(){
   const errEl=document.getElementById('lg-create-err');
   if(!name){if(errEl)errEl.textContent='Please enter a league name.';return;}
   if(!dname){if(errEl)errEl.textContent='Please enter your display name.';return;}
+  _lgSetBtnLoading('lg-create-btn', true, 'Creating…');
+  if(errEl)errEl.textContent='';
   const uid=_lgUid();
   const leagueId=_lgGid();
   const code=_lgCode();
@@ -413,6 +434,7 @@ async function lgCreateSubmit(){
     if(l){_lgCurrent=l;_lgView='detail';}
     lgRender();
   }catch(e){
+    _lgSetBtnLoading('lg-create-btn', false, 'Create League');
     if(errEl)errEl.textContent='Error creating league: '+(e.message||e);
   }
 }
@@ -426,7 +448,7 @@ function lgRenderJoin(el){
       +'<div class="bttl">Join a League</div>'
       +'<div class="fg"><label>Invite Code</label><input id="lg-join-code" type="text" placeholder="ABC123" autocomplete="off" style="width:100%;box-sizing:border-box;text-transform:uppercase;letter-spacing:.15em;font-size:16px;" maxlength="6" oninput="this.value=this.value.toUpperCase()"></div>'
       +'<div class="fg"><label>Your Display Name</label><input id="lg-join-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
-      +'<button onclick="lgJoinSubmit()" style="width:100%;padding:11px;border-radius:9px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:4px;">Join League</button>'
+      +'<button id="lg-join-btn" onclick="lgJoinSubmit()" style="width:100%;padding:11px;border-radius:9px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:4px;">Join League</button>'
       +'<div id="lg-join-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
     +'</div>';
 }
@@ -437,20 +459,29 @@ async function lgJoinSubmit(){
   const errEl=document.getElementById('lg-join-err');
   if(code.length!==6){if(errEl)errEl.textContent='Please enter a 6-character invite code.';return;}
   if(!dname){if(errEl)errEl.textContent='Please enter your display name.';return;}
+  _lgSetBtnLoading('lg-join-btn', true, 'Joining…');
+  if(errEl)errEl.textContent='';
   try{
     const leagues=await _lgFetch('leagues?invite_code=eq.'+encodeURIComponent(code));
-    if(!leagues.length){if(errEl)errEl.textContent='No league found with that code.';return;}
+    if(!leagues.length){
+      _lgSetBtnLoading('lg-join-btn', false, 'Join League');
+      if(errEl)errEl.textContent='No league found with that code.';return;
+    }
     const l=leagues[0];
     const uid=_lgUid();
     // Check not already a member
     const existing=await _lgFetch('league_members?league_id=eq.'+encodeURIComponent(l.id)+'&user_id=eq.'+encodeURIComponent(uid));
-    if(existing.length){if(errEl)errEl.textContent='You\'re already in this league.';return;}
+    if(existing.length){
+      _lgSetBtnLoading('lg-join-btn', false, 'Join League');
+      if(errEl)errEl.textContent='You\'re already in this league.';return;
+    }
     await _lgFetch('league_members',{method:'POST',body:JSON.stringify({id:_lgGid(),league_id:l.id,user_id:uid,display_name:dname})});
     await lgLoad();
     const joined=_lgMyLeagues.find(function(x){return x.id===l.id;});
     if(joined){_lgCurrent=joined;_lgView='detail';}
     lgRender();
   }catch(e){
+    _lgSetBtnLoading('lg-join-btn', false, 'Join League');
     if(errEl)errEl.textContent='Error joining league: '+(e.message||e);
   }
 }
@@ -590,7 +621,7 @@ function _lgShowLeaguePicker(horse, course, time, odds, leagues){
       +'<div style="width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;color:#10b981;flex-shrink:0;">'+SVG_TROPHY+'</div>'
       +'<div style="flex:1;">'
         +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
-        +'<div style="font-size:10px;color:var(--mut);">'+(l.end_date?'Ends '+_lgFmtDate(l.end_date)+' · ':'')+myPicks.length+' pick'+(myPicks.length!==1?'s':'')+'  today</div>'
+        +'<div style="font-size:10px;color:var(--mut);">'+(l.scoring==='wins'?'Win count':'Stakes P&L')+' · '+(l.end_date?'Ends '+_lgFmtDate(l.end_date)+' · ':'')+myPicks.length+' pick'+(myPicks.length!==1?'s':'')+' today</div>'
       +'</div>'
       +(alreadyPicked
         ?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#10b981;">Picked ✓</span>'

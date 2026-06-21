@@ -68,6 +68,9 @@ async function bootApp() {
   // Show onboarding for new users — after data loaded so we can detect empty state
   if (typeof obMaybeShow === 'function') obMaybeShow();
 
+  // Show install guide once for users not yet running as installed PWA
+  if (typeof igMaybeShow === 'function') igMaybeShow();
+
 }
 
 // ── Auth-first startup ─────────────────────────────────────────────────────────

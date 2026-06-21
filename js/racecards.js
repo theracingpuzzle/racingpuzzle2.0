@@ -554,7 +554,7 @@ function rcSwRenderRunners(idx, course, el){
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'
             +(age?'<span class="rc-runner-age" style="font-size:0.72em;color:var(--mut);margin-left:4px;">'+age+'</span>':'')
             +(rpr?'<span class="rc-or">'+rpr+'</span>':'')
-            +(_badge?'<span class="rc-wl-pill">'+_pm.emoji+'</span>':'')
+            +(_badge?'<span class="rc-wl-pill">'+_pm.svg+'</span>':'')
             +(_qr2?'<span style="font-size:10px;font-weight:800;background:rgba(234,179,8,.18);color:#854d0e;border:1px solid rgba(234,179,8,.4);border-radius:6px;padding:2px 7px;margin-left:5px;">MR '+_qr2.mr+'</span>':'')
             +(draw?'<span class="rc-runner-age">'+draw+'</span>':'')
           +'</div>'
@@ -1127,7 +1127,7 @@ function rcSwRenderResultsCourse(listEl){
 
 function rcProfilePanelHtml(profiled,panelId){
   if(!profiled)return'';
-  const rm={'eye-catcher':{emoji:'👁',col:'#a78bfa',label:'Eye Catcher'},'future-target':{emoji:'📰',col:'#34d399',label:'Future Target'},'trainer-intel':{emoji:'🗣',col:'#38bdf8',label:'Trainer Intel'},'form-study':{emoji:'📊',col:'#f59e0b',label:'Form Study'},'tip-source':{emoji:'💡',col:'#fb7185',label:'Tip Source'}};
+  const rm={'eye-catcher':{svg:'<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>',col:'#a78bfa',label:'Eye Catcher'},'future-target':{svg:'<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="1" x2="10" y2="3"/><line x1="10" y1="17" x2="10" y2="19"/><line x1="1" y1="10" x2="3" y2="10"/><line x1="17" y1="10" x2="19" y2="10"/></svg>',col:'#34d399',label:'Future Target'},'trainer-intel':{svg:'<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13a8 8 0 1 0-8 5h8v-5z"/></svg>',col:'#38bdf8',label:'Trainer Intel'},'form-study':{svg:'<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>',col:'#f59e0b',label:'Form Study'},'tip-source':{svg:'<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2a6 6 0 0 1 4.47 10.06A4 4 0 0 1 13 15H7a4 4 0 0 1-1.47-2.94A6 6 0 0 1 10 2z"/><line x1="8" y1="18" x2="12" y2="18"/><line x1="9" y1="21" x2="11" y2="21"/></svg>',col:'#fb7185',label:'Tip Source'}};
   const meta=rm[profiled.reason||'eye-catcher']||rm['eye-catcher'];
   const edge=(function(){const mr=parseFloat(profiled.myRating),or=parseFloat(profiled.currentRating);if(!mr||!or)return null;return mr-or;}());
   const edgeHtml=edge===null?''
@@ -1138,7 +1138,7 @@ function rcProfilePanelHtml(profiled,panelId){
   const targets=(profiled.targets||[]).slice(0,3);
   let html='<div class="rc-profile-panel">';
   html+='<div class="rc-pp-header">'
-    +'<span class="rc-pp-reason-badge" style="border-color:'+meta.col+';color:'+meta.col+';">'+meta.emoji+' '+meta.label+'</span>'
+    +'<span class="rc-pp-reason-badge" style="border-color:'+meta.col+';color:'+meta.col+';display:inline-flex;align-items:center;gap:4px;">'+meta.svg+' '+meta.label+'</span>'
     +(profiled.myRating?'<span class="rc-pp-mr">MR '+profiled.myRating+'</span>':'')
     +(profiled.currentRating?'<span class="rc-pp-or">OR '+profiled.currentRating+'</span>':'')
     +edgeHtml
@@ -1660,7 +1660,7 @@ function rcSlRenderCard(){
   if(prof){
     profHtml='<div class="rc-profile-panel" style="margin:0 -14px;border-top:1px solid var(--bdr);border-radius:0;">'
       +'<div class="rc-pp-header">'
-        +'<span class="rc-pp-reason-badge" style="border-color:'+profMeta.col+';color:'+profMeta.col+';">'+profMeta.emoji+' '+profMeta.label+'</span>'
+        +'<span class="rc-pp-reason-badge" style="border-color:'+profMeta.col+';color:'+profMeta.col+';display:inline-flex;align-items:center;gap:4px;">'+profMeta.svg+' '+profMeta.label+'</span>'
         +(prof.myRating?'<span class="rc-pp-mr">MR '+prof.myRating+'</span>':'')
         +(prof.currentRating?'<span class="rc-pp-or">OR '+prof.currentRating+'</span>':'')
         +(edge!==null?(edge>0?'<span class="rc-sl-edge-pos">▲ +'+edge+'</span>':(edge<0?'<span class="rc-sl-edge-neg">▼ '+edge+'</span>':'')):'')

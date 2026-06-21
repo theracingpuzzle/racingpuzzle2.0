@@ -339,11 +339,11 @@ function lgRenderDetail(el){
           +'<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(canEditOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(canEditOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.15);':'')+'">'
             +'<div style="flex:1;min-width:0;">'
               +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+'</div>'
-              +'<div style="font-size:10px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+p.odds+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+'</div>'
+              +'<div style="font-size:10px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+(p.odds_display||p.odds)+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+'</div>'
             +'</div>'
             +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
               +(canEditOdds||canOverrideOdds?'<div id="lg-odds-edit-'+p.id+'">'
-                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
+                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds_display||p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
                   +'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>'
                   +(p.odds?'Edit Odds':'Add Odds')
                 +'</button>'
@@ -427,11 +427,11 @@ function lgRenderDetail(el){
           h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(needsOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(needsOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.12);':'')+'">'
             +'<div style="flex:1;min-width:0;">'
               +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+(isAdmin&&memberName?' <span style="font-size:9px;color:var(--mut);font-weight:500;">'+_lgEsc(memberName)+'</span>':'')+'</div>'
-              +'<div style="font-size:10px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+p.odds+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+(res==='win'&&p.returns?' · <span style="color:#10b981;">+'+Number(p.returns).toFixed(2)+'</span>':'')+'</div>'
+              +'<div style="font-size:10px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+(p.odds_display||p.odds)+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+(res==='win'&&p.returns?' · <span style="color:#10b981;">+'+Number(p.returns).toFixed(2)+'</span>':'')+'</div>'
             +'</div>'
             +'<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">'
               +(canEdit?'<div id="lg-odds-edit-'+p.id+'">'
-                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
+                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds_display||p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
                   +'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>'
                   +(p.odds?'Edit':'Add Odds')
                 +'</button>'
@@ -713,26 +713,27 @@ function lgCancelOddsEdit(pickId){
 async function lgSaveOdds(pickId){
   const inp=document.getElementById('lg-odds-val-'+pickId);
   if(!inp)return;
-  const odds=inp.value.trim();
-  if(!odds)return;
+  const oddsRaw=inp.value.trim();
+  if(!oddsRaw)return;
   const wrap=document.getElementById('lg-odds-edit-'+pickId);
   if(wrap)wrap.innerHTML='<span style="font-size:10px;color:var(--mut);">Saving…</span>';
   try{
+    // DB odds column is numeric — convert fractions (5/2) to decimal (3.5) before saving
+    const dec=_lgOddsToDecimal(oddsRaw);
+    const oddsNum=dec>0?dec:parseFloat(oddsRaw)||null;
     // Find the pick to check if it's a settled win — if so recalculate returns
     let pick=null;
     Object.values(_lgPicks).forEach(function(arr){arr.forEach(function(p){if(p.id===pickId)pick=p;});});
-    const patch={odds};
-    if(pick&&pick.result==='win'){
-      const dec=_lgOddsToDecimal(odds);
-      if(dec>0)patch.returns=dec;
-    }
-    await _lgFetch('league_picks?id=eq.'+encodeURIComponent(pickId),{method:'PATCH',body:JSON.stringify(patch)});
-    // Update local cache
+    const dbPatch={odds:oddsNum,odds_display:oddsRaw};
+    if(pick&&pick.result==='win'&&oddsNum>0)dbPatch.returns=oddsNum;
+    await _lgFetch('league_picks?id=eq.'+encodeURIComponent(pickId),{method:'PATCH',body:JSON.stringify(dbPatch)});
+    // Keep the original display string in local cache
+    const cachePatch=Object.assign({},dbPatch);
     Object.keys(_lgPicks).forEach(function(lid){
-      _lgPicks[lid]=(_lgPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,patch):p;});
+      _lgPicks[lid]=(_lgPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,cachePatch):p;});
     });
     Object.keys(_lgMyPicks).forEach(function(lid){
-      _lgMyPicks[lid]=(_lgMyPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,patch):p;});
+      _lgMyPicks[lid]=(_lgMyPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,cachePatch):p;});
     });
     if(typeof _lgToast==='function')_lgToast('Odds saved ✓');
     lgRender();

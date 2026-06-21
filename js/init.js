@@ -59,6 +59,12 @@ async function bootApp() {
     if (typeof loadTodayMeetings === 'function') loadTodayMeetings();
   }, 800);
 
+  // Load league memberships in the background so the trophy button
+  // shows on racecards without needing to visit the Leagues card first
+  setTimeout(function() {
+    if (typeof lgLoad === 'function' && !_lgLoaded) lgLoad();
+  }, 1500);
+
   // Show onboarding for new users — after data loaded so we can detect empty state
   if (typeof obMaybeShow === 'function') obMaybeShow();
 

@@ -1522,7 +1522,15 @@ function renderTrackPulse(){
   if(!races.length){el.style.display='none';return;}
 
   var items=_tpBuildItems(races);
-  if(!items.length){el.style.display='none';return;}
+  // No results processed yet — show a standing-by message rather than hiding
+  if(!items.length){
+    var rcRaces=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
+    if(rcRaces.length){
+      items=['Awaiting results — '+rcRaces.length+' meeting'+(rcRaces.length!==1?'s':'')+' today','Results update every 10 minutes'];
+    }else{
+      el.style.display='none';return;
+    }
+  }
 
   // Double items so the CSS scroll loop is perfectly seamless
   var doubled=items.concat(items);
@@ -1549,34 +1557,69 @@ function renderTrackPulse(){
     +'</div>';
 }
 
+// Merge racecard + results into a unified race list so checkWatchlistRunners
+// sees both declared runners AND finishing positions in a single pass.
+function _mergeRacecardsAndResults(){
+  const rcRaces=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
+  const resRaces=window._todayResultsCache||[];
+  if(!resRaces.length)return rcRaces;
+  if(!rcRaces.length)return resRaces;
+  // Index results by course+time for fast lookup
+  const resIdx={};
+  resRaces.forEach(function(r){
+    const key=(r.course||r.venue||'').toLowerCase().trim()+'|'+(r.off||r.off_time||r.time||'');
+    resIdx[key]=r;
+  });
+  // Return merged list: result version if available (has positions), else racecard version
+  return rcRaces.map(function(rc){
+    const key=(rc.course||rc.venue||'').toLowerCase().trim()+'|'+(rc.off||rc.off_time||rc.time||'');
+    return resIdx[key]||rc;
+  }).concat(resRaces.filter(function(r){
+    const key=(r.course||r.venue||'').toLowerCase().trim()+'|'+(r.off||r.off_time||r.time||'');
+    return !rcRaces.some(function(rc){
+      return (rc.course||rc.venue||'').toLowerCase().trim()+'|'+(rc.off||rc.off_time||rc.time||'')=== key;
+    });
+  }));
+}
+
 async function initTrackPulse(){
   await fetchTodayResults();
   renderTrackPulse();
-  // Results are now in — settle any pending league picks
-  if(typeof lgSyncResults==='function'&&window._todayResultsCache&&window._todayResultsCache.length){
-    lgSyncResults(window._todayResultsCache);
+
+  // Pass merged racecard+results data to watchlist checker so it sees
+  // both declared runners AND finishing positions in a single pass
+  if(typeof checkWatchlistRunners==='function'){
+    const merged=_mergeRacecardsAndResults();
+    if(merged.length)checkWatchlistRunners(merged);
   }
-  // Results are now in — re-check watching horses so any that have finished
-  // get their review auto-filled instead of just declared-to-run
-  if(typeof checkWatchlistRunners==='function'&&window._todayMeetingsCache){
-    const races=window._todayMeetingsCache.racecards||window._todayMeetingsCache.races||[];
-    if(races.length)checkWatchlistRunners(races);
+
+  // Settle league picks — wait for leagues to finish loading if needed
+  function _doLgSync(){
+    if(typeof lgSyncResults==='function'&&window._todayResultsCache&&window._todayResultsCache.length){
+      if(typeof _lgLoaded!=='undefined'&&!_lgLoaded){
+        // Leagues not loaded yet — retry in 3 seconds
+        setTimeout(_doLgSync,3000);
+        return;
+      }
+      lgSyncResults(window._todayResultsCache);
+    }
   }
-  // Refresh every 10 minutes — busts meeting cache so results are fresh
+  _doLgSync();
+
+  // Refresh every 10 minutes — bust caches so results are genuinely fresh
   if(window._tpRefreshTimer)clearInterval(window._tpRefreshTimer);
   window._tpRefreshTimer=setInterval(async function(){
     window._todayResultsCache=null;
-    if(typeof rcSwResultsData!=='undefined')rcSwResultsData=[]; // force a real re-fetch — same array the Results tab renders
+    if(typeof rcSwResultsData!=='undefined')rcSwResultsData=[];
     try{ window._todayMeetingsCache=await callRacingAPI('racecards/free',{}); }catch(e){}
     await fetchTodayResults();
     renderTrackPulse();
-    // Re-settle picks on each refresh cycle
+    if(typeof checkWatchlistRunners==='function'){
+      const merged=_mergeRacecardsAndResults();
+      if(merged.length)checkWatchlistRunners(merged);
+    }
     if(typeof lgSyncResults==='function'&&window._todayResultsCache&&window._todayResultsCache.length){
       lgSyncResults(window._todayResultsCache);
-    }
-    if(typeof checkWatchlistRunners==='function'&&window._todayMeetingsCache){
-      const races=window._todayMeetingsCache.racecards||window._todayMeetingsCache.races||[];
-      if(races.length)checkWatchlistRunners(races);
     }
   },10*60*1000);
 }

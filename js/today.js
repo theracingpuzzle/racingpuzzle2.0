@@ -452,10 +452,13 @@ async function checkWatchlistRunners(races){
         const wlName=(typeof stripCountrySuffix==='function'?stripCountrySuffix(w.horse||''):(w.horse||'')).toLowerCase().trim();
         if(horseName&&wlName&&horseName===wlName){
           // Auto-update OR if racecard has one and it differs from stored value
+          // Only do this once per day — if orUpdatedDate is already today, skip
           const storedOR=String(w.currentRating||'').trim();
-          const orChanged=racecardOR&&racecardOR!==storedOR;
+          const alreadyUpdatedToday=w.orUpdatedDate===td();
+          const orChanged=racecardOR&&racecardOR!==storedOR&&!alreadyUpdatedToday;
           if(orChanged){
             w.currentRating=racecardOR;
+            w.orUpdatedDate=td();
             if(!w.orHistory)w.orHistory=[];
             w.orHistory.unshift({or:racecardOR,prev:storedOR,date:td(),auto:true});
             if(w.orHistory.length>20)w.orHistory=w.orHistory.slice(0,20);

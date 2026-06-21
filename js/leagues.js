@@ -333,8 +333,8 @@ function lgRenderDetail(el){
         const res=p.result||'pending';
         const resCol=res==='win'?'#10b981':res==='loss'?'#f87171':'var(--mut)';
         const resBg=res==='win'?'rgba(16,185,129,.1)':res==='loss'?'rgba(248,113,113,.1)':'rgba(255,255,255,.04)';
-        const canEditOdds=res==='pending'&&(isMe||isAdmin)&&!p.odds;
-        const canOverrideOdds=res==='pending'&&(isMe||isAdmin)&&p.odds;
+        const canEditOdds=(isMe||isAdmin)&&!p.odds;
+        const canOverrideOdds=(isMe||isAdmin)&&p.odds;
         h+='<div style="display:flex;flex-direction:column;gap:4px;">'
           +'<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(canEditOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(canEditOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.15);':'')+'">'
             +'<div style="flex:1;min-width:0;">'
@@ -421,7 +421,7 @@ function lgRenderDetail(el){
           const resCol=res==='win'?'#10b981':res==='loss'?'#f87171':'var(--mut)';
           const resBg=res==='win'?'rgba(16,185,129,.1)':res==='loss'?'rgba(248,113,113,.1)':'rgba(255,255,255,.04)';
           const needsOdds=res==='pending'&&!p.odds;
-          const canEdit=res==='pending'&&(p.user_id===uid||isAdmin);
+          const canEdit=(p.user_id===uid||isAdmin);
           // Find member display name for admin view
           const memberName=isAdmin?(function(){const mb=members.find(function(m){return m.user_id===p.user_id;});return mb?mb.display_name:'';})():'';
           h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(needsOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(needsOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.12);':'')+'">'
@@ -698,7 +698,7 @@ function lgShowOddsEdit(pickId, currentOdds){
   const wrap=document.getElementById('lg-odds-edit-'+pickId);
   if(!wrap)return;
   wrap.innerHTML='<div style="display:flex;align-items:center;gap:5px;">'
-    +'<input id="lg-odds-val-'+pickId+'" type="text" inputmode="decimal" placeholder="e.g. 5/1" value="'+_lgEsc(currentOdds||'')+'" style="width:70px;padding:4px 7px;font-size:12px;border-radius:7px;border:1px solid rgba(245,158,11,.5);background:var(--inp);color:var(--txt);text-align:center;" autofocus>'
+    +'<input id="lg-odds-val-'+pickId+'" type="text" inputmode="text" autocomplete="off" placeholder="e.g. 5/2" value="'+_lgEsc(currentOdds||'')+'" style="width:75px;padding:4px 7px;font-size:12px;border-radius:7px;border:1px solid rgba(245,158,11,.5);background:var(--inp);color:var(--txt);text-align:center;" autofocus>'
     +'<button onclick="lgSaveOdds(\''+pickId+'\')" style="padding:4px 9px;border-radius:7px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Save</button>'
     +'<button onclick="lgCancelOddsEdit(\''+pickId+'\')" style="padding:4px 7px;border-radius:7px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-size:11px;cursor:pointer;">✕</button>'
   +'</div>';
@@ -718,13 +718,21 @@ async function lgSaveOdds(pickId){
   const wrap=document.getElementById('lg-odds-edit-'+pickId);
   if(wrap)wrap.innerHTML='<span style="font-size:10px;color:var(--mut);">Saving…</span>';
   try{
-    await _lgFetch('league_picks?id=eq.'+encodeURIComponent(pickId),{method:'PATCH',body:JSON.stringify({odds})});
+    // Find the pick to check if it's a settled win — if so recalculate returns
+    let pick=null;
+    Object.values(_lgPicks).forEach(function(arr){arr.forEach(function(p){if(p.id===pickId)pick=p;});});
+    const patch={odds};
+    if(pick&&pick.result==='win'){
+      const dec=_lgOddsToDecimal(odds);
+      if(dec>0)patch.returns=dec;
+    }
+    await _lgFetch('league_picks?id=eq.'+encodeURIComponent(pickId),{method:'PATCH',body:JSON.stringify(patch)});
     // Update local cache
     Object.keys(_lgPicks).forEach(function(lid){
-      _lgPicks[lid]=(_lgPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,{odds}):p;});
+      _lgPicks[lid]=(_lgPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,patch):p;});
     });
     Object.keys(_lgMyPicks).forEach(function(lid){
-      _lgMyPicks[lid]=(_lgMyPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,{odds}):p;});
+      _lgMyPicks[lid]=(_lgMyPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,patch):p;});
     });
     if(typeof _lgToast==='function')_lgToast('Odds saved ✓');
     lgRender();

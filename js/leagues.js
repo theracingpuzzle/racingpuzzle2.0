@@ -914,34 +914,68 @@ function _lgIsEnded(l){if(!l||!l.end_date)return false;return _lgToday()>l.end_d
 // to auto-settle pending picks
 async function lgSyncResults(results){
   if(!results||!results.length||!_lgMyLeagues.length)return;
-  const uid=_lgUid();
   const today=_lgToday();
-  for(const l of _lgMyLeagues){
-    const pending=(_lgMyPicks[l.id]||[]).filter(function(p){return p.pick_date===today&&p.result==='pending';});
-    for(const pick of pending){
-      const hn=(pick.horse||'').toLowerCase().trim();
-      for(const race of results){
-        if(race.result==='void')continue;
-        const runners=race.runners||race.horses||[];
-        const found=runners.find(function(r){
-          return(r.horse||r.name||'').toLowerCase().trim()===hn&&(r.position||r.place);
-        });
-        if(found){
-          const pos=parseInt(found.position||found.place)||0;
-          const result=pos===1?'win':'loss';
-          const dec=_lgOddsToDecimal(pick.odds);
-          const returns=result==='win'?dec:0;
-          try{
-            await _lgFetch('league_picks?id=eq.'+encodeURIComponent(pick.id),{
-              method:'PATCH',
-              body:JSON.stringify({result,returns}),
-            });
-            pick.result=result;pick.returns=returns;
-          }catch(e){console.warn('lgSyncResults patch',e);}
-          break;
-        }
+
+  // Strip country suffix e.g. "Arrest (GB)" → "arrest"
+  const normHorse=function(s){return(s||'').replace(/\s*\([^)]+\)\s*$/,'').toLowerCase().trim();};
+
+  // Build a flat lookup: horseName → {pos, going, race} from all results
+  const resultMap={};
+  results.forEach(function(race){
+    (race.runners||race.horses||[]).forEach(function(r){
+      const hn=normHorse(r.horse||r.name||'');
+      if(!hn)return;
+      const posRaw=r.position||r.place||'';
+      const pos=parseInt(posRaw);
+      if(!posRaw||isNaN(pos))return; // no result yet
+      if(!resultMap[hn]){
+        resultMap[hn]={pos,sp:r.sp||r.starting_price||''};
       }
+    });
+  });
+
+  if(!Object.keys(resultMap).length)return; // no settled races yet
+
+  for(const l of _lgMyLeagues){
+    // Use _lgPicks (all members) not just _lgMyPicks so every member's pick gets settled
+    const allPending=(_lgPicks[l.id]||[]).filter(function(p){return p.pick_date===today&&p.result==='pending';});
+    for(const pick of allPending){
+      const hn=normHorse(pick.horse||'');
+      const res=resultMap[hn];
+      if(!res)continue;
+
+      const result=res.pos===1?'win':'loss';
+      // Use pick odds if set, otherwise fall back to SP from results
+      const oddsStr=pick.odds||res.sp||'';
+      const dec=_lgOddsToDecimal(oddsStr);
+      const returns=result==='win'&&dec>0?dec:0;
+
+      try{
+        await _lgFetch('league_picks?id=eq.'+encodeURIComponent(pick.id),{
+          method:'PATCH',
+          body:JSON.stringify({result,returns,odds:pick.odds||oddsStr||null}),
+        });
+        // Update local cache so UI reflects immediately without a reload
+        pick.result=result;pick.returns=returns;
+        if(!pick.odds&&oddsStr)pick.odds=oddsStr;
+        // Mirror into _lgMyPicks if it's there too
+        Object.keys(_lgMyPicks).forEach(function(lid){
+          (_lgMyPicks[lid]||[]).forEach(function(p){
+            if(p.id===pick.id){p.result=result;p.returns=returns;if(!p.odds&&oddsStr)p.odds=oddsStr;}
+          });
+        });
+      }catch(e){console.warn('lgSyncResults patch',e);}
     }
+  }
+
+  // Re-render leagues detail if it's open so standings update immediately
+  if(typeof lgRender==='function'&&typeof _lgView!=='undefined'&&_lgView==='detail'){
+    lgRender();
+  }
+  // Show a toast if any picks were settled
+  const settledCount=Object.keys(resultMap).length;
+  if(settledCount>0&&typeof _lgToast==='function'){
+    // Only toast if we actually patched something — check silently
   }
 }
 

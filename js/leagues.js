@@ -333,8 +333,8 @@ function lgRenderDetail(el){
         const res=p.result||'pending';
         const resCol=res==='win'?'#10b981':res==='loss'?'#f87171':'var(--mut)';
         const resBg=res==='win'?'rgba(16,185,129,.1)':res==='loss'?'rgba(248,113,113,.1)':'rgba(255,255,255,.04)';
-        const canEditOdds=l.scoring==='stakes'&&res==='pending'&&(isMe||isAdmin)&&!p.odds;
-        const canOverrideOdds=l.scoring==='stakes'&&res==='pending'&&(isMe||isAdmin)&&p.odds;
+        const canEditOdds=res==='pending'&&(isMe||isAdmin)&&!p.odds;
+        const canOverrideOdds=res==='pending'&&(isMe||isAdmin)&&p.odds;
         h+='<div style="display:flex;flex-direction:column;gap:4px;">'
           +'<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(canEditOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(canEditOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.15);':'')+'">'
             +'<div style="flex:1;min-width:0;">'
@@ -393,7 +393,7 @@ function lgRenderDetail(el){
   h+='</div>';
 
   // Pick history — all my picks (and all picks if admin), grouped by date, with odds editing on pending
-  if(l.scoring==='stakes'){
+  if(true){
     const histPicks=isAdmin
       ?allPicks.slice().sort(function(a,b){return b.pick_date<a.pick_date?-1:b.pick_date>a.pick_date?1:0;})
       :allPicks.filter(function(p){return p.user_id===uid;}).sort(function(a,b){return b.pick_date<a.pick_date?-1:b.pick_date>a.pick_date?1:0;});
@@ -653,7 +653,7 @@ function lgRenderPick(el){
                   const oddsId='lg-odds-'+safeKey;
                   const oddsHint=isStakes
                     ?'<div style="font-size:9px;color:#f59e0b;margin-top:3px;">Odds required for scoring</div>'
-                    :'';
+                    :'<div style="font-size:9px;color:var(--mut);margin-top:3px;">Optional — for reference</div>';
                   return'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;">'
                     +'<div style="display:flex;align-items:center;gap:6px;">'
                       +'<input id="'+oddsId+'" type="text" inputmode="decimal" placeholder="'+(isStakes?'Odds*':'Odds')+'" value="'+_lgEsc(odds)+'" '
@@ -680,11 +680,11 @@ function lgRenderPick(el){
 // ─── Pick actions ─────────────────────────────────────────────────────────────
 // Enable/disable Pick button as odds field changes (stakes leagues only)
 function lgOddsInputChange(safeKey, leagueId, isStakes){
-  if(!isStakes)return;
   const inp=document.getElementById('lg-odds-'+safeKey);
   if(!inp)return;
   const hasOdds=inp.value.trim().length>0;
-  inp.style.borderColor=hasOdds?'var(--bdr)':'rgba(245,158,11,.6)';
+  // Stakes leagues: amber border when empty. Win count: subtle reminder only.
+  inp.style.borderColor=hasOdds?'var(--bdr)':(isStakes?'rgba(245,158,11,.6)':'rgba(245,158,11,.3)');
 }
 
 function lgConfirmPick(leagueId, horse, course, time, safeKey){

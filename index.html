@@ -318,11 +318,7 @@ RACING <span class="logo-accent">PUZZLE</span>
           <div class="card-title" style="color:#60a5fa;" id="stats-card-title">Stats</div>
         </div>
 
-        <!-- ── Top-level Stats / History toggle ── -->
-        <div class="rc-view-tog" style="margin-bottom:16px;width:100%;" id="stats-hist-tog">
-          <button id="sh-tog-stats" class="rc-view-btn on" onclick="setStatsHistView('stats')" style="display:inline-flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Stats</button>
-          <button id="sh-tog-hist"  class="rc-view-btn off" onclick="setStatsHistView('hist')" style="display:inline-flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> History</button>
-        </div>
+        <!-- History moved to Profile overlay -->
 
         <!-- ══ STATS PANE ══ -->
         <div id="cp-stats">
@@ -386,44 +382,7 @@ RACING <span class="logo-accent">PUZZLE</span>
         </div>
 
         <!-- ══ HISTORY PANE ══ -->
-        <div id="cp-hist" style="display:none;">
-          <div class="hist-tog">
-            <button id="hist-tog-real" class="hist-tog-btn on" onclick="setHistMode('real')">Real</button>
-            <button id="hist-tog-virt" class="hist-tog-btn off" onclick="setHistMode('virt')">Virtual</button>
-          </div>
-          <div id="hist-real-section">
-            <div class="blk" id="hist-pending-blk">
-              <div class="bttl">⏳ Awaiting Results</div>
-              <div id="hist-pending"></div>
-            </div>
-            <div class="blk">
-              <div class="bttl">All Bets</div>
-              <div class="row-g7">
-                <input type="text" id="hfs" class="inp-flex" oninput="renderHist()" placeholder="Search horse or track…">
-                <select id="hfr" onchange="renderHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
-                <button class="btn bout bsm" onclick="clrHF()">Clear</button>
-                <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--mut);align-self:center;" id="hcnt"></span>
-              </div>
-              <div id="hist-list"></div>
-            </div>
-          </div>
-          <div id="hist-virt-section" style="display:none;">
-            <div class="blk" id="hist-vpending-blk" style="display:none;">
-              <div class="bttl">⏳ Awaiting Results</div>
-              <div id="hist-vpending"></div>
-            </div>
-            <div class="blk">
-              <div class="bttl">All Virtual Bets</div>
-              <div class="row-g7">
-                <input type="text" id="hvfs" oninput="renderVirtHist()" placeholder="Search horse or track…" style="flex:1;min-width:140px;font-size:13px;">
-                <select id="hvfr" onchange="renderVirtHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
-                <button class="btn bout bsm" onclick="clrVHF()">Clear</button>
-                <span style="font-family:monospace;font-size:10px;color:var(--mut);align-self:center;" id="hvcnt"></span>
-              </div>
-              <div id="hist-virt-list"></div>
-            </div>
-          </div>
-        </div>
+        <!-- History content moved to Profile overlay -->
 
       </div>
     </div>
@@ -804,81 +763,124 @@ RACING <span class="logo-accent">PUZZLE</span>
 
 <!-- ── USER PROFILE MODAL ── -->
 <div id="profile-overlay" style="display:none;position:fixed;inset:0;z-index:10003;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;" onclick="if(event.target===this)profileClose()">
-  <div style="width:100%;max-width:520px;background:var(--sur);border-radius:20px 20px 0 0;overflow:hidden;">
+  <div style="width:100%;max-width:520px;background:var(--sur);border-radius:20px 20px 0 0;display:flex;flex-direction:column;max-height:90vh;">
 
     <!-- Drag handle -->
-    <div style="display:flex;justify-content:center;padding:12px 0 0;">
+    <div style="display:flex;justify-content:center;padding:12px 0 0;flex-shrink:0;">
       <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);"></div>
     </div>
 
     <!-- Avatar + email -->
-    <div style="text-align:center;padding:20px 24px 18px;">
-      <div id="profile-avatar" style="width:64px;height:64px;border-radius:50%;background:var(--navy);border:2px solid rgba(255,255,255,.15);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:26px;font-weight:900;color:var(--gld2);">?</div>
-      <div style="font-size:12px;color:var(--mut);margin-bottom:4px;letter-spacing:.05em;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Signed in as</div>
-      <div id="profile-email" style="font-size:15px;font-weight:600;color:var(--txt);word-break:break-all;">—</div>
+    <div style="text-align:center;padding:16px 24px 14px;flex-shrink:0;">
+      <div id="profile-avatar" style="width:56px;height:56px;border-radius:50%;background:var(--navy);border:2px solid rgba(255,255,255,.15);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:900;color:var(--gld2);">?</div>
+      <div style="font-size:12px;color:var(--mut);margin-bottom:3px;letter-spacing:.05em;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Signed in as</div>
+      <div id="profile-email" style="font-size:14px;font-weight:600;color:var(--txt);word-break:break-all;">—</div>
     </div>
 
     <!-- Stats strip -->
-    <div style="display:flex;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">
-      <div style="flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--bdr);">
-        <div id="profile-stat-bets" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:900;color:var(--txt);">0</div>
+    <div style="display:flex;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);flex-shrink:0;">
+      <div style="flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--bdr);">
+        <div id="profile-stat-bets" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:20px;font-weight:900;color:var(--txt);">0</div>
         <div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Bets</div>
       </div>
-      <div style="flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--bdr);">
-        <div id="profile-stat-profiles" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:900;color:var(--txt);">0</div>
+      <div style="flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--bdr);">
+        <div id="profile-stat-profiles" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:20px;font-weight:900;color:var(--txt);">0</div>
         <div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Profiles</div>
       </div>
-      <div style="flex:1;padding:14px 8px;text-align:center;">
-        <div id="profile-stat-bank" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:22px;font-weight:900;color:var(--txt);">£0</div>
+      <div style="flex:1;padding:12px 8px;text-align:center;">
+        <div id="profile-stat-bank" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:20px;font-weight:900;color:var(--txt);">£0</div>
         <div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-top:2px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">Bank</div>
       </div>
     </div>
 
-    <!-- Actions -->
-    <div style="padding:16px 20px;">
-
-      <!-- Settings -->
-      <button onclick="profileClose();navTo('settings');" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--txt);text-align:left;cursor:pointer;margin-bottom:10px;font-family:inherit;">
-        <span style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(148,163,184,.1);color:#94a3b8;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </span>
-        <div style="flex:1;">
-          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;">Settings</div>
-          <div style="font-size:11px;color:var(--mut);margin-top:1px;">Banks, staking plan, sources & API keys</div>
-        </div>
-        <span style="color:var(--mut);font-size:16px;">›</span>
-      </button>
-
-      <!-- Sign Out -->
-      <button onclick="authSignOut()" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--txt);text-align:left;cursor:pointer;margin-bottom:10px;font-family:inherit;">
-        <span style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.05);color:var(--mut);">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        </span>
-        <div style="flex:1;">
-          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;">Sign Out</div>
-          <div style="font-size:11px;color:var(--mut);margin-top:1px;">You'll need to sign back in to access your data</div>
-        </div>
-        <span style="color:var(--mut);font-size:16px;">›</span>
-      </button>
-
-      <!-- Delete Account -->
-      <button onclick="profileClose();authDeleteAccountPrompt();" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.05);color:var(--txt);text-align:left;cursor:pointer;font-family:inherit;">
-        <span style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(239,68,68,.1);color:#ef4444;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        </span>
-        <div style="flex:1;">
-          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#ef4444;">Delete Account</div>
-          <div style="font-size:11px;color:var(--mut);margin-top:1px;">Permanently removes all your data</div>
-        </div>
-        <span style="color:rgba(239,68,68,.4);font-size:16px;">›</span>
-      </button>
+    <!-- Tab bar -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--bdr);flex-shrink:0;">
+      <button id="prof-tab-account" onclick="profileTab('account')" style="padding:11px 0;border:none;border-bottom:2px solid var(--navy);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);cursor:pointer;">Account</button>
+      <button id="prof-tab-history" onclick="profileTab('history')" style="padding:11px 0;border:none;border-bottom:2px solid transparent;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);cursor:pointer;">Bet History</button>
     </div>
 
-    <!-- Close -->
-    <div style="padding:0 20px 28px;">
-      <button onclick="profileClose()" style="width:100%;padding:13px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">Close</button>
-    </div>
+    <!-- Scrollable body -->
+    <div style="overflow-y:auto;flex:1;">
 
+      <!-- Account panel -->
+      <div id="prof-panel-account" style="padding:16px 20px;">
+        <!-- Settings -->
+        <button onclick="profileClose();navTo('settings');" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--txt);text-align:left;cursor:pointer;margin-bottom:10px;font-family:inherit;">
+          <span style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(148,163,184,.1);color:#94a3b8;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </span>
+          <div style="flex:1;">
+            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;">Settings</div>
+            <div style="font-size:11px;color:var(--mut);margin-top:1px;">Banks, staking plan, sources & API keys</div>
+          </div>
+          <span style="color:var(--mut);font-size:16px;">›</span>
+        </button>
+        <!-- Sign Out -->
+        <button onclick="authSignOut()" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--txt);text-align:left;cursor:pointer;margin-bottom:10px;font-family:inherit;">
+          <span style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.05);color:var(--mut);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </span>
+          <div style="flex:1;">
+            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;">Sign Out</div>
+            <div style="font-size:11px;color:var(--mut);margin-top:1px;">You'll need to sign back in to access your data</div>
+          </div>
+          <span style="color:var(--mut);font-size:16px;">›</span>
+        </button>
+        <!-- Delete Account -->
+        <button onclick="profileClose();authDeleteAccountPrompt();" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.05);color:var(--txt);text-align:left;cursor:pointer;margin-bottom:16px;font-family:inherit;">
+          <span style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(239,68,68,.1);color:#ef4444;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </span>
+          <div style="flex:1;">
+            <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#ef4444;">Delete Account</div>
+            <div style="font-size:11px;color:var(--mut);margin-top:1px;">Permanently removes all your data</div>
+          </div>
+          <span style="color:rgba(239,68,68,.4);font-size:16px;">›</span>
+        </button>
+        <button onclick="profileClose()" style="width:100%;padding:13px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">Close</button>
+      </div>
+
+      <!-- History panel -->
+      <div id="prof-panel-history" style="display:none;padding:16px 20px 28px;">
+        <div class="hist-tog" style="margin-bottom:14px;">
+          <button id="hist-tog-real" class="hist-tog-btn on" onclick="setHistMode('real')">Real</button>
+          <button id="hist-tog-virt" class="hist-tog-btn off" onclick="setHistMode('virt')">Virtual</button>
+        </div>
+        <div id="hist-real-section">
+          <div class="blk" id="hist-pending-blk">
+            <div class="bttl">Awaiting Results</div>
+            <div id="hist-pending"></div>
+          </div>
+          <div class="blk">
+            <div class="bttl">All Bets</div>
+            <div class="row-g7" style="margin-bottom:10px;">
+              <input type="text" id="hfs" class="inp-flex" oninput="renderHist()" placeholder="Search horse or track…">
+              <select id="hfr" onchange="renderHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
+              <button class="btn bout bsm" onclick="clrHF()">Clear</button>
+              <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--mut);align-self:center;" id="hcnt"></span>
+            </div>
+            <div id="hist-list"></div>
+          </div>
+        </div>
+        <div id="hist-virt-section" style="display:none;">
+          <div class="blk" id="hist-vpending-blk" style="display:none;">
+            <div class="bttl">Awaiting Results</div>
+            <div id="hist-vpending"></div>
+          </div>
+          <div class="blk">
+            <div class="bttl">All Virtual Bets</div>
+            <div class="row-g7" style="margin-bottom:10px;">
+              <input type="text" id="hvfs" oninput="renderVirtHist()" placeholder="Search horse or track…" style="flex:1;min-width:140px;font-size:13px;">
+              <select id="hvfr" onchange="renderVirtHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
+              <button class="btn bout bsm" onclick="clrVHF()">Clear</button>
+              <span style="font-family:monospace;font-size:10px;color:var(--mut);align-self:center;" id="hvcnt"></span>
+            </div>
+            <div id="hist-virt-list"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 

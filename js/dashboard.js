@@ -58,26 +58,9 @@ function renderCompare(set,p,roi,sr){
   }
 
 // ─── STATS / HISTORY VIEW TOGGLE ───
+// History has moved to the Profile overlay (profile button → Bet History tab)
 let _statsHistView='stats';
-function setStatsHistView(view){
-  _statsHistView=view;
-  const statsPane=document.getElementById('cp-stats');
-  const histPane=document.getElementById('cp-hist');
-  const btnStats=document.getElementById('sh-tog-stats');
-  const btnHist=document.getElementById('sh-tog-hist');
-  const title=document.getElementById('stats-card-title');
-  if(statsPane)statsPane.style.display=view==='stats'?'block':'none';
-  if(histPane)histPane.style.display=view==='hist'?'block':'none';
-  if(btnStats){btnStats.classList.toggle('on',view==='stats');btnStats.classList.toggle('off',view!=='stats');}
-  if(btnHist){btnHist.classList.toggle('on',view==='hist');btnHist.classList.toggle('off',view!=='hist');}
-  if(title)title.textContent=view==='hist'?'History':'Stats';
-  // Render the appropriate content when switching
-  if(view==='hist'){
-    if(histMode==='virt')renderVirtHist();else renderHist();
-  } else {
-    renderStats();
-  }
-}
+function setStatsHistView(view){ _statsHistView='stats'; renderStats(); }
 
 // ─── HISTORY ───
 let histMode='real';

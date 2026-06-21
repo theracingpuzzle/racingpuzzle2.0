@@ -136,7 +136,29 @@ function profileOpen() {
     }
   }
 
+  // Always open on Account tab
+  profileTab('account');
   overlay.style.display = 'flex';
+}
+
+function profileTab(tab) {
+  const panels = { account: 'prof-panel-account', history: 'prof-panel-history' };
+  const tabs   = { account: 'prof-tab-account',   history: 'prof-tab-history'   };
+  Object.keys(panels).forEach(function(k) {
+    const panel = document.getElementById(panels[k]);
+    const btn   = document.getElementById(tabs[k]);
+    const active = k === tab;
+    if (panel) panel.style.display = active ? 'block' : 'none';
+    if (btn) {
+      btn.style.color       = active ? 'var(--navy)' : 'var(--mut)';
+      btn.style.borderBottomColor = active ? 'var(--navy)' : 'transparent';
+    }
+  });
+  // Render history when switching to it
+  if (tab === 'history') {
+    if (typeof renderHist === 'function') renderHist();
+    if (typeof renderVirtHist === 'function' && document.getElementById('hist-virt-section') && document.getElementById('hist-virt-section').style.display !== 'none') renderVirtHist();
+  }
 }
 
 function profileClose() {

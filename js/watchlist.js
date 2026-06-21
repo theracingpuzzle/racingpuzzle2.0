@@ -406,9 +406,6 @@ function renderWLList(){
       const lastObs=obs.length?obs.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');})[0]:null;
       const subParts=[];
       if(e.trainer)subParts.push(e.trainer);
-      if(obs.length)subParts.push(obs.length+' obs');
-      if(targets.length)subParts.push(targets.length+' target'+(targets.length>1?'s':''));
-      if(!obs.length&&!targets.length)subParts.push('No obs or targets yet');
       const addedDate=e.createdAt?'Added '+fdate(new Date(e.createdAt).toISOString().slice(0,10)):'';
 
       html+='<div style="position:relative;border-bottom:1px solid var(--bdr);" data-wl-id="'+e.id+'">'

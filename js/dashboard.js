@@ -306,7 +306,7 @@ function renderStats(){
 
     const perfCard=function(label,item,valueKey){
       if(!item)return'<div style="flex:1;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);opacity:.35;text-align:center;"><div style="font-size:10px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">'+label+'</div><div style="font-size:11px;color:var(--mut);">No data</div></div>';
-      const val=valueKey==='p'?(item.p>=0?'+':'')+fmt(item.p):(item.roi>=0?'+':'')+item.roi.toFixed(1)+'%';
+      const val=valueKey==='p'?fmt(item.p):(item.roi>=0?'+':'')+Math.round(item.roi)+'%';
       const col=((valueKey==='p'?item.p:item.roi)>=0)?'#10b981':'#f87171';
       return'<div style="flex:1;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);overflow:hidden;">'
         +'<div style="font-size:9px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">'+label+'</div>'
@@ -319,13 +319,13 @@ function renderStats(){
     summaryEl.innerHTML='<div style="border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin-bottom:14px;">'
       // Row 1 — headline numbers
       +'<div style="display:flex;border-bottom:1px solid var(--bdr);">'
-        +metric('P&L',(p>=0?'+':'')+fmt(p),'from '+staked.toFixed(0)+' staked',pCol)
-        +metric('ROI',(roi>=0?'+':'')+roi.toFixed(1)+'%',statBets.length+' settled bets',roiCol)
-        +metric('Strike Rate',sr.toFixed(0)+'%',wins.length+' wins',sr>=25?'#10b981':sr>=15?'#f59e0b':'var(--txt)')
+        +metric('P&L',fmt(p),'from £'+Math.round(staked)+' staked',pCol)
+        +metric('ROI',(roi>=0?'+':'')+Math.round(roi)+'%',statBets.length+' settled bets',roiCol)
+        +metric('Strike Rate',Math.round(sr)+'%',wins.length+' wins',sr>=25?'#10b981':sr>=15?'#f59e0b':'var(--txt)')
       +'</div>'
       // Row 2 — bank / odds / pending
       +'<div style="display:flex;border-bottom:1px solid var(--bdr);">'
-        +metric('Bank',(bankChange>=0?'+':'')+fmt(bankChange),'vs '+fmt(bankStart)+' start',bankCol)
+        +metric('Bank',fmt(bankChange),'vs '+fmt(bankStart)+' start',bankCol)
         +metric('Avg Odds',avg>0?avg.toFixed(1)+'x':'—','decimal',null)
         +metric('Pending',pendingCount,'awaiting results',pendingCount>0?'#f59e0b':null)
       +'</div>'
@@ -341,7 +341,7 @@ function renderStats(){
         +(bestTrack?'<div style="flex:1;min-width:0;padding:11px 10px;overflow:hidden;">'
           +'<div style="font-size:9px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">Racecourse</div>'
           +'<div style="font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;" title="'+bestTrack.k+'">'+bestTrack.k+'</div>'
-          +'<div style="font-size:11px;font-weight:800;color:'+(bestTrack.p>=0?'#10b981':'#f87171')+';"> '+(bestTrack.p>=0?'+':'')+fmt(bestTrack.p)+'</div>'
+          +'<div style="font-size:11px;font-weight:800;color:'+(bestTrack.p>=0?'#10b981':'#f87171')+';">'+fmt(bestTrack.p)+'</div>'
           +'<div style="font-size:9px;color:var(--mut);">'+bestTrack.n+' bets</div>'
         +'</div>':'<div style="flex:1;min-width:0;padding:11px 10px;opacity:.35;text-align:center;"><div style="font-size:9px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">Racecourse</div><div style="font-size:11px;color:var(--mut);">No data</div></div>')
       +'</div>'

@@ -837,7 +837,7 @@ function openWLForm(id,prefill){
             +(r.notes?'<div class="wlf-rvw-notes">'+r.notes+'</div>':'')
             +'</div>';}).join('')
         : '<div style="font-size:12px;color:var(--mut);padding:8px 0;">No race reviews yet — use the <strong>Review</strong> button on the Today page after each run.</div>')
-      +(pid?'<button onclick="openWLPostRaceReview(\''+pid+'\',\''+(e?e.horse:'')+'\',\'\',\'\',\'\')" class="wlf-add-btn" style="margin-top:10px;">+ Add Race Review</button>':'')
+      +(pid?'<button onclick="openWLPostRaceReview(\''+pid+'\',\''+(e?(e.horse||'').replace(/'/g,"\\'"):'')+'\',\'\',\'\',\'\')" class="wlf-add-btn" style="margin-top:10px;">+ Add Race Review</button>':'')
       +'</div></div>';
   }())
   +'<div class="wlf-section">'
@@ -1460,7 +1460,7 @@ const WLP_CSS = `
 
 function _wlpEsc(s){
   if(s===null||s===undefined)return'';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'\\\'');
 }
 
 function _wlpFmt(d){

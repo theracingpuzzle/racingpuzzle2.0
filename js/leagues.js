@@ -392,6 +392,60 @@ function lgRenderDetail(el){
   }
   h+='</div>';
 
+  // Pick history — all my picks (and all picks if admin), grouped by date, with odds editing on pending
+  if(l.scoring==='stakes'){
+    const histPicks=isAdmin
+      ?allPicks.slice().sort(function(a,b){return b.pick_date<a.pick_date?-1:b.pick_date>a.pick_date?1:0;})
+      :allPicks.filter(function(p){return p.user_id===uid;}).sort(function(a,b){return b.pick_date<a.pick_date?-1:b.pick_date>a.pick_date?1:0;});
+    const missingOdds=histPicks.filter(function(p){return !p.odds&&p.result==='pending';});
+    if(histPicks.length){
+      h+='<div class="blk">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+          +'<div class="bttl" style="border:none;padding:0;margin:0;">Pick History</div>'
+          +(missingOdds.length?'<span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:5px;padding:2px 7px;">'+missingOdds.length+' missing odds</span>':'')
+        +'</div>';
+      // Group by date
+      const byDate={};
+      histPicks.forEach(function(p){
+        const d=p.pick_date||'Unknown';
+        if(!byDate[d])byDate[d]=[];
+        byDate[d].push(p);
+      });
+      Object.keys(byDate).sort(function(a,b){return b<a?-1:b>a?1:0;}).forEach(function(date,di){
+        const dateLabel=(function(){try{const p=date.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];}catch(e){return date;}})();
+        h+='<div style="'+(di?'margin-top:10px;border-top:1px solid var(--bdr);padding-top:10px;':'')+'">'
+          +'<div style="font-size:10px;font-weight:700;color:var(--mut);letter-spacing:.04em;margin-bottom:6px;">'+dateLabel+'</div>'
+          +'<div style="display:flex;flex-direction:column;gap:5px;">';
+        byDate[date].forEach(function(p){
+          const res=p.result||'pending';
+          const resCol=res==='win'?'#10b981':res==='loss'?'#f87171':'var(--mut)';
+          const resBg=res==='win'?'rgba(16,185,129,.1)':res==='loss'?'rgba(248,113,113,.1)':'rgba(255,255,255,.04)';
+          const needsOdds=res==='pending'&&!p.odds;
+          const canEdit=res==='pending'&&(p.user_id===uid||isAdmin);
+          // Find member display name for admin view
+          const memberName=isAdmin?(function(){const mb=members.find(function(m){return m.user_id===p.user_id;});return mb?mb.display_name:'';})():'';
+          h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(needsOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(needsOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.12);':'')+'">'
+            +'<div style="flex:1;min-width:0;">'
+              +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+(isAdmin&&memberName?' <span style="font-size:9px;color:var(--mut);font-weight:500;">'+_lgEsc(memberName)+'</span>':'')+'</div>'
+              +'<div style="font-size:10px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+p.odds+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+(res==='win'&&p.returns?' · <span style="color:#10b981;">+'+Number(p.returns).toFixed(2)+'</span>':'')+'</div>'
+            +'</div>'
+            +'<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">'
+              +(canEdit?'<div id="lg-odds-edit-'+p.id+'">'
+                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
+                  +'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>'
+                  +(p.odds?'Edit':'Add Odds')
+                +'</button>'
+              +'</div>':'')
+              +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+resBg+';border:1px solid '+(res==='win'?'rgba(16,185,129,.25)':res==='loss'?'rgba(248,113,113,.25)':'var(--bdr)')+';color:'+resCol+';">'+res+'</span>'
+            +'</div>'
+          +'</div>';
+        });
+        h+='</div></div>';
+      });
+      h+='</div>';
+    }
+  }
+
   // Footer action
   h+='<div style="text-align:center;margin-top:4px;">'
     +(isAdmin
@@ -549,12 +603,23 @@ function lgRenderPick(el){
         (meeting.races||[]).forEach(function(r){flat.push({race:r,course});});
       }
     });
-    flat.sort(function(a,b){
+    // Filter to UK/IRE tracks only
+    const ukIreTracks=(typeof TKS!=='undefined'?TKS:[]).map(function(t){return t.toLowerCase();});
+    const filtered=flat.filter(function(item){
+      const c=(item.course||'').toLowerCase().trim();
+      return ukIreTracks.some(function(t){return c===t||c.startsWith(t)||t.startsWith(c);});
+    });
+
+    filtered.sort(function(a,b){
       return(typeof timeToMins==='function'?timeToMins:function(t){return 0;})(a.race.off||a.race.time||'')
             -(typeof timeToMins==='function'?timeToMins:function(t){return 0;})(b.race.off||b.race.time||'');
     });
 
-    flat.forEach(function(item){
+    if(!filtered.length){
+      h+='<div class="blk" style="text-align:center;padding:30px 16px;font-size:12px;color:var(--mut);">No UK or Irish races available today.<br>Open the Races card to fetch today\'s cards.</div>';
+    }
+
+    filtered.forEach(function(item){
       const r=item.race;
       const time=r.off||r.off_time||r.time||'—';
       const raceName=r.race_name||r.name||r.title||'Race';

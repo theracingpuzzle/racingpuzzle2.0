@@ -99,9 +99,11 @@ function onEnd(){
   drag=false;
   // If barely moved it's a tap — let the button's onclick handle it
   if(Math.abs(dx)<8&&Math.abs(vel)<.15){dx=0;vel=0;return;}
+  // Settings (last card) is excluded from swipe navigation — only reachable via profile button
+  const SWIPE_MAX=CARDS.length-2; // highest index reachable by swiping
   let n=cur;
-  if(dx<-40||vel<-.3)n=(cur+1)%CARDS.length;
-  else if(dx>40||vel>.3)n=(cur-1+CARDS.length)%CARDS.length;
+  if(dx<-40||vel<-.3)n=cur>=SWIPE_MAX?0:cur+1;        // swipe left: wrap today after leagues
+  else if(dx>40||vel>.3)n=cur<=0?SWIPE_MAX:cur-1;     // swipe right: wrap leagues before today
   goTo(n);dx=0;vel=0;
 }
 

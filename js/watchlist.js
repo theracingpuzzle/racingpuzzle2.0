@@ -204,7 +204,7 @@ function _applyWLFilter(entries){
   if(!_wlFilter) return entries;
   const today=td();
   if(_wlFilter==='no-obs'){
-    return entries.filter(function(e){return!(e.observations&&e.observations.length);});
+    return entries.filter(function(e){return!e.unraced&&!(e.observations&&e.observations.length);});
   }
   if(_wlFilter==='past-target'){
     return entries.filter(function(e){
@@ -467,6 +467,7 @@ function renderWLEntry(e){
       +'<div class="wll-name">'+(e.horse||'Unknown')+'</div>'
       +'<div class="wll-sub">'+subParts.join(' · ')+(daysAgo?' · '+daysAgo:'')+'</div>'
       +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
+      +(e.unraced?'<div class="wll-tag" style="background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);color:#fb7185;margin-left:4px;">Unraced</div>':'')
     +'</div>'
     +'<div class="wll-right">'
       +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--navy)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
@@ -788,21 +789,34 @@ function openWLForm(id,prefill){
   +'<div class="fg"><label>In a sentence…</label>'
   +'<input type="text" id="wlf-reason-note" placeholder="e.g. Kept on well from rear, bumped 2f out — needs a clearer run" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off">'
   +'</div>'
-  +'<div class="wlf-obs-sub-hdr">Initial Race</div>'
+  // Unraced toggle — only visible for trainer-intel / tip-source
   +(function(){
+    const showUnraced=(curReason==='trainer-intel'||curReason==='tip-source');
+    const isUnraced=e&&e.unraced?true:false;
+    return'<div id="wlf-unraced-row" style="display:'+(showUnraced?'flex':'none')+';align-items:center;gap:10px;padding:10px 13px;background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.2);border-radius:9px;margin-bottom:4px;">'
+      +'<input type="checkbox" id="wlf-unraced" onchange="wlToggleUnraced()" style="width:16px;height:16px;accent-color:#fb7185;cursor:pointer;flex-shrink:0;"'+(isUnraced?' checked':'')+'>'
+      +'<label for="wlf-unraced" style="font-size:12px;font-weight:700;color:var(--txt);cursor:pointer;margin:0;">Unraced — no observations possible yet</label>'
+    +'</div>';
+  }())
+  // Initial Race fields — hidden when unraced is ticked
+  +(function(){
+    const isUnraced=e&&e.unraced?true:false;
     const io=(_wlDossier.obs&&_wlDossier.obs[0])||{};
-    return'<div class="g2" style="margin-bottom:8px;">'
-      +'<div class="fg"><label>Date</label><input type="date" id="wlf-io-date" value="'+(io.date||'')+'"></div>'
-      +'<div class="fg"><label>Result</label><select id="wlf-io-result">'
-      +'<option value=""'+((!io.result)?' selected':'')+'>— Select</option>'
-      +'<option value="win"'+((io.result==='win')?' selected':'')+'>Won</option>'
-      +'<option value="place"'+((io.result==='place')?' selected':'')+'>Placed</option>'
-      +'<option value="loss"'+((io.result==='loss')?' selected':'')+'>Unplaced</option>'
-      +'</select></div>'
-      +'<div class="fg"><label>Race / Meeting</label><input type="text" id="wlf-io-race" placeholder="e.g. Newmarket Maiden" value="'+(io.raceName||'')+'"></div>'
-      +'<div class="fg"><label>Going</label><input type="text" id="wlf-io-going" placeholder="e.g. Good to Firm" value="'+(io.going||'')+'"></div>'
+    return'<div id="wlf-initial-race" style="display:'+(isUnraced?'none':'')+'">'
+      +'<div class="wlf-obs-sub-hdr">Initial Race</div>'
+      +'<div class="g2" style="margin-bottom:8px;">'
+        +'<div class="fg"><label>Date</label><input type="date" id="wlf-io-date" value="'+(io.date||'')+'"></div>'
+        +'<div class="fg"><label>Result</label><select id="wlf-io-result">'
+          +'<option value=""'+((!io.result)?' selected':'')+'>— Select</option>'
+          +'<option value="win"'+((io.result==='win')?' selected':'')+'>Won</option>'
+          +'<option value="place"'+((io.result==='place')?' selected':'')+'>Placed</option>'
+          +'<option value="loss"'+((io.result==='loss')?' selected':'')+'>Unplaced</option>'
+        +'</select></div>'
+        +'<div class="fg"><label>Race / Meeting</label><input type="text" id="wlf-io-race" placeholder="e.g. Newmarket Maiden" value="'+(io.raceName||'')+'"></div>'
+        +'<div class="fg"><label>Going</label><input type="text" id="wlf-io-going" placeholder="e.g. Good to Firm" value="'+(io.going||'')+'"></div>'
       +'</div>'
-      +'<div class="fg"><label>What you saw</label><textarea id="wlf-io-notes" placeholder="Describe what caught your eye in this race…" style="min-height:60px;">'+(io.notes||'')+'</textarea></div>';
+      +'<div class="fg"><label>What you saw</label><textarea id="wlf-io-notes" placeholder="Describe what caught your eye in this race…" style="min-height:60px;">'+(io.notes||'')+'</textarea></div>'
+    +'</div>';
   }())
   +'</div></div></div>'
   +'<div class="wlf-section">'
@@ -934,6 +948,21 @@ function wlSelectReason(btn){
     b.style.borderColor=sel?col:'';
     b.style.color=sel?'#fff':'';
   });
+  // Show unraced toggle only for trainer intel / tip source
+  const unracedRow=document.getElementById('wlf-unraced-row');
+  if(unracedRow)unracedRow.style.display=(val==='trainer-intel'||val==='tip-source')?'':'none';
+  // If switching away from those reasons, uncheck unraced and show obs fields
+  if(val!=='trainer-intel'&&val!=='tip-source'){
+    const cb=document.getElementById('wlf-unraced');
+    if(cb){cb.checked=false;wlToggleUnraced(false);}
+  }
+}
+
+function wlToggleUnraced(forceVal){
+  const cb=document.getElementById('wlf-unraced');
+  const isUnraced=typeof forceVal==='boolean'?forceVal:(cb&&cb.checked);
+  const obsSection=document.getElementById('wlf-initial-race');
+  if(obsSection)obsSection.style.display=isUnraced?'none':'';
 }
 
 function wlToggleDist(btn){
@@ -982,6 +1011,7 @@ function saveWLEntry(id){
     trainer:(document.getElementById('wlf-trainer').value||'').trim(),
     reason:(document.getElementById('wlf-reason')||{value:'eye-catcher'}).value||'eye-catcher',
     reasonNote:(document.getElementById('wlf-reason-note')||{value:''}).value.trim(),
+    unraced:!!(document.getElementById('wlf-unraced')&&document.getElementById('wlf-unraced').checked),
     trainerIntel:(document.getElementById('wlf-intel').value||'').trim(),
     observations:initialObs,
     targets:_wlDossier.targets.filter(function(t){return t.race;}),

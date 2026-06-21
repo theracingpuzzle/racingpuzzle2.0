@@ -71,6 +71,9 @@ async function bootApp() {
   // Show install guide once for users not yet running as installed PWA
   if (typeof igMaybeShow === 'function') igMaybeShow();
 
+  // Handle ?join=CODE deep link from WhatsApp invite
+  if (typeof lgHandleJoinLink === 'function') lgHandleJoinLink();
+
 }
 
 // ── Auth-first startup ─────────────────────────────────────────────────────────

@@ -86,6 +86,8 @@ async function lgLoad(){
     });
     _lgLoaded=true;
     lgRender();
+    // Background-load full detail for each league so the list can show position
+    Promise.all(_lgMyLeagues.map(function(l){return lgLoadDetail(l.id);})).then(function(){lgRender();}).catch(function(){});
   }catch(e){
     _lgLoaded=true;
     lgRenderError('Could not load leagues. Make sure the Supabase tables are set up — see leagues.js header for SQL.');
@@ -194,16 +196,40 @@ function lgRenderList(el){
   }else{
     h+='<div class="blk" style="padding:0;">';
     _lgMyLeagues.forEach(function(l,idx){
+      const uid=_lgUid();
       const myPicks=_lgMyPicks[l.id]||[];
       const todayPicks=myPicks.filter(function(p){return p.pick_date===_lgToday();});
       const allScore=_lgCalcScore(myPicks,l.scoring);
       const scoreVal=l.scoring==='wins'?allScore.wins+' W':(allScore.score>=0?'+':'')+allScore.score.toFixed(2);
       const scoreCol=allScore.score>0?'#10b981':allScore.score<0?'#f87171':'var(--txt)';
+
+      // Calculate leaderboard position if we have all members' picks loaded
+      let posHtml='';
+      const allMembers=_lgMembers[l.id];
+      const allPicks=_lgPicks[l.id];
+      if(allMembers&&allMembers.length>1&&allPicks){
+        const ranked=allMembers.map(function(m){
+          const mp=allPicks.filter(function(p){return p.user_id===m.user_id;});
+          return{uid:m.user_id,s:_lgCalcScore(mp,l.scoring)};
+        }).sort(function(a,b){
+          return l.scoring==='wins'?(b.s.wins-a.s.wins):(b.s.score-a.s.score);
+        });
+        const pos=ranked.findIndex(function(r){return r.uid===uid;})+1;
+        const total=ranked.length;
+        const posLabel=pos===1?'1st':pos===2?'2nd':pos===3?'3rd':pos+'th';
+        const posCol=pos===1?'#10b981':pos<=3?'#f59e0b':'var(--mut)';
+        posHtml='<div style="display:inline-flex;align-items:center;gap:3px;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;color:'+posCol+';background:'+(pos===1?'rgba(16,185,129,.08)':pos<=3?'rgba(245,158,11,.08)':'var(--sur2)')+';border:1px solid '+(pos===1?'rgba(16,185,129,.25)':pos<=3?'rgba(245,158,11,.25)':'var(--bdr)')+';border-radius:5px;padding:1px 6px;margin-top:4px;">'
+          +(pos===1?'<svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>':'')
+          +posLabel+' of '+total
+        +'</div>';
+      }
+
       h+='<div onclick="lgOpenLeague(\''+l.id+'\')" style="display:flex;align-items:center;gap:12px;padding:13px 16px;'+(idx?'border-top:1px solid var(--bdr);':'')+'cursor:pointer;">'
         +'<div style="width:36px;height:36px;border-radius:9px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;color:#10b981;flex-shrink:0;">'+SVG_TROPHY+'</div>'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_lgEsc(l.name)+'</div>'
           +'<div style="font-size:10px;color:var(--mut);margin-top:1px;">'+(l.scoring==='wins'?'Win count':'£1 stakes')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+(todayPicks.length?' · <span style="color:#10b981;">'+todayPicks.length+' pick'+(todayPicks.length!==1?'s':'')+'</span>':'')+'</div>'
+          +posHtml
         +'</div>'
         +'<div style="text-align:right;flex-shrink:0;">'
           +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;color:'+scoreCol+';">'+scoreVal+'</div>'
@@ -307,13 +333,25 @@ function lgRenderDetail(el){
         const res=p.result||'pending';
         const resCol=res==='win'?'#10b981':res==='loss'?'#f87171':'var(--mut)';
         const resBg=res==='win'?'rgba(16,185,129,.1)':res==='loss'?'rgba(248,113,113,.1)':'rgba(255,255,255,.04)';
-        h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid var(--bdr);">'
-          +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+'</div>'
-            +'<div style="font-size:10px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+p.odds+'</span>':'')+'</div>'
+        const canEditOdds=l.scoring==='stakes'&&res==='pending'&&(isMe||isAdmin)&&!p.odds;
+        const canOverrideOdds=l.scoring==='stakes'&&res==='pending'&&(isMe||isAdmin)&&p.odds;
+        h+='<div style="display:flex;flex-direction:column;gap:4px;">'
+          +'<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(canEditOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(canEditOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.15);':'')+'">'
+            +'<div style="flex:1;min-width:0;">'
+              +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+'</div>'
+              +'<div style="font-size:10px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+p.odds+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+'</div>'
+            +'</div>'
+            +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
+              +(canEditOdds||canOverrideOdds?'<div id="lg-odds-edit-'+p.id+'">'
+                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
+                  +'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>'
+                  +(p.odds?'Edit Odds':'Add Odds')
+                +'</button>'
+              +'</div>':'')
+              +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+resBg+';border:1px solid '+(res==='win'?'rgba(16,185,129,.25)':res==='loss'?'rgba(248,113,113,.25)':'var(--bdr)')+';color:'+resCol+';">'+res+'</span>'
+              +(isMe&&res==='pending'?'<button onclick="lgRemovePick(\''+p.id+'\',\''+l.id+'\')" style="background:none;border:none;color:var(--mut);font-size:13px;cursor:pointer;padding:0;line-height:1;" title="Remove pick">✕</button>':'')
+            +'</div>'
           +'</div>'
-          +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+resBg+';border:1px solid '+(res==='win'?'rgba(16,185,129,.25)':res==='loss'?'rgba(248,113,113,.25)':'var(--bdr)')+';color:'+resCol+';">'+res+'</span>'
-          +(isMe&&res==='pending'?'<button onclick="lgRemovePick(\''+p.id+'\',\''+l.id+'\')" style="background:none;border:none;color:var(--mut);font-size:13px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;" title="Remove pick">✕</button>':'')
         +'</div>';
       });
       h+='</div></div>';
@@ -544,10 +582,25 @@ function lgRenderPick(el){
             +'</div>'
             +(isPicked
               ?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#10b981;">Picked ✓</span>'
-              :'<div id="lg-pick-wrap-'+_lgEsc(horse.replace(/\s/g,'_'))+'" style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
-                +'<input id="lg-odds-'+_lgEsc(horse.replace(/\s/g,'_'))+'" type="text" inputmode="decimal" placeholder="Odds" value="'+_lgEsc(odds)+'" style="width:64px;padding:5px 7px;font-size:12px;border-radius:7px;border:1px solid var(--bdr);background:var(--inp);color:var(--txt);text-align:center;">'
-                +'<button onclick="lgConfirmPick(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+item.course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+_lgEsc(horse.replace(/\s/g,'_'))+'\')" class="btn-refresh" style="color:#10b981;border-color:rgba(16,185,129,.4);white-space:nowrap;">Pick</button>'
-              +'</div>'
+              :(function(){
+                  const isStakes=l.scoring==='stakes';
+                  const safeKey=_lgEsc(horse.replace(/\s/g,'_'));
+                  const oddsId='lg-odds-'+safeKey;
+                  const oddsHint=isStakes
+                    ?'<div style="font-size:9px;color:#f59e0b;margin-top:3px;">Odds required for scoring</div>'
+                    :'';
+                  return'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;">'
+                    +'<div style="display:flex;align-items:center;gap:6px;">'
+                      +'<input id="'+oddsId+'" type="text" inputmode="decimal" placeholder="'+(isStakes?'Odds*':'Odds')+'" value="'+_lgEsc(odds)+'" '
+                        +'oninput="lgOddsInputChange(\''+safeKey+'\',\''+l.id+'\','+isStakes+')" '
+                        +'style="width:68px;padding:5px 7px;font-size:12px;border-radius:7px;border:1px solid '+(isStakes?'rgba(245,158,11,.5)':'var(--bdr)')+';background:var(--inp);color:var(--txt);text-align:center;">'
+                      +'<button id="lg-pick-btn-'+safeKey+'" onclick="lgConfirmPick(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+item.course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+safeKey+'\')" class="btn-refresh" '
+                        +'style="color:#10b981;border-color:rgba(16,185,129,.4);white-space:nowrap;"'
+                        +'>Pick</button>'
+                    +'</div>'
+                    +oddsHint
+                  +'</div>';
+                })()
             )
           +'</div>';
         }).join('')
@@ -560,10 +613,59 @@ function lgRenderPick(el){
 }
 
 // ─── Pick actions ─────────────────────────────────────────────────────────────
+// Enable/disable Pick button as odds field changes (stakes leagues only)
+function lgOddsInputChange(safeKey, leagueId, isStakes){
+  if(!isStakes)return;
+  const inp=document.getElementById('lg-odds-'+safeKey);
+  if(!inp)return;
+  const hasOdds=inp.value.trim().length>0;
+  inp.style.borderColor=hasOdds?'var(--bdr)':'rgba(245,158,11,.6)';
+}
+
 function lgConfirmPick(leagueId, horse, course, time, safeKey){
   const inp=document.getElementById('lg-odds-'+safeKey);
   const odds=inp?inp.value.trim():'';
   lgAddPickFromCard(leagueId, horse, course, time, odds);
+}
+
+// Inline odds editor for pending picks (own picks or admin editing any pick)
+function lgShowOddsEdit(pickId, currentOdds){
+  const wrap=document.getElementById('lg-odds-edit-'+pickId);
+  if(!wrap)return;
+  wrap.innerHTML='<div style="display:flex;align-items:center;gap:5px;">'
+    +'<input id="lg-odds-val-'+pickId+'" type="text" inputmode="decimal" placeholder="e.g. 5/1" value="'+_lgEsc(currentOdds||'')+'" style="width:70px;padding:4px 7px;font-size:12px;border-radius:7px;border:1px solid rgba(245,158,11,.5);background:var(--inp);color:var(--txt);text-align:center;" autofocus>'
+    +'<button onclick="lgSaveOdds(\''+pickId+'\')" style="padding:4px 9px;border-radius:7px;border:none;background:#10b981;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Save</button>'
+    +'<button onclick="lgCancelOddsEdit(\''+pickId+'\')" style="padding:4px 7px;border-radius:7px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-size:11px;cursor:pointer;">✕</button>'
+  +'</div>';
+  setTimeout(function(){const i=document.getElementById('lg-odds-val-'+pickId);if(i){i.focus();i.select();}},50);
+}
+
+function lgCancelOddsEdit(pickId){
+  // Re-render to restore original state
+  lgRender();
+}
+
+async function lgSaveOdds(pickId){
+  const inp=document.getElementById('lg-odds-val-'+pickId);
+  if(!inp)return;
+  const odds=inp.value.trim();
+  if(!odds)return;
+  const wrap=document.getElementById('lg-odds-edit-'+pickId);
+  if(wrap)wrap.innerHTML='<span style="font-size:10px;color:var(--mut);">Saving…</span>';
+  try{
+    await _lgFetch('league_picks?id=eq.'+encodeURIComponent(pickId),{method:'PATCH',body:JSON.stringify({odds})});
+    // Update local cache
+    Object.keys(_lgPicks).forEach(function(lid){
+      _lgPicks[lid]=(_lgPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,{odds}):p;});
+    });
+    Object.keys(_lgMyPicks).forEach(function(lid){
+      _lgMyPicks[lid]=(_lgMyPicks[lid]||[]).map(function(p){return p.id===pickId?Object.assign({},p,{odds}):p;});
+    });
+    if(typeof _lgToast==='function')_lgToast('Odds saved ✓');
+    lgRender();
+  }catch(e){
+    if(wrap)wrap.innerHTML='<span style="font-size:10px;color:#f87171;">Error — tap to retry</span>';
+  }
 }
 
 async function lgAddPickFromCard(leagueId, horse, course, time, odds){
@@ -705,8 +807,37 @@ function lgCopyCode(code){
 }
 
 function lgShareWhatsApp(leagueName, code){
-  const msg='Join my Racing Puzzle league *'+leagueName+'*!\n\nUse invite code: *'+code+'*\n\nOpen Racing Puzzle → Leagues → Join, then enter the code.';
+  const appUrl='https://theracingpuzzle.github.io/?join='+code;
+  const msg='Join my Racing Puzzle league *'+leagueName+'*! 🏇\n\nTap the link to join instantly:\n'+appUrl;
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+// Handle ?join=CODE deep link — auto-open the join screen with code pre-filled
+function lgHandleJoinLink(){
+  const params=new URLSearchParams(window.location.search);
+  const code=params.get('join');
+  if(!code)return;
+  // Clean the URL so refreshing doesn't retrigger
+  window.history.replaceState({},'',window.location.pathname);
+  // Wait for app to boot, then navigate to the leagues join screen with code pre-filled
+  function _tryOpen(){
+    if(typeof lgShowJoin==='function'&&typeof goTo==='function'){
+      // Navigate to Leagues card first
+      const lgIdx=(typeof CARDS!=='undefined'?CARDS.findIndex(function(c){return c.id==='leagues';}):5);
+      if(lgIdx>=0)goTo(lgIdx,true);
+      setTimeout(function(){
+        lgShowJoin();
+        setTimeout(function(){
+          const inp=document.getElementById('lg-join-code');
+          if(inp){inp.value=code.toUpperCase();}
+        },200);
+      },400);
+    }else{
+      setTimeout(_tryOpen,300);
+    }
+  }
+  // Delay until after bootApp has run
+  setTimeout(_tryOpen, 2000);
 }
 
 function _lgEsc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}

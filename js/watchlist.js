@@ -459,8 +459,6 @@ function renderWLEntry(e){
   const daysAgo=lastObs&&lastObs.date?(function(){const d=new Date(lastObs.date+'T00:00:00');const diff=Math.round((new Date()-d)/(1000*60*60*24));return diff===0?'Today':diff===1?'Yesterday':diff>0?diff+'d ago':'Upcoming';}()):'';
   const subParts=[];
   if(e.trainer)subParts.push(e.trainer);
-  if(obs.length)subParts.push(obs.length+' obs');
-  if(targets.length)subParts.push(targets.length+' target'+(targets.length>1?'s':''));
   return'<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
     +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
     +'<div class="wll-main">'

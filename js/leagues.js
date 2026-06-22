@@ -50,6 +50,10 @@ let _lgLoaded      = false;
 let _lgView        = 'list'; // 'list' | 'detail' | 'create' | 'join' | 'pick'
 let _lgPickRaces   = [];   // races available to pick from (shared cache)
 
+let _lgReactions    = {};   // { pickId: { emoji: [{user_id,display_name}] } }
+let _lgActivity     = [];   // activity feed for current league
+let _lgActivityLeague = null;
+
 // ─── Supabase helpers ────────────────────────────────────────────────────────
 async function _lgFetch(path, opts){
   const token=typeof _rpToken==='function'?_rpToken():'';
@@ -248,12 +252,21 @@ function lgRenderList(el){
 }
 
 // ─── Screen 2: League Detail ──────────────────────────────────────────────────
+async function lgRefreshFeed(leagueId){
+  const el=document.getElementById('lg-feed-'+leagueId);
+  if(el)el.innerHTML='<div style="font-size:12px;color:var(--mut);padding:8px 0;">Loading…</div>';
+  await lgLoadActivity(leagueId);
+  if(el)el.innerHTML=lgRenderFeed(leagueId);
+}
+
 async function lgOpenLeague(id){
   _lgCurrent=_lgMyLeagues.find(function(l){return l.id===id;})||null;
   if(!_lgCurrent)return;
   _lgView='detail';
   lgRender();
   await lgLoadDetail(id);
+  // Load reactions and activity feed in parallel
+  await Promise.all([lgLoadReactions(id), lgLoadActivity(id)]);
   lgRender();
 }
 
@@ -356,6 +369,7 @@ function lgRenderDetail(el){
               +(isMe&&res==='pending'?'<button onclick="lgRemovePick(\''+p.id+'\',\''+l.id+'\')" style="background:none;border:none;color:var(--mut);font-size:13px;cursor:pointer;padding:0;line-height:1;" title="Remove pick">✕</button>':'')
             +'</div>'
           +'</div>'
+          +'<div id="lg-react-'+p.id+'" style="display:flex;gap:5px;padding:4px 0 2px 2px;">'+_lgReactionBar(p.id,l.id)+'</div>'
         +'</div>';
       });
       h+='</div></div>';
@@ -442,13 +456,23 @@ function lgRenderDetail(el){
               +'</div>':'')
               +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+resBg+';border:1px solid '+(res==='win'?'rgba(16,185,129,.25)':res==='loss'?'rgba(248,113,113,.25)':'var(--bdr)')+';color:'+resCol+';">'+res+'</span>'
             +'</div>'
-          +'</div>';
+          +'</div>'
+          +'<div id="lg-react-'+p.id+'" style="display:flex;gap:5px;padding:4px 0 2px 2px;">'+_lgReactionBar(p.id,l.id)+'</div>';
         });
         h+='</div></div>';
       });
       h+='</div>';
     }
   }
+
+  // Activity feed
+  h+='<div class="blk">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+      +'<div class="bttl" style="border:none;padding:0;margin:0;">Activity</div>'
+      +'<button onclick="lgRefreshFeed(\''+l.id+'\')" style="background:none;border:none;color:var(--mut);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bdr);">Refresh</button>'
+    +'</div>'
+    +'<div id="lg-feed-'+l.id+'">'+lgRenderFeed(l.id)+'</div>'
+  +'</div>';
 
   // Footer action
   h+='<div style="text-align:center;margin-top:4px;">'
@@ -789,6 +813,12 @@ async function lgAddPickFromCard(leagueId, horse, course, time, odds){
     _lgPicks[leagueId].push(pick);
     if(!_lgMyPicks[leagueId])_lgMyPicks[leagueId]=[];
     _lgMyPicks[leagueId].push(pick);
+    // Write to activity feed
+    const _lga=_lgMyLeagues.find(function(x){return x.id===leagueId;});
+    const _lgaMembers=_lgMembers[leagueId]||[];
+    const _lgaMe=_lgaMembers.find(function(m){return m.user_id===_lgUid();});
+    const _lgaName=_lgaMe?_lgaMe.display_name:'Member';
+    lgWriteActivity(leagueId,'pick_made',_lgaName+' picked '+horse+(time?' · '+time:'')+(course?' · '+course:''),pick.id,null);
     lgRender();
   }catch(e){alert('Error adding pick: '+(e.message||e));}
 }
@@ -1010,6 +1040,13 @@ async function lgSyncResults(results){
             if(p.id===pick.id){p.result=result;p.returns=returns;if(!p.odds&&oddsStr)p.odds=oddsStr;}
           });
         });
+        // Write to activity feed
+        const _mem=(_lgMembers[l.id]||[]).find(function(m){return m.user_id===pick.user_id;});
+        const _mName=_mem?_mem.display_name:'Member';
+        const _actMsg=result==='win'
+          ?_mName+'\'s pick '+pick.horse+' WON'+(returns?' · +£'+Number(returns).toFixed(2):'')
+          :_mName+'\'s pick '+pick.horse+' lost';
+        lgWriteActivity(l.id,result==='win'?'pick_won':'pick_lost',_actMsg,pick.id,null);
       }catch(e){console.warn('lgSyncResults patch',e);}
     }
   }
@@ -1023,6 +1060,134 @@ async function lgSyncResults(results){
   if(settledCount>0&&typeof _lgToast==='function'){
     // Only toast if we actually patched something — check silently
   }
+}
+
+// ─── Activity feed ────────────────────────────────────────────────────────────
+async function lgWriteActivity(leagueId, type, message, pickId, emoji){
+  try{
+    const uid=_lgUid();
+    const members=_lgMembers[leagueId]||[];
+    const me=members.find(function(m){return m.user_id===uid;});
+    const displayName=me?me.display_name:'Member';
+    await _lgFetch('league_activity',{
+      method:'POST',
+      headers:{'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        id:_lgGid(),
+        league_id:leagueId,
+        user_id:uid,
+        display_name:displayName,
+        type,
+        message,
+        pick_id:pickId||null,
+        emoji:emoji||null,
+        created_at:new Date().toISOString(),
+      }),
+    });
+  }catch(e){console.warn('lgWriteActivity',e);}
+}
+
+async function lgLoadActivity(leagueId){
+  try{
+    const rows=await _lgFetch('league_activity?league_id=eq.'+encodeURIComponent(leagueId)+'&order=created_at.desc&limit=40&select=*');
+    _lgActivity=rows||[];
+    _lgActivityLeague=leagueId;
+  }catch(e){_lgActivity=[];}
+}
+
+function lgRenderFeed(leagueId){
+  const items=_lgActivityLeague===leagueId?_lgActivity:[];
+  if(!items.length) return '<div style="font-size:13px;color:var(--mut);text-align:center;padding:16px 0;">No activity yet — make the first pick!</div>';
+
+  function timeAgo(ts){
+    const diff=Math.floor((Date.now()-new Date(ts).getTime())/1000);
+    if(diff<60)return 'just now';
+    if(diff<3600)return Math.floor(diff/60)+'m ago';
+    if(diff<86400)return Math.floor(diff/3600)+'h ago';
+    return Math.floor(diff/86400)+'d ago';
+  }
+
+  return items.map(function(a){
+    const icon=a.type==='pick_won'?'✅':a.type==='pick_lost'?'❌':a.type==='reaction'?a.emoji||'🔥':a.type==='member_joined'?'👋':'🏇';
+    const initials=((a.display_name||'?').slice(0,1)).toUpperCase();
+    const isMe=a.user_id===_lgUid();
+    return'<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;'+(items.indexOf(a)>0?'border-top:1px solid var(--bdr);':'')+'">'
+      +'<div style="width:32px;height:32px;border-radius:50%;background:'+(isMe?'rgba(16,185,129,.15)':'rgba(255,255,255,.06)')+';border:1px solid '+(isMe?'rgba(16,185,129,.3)':'var(--bdr)')+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:'+(isMe?'#10b981':'var(--mut)')+';flex-shrink:0;">'+initials+'</div>'
+      +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:14px;color:var(--txt);line-height:1.4;">'+icon+' '+_lgEsc(a.message||'')+'</div>'
+        +'<div style="font-size:11px;color:var(--mut);margin-top:3px;">'+timeAgo(a.created_at)+'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+// ─── Reactions ────────────────────────────────────────────────────────────────
+const LG_EMOJIS = ['🔥','👀','💀'];
+
+async function lgLoadReactions(leagueId){
+  try{
+    // Load reactions for all picks in this league
+    const rows=await _lgFetch('league_reactions?league_id=eq.'+encodeURIComponent(leagueId)+'&select=*');
+    _lgReactions={};
+    (rows||[]).forEach(function(r){
+      if(!_lgReactions[r.pick_id])_lgReactions[r.pick_id]={};
+      if(!_lgReactions[r.pick_id][r.emoji])_lgReactions[r.pick_id][r.emoji]=[];
+      _lgReactions[r.pick_id][r.emoji].push({user_id:r.user_id,display_name:r.display_name});
+    });
+  }catch(e){console.warn('lgLoadReactions',e);}
+}
+
+async function lgReact(pickId, emoji, leagueId){
+  const uid=_lgUid();
+  if(!_lgReactions[pickId])_lgReactions[pickId]={};
+  if(!_lgReactions[pickId][emoji])_lgReactions[pickId][emoji]=[];
+
+  const existing=_lgReactions[pickId][emoji].find(function(r){return r.user_id===uid;});
+  if(existing){
+    // Toggle off — remove
+    _lgReactions[pickId][emoji]=_lgReactions[pickId][emoji].filter(function(r){return r.user_id!==uid;});
+    try{
+      await _lgFetch('league_reactions?pick_id=eq.'+encodeURIComponent(pickId)+'&user_id=eq.'+encodeURIComponent(uid)+'&emoji=eq.'+encodeURIComponent(emoji),{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+    }catch(e){console.warn('lgReact delete',e);}
+  } else {
+    // Add reaction
+    const members=_lgMembers[leagueId]||[];
+    const me=members.find(function(m){return m.user_id===uid;});
+    const displayName=me?me.display_name:'Member';
+    _lgReactions[pickId][emoji].push({user_id:uid,display_name:displayName});
+    try{
+      await _lgFetch('league_reactions',{
+        method:'POST',
+        headers:{'Prefer':'return=minimal'},
+        body:JSON.stringify({id:_lgGid(),pick_id:pickId,league_id:leagueId,user_id:uid,display_name:displayName,emoji,created_at:new Date().toISOString()}),
+      });
+      // Write to activity feed
+      const pick=(_lgPicks[leagueId]||[]).find(function(p){return p.id===pickId;});
+      if(pick){
+        const pickMember=members.find(function(m){return m.user_id===pick.user_id;});
+        const pickName=pickMember?pickMember.display_name:'Member';
+        const msg=displayName+' reacted '+emoji+' to '+pickName+'\'s pick — '+_lgEsc(pick.horse);
+        lgWriteActivity(leagueId,'reaction',msg,pickId,emoji);
+      }
+    }catch(e){console.warn('lgReact add',e);}
+  }
+  // Re-render just the reaction bar for this pick
+  const bar=document.getElementById('lg-react-'+pickId);
+  if(bar)bar.innerHTML=_lgReactionBar(pickId,leagueId);
+}
+
+function _lgReactionBar(pickId, leagueId){
+  const uid=_lgUid();
+  const reactions=_lgReactions[pickId]||{};
+  return LG_EMOJIS.map(function(emoji){
+    const users=reactions[emoji]||[];
+    const iMine=users.some(function(r){return r.user_id===uid;});
+    const names=users.map(function(r){return r.display_name||'Member';}).join(', ');
+    return'<button onclick="lgReact(\''+pickId+'\',\''+emoji+'\',\''+leagueId+'\')" title="'+(names||emoji)+'" '
+      +'style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;border:1px solid '+(iMine?'rgba(16,185,129,.5)':'var(--bdr)')+';background:'+(iMine?'rgba(16,185,129,.1)':'transparent')+';cursor:pointer;font-size:13px;">'
+      +emoji+(users.length?'<span style="font-size:11px;font-weight:700;color:'+(iMine?'#10b981':'var(--mut)')+';">'+users.length+'</span>':'')
+    +'</button>';
+  }).join('');
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────

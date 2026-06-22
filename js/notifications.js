@@ -49,13 +49,13 @@ async function notifSavePushSubscription() {
     const userId = typeof SUPA_USER_ID !== 'undefined' ? SUPA_USER_ID : null;
     console.log('[notif] userId:', userId, '| token:', window._rpAccessToken ? 'set' : 'missing');
     if (!userId || !j.endpoint) { console.warn('[notif] Missing userId or endpoint'); return; }
-    const resp = await fetch(SUPA_URL + '/rest/v1/push_subscriptions', {
+    const resp = await fetch(SUPA_URL + '/rest/v1/push_subscriptions?on_conflict=user_id,endpoint', {
       method: 'POST',
       headers: {
         'apikey': SUPA_ANON,
         'Authorization': 'Bearer ' + (window._rpAccessToken || SUPA_ANON),
         'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates',
+        'Prefer': 'resolution=merge-duplicates,return=minimal',
       },
       body: JSON.stringify({
         user_id: userId,

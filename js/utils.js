@@ -8,6 +8,26 @@ function fp(n){return'£'+(parseFloat(n)||0).toFixed(2);}
 function fdate(d){if(!d)return d;const p=String(d).split('-');return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:d;}
 
 function fo(s){if(!s)return 0;s=String(s).trim().toUpperCase().replace(/\s/g,'');if(s==='EVS'||s==='EVENS'||s==='1/1')return 2;const m=s.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);if(m){const n=parseFloat(m[1]),d=parseFloat(m[2]);return d>0?parseFloat((n/d+1).toFixed(4)):0;}const n=parseFloat(s);return isNaN(n)?0:n;}
+// Converts a decimal odds value to a fractional string e.g. 4.5 → "7/2"
+function decToFrac(dec){
+  dec=parseFloat(dec);if(!dec||dec<=1)return'—';
+  const frac=dec-1;
+  const denoms=[1,2,3,4,5,6,7,8,10,12,14,16];
+  let best='',bestErr=999;
+  for(const d of denoms){
+    const n=Math.round(frac*d);
+    if(n<=0)continue;
+    const err=Math.abs(frac-n/d);
+    if(err<bestErr){bestErr=err;best=n+'/'+d;}
+  }
+  if(bestErr>0.05){const n=Math.round(frac);return n+'/1';}
+  // Simplify e.g. 2/2→1/1 (Evs)
+  const parts=best.split('/');const n=parseInt(parts[0]),d=parseInt(parts[1]);
+  const g=(a,b)=>b?g(b,a%b):a;const div=g(n,d);
+  const sn=n/div,sd=d/div;
+  if(sn===1&&sd===1)return'Evs';
+  return sn+'/'+sd;
+}
 function dOdds(s){return s?s:'—';}
 
 function pnl(b){if(!b.result||b.result==='pending')return null;if(b.result==='void'||b.result==='nr')return 0;const outlay=parseFloat(b.stake)||0;return(parseFloat(b.returns)||0)-outlay;}

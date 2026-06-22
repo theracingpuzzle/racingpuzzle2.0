@@ -342,7 +342,7 @@ function renderStats(){
       // Row 2 — bank / odds / pending
       +'<div style="display:flex;border-bottom:1px solid var(--bdr);">'
         +metric('Bank',fmt(bankChange),'vs '+fmt(bankStart)+' start',bankCol)
-        +metric('Avg Odds',avg>0?avg.toFixed(1)+'x':'—','decimal',null)
+        +metric('Avg Odds',avg>0?decToFrac(avg):'—','fractional',null)
         +metric('Pending',pendingCount,'awaiting results',pendingCount>0?'#f59e0b':null)
       +'</div>'
       // Row 3 — best performers header
@@ -408,8 +408,8 @@ function renderStats(){
   const today=disciplineSet.filter(b=>b.date===td()).length;
   if(today>=4)insights.push({icon:'clock',msg:today+' settled bets today. Volume is your enemy — quality over quantity.'});
   // Avg odds insight
-  if(avg>8)insights.push({icon:'info',msg:'Your average odds are '+avg.toFixed(1)+'. At this level you need a 12%+ strike rate to profit. Make sure your form study supports this.'});
-  else if(avg<2.5)insights.push({icon:'info',msg:'Average odds of '+avg.toFixed(1)+' — backing short-priced horses. Strike rate needs to be very high (40%+) to show profit.'});
+  if(avg>8)insights.push({icon:'info',msg:'Your average odds are '+decToFrac(avg)+'. At this level you need a 12%+ strike rate to profit. Make sure your form study supports this.'});
+  else if(avg<2.5)insights.push({icon:'info',msg:'Average odds of '+decToFrac(avg)+' — backing short-priced horses. Strike rate needs to be very high (40%+) to show profit.'});
 
   // SVG icon map for insight types
   const _ISVG={

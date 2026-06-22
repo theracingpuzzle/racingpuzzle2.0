@@ -176,6 +176,18 @@ function renderNotifSettings() {
   }
 
   if (perm === 'granted') {
+    const disabled = localStorage.getItem('rp-notif-disabled') === '1';
+    if (disabled) {
+      el.innerHTML = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
+        + '<div style="display:flex;align-items:center;gap:8px;">'
+        +   '<div style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;"></div>'
+        +   '<span style="font-size:13px;color:var(--txt);">Notifications disabled</span>'
+        + '</div>'
+        + '<button onclick="notifReEnable()" class="btn bblu" style="font-size:11px;padding:5px 12px;">Re-enable</button>'
+        + '</div>'
+        + '<div style="font-size:11px;color:var(--mut);margin-top:8px;line-height:1.6;">Background alerts are off. Tap Re-enable to start receiving them again.</div>';
+      return;
+    }
     const paused = localStorage.getItem('rp-notif-paused') === '1';
     el.innerHTML = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
       + '<div style="display:flex;align-items:center;gap:8px;">'
@@ -225,6 +237,12 @@ function notifTogglePause() {
 }
 
 // ── Disable — removes subscription from Supabase and unsubscribes SW ─────────
+async function notifReEnable() {
+  localStorage.removeItem('rp-notif-disabled');
+  await notifSavePushSubscription();
+  renderNotifSettings();
+}
+
 async function notifDisable() {
   if (!confirm('Disable background alerts? You can re-enable them here at any time.')) return;
   // Remove from Supabase
@@ -244,6 +262,7 @@ async function notifDisable() {
     if (sub) await sub.unsubscribe();
   } catch(e) {}
   localStorage.removeItem('rp-notif-paused');
+  localStorage.setItem('rp-notif-disabled', '1');
   renderNotifSettings();
 }
 

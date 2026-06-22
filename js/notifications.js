@@ -209,6 +209,4 @@ async function notifTest() {
 // ── Auto-init: render settings block on load ──────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   renderNotifSettings();
-  // Re-save subscription on load in case it expired or is new device
-  if (notifPermission() === 'granted') notifSavePushSubscription();
 });

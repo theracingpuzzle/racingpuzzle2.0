@@ -24,6 +24,10 @@ async function authInit() {
       SUPA_USER_ID           = session.user.id;
       window._rpAccessToken  = session.access_token;
       window._rpUserEmail    = session.user.email;
+      // Save push subscription now that we have a valid token and user ID
+      if (typeof notifSavePushSubscription === 'function' && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        notifSavePushSubscription();
+      }
     } else {
       window._rpAccessToken  = null;
       window._rpUserEmail    = null;

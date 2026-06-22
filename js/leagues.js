@@ -1097,7 +1097,7 @@ async function lgLoadActivity(leagueId){
 
 function lgRenderFeed(leagueId){
   const items=_lgActivityLeague===leagueId?_lgActivity:[];
-  if(!items.length) return '<div style="font-size:13px;color:var(--mut);text-align:center;padding:16px 0;">No activity yet — make the first pick!</div>';
+  if(!items.length) return '<div style="font-size:13px;color:var(--mut);text-align:center;padding:20px 0;">No activity yet — make the first pick!</div>';
 
   function timeAgo(ts){
     const diff=Math.floor((Date.now()-new Date(ts).getTime())/1000);
@@ -1107,22 +1107,32 @@ function lgRenderFeed(leagueId){
     return Math.floor(diff/86400)+'d ago';
   }
 
-  return items.map(function(a){
-    const icon=a.type==='pick_won'?'✅':a.type==='pick_lost'?'❌':a.type==='reaction'?a.emoji||'🔥':a.type==='member_joined'?'👋':'🏇';
+  return items.map(function(a,i){
+    const isWin=a.type==='pick_won';
+    const isLoss=a.type==='pick_lost';
+    const isPick=a.type==='pick_made';
+    const isReaction=a.type==='reaction';
+    const isJoin=a.type==='member_joined';
+    const icon=isWin?'✅':isLoss?'❌':isReaction?(a.emoji||'🔥'):isJoin?'👋':'🏇';
     const initials=((a.display_name||'?').slice(0,1)).toUpperCase();
+    const avatarCol=_lgMemberColour(a.display_name||'');
     const isMe=a.user_id===_lgUid();
-    return'<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;'+(items.indexOf(a)>0?'border-top:1px solid var(--bdr);':'')+'">'
-      +'<div style="width:32px;height:32px;border-radius:50%;background:'+(isMe?'rgba(16,185,129,.15)':'rgba(255,255,255,.06)')+';border:1px solid '+(isMe?'rgba(16,185,129,.3)':'var(--bdr)')+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:'+(isMe?'#10b981':'var(--mut)')+';flex-shrink:0;">'+initials+'</div>'
-      +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-size:14px;color:var(--txt);line-height:1.4;">'+icon+' '+_lgEsc(a.message||'')+'</div>'
-        +'<div style="font-size:11px;color:var(--mut);margin-top:3px;">'+timeAgo(a.created_at)+'</div>'
+    const msgCol=isWin?'#10b981':isLoss?'#f87171':'var(--txt)';
+    const rowBg=isWin?'rgba(16,185,129,.04)':isLoss?'rgba(248,113,113,.04)':'transparent';
+    return'<div style="display:flex;align-items:flex-start;gap:12px;padding:11px 0;'+(i>0?'border-top:1px solid var(--bdr);':'')+';background:'+rowBg+'">'
+      // Avatar circle with member colour
+      +'<div style="width:36px;height:36px;border-radius:50%;background:'+avatarCol+';display:flex;align-items:center;justify-content:center;font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:15px;color:#fff;flex-shrink:0;'+(isMe?'box-shadow:0 0 0 2px #10b981;':'')+'">'+initials+'</div>'
+      +'<div style="flex:1;min-width:0;padding-top:2px;">'
+        // Event icon + message
+        +'<div style="font-size:14px;color:'+msgCol+';line-height:1.45;">'+icon+' '+_lgEsc(a.message||'')+'</div>'
+        +'<div style="font-size:11px;color:var(--mut);margin-top:4px;">'+timeAgo(a.created_at)+'</div>'
       +'</div>'
     +'</div>';
   }).join('');
 }
 
 // ─── Reactions ────────────────────────────────────────────────────────────────
-const LG_EMOJIS = ['🔥','👀','💀'];
+const LG_EMOJIS = ['💰','💥','🎯','🔥','🏆','👍','😬'];
 
 async function lgLoadReactions(leagueId){
   try{
@@ -1176,18 +1186,37 @@ async function lgReact(pickId, emoji, leagueId){
   if(bar)bar.innerHTML=_lgReactionBar(pickId,leagueId);
 }
 
+function _lgMemberColour(name){
+  // Deterministic colour from name for avatar
+  const cols=['#6366f1','#ec4899','#f59e0b','#10b981','#3b82f6','#ef4444','#8b5cf6','#14b8a6'];
+  let h=0;for(let i=0;i<(name||'').length;i++)h=(h*31+name.charCodeAt(i))&0xffff;
+  return cols[h%cols.length];
+}
+
 function _lgReactionBar(pickId, leagueId){
   const uid=_lgUid();
   const reactions=_lgReactions[pickId]||{};
-  return LG_EMOJIS.map(function(emoji){
-    const users=reactions[emoji]||[];
-    const iMine=users.some(function(r){return r.user_id===uid;});
-    const names=users.map(function(r){return r.display_name||'Member';}).join(', ');
-    return'<button onclick="lgReact(\''+pickId+'\',\''+emoji+'\',\''+leagueId+'\')" title="'+(names||emoji)+'" '
-      +'style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;border:1px solid '+(iMine?'rgba(16,185,129,.5)':'var(--bdr)')+';background:'+(iMine?'rgba(16,185,129,.1)':'transparent')+';cursor:pointer;font-size:13px;">'
-      +emoji+(users.length?'<span style="font-size:11px;font-weight:700;color:'+(iMine?'#10b981':'var(--mut)')+';">'+users.length+'</span>':'')
-    +'</button>';
-  }).join('');
+  const hasAny=LG_EMOJIS.some(function(e){return(reactions[e]||[]).length>0;});
+  // Show all emojis as small ghosts, highlight ones with reactions
+  return'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
+    +LG_EMOJIS.map(function(emoji){
+      const users=reactions[emoji]||[];
+      const iMine=users.some(function(r){return r.user_id===uid;});
+      const count=users.length;
+      const names=users.map(function(r){return r.display_name||'Member';}).join(', ');
+      const active=count>0;
+      return'<button onclick="lgReact(\''+pickId+'\',\''+emoji+'\',\''+leagueId+'\')" '
+        +'title="'+(names||emoji)+'" '
+        +'style="display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;'
+        +'border:1px solid '+(iMine?'rgba(16,185,129,.6)':active?'rgba(255,255,255,.15)':'rgba(255,255,255,.06)')+';'
+        +'background:'+(iMine?'rgba(16,185,129,.12)':active?'rgba(255,255,255,.05)':'transparent')+';'
+        +'cursor:pointer;font-size:'+(active?'14':'13')+'px;opacity:'+(active?'1':'.4')+';transition:opacity .15s,transform .1s;'
+        +'line-height:1;">'
+        +emoji
+        +(count?'<span style="font-size:11px;font-weight:700;color:'+(iMine?'#10b981':'var(--txt)')+';">'+count+'</span>':'')
+      +'</button>';
+    }).join('')
+  +'</div>';
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────

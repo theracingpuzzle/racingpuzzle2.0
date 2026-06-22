@@ -50,9 +50,10 @@ let _lgLoaded      = false;
 let _lgView        = 'list'; // 'list' | 'detail' | 'create' | 'join' | 'pick'
 let _lgPickRaces   = [];   // races available to pick from (shared cache)
 
-let _lgReactions    = {};   // { pickId: { emoji: [{user_id,display_name}] } }
-let _lgActivity     = [];   // activity feed for current league
+let _lgReactions      = {};   // { pickId: { emoji: [{user_id,display_name}] } }
+let _lgActivity       = [];   // activity feed for current league
 let _lgActivityLeague = null;
+let _lgDetailTab      = 'today'; // 'today' | 'board' | 'history' | 'feed'
 
 // ─── Supabase helpers ────────────────────────────────────────────────────────
 async function _lgFetch(path, opts){
@@ -266,6 +267,7 @@ async function lgRefreshFeed(leagueId){
 async function lgOpenLeague(id){
   _lgCurrent=_lgMyLeagues.find(function(l){return l.id===id;})||null;
   if(!_lgCurrent)return;
+  _lgDetailTab='today';
   _lgView='detail';
   lgRender();
   await lgLoadDetail(id);
@@ -295,6 +297,9 @@ function lgRenderDetail(el){
   const isAdmin=l.created_by===uid;
   const SVG_ADMIN_KEY='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5 18 5l3 3-2.5 2.5"/></svg>';
 
+  function lgDetailTab(tab){ _lgDetailTab=tab; lgRender(); }
+  window.lgDetailTab=lgDetailTab;
+
   let h=_lgBackBtn('Leagues');
 
   // League info blk
@@ -323,9 +328,30 @@ function lgRenderDetail(el){
     +'</div>'
   +'</div>';
 
+  // ── Tab bar ──────────────────────────────────────────────────────────────────
+  const tabs=[
+    {id:'today',label:'Today'},
+    {id:'board',label:'Leaderboard'},
+    {id:'history',label:'History'},
+    {id:'feed',label:'Feed'},
+  ];
+  const missingOddsCount=(function(){
+    const hp=isAdmin?allPicks:allPicks.filter(function(p){return p.user_id===uid;});
+    return hp.filter(function(p){return !p.odds&&p.result==='pending';}).length;
+  })();
+  h+='<div style="display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--bdr);margin-bottom:12px;">'
+    +tabs.map(function(t){
+      const active=_lgDetailTab===t.id;
+      const badge=t.id==='history'&&missingOddsCount?'<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#f59e0b;color:#000;font-size:9px;font-weight:900;margin-left:4px;">'+missingOddsCount+'</span>':'';
+      return'<button onclick="lgDetailTab(\''+t.id+'\')" style="flex:1;padding:10px 4px;border:none;border-right:'+(t.id!=='feed'?'1px solid var(--bdr)':'none')+';background:'+(active?'var(--navy)':'var(--sur2)')+';color:'+(active?'#fff':'var(--mut)')+';font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:'+(active?'800':'600')+';letter-spacing:.03em;cursor:pointer;transition:background .15s;">'+t.label+badge+'</button>';
+    }).join('')
+  +'</div>';
+
+  const tab=_lgDetailTab;
+
   // Today's picks — all members grouped
   const allTodayPicks=allPicks.filter(function(p){return p.pick_date===_lgToday();});
-  h+='<div class="blk">'
+  if(tab==='today') h+='<div class="blk">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
       +'<div class="bttl" style="border:none;padding:0;margin:0;">Today\'s Picks</div>'
       +(_lgIsEnded(l)
@@ -390,10 +416,10 @@ function lgRenderDetail(el){
       h+='</div>';
     }
   }
-  h+='</div>';
+  if(tab==='today') h+='</div>';
 
   // Leaderboard blk
-  h+='<div class="blk">';
+  if(tab==='board'){ h+='<div class="blk">';
   h+='<div class="bttl">Leaderboard</div>';
   if(!board.length){
     h+='<div style="font-size:12px;color:var(--mut);text-align:center;padding:12px 0;">No members yet</div>';
@@ -412,10 +438,10 @@ function lgRenderDetail(el){
       +'</div>';
     });
   }
-  h+='</div>';
+  if(tab==='board') h+='</div>'; }
 
-  // Pick history — all my picks (and all picks if admin), grouped by date, with odds editing on pending
-  if(true){
+  // Pick history
+  if(tab==='history'){
     const histPicks=isAdmin
       ?allPicks.slice().sort(function(a,b){return b.pick_date<a.pick_date?-1:b.pick_date>a.pick_date?1:0;})
       :allPicks.filter(function(p){return p.user_id===uid;}).sort(function(a,b){return b.pick_date<a.pick_date?-1:b.pick_date>a.pick_date?1:0;});
@@ -469,14 +495,16 @@ function lgRenderDetail(el){
     }
   }
 
-  // Activity feed
-  h+='<div class="blk">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
-      +'<div class="bttl" style="border:none;padding:0;margin:0;">Activity</div>'
-      +'<button onclick="lgRefreshFeed(\''+l.id+'\')" style="background:none;border:none;color:var(--mut);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bdr);">Refresh</button>'
-    +'</div>'
-    +'<div id="lg-feed-'+l.id+'">'+lgRenderFeed(l.id)+'</div>'
-  +'</div>';
+  // Activity feed tab
+  if(tab==='feed'){
+    h+='<div class="blk">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+        +'<div class="bttl" style="border:none;padding:0;margin:0;">Activity</div>'
+        +'<button onclick="lgRefreshFeed(\''+l.id+'\')" style="background:none;border:none;color:var(--mut);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:5px;border:1px solid var(--bdr);">Refresh</button>'
+      +'</div>'
+      +'<div id="lg-feed-'+l.id+'">'+lgRenderFeed(l.id)+'</div>'
+    +'</div>';
+  }
 
   // Footer action
   h+='<div style="text-align:center;margin-top:4px;">'

@@ -284,10 +284,10 @@ function lgRenderDetail(el){
   h+='<div class="blk" style="background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.2);">'
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
       +'<div>'
-        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:17px;font-weight:900;letter-spacing:.02em;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
-        +'<div style="font-size:10px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Win count scoring':'£1 level stakes scoring')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+'</div>'
-        +(function(){var admin=members.find(function(m){return m.user_id===l.created_by;});return admin?'<div style="margin-top:5px;display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--mut);">'+SVG_ADMIN_KEY+'<span>League Admin: <strong style="color:var(--txt);">'+_lgEsc(admin.display_name||'Unknown')+'</strong></span></div>':'';})()
-        +(_lgIsEnded(l)?'<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;">Competition Ended</div>':'')
+        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:900;letter-spacing:.02em;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
+        +'<div style="font-size:13px;color:var(--mut);margin-top:3px;">'+(l.scoring==='wins'?'Win count scoring':'£1 level stakes scoring')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+'</div>'
+        +(function(){var admin=members.find(function(m){return m.user_id===l.created_by;});return admin?'<div style="margin-top:6px;display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--mut);">'+SVG_ADMIN_KEY+'<span>League Admin: <strong style="color:var(--txt);">'+_lgEsc(admin.display_name||'Unknown')+'</strong></span></div>':'';})()
+        +(_lgIsEnded(l)?'<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;">Competition Ended</div>':'')
       +'</div>'
       +'<div style="text-align:right;flex-shrink:0;">'
         +'<div class="bttl" style="border:none;padding:0;margin-bottom:4px;">Invite Code</div>'
@@ -327,10 +327,10 @@ function lgRenderDetail(el){
       const isMe=m.user_id===uid;
       h+='<div style="'+(mi>0?'margin-top:10px;border-top:1px solid var(--bdr);padding-top:10px;':'')+'">'
         +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">'
-          +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.04em;color:'+(isMe?'#10b981':'var(--txt)')+';">'+_lgEsc(m.display_name||'Member')+'</span>'
-          +(m.user_id===l.created_by?'<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);background:var(--sur2);border:1px solid var(--bdr);border-radius:4px;padding:1px 6px;">'+SVG_ADMIN_KEY+' League Admin</span>':'')
-          +(isMe?'<span style="font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#10b981;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:4px;padding:1px 5px;">You</span>':'')
-          +'<span style="font-size:10px;color:var(--mut);">'+memberPicks.length+' pick'+(memberPicks.length!==1?'s':'')+'</span>'
+          +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:800;letter-spacing:.04em;color:'+(isMe?'#10b981':'var(--txt)')+';">'+_lgEsc(m.display_name||'Member')+'</span>'
+          +(m.user_id===l.created_by?'<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);background:var(--sur2);border:1px solid var(--bdr);border-radius:4px;padding:1px 6px;">'+SVG_ADMIN_KEY+' League Admin</span>':'')
+          +(isMe?'<span style="font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#10b981;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:4px;padding:1px 5px;">You</span>':'')
+          +'<span style="font-size:12px;color:var(--mut);">'+memberPicks.length+' pick'+(memberPicks.length!==1?'s':'')+'</span>'
         +'</div>'
         +'<div style="display:flex;flex-direction:column;gap:5px;">';
       memberPicks.forEach(function(p){
@@ -342,17 +342,17 @@ function lgRenderDetail(el){
         h+='<div style="display:flex;flex-direction:column;gap:4px;">'
           +'<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(canEditOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(canEditOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.15);':'')+'">'
             +'<div style="flex:1;min-width:0;">'
-              +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+'</div>'
-              +'<div style="font-size:10px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+(p.odds_display||p.odds)+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+'</div>'
+              +'<div style="font-size:16px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+'</div>'
+              +'<div style="font-size:12px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+(p.odds_display||p.odds)+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+'</div>'
             +'</div>'
             +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
               +(canEditOdds||canOverrideOdds?'<div id="lg-odds-edit-'+p.id+'">'
-                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds_display||p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
+                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds_display||p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
                   +'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>'
                   +(p.odds?'Edit Odds':'Add Odds')
                 +'</button>'
               +'</div>':'')
-              +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+resBg+';border:1px solid '+(res==='win'?'rgba(16,185,129,.25)':res==='loss'?'rgba(248,113,113,.25)':'var(--bdr)')+';color:'+resCol+';">'+res+'</span>'
+              +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+resBg+';border:1px solid '+(res==='win'?'rgba(16,185,129,.25)':res==='loss'?'rgba(248,113,113,.25)':'var(--bdr)')+';color:'+resCol+';">'+res+'</span>'
               +(isMe&&res==='pending'?'<button onclick="lgRemovePick(\''+p.id+'\',\''+l.id+'\')" style="background:none;border:none;color:var(--mut);font-size:13px;cursor:pointer;padding:0;line-height:1;" title="Remove pick">✕</button>':'')
             +'</div>'
           +'</div>'
@@ -367,7 +367,7 @@ function lgRenderDetail(el){
       h+='<div style="margin-top:10px;border-top:1px solid var(--bdr);padding-top:10px;display:flex;flex-wrap:wrap;gap:6px;">';
       noPicks.forEach(function(m){
         const isMe=m.user_id===uid;
-        h+='<span style="font-size:10px;color:var(--mut);background:var(--bg);border:1px solid var(--bdr);border-radius:6px;padding:3px 8px;">'+_lgEsc(m.display_name||'Member')+(isMe?' (you)':'')+'<span style="margin-left:4px;opacity:.5;">— no pick</span></span>';
+        h+='<span style="font-size:13px;color:var(--mut);background:var(--bg);border:1px solid var(--bdr);border-radius:6px;padding:3px 8px;">'+_lgEsc(m.display_name||'Member')+(isMe?' (you)':'')+'<span style="margin-left:4px;opacity:.5;">— no pick</span></span>';
       });
       h+='</div>';
     }
@@ -385,12 +385,12 @@ function lgRenderDetail(el){
       const scoreDisp=l.scoring==='wins'?entry.s.wins+' W':(entry.s.score>=0?'+':'')+entry.s.score.toFixed(2);
       const scoreCol=entry.s.score>0?'#10b981':entry.s.score<0?'#f87171':'var(--txt)';
       h+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;'+(i?'border-top:1px solid var(--bdr);':'')+'background:'+(entry.isMe?'transparent':'transparent')+';">'
-        +'<div style="width:28px;text-align:center;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:900;color:'+(i<3?'var(--txt)':'var(--mut)')+';flex-shrink:0;">'+pos+'</div>'
+        +'<div style="width:32px;text-align:center;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:900;color:'+(i<3?'var(--txt)':'var(--mut)')+';flex-shrink:0;">'+pos+'</div>'
         +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(entry.m.display_name||'Member')+(entry.m.user_id===l.created_by?' <span style="display:inline-flex;align-items:center;vertical-align:middle;color:var(--mut);margin-left:3px;" title="League Admin">'+SVG_ADMIN_KEY+'</span>':'')+(entry.isMe?' <span style="font-size:9px;color:#10b981;font-weight:800;letter-spacing:.04em;">YOU</span>':'')+'</div>'
-          +'<div style="font-size:10px;color:var(--mut);">'+entry.s.settled+' settled · '+entry.s.wins+' win'+(entry.s.wins!==1?'s':'')+(entry.todayCount?' · '+entry.todayCount+' today':'')+'</div>'
+          +'<div style="font-size:16px;font-weight:700;color:var(--txt);">'+_lgEsc(entry.m.display_name||'Member')+(entry.m.user_id===l.created_by?' <span style="display:inline-flex;align-items:center;vertical-align:middle;color:var(--mut);margin-left:3px;" title="League Admin">'+SVG_ADMIN_KEY+'</span>':'')+(entry.isMe?' <span style="font-size:11px;color:#10b981;font-weight:800;letter-spacing:.04em;">YOU</span>':'')+'</div>'
+          +'<div style="font-size:12px;color:var(--mut);">'+entry.s.settled+' settled · '+entry.s.wins+' win'+(entry.s.wins!==1?'s':'')+(entry.todayCount?' · '+entry.todayCount+' today':'')+'</div>'
         +'</div>'
-        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;color:'+scoreCol+';flex-shrink:0;">'+scoreDisp+'</div>'
+        +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:900;color:'+scoreCol+';flex-shrink:0;">'+scoreDisp+'</div>'
       +'</div>';
     });
   }
@@ -418,7 +418,7 @@ function lgRenderDetail(el){
       Object.keys(byDate).sort(function(a,b){return b<a?-1:b>a?1:0;}).forEach(function(date,di){
         const dateLabel=(function(){try{const p=date.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];}catch(e){return date;}})();
         h+='<div style="'+(di?'margin-top:10px;border-top:1px solid var(--bdr);padding-top:10px;':'')+'">'
-          +'<div style="font-size:10px;font-weight:700;color:var(--mut);letter-spacing:.04em;margin-bottom:6px;">'+dateLabel+'</div>'
+          +'<div style="font-size:12px;font-weight:700;color:var(--mut);letter-spacing:.04em;margin-bottom:6px;">'+dateLabel+'</div>'
           +'<div style="display:flex;flex-direction:column;gap:5px;">';
         byDate[date].forEach(function(p){
           const res=p.result||'pending';
@@ -430,17 +430,17 @@ function lgRenderDetail(el){
           const memberName=isAdmin?(function(){const mb=members.find(function(m){return m.user_id===p.user_id;});return mb?mb.display_name:'';})():'';
           h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(needsOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(needsOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.12);':'')+'">'
             +'<div style="flex:1;min-width:0;">'
-              +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+(isAdmin&&memberName?' <span style="font-size:9px;color:var(--mut);font-weight:500;">'+_lgEsc(memberName)+'</span>':'')+'</div>'
-              +'<div style="font-size:10px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+(p.odds_display||p.odds)+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+(res==='win'&&p.returns?' · <span style="color:#10b981;">+'+Number(p.returns).toFixed(2)+'</span>':'')+'</div>'
+              +'<div style="font-size:16px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+(isAdmin&&memberName?' <span style="font-size:11px;color:var(--mut);font-weight:500;">'+_lgEsc(memberName)+'</span>':'')+'</div>'
+              +'<div style="font-size:12px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+(p.odds_display||p.odds)+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+(res==='win'&&p.returns?' · <span style="color:#10b981;">+'+Number(p.returns).toFixed(2)+'</span>':'')+'</div>'
             +'</div>'
             +'<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">'
               +(canEdit?'<div id="lg-odds-edit-'+p.id+'">'
-                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds_display||p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
+                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds_display||p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
                   +'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>'
                   +(p.odds?'Edit':'Add Odds')
                 +'</button>'
               +'</div>':'')
-              +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+resBg+';border:1px solid '+(res==='win'?'rgba(16,185,129,.25)':res==='loss'?'rgba(248,113,113,.25)':'var(--bdr)')+';color:'+resCol+';">'+res+'</span>'
+              +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+resBg+';border:1px solid '+(res==='win'?'rgba(16,185,129,.25)':res==='loss'?'rgba(248,113,113,.25)':'var(--bdr)')+';color:'+resCol+';">'+res+'</span>'
             +'</div>'
           +'</div>';
         });

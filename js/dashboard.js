@@ -3,10 +3,22 @@
 // ─── CMD DASHBOARD ───
 function renderDash(){} // Dashboard removed - stats is now the default tab
 
-function renderCompare(set,p,roi,sr){
+function renderCompare(set){
   const dc=document.getElementById('d-compare');
   const dcblk=document.getElementById('d-compare-blk');
   if(dc){
+    // Real stats — calculated fresh from the real settled bets passed in
+    const rStaked=set.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
+    const rRets=set.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
+    const p=rRets-rStaked;
+    const roi=rStaked>0?(p/rStaked*100):0;
+    const rW=set.filter(b=>b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'))).length;
+    const sr=set.length>0?(rW/set.length*100):0;
+    // Real bank change — recalculate live same way updHdr() does
+    const bankStart=D.bank&&D.bank.start!=null?D.bank.start:0;
+    const realBankChange=set.reduce((a,b)=>a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0),0);
+
+    // Virtual stats
     const vb=getVBank();
     const vset=vb.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='nr');
     const vStaked=vset.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
@@ -15,7 +27,7 @@ function renderCompare(set,p,roi,sr){
     const vROI=vStaked>0?(vP/vStaked*100):0;
     const vW=vset.filter(b=>b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'))).length;
     const vSR=vset.length>0?(vW/vset.length*100):0;
-    const vBankDiff=vb.current-vb.start;
+    const vBankChange=vset.reduce((a,b)=>a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0),0);
 
     if(!set.length&&!vset.length){
       dc.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Log real and virtual bets to see the comparison.</div>';
@@ -26,8 +38,8 @@ function renderCompare(set,p,roi,sr){
       const rows=[
         ['P&L',fmt(p),fmt(vP),p,vP],
         ['ROI',Math.round(roi)+'%',Math.round(vROI)+'%',roi,vROI],
-        ['Strike Rate',sr.toFixed(0)+'%',vSR.toFixed(0)+'%',sr,vSR],
-        ['Bank Change',fmt(D.bank.current-(D.bank.start||0)),fmt(vBankDiff),D.bank.current-(D.bank.start||0),vBankDiff],
+        ['Strike Rate',Math.round(sr)+'%',Math.round(vSR)+'%',sr,vSR],
+        ['Bank Change',fmt(realBankChange),fmt(vBankChange),realBankChange,vBankChange],
         ['Bets Settled',set.length+'',''+vset.length,0,0],
       ];
       let insight='';
@@ -649,8 +661,7 @@ function renderStats(){
   if(dcblk2) dcblk2.style.display=(scope==='both'&&!ownStudyOnly)?'block':'none';
   if(scope==='both'&&!ownStudyOnly){
     renderCompare(
-      D.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr'),
-      p, roi, sr
+      D.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr')
     );
   }
   // By Source block — hidden in own study mode

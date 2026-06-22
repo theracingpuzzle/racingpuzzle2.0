@@ -226,6 +226,7 @@ function renderStats(){
   // Headline metrics use the scope-matched bets, filtered by own study if active
   const _allStatBets=scope==='virt'?vbBets:scope==='real'?realBets:[...realBets,...vbBets];
   const statBets=ownStudyOnly?_allStatBets.filter(b=>OWN_SOURCES.includes(b.source||'')):_allStatBets;
+  const disciplineSet=ownStudyOnly?set.filter(b=>OWN_SOURCES.includes(b.source||'')):set;
   const wins=statBets.filter(b=>b.result==='win');
   const places=statBets.filter(b=>b.result==='place'&&(b.betType==='ew'||b.betType==='place'));
   const staked=statBets.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
@@ -233,7 +234,6 @@ function renderStats(){
   const p=rets-staked,roi=staked>0?(p/staked*100):0;
   const sr=statBets.length>0?((wins.length+places.length)/statBets.length*100):0;
   const avg=disciplineSet.length>0?disciplineSet.reduce((a,b)=>a+(parseFloat(b.odds)||0),0)/disciplineSet.length:0;
-  const disciplineSet=ownStudyOnly?set.filter(b=>OWN_SOURCES.includes(b.source||'')):set;
 
   // If the selected scope has no bets, show empty state
   if(!set.length){

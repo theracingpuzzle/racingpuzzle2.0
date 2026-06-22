@@ -221,8 +221,11 @@ function renderStats(){
   const realBets=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
   // 'set' = bets used for all breakdowns (source, confidence, track etc.)
   const set=scope==='real'?realBets:scope==='virt'?vbBets:[...realBets,...vbBets.map(function(b){return Object.assign({},b,{_virt:true});})];
-  // Headline metrics use the scope-matched bets ('both' = combined)
-  const statBets=scope==='virt'?vbBets:scope==='real'?realBets:[...realBets,...vbBets];
+  const ownStudyOnly=window._ownStudyOnly||false;
+  const OWN_SOURCES=['Own Form Study'];
+  // Headline metrics use the scope-matched bets, filtered by own study if active
+  const _allStatBets=scope==='virt'?vbBets:scope==='real'?realBets:[...realBets,...vbBets];
+  const statBets=ownStudyOnly?_allStatBets.filter(b=>OWN_SOURCES.includes(b.source||'')):_allStatBets;
   const wins=statBets.filter(b=>b.result==='win');
   const places=statBets.filter(b=>b.result==='place'&&(b.betType==='ew'||b.betType==='place'));
   const staked=statBets.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
@@ -230,8 +233,6 @@ function renderStats(){
   const p=rets-staked,roi=staked>0?(p/staked*100):0;
   const sr=statBets.length>0?((wins.length+places.length)/statBets.length*100):0;
   const avg=set.length>0?set.reduce((a,b)=>a+(parseFloat(b.odds)||0),0)/set.length:0;
-  const ownStudyOnly=window._ownStudyOnly||false;
-  const OWN_SOURCES=['Own Form Study'];
   const disciplineSet=ownStudyOnly?set.filter(b=>OWN_SOURCES.includes(b.source||'')):set;
 
   // If the selected scope has no bets, show empty state

@@ -217,10 +217,12 @@ function lgRenderList(el){
         const pos=ranked.findIndex(function(r){return r.uid===uid;})+1;
         const total=ranked.length;
         const posLabel=pos===1?'1st':pos===2?'2nd':pos===3?'3rd':pos+'th';
-        const posCol=pos===1?'#10b981':pos<=3?'#f59e0b':'var(--mut)';
-        posHtml='<div style="display:inline-flex;align-items:center;gap:3px;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;color:'+posCol+';background:'+(pos===1?'rgba(16,185,129,.08)':pos<=3?'rgba(245,158,11,.08)':'var(--sur2)')+';border:1px solid '+(pos===1?'rgba(16,185,129,.25)':pos<=3?'rgba(245,158,11,.25)':'var(--bdr)')+';border-radius:5px;padding:1px 6px;margin-top:4px;">'
-          +(pos===1?'<svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>':'')
-          +posLabel+' of '+total
+        const posCol=pos===1?'#10b981':pos<=3?'#f59e0b':'var(--txt)';
+        const posBg=pos===1?'rgba(16,185,129,.12)':pos<=3?'rgba(245,158,11,.1)':'var(--sur2)';
+        const posBdr=pos===1?'rgba(16,185,129,.3)':pos<=3?'rgba(245,158,11,.3)':'var(--bdr)';
+        posHtml='<div style="display:inline-flex;align-items:center;gap:4px;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:900;letter-spacing:.03em;color:'+posCol+';background:'+posBg+';border:1px solid '+posBdr+';border-radius:7px;padding:2px 9px;margin-top:5px;">'
+          +(pos===1?'<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>':'')
+          +posLabel+' <span style="font-size:11px;font-weight:700;opacity:.7;">of '+total+'</span>'
         +'</div>';
       }
 

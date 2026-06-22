@@ -407,6 +407,7 @@ function renderWLList(){
       const subParts=[];
       if(e.trainer)subParts.push(e.trainer);
       const addedDate=e.createdAt?'Added '+fdate(new Date(e.createdAt).toISOString().slice(0,10)):'';
+      const updatedDate=e.updatedAt&&e.updatedAt!==e.createdAt?'Updated '+fdate(new Date(e.updatedAt).toISOString().slice(0,10)):'';
 
       html+='<div style="position:relative;border-bottom:1px solid var(--bdr);" data-wl-id="'+e.id+'">'
         +'<div class="wll-row" style="border-left:none;border-bottom:none;">'
@@ -421,7 +422,7 @@ function renderWLList(){
             +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
           +'</div>'
         +'</div>'
-        +(addedDate?'<div style="text-align:right;font-size:9px;color:var(--mut);padding:0 12px 5px;letter-spacing:.04em;">'+addedDate+'</div>':'')
+        +((addedDate||updatedDate)?'<div style="text-align:right;font-size:9px;color:var(--mut);padding:0 12px 5px;letter-spacing:.04em;display:flex;justify-content:flex-end;gap:10px;">'+(addedDate?'<span>'+addedDate+'</span>':'')+(updatedDate?'<span>'+updatedDate+'</span>':'')+'</div>':'')
       +'</div>';
     });
     if(isOpen){html+='</div>';} // close category wrapper

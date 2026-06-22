@@ -1608,6 +1608,11 @@ async function initTrackPulse(){
   }
   _doLgSync();
 
+  // Auto-settle personal bets
+  if(window._todayResultsCache&&window._todayResultsCache.length){
+    syncBetResults(window._todayResultsCache);
+  }
+
   // Refresh every 10 minutes — bust caches so results are genuinely fresh
   if(window._tpRefreshTimer)clearInterval(window._tpRefreshTimer);
   window._tpRefreshTimer=setInterval(async function(){
@@ -1623,5 +1628,109 @@ async function initTrackPulse(){
     if(typeof lgSyncResults==='function'&&window._todayResultsCache&&window._todayResultsCache.length){
       lgSyncResults(window._todayResultsCache);
     }
+    if(window._todayResultsCache&&window._todayResultsCache.length){
+      syncBetResults(window._todayResultsCache);
+    }
   },10*60*1000);
+}
+
+// ── Auto-settle personal bets from race results ───────────────────────────────
+function syncBetResults(results){
+  if(!results||!results.length)return;
+  const today=td();
+
+  const normHorse=function(s){return(s||'').replace(/\s*\([^)]+\)\s*$/,'').toLowerCase().trim();};
+
+  // Build result map: horseName → {pos, numRunners, sp}
+  const resultMap={};
+  results.forEach(function(race){
+    const numRunners=(race.runners||race.horses||[]).length;
+    (race.runners||race.horses||[]).forEach(function(r){
+      const hn=normHorse(r.horse||r.name||'');
+      if(!hn)return;
+      const posRaw=r.position||r.place||'';
+      const pos=parseInt(posRaw);
+      if(!posRaw||isNaN(pos))return;
+      if(!resultMap[hn]){
+        resultMap[hn]={pos,numRunners,sp:r.sp||r.starting_price||''};
+      }
+    });
+  });
+
+  if(!Object.keys(resultMap).length)return;
+
+  let changed=false;
+
+  // Determine place terms based on field size (standard UK rules)
+  function placeTerms(numRunners){
+    if(numRunners<=4)return null;       // no place market
+    if(numRunners<=7)return'1/4';       // 2 places
+    if(numRunners<=12)return'1/5';      // 3 places
+    return'1/4';                        // 4+ places (handicaps etc.)
+  }
+
+  // How many places paid
+  function placesNum(numRunners){
+    if(numRunners<=4)return 1;
+    if(numRunners<=7)return 2;
+    if(numRunners<=12)return 3;
+    return 4;
+  }
+
+  function settleBet(b){
+    if(b.result&&b.result!=='pending')return false; // already settled
+    if(b.date!==today)return false;                 // only today's bets
+    const hn=normHorse(b.horse||'');
+    const res=resultMap[hn];
+    if(!res)return false;
+
+    const pos=res.pos;
+    const places=placesNum(res.numRunners);
+    const betType=b.betType||'win';
+
+    let result;
+    if(pos===1){
+      result='win';
+    } else if(pos<=places&&(betType==='ew'||betType==='place')){
+      result='place';
+    } else {
+      result='loss';
+    }
+
+    // Use stored odds; fall back to SP from results
+    const oddsRaw=b.oddsDisplay||b.odds||res.sp||'';
+    const odDec=fo(String(oddsRaw));
+    const ewT=placeTerms(res.numRunners)||'1/4';
+    const returns=calcReturns(result,b.stake,odDec,betType,ewT);
+
+    b.result=result;
+    b.returns=returns;
+    // If no odds were stored, fill in the SP so it shows on the bet
+    if(!b.odds&&res.sp)b.odds=fo(String(res.sp));
+    if(!b.oddsDisplay&&res.sp)b.oddsDisplay=String(res.sp);
+    return true;
+  }
+
+  // Settle real bets
+  (D.bets||[]).forEach(function(b){if(settleBet(b))changed=true;});
+
+  // Settle virtual bets
+  const vb=getVBank();
+  (vb.bets||[]).forEach(function(b){if(settleBet(b))changed=true;});
+
+  if(changed){
+    // Recalculate bank balances from all settled bets
+    const realSettled=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
+    const realProfit=realSettled.reduce(function(a,b){return a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);},0);
+    D.bank.current=(D.bank.start||0)+realProfit;
+
+    const virtSettled=vb.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
+    const virtProfit=virtSettled.reduce(function(a,b){return a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);},0);
+    vb.current=(vb.start||0)+virtProfit;
+
+    save();
+    // Refresh any open stats/today views
+    if(typeof renderStats==='function')renderStats();
+    if(typeof renderToday==='function')renderToday();
+  }
 }

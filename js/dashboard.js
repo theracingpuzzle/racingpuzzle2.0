@@ -280,10 +280,10 @@ function renderStats(){
       +'</div>';
     };
 
-    // ── Best performer helper ──
+    // ── Best performer helper — respects own study filter ──
     function bestOf(key){
       const map={};
-      set.forEach(function(b){
+      disciplineSet.forEach(function(b){
         const k=(b[key]||'').trim();if(!k||k==='Unknown')return;
         if(!map[k])map[k]={p:0,n:0,staked:0,w:0};
         map[k].p+=(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);
@@ -303,7 +303,7 @@ function renderStats(){
     const bestSource=bestOf('source');
     const bestTrack=(function(){
       const map={};
-      set.forEach(function(b){const k=(b.track||'').trim();if(!k)return;if(!map[k])map[k]={p:0,n:0};map[k].p+=(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);map[k].n++;});
+      disciplineSet.forEach(function(b){const k=(b.track||'').trim();if(!k)return;if(!map[k])map[k]={p:0,n:0};map[k].p+=(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);map[k].n++;});
       const rows=Object.entries(map).filter(function(_ref){return _ref[1].n>=2;}).map(function(_ref){var k=_ref[0],v=_ref[1];return{k,p:v.p,n:v.n};}).sort(function(a,b){return b.p-a.p;});
       return rows[0]||null;
     })();

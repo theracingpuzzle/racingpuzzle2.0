@@ -1719,17 +1719,8 @@ function syncBetResults(results){
   (vb.bets||[]).forEach(function(b){if(settleBet(b))changed=true;});
 
   if(changed){
-    // Recalculate bank balances from all settled bets
-    const realSettled=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
-    const realProfit=realSettled.reduce(function(a,b){return a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);},0);
-    D.bank.current=(D.bank.start||0)+realProfit;
-
-    const virtSettled=vb.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
-    const virtProfit=virtSettled.reduce(function(a,b){return a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);},0);
-    vb.current=(vb.start||0)+virtProfit;
-
     save();
-    // Refresh any open stats/today views
+    if(typeof updHdr==='function')updHdr();
     if(typeof renderStats==='function')renderStats();
     if(typeof renderToday==='function')renderToday();
   }

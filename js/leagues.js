@@ -217,27 +217,29 @@ function lgRenderList(el){
         const pos=ranked.findIndex(function(r){return r.uid===uid;})+1;
         const total=ranked.length;
         const posLabel=pos===1?'1st':pos===2?'2nd':pos===3?'3rd':pos+'th';
-        const posCol=pos===1?'#10b981':pos<=3?'#f59e0b':'var(--txt)';
-        const posBg=pos===1?'rgba(16,185,129,.12)':pos<=3?'rgba(245,158,11,.1)':'var(--sur2)';
-        const posBdr=pos===1?'rgba(16,185,129,.3)':pos<=3?'rgba(245,158,11,.3)':'var(--bdr)';
+        const isLast=pos===total;
+        const isPodium=pos<=3&&!isLast;
+        const posCol=pos===1?'#f59e0b':pos===2?'#9ca3af':pos===3?'#b45309':isLast&&total>1?'#f87171':'var(--mut)';
+        const posBg=pos===1?'rgba(245,158,11,.12)':pos===2?'rgba(156,163,175,.1)':pos===3?'rgba(180,83,9,.1)':isLast&&total>1?'rgba(248,113,113,.1)':'var(--sur2)';
+        const posBdr=pos===1?'rgba(245,158,11,.4)':pos===2?'rgba(156,163,175,.3)':pos===3?'rgba(180,83,9,.3)':isLast&&total>1?'rgba(248,113,113,.3)':'var(--bdr)';
         posHtml='<div style="display:inline-flex;align-items:center;gap:4px;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:900;letter-spacing:.03em;color:'+posCol+';background:'+posBg+';border:1px solid '+posBdr+';border-radius:7px;padding:2px 9px;margin-top:5px;">'
           +(pos===1?'<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>':'')
           +posLabel+' <span style="font-size:11px;font-weight:700;opacity:.7;">of '+total+'</span>'
         +'</div>';
       }
 
-      h+='<div onclick="lgOpenLeague(\''+l.id+'\')" style="display:flex;align-items:center;gap:12px;padding:13px 16px;'+(idx?'border-top:1px solid var(--bdr);':'')+'cursor:pointer;">'
-        +'<div style="width:36px;height:36px;border-radius:9px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;color:#10b981;flex-shrink:0;">'+SVG_TROPHY+'</div>'
+      h+='<div onclick="lgOpenLeague(\''+l.id+'\')" style="display:flex;align-items:center;gap:12px;padding:15px 16px;'+(idx?'border-top:1px solid var(--bdr);':'')+'cursor:pointer;">'
+        +'<div style="width:40px;height:40px;border-radius:10px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;color:#10b981;flex-shrink:0;">'+SVG_TROPHY+'</div>'
         +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_lgEsc(l.name)+'</div>'
-          +'<div style="font-size:10px;color:var(--mut);margin-top:1px;">'+(l.scoring==='wins'?'Win count':'£1 stakes')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+(todayPicks.length?' · <span style="color:#10b981;">'+todayPicks.length+' pick'+(todayPicks.length!==1?'s':'')+'</span>':'')+'</div>'
+          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1;">'+_lgEsc(l.name)+'</div>'
+          +'<div style="font-size:12px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Win count':'£1 stakes')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+(todayPicks.length?' · <span style="color:#10b981;font-weight:700;">'+todayPicks.length+' pick'+(todayPicks.length!==1?'s':'')+'</span>':'')+'</div>'
           +posHtml
         +'</div>'
         +'<div style="text-align:right;flex-shrink:0;">'
-          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:900;color:'+scoreCol+';">'+scoreVal+'</div>'
-          +'<div style="font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;">'+(l.scoring==='wins'?'wins':'P&L')+'</div>'
+          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:900;color:'+scoreCol+';">'+scoreVal+'</div>'
+          +'<div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;">'+(l.scoring==='wins'?'wins':'P&L')+'</div>'
         +'</div>'
-        +'<span style="color:var(--mut);font-size:16px;margin-left:2px;">›</span>'
+        +'<span style="color:var(--mut);font-size:18px;margin-left:2px;">›</span>'
       +'</div>';
     });
     h+='</div>';

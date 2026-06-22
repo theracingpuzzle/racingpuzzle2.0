@@ -232,7 +232,7 @@ function renderStats(){
   const rets=statBets.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
   const p=rets-staked,roi=staked>0?(p/staked*100):0;
   const sr=statBets.length>0?((wins.length+places.length)/statBets.length*100):0;
-  const avg=set.length>0?set.reduce((a,b)=>a+(parseFloat(b.odds)||0),0)/set.length:0;
+  const avg=disciplineSet.length>0?disciplineSet.reduce((a,b)=>a+(parseFloat(b.odds)||0),0)/disciplineSet.length:0;
   const disciplineSet=ownStudyOnly?set.filter(b=>OWN_SOURCES.includes(b.source||'')):set;
 
   // If the selected scope has no bets, show empty state
@@ -371,7 +371,7 @@ function renderStats(){
     }
   }
   // Best source — only when NOT in own study mode (all bets are own study then)
-  const srcMap={};set.forEach(b=>{const k=b.source||'Unknown';if(!srcMap[k])srcMap[k]={p:0,n:0,staked:0,wins:0};srcMap[k].p+=(pnl(b)||0);srcMap[k].n++;srcMap[k].staked+=(parseFloat(b.stake)||0);if(b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place')))srcMap[k].wins++;});
+  const srcMap={};disciplineSet.forEach(b=>{const k=b.source||'Unknown';if(!srcMap[k])srcMap[k]={p:0,n:0,staked:0,wins:0};srcMap[k].p+=(pnl(b)||0);srcMap[k].n++;srcMap[k].staked+=(parseFloat(b.stake)||0);if(b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place')))srcMap[k].wins++;});
   const srcArr=Object.entries(srcMap).map(([k,v])=>({k,roi:v.staked>0?v.p/v.staked*100:0,p:v.p,n:v.n,sr:v.n>0?(v.wins/v.n*100):0}));
   if(!ownStudyOnly&&srcArr.length>1){
     srcArr.sort((a,b)=>b.roi-a.roi);
@@ -577,7 +577,7 @@ function renderStats(){
   if(typeEl){
     const types=['win','ew','place'];const typeLabels={win:'Win',ew:'Each Way',place:'Place'};
     typeEl.innerHTML=types.map(t=>{
-      const tb=set.filter(b=>b.betType===t);if(!tb.length)return'';
+      const tb=disciplineSet.filter(b=>b.betType===t);if(!tb.length)return'';
       const tp=tb.reduce((a,b)=>a+(pnl(b)||0),0);
       const ts=tb.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
       const roi=ts>0?(tp/ts*100):0;
@@ -590,12 +590,12 @@ function renderStats(){
 
   // ── Track bar chart ──
   function bar(id,data){const el=document.getElementById(id);if(!el)return;if(!Object.keys(data).length){el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Not enough data.</div>';return;}const mx=Math.max(...Object.values(data).map(Math.abs),1);el.innerHTML=Object.entries(data).map(([k,v])=>{const pct=Math.abs(v)/mx*100,neg=v<0,lbl=(v>=0?'+£':'-£')+Math.abs(v).toFixed(2);return'<div class="brow"><div class="blbl" title="'+k+'">'+String(k).slice(0,14)+'</div><div class="btrk"><div class="bfil '+(neg?'nb':'pb')+'" style="width:'+pct.toFixed(1)+'%;"><span class="bval">'+lbl+'</span></div></div></div>';}).join('');}
-  const tkD={};set.forEach(b=>{const k=b.track||'Unknown';tkD[k]=(tkD[k]||0)+(pnl(b)||0);});
+  const tkD={};disciplineSet.forEach(b=>{const k=b.track||'Unknown';tkD[k]=(tkD[k]||0)+(pnl(b)||0);});
   const tkSorted=[...Object.entries(tkD).filter(([,v])=>v>=0).sort((a,b)=>b[1]-a[1]),...Object.entries(tkD).filter(([,v])=>v<0).sort((a,b)=>b[1]-a[1])];
   bar('st-trk',Object.fromEntries(tkSorted));
 
   // ── Jockey + Trainer tables (combined real + virtual) ──
-  const allBets=set; // set already contains the right scope (real/virtual/both)
+  const allBets=disciplineSet;
   function personTable(id, key){
     const el=document.getElementById(id);if(!el)return;
     const map={};
@@ -634,7 +634,7 @@ function renderStats(){
   personTable('st-trainer','trainer');
   const monthEl=document.getElementById('st-monthly');
   if(monthEl){
-    const months={};set.forEach(b=>{const m=b.date?b.date.slice(0,7):'?';months[m]=(months[m]||0)+(pnl(b)||0);});
+    const months={};disciplineSet.forEach(b=>{const m=b.date?b.date.slice(0,7):'?';months[m]=(months[m]||0)+(pnl(b)||0);});
     const mArr=Object.entries(months).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12);
     if(!mArr.length){monthEl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;">Not enough data.</div>';}
     else{monthEl.innerHTML='<div style="display:flex;align-items:flex-end;gap:6px;height:80px;padding-bottom:24px;position:relative;">'
@@ -661,8 +661,8 @@ function renderStats(){
   }
 
   // Checklist analysis
-  renderCkImpact(set);
-  renderCkSignals(set);
+  renderCkImpact(disciplineSet);
+  renderCkSignals(disciplineSet);
   renderCkTip();
 }
 

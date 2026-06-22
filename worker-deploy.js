@@ -202,7 +202,7 @@ async function handleScheduled(env) {
 
   if (!races.length) return;
 
-  const subsResp = await supaFetch(env, '/push_subscriptions?select=*');
+  const subsResp = await supaFetch(env, '/push_subscriptions?select=*&paused=eq.false');
   const subs = await subsResp.json();
   if (!subs.length) return;
 

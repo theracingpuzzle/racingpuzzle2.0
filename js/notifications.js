@@ -176,14 +176,21 @@ function renderNotifSettings() {
   }
 
   if (perm === 'granted') {
+    const paused = localStorage.getItem('rp-notif-paused') === '1';
     el.innerHTML = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'
       + '<div style="display:flex;align-items:center;gap:8px;">'
-      +   '<div style="width:8px;height:8px;border-radius:50%;background:#34d399;flex-shrink:0;"></div>'
-      +   '<span style="font-size:13px;color:var(--txt);">Notifications enabled</span>'
+      +   '<div style="width:8px;height:8px;border-radius:50%;background:'+(paused?'#f59e0b':'#34d399')+';flex-shrink:0;"></div>'
+      +   '<span style="font-size:13px;color:var(--txt);">Notifications '+(paused?'paused':'enabled')+'</span>'
       + '</div>'
-      + '<button onclick="notifTest()" class="btn bout" style="font-size:11px;padding:5px 12px;">Send Test</button>'
+      + '<div style="display:flex;gap:8px;">'
+      +   '<button onclick="notifTest()" class="btn bout" style="font-size:11px;padding:5px 12px;">Test</button>'
+      +   '<button onclick="notifTogglePause()" class="btn bout" style="font-size:11px;padding:5px 12px;">'+(paused?'Resume':'Pause')+'</button>'
+      +   '<button onclick="notifDisable()" class="btn bout" style="font-size:11px;padding:5px 12px;color:var(--red);border-color:var(--red);">Disable</button>'
       + '</div>'
-      + '<div style="font-size:11px;color:var(--mut);margin-top:8px;line-height:1.6;">Background alerts enabled — you\'ll get a push 30 minutes before any Profiler horse runs, even if the app is closed.</div>';
+      + '</div>'
+      + '<div style="font-size:11px;color:var(--mut);margin-top:8px;line-height:1.6;">'
+      + (paused ? 'Alerts are paused — the Worker will skip your pushes until you resume.' : 'Background alerts enabled — you\'ll get a push 30 minutes before any Profiler horse runs, even if the app is closed.')
+      + '</div>';
   } else if (perm === 'denied') {
     el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
       +   '<div style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;"></div>'
@@ -196,6 +203,48 @@ function renderNotifSettings() {
       + '</div>'
       + '<button onclick="notifRequestPermission()" class="btn bblu">Enable Notifications</button>';
   }
+}
+
+// ── Pause / resume (client-side flag, Worker skips paused users) ──────────────
+function notifTogglePause() {
+  const paused = localStorage.getItem('rp-notif-paused') === '1';
+  localStorage.setItem('rp-notif-paused', paused ? '0' : '1');
+  // Update the paused flag on the subscription row so the Worker respects it
+  if (typeof SUPA_URL !== 'undefined' && typeof SUPA_USER_ID !== 'undefined' && SUPA_USER_ID) {
+    fetch(SUPA_URL + '/rest/v1/push_subscriptions?user_id=eq.' + encodeURIComponent(SUPA_USER_ID), {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPA_ANON,
+        'Authorization': 'Bearer ' + (window._rpAccessToken || SUPA_ANON),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ paused: !paused }),
+    });
+  }
+  renderNotifSettings();
+}
+
+// ── Disable — removes subscription from Supabase and unsubscribes SW ─────────
+async function notifDisable() {
+  if (!confirm('Disable background alerts? You can re-enable them here at any time.')) return;
+  // Remove from Supabase
+  if (typeof SUPA_URL !== 'undefined' && typeof SUPA_USER_ID !== 'undefined' && SUPA_USER_ID) {
+    await fetch(SUPA_URL + '/rest/v1/push_subscriptions?user_id=eq.' + encodeURIComponent(SUPA_USER_ID), {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPA_ANON,
+        'Authorization': 'Bearer ' + (window._rpAccessToken || SUPA_ANON),
+      },
+    });
+  }
+  // Unsubscribe the SW push subscription
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) await sub.unsubscribe();
+  } catch(e) {}
+  localStorage.removeItem('rp-notif-paused');
+  renderNotifSettings();
 }
 
 async function notifTest() {

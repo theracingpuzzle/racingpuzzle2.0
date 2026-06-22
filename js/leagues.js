@@ -59,7 +59,11 @@ async function _lgFetch(path, opts){
   const token=typeof _rpToken==='function'?_rpToken():'';
   const headers={'Content-Type':'application/json',apikey:SUPA_ANON,Prefer:'return=representation'};
   if(token)headers['Authorization']='Bearer '+token;
-  const res=await fetch(SUPA_URL+'/rest/v1/'+path,Object.assign({headers},opts||{}));
+  // Merge caller headers on top of defaults rather than replacing them
+  const mergedOpts=Object.assign({},opts||{});
+  if(opts&&opts.headers)mergedOpts.headers=Object.assign({},headers,opts.headers);
+  else mergedOpts.headers=headers;
+  const res=await fetch(SUPA_URL+'/rest/v1/'+path,mergedOpts);
   if(!res.ok){const e=await res.text();throw new Error(e);}
   const txt=await res.text();
   return txt?JSON.parse(txt):[];

@@ -33,21 +33,23 @@ async function notifRequestPermission() {
 
 // ── Save Web Push subscription to Supabase (enables background alerts) ────────
 async function notifSavePushSubscription() {
-  if (!VAPID_PUBLIC_KEY) return; // key not configured yet
+  console.log('[notif] notifSavePushSubscription called');
+  if (!VAPID_PUBLIC_KEY) { console.warn('[notif] No VAPID_PUBLIC_KEY'); return; }
   try {
     const reg = await navigator.serviceWorker.ready;
-    // Convert base64url VAPID key to Uint8Array
+    console.log('[notif] SW ready');
     const key = VAPID_PUBLIC_KEY.replace(/-/g,'+').replace(/_/g,'/');
     const raw = Uint8Array.from(atob(key), c => c.charCodeAt(0));
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: raw,
     });
+    console.log('[notif] Push subscribed:', sub.endpoint);
     const j = sub.toJSON();
     const userId = typeof SUPA_USER_ID !== 'undefined' ? SUPA_USER_ID : null;
-    if (!userId || !j.endpoint) return;
-    // Upsert to Supabase — conflict on (user_id, endpoint)
-    await fetch(SUPA_URL + '/rest/v1/push_subscriptions', {
+    console.log('[notif] userId:', userId, '| token:', window._rpAccessToken ? 'set' : 'missing');
+    if (!userId || !j.endpoint) { console.warn('[notif] Missing userId or endpoint'); return; }
+    const resp = await fetch(SUPA_URL + '/rest/v1/push_subscriptions', {
       method: 'POST',
       headers: {
         'apikey': SUPA_ANON,
@@ -62,8 +64,9 @@ async function notifSavePushSubscription() {
         auth: j.keys.auth,
       }),
     });
+    console.log('[notif] Supabase response:', resp.status, await resp.text());
   } catch(e) {
-    console.warn('Push subscription failed:', e);
+    console.error('[notif] Push subscription failed:', e);
   }
 }
 

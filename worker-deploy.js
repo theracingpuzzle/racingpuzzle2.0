@@ -206,6 +206,7 @@ async function handleScheduled(env) {
   const subs = await subsResp.json();
   if (!subs.length) return;
 
+  const isMorning = ukHour === 8; // morning summary fires during the 8am cron window
   const userIds = [...new Set(subs.map(s => s.user_id))];
 
   for (const userId of userIds) {
@@ -218,29 +219,56 @@ async function handleScheduled(env) {
 
     const watched = new Set(watchlist.map(w => normHorse(w.horse)));
 
-    const alerts = [];
+    // Find all watched horses running today
+    const todayRunners = [];
     for (const race of races) {
-      const raceMins  = timeToMins(race.time || race.off || '');
-      const minsUntil = raceMins - nowMins;
-      if (minsUntil < 25 || minsUntil > 40) continue;
-
       const runners = race.runners || race.horses || [];
       for (const runner of runners) {
         const horseName = runner.horse || runner.name || '';
         if (watched.has(normHorse(horseName))) {
-          alerts.push({
-            horse:     horseName,
-            time:      race.time || race.off || '',
-            course:    race.course || race.venue || '',
-            minsUntil: Math.round(minsUntil),
+          todayRunners.push({
+            horse:  horseName,
+            time:   race.time || race.off || '',
+            course: race.course || race.venue || '',
           });
         }
       }
     }
 
-    for (const alert of alerts) {
+    // ── Morning summary — one notification listing all runners today ──────────
+    if (isMorning && todayRunners.length) {
+      const summaryId = `rp-morning-${todayStr}-${userId.slice(-6)}`;
+      const sentResp  = await supaFetch(env, `/push_sent?id=eq.${encodeURIComponent(summaryId)}&select=id`);
+      const sent      = await sentResp.json();
+      if (!sent.length) {
+        const title = todayRunners.length === 1
+          ? `🏇 ${todayRunners[0].horse} runs today`
+          : `🏇 ${todayRunners.length} Profiler horses run today`;
+        const body = todayRunners.map(r => `${r.horse} · ${r.time} ${r.course}`).join('\n');
+        try {
+          const status = await sendWebPush(
+            sub,
+            { title, body, tag: summaryId },
+            env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY,
+            'mailto:dan.hill7@hotmail.com'
+          );
+          if (status === 410) {
+            await supaFetch(env, `/push_subscriptions?endpoint=eq.${encodeURIComponent(sub.endpoint)}`, 'DELETE');
+          }
+        } catch(e) { console.error('Morning push failed:', e); }
+        await supaFetch(env, '/push_sent', 'POST', { id: summaryId, user_id: userId, sent_at: new Date().toISOString() });
+      }
+    }
+
+    // ── Pre-race alerts — 15 to 30 mins before each race ─────────────────────
+    const preRaceAlerts = todayRunners.filter(r => {
+      const minsUntil = timeToMins(r.time) - nowMins;
+      return minsUntil >= 15 && minsUntil <= 30;
+    }).map(r => ({ ...r, minsUntil: Math.round(timeToMins(r.time) - nowMins) }));
+
+    for (const alert of preRaceAlerts) {
       const slug    = alert.horse.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-      const notifId = `rp-30min-${todayStr}-${userId.slice(-6)}-${slug}`;
+      const notifId = `rp-prerace-${todayStr}-${userId.slice(-6)}-${slug}`;
 
       const sentResp = await supaFetch(env, `/push_sent?id=eq.${encodeURIComponent(notifId)}&select=id`);
       const sent = await sentResp.json();
@@ -254,22 +282,15 @@ async function handleScheduled(env) {
             body:  `${alert.time} · ${alert.course}`,
             tag:   notifId,
           },
-          env.VAPID_PUBLIC_KEY,
-          env.VAPID_PRIVATE_KEY,
+          env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY,
           'mailto:dan.hill7@hotmail.com'
         );
         if (status === 410) {
           await supaFetch(env, `/push_subscriptions?endpoint=eq.${encodeURIComponent(sub.endpoint)}`, 'DELETE');
         }
-      } catch (e) {
-        console.error('Push send failed:', e);
-      }
+      } catch(e) { console.error('Pre-race push failed:', e); }
 
-      await supaFetch(env, '/push_sent', 'POST', {
-        id:      notifId,
-        user_id: userId,
-        sent_at: new Date().toISOString(),
-      });
+      await supaFetch(env, '/push_sent', 'POST', { id: notifId, user_id: userId, sent_at: new Date().toISOString() });
     }
   }
 }

@@ -8,6 +8,10 @@
 const NOTIF_PERM_KEY   = 'rp-notif-permission';  // 'granted'|'denied'|'default'
 const NOTIF_FIRED_KEY  = 'rp-notif-fired-';       // + date string, stores array of notif IDs fired
 
+// VAPID public key — must match VAPID_PUBLIC_KEY secret in the Cloudflare Worker
+// Generate once: see worker-cron.js instructions
+const VAPID_PUBLIC_KEY = typeof window._VAPID_PUBLIC_KEY !== 'undefined' ? window._VAPID_PUBLIC_KEY : '';
+
 // ── Permission state ──────────────────────────────────────────────────────────
 function notifPermission() {
   return (typeof Notification !== 'undefined') ? Notification.permission : 'unsupported';
@@ -17,13 +21,50 @@ function notifSupported() {
   return typeof Notification !== 'undefined' && 'serviceWorker' in navigator;
 }
 
-// ── Request permission ────────────────────────────────────────────────────────
+// ── Request permission + subscribe to Web Push ────────────────────────────────
 async function notifRequestPermission() {
   if (!notifSupported()) return 'unsupported';
   const result = await Notification.requestPermission();
   localStorage.setItem(NOTIF_PERM_KEY, result);
+  if (result === 'granted') await notifSavePushSubscription();
   renderNotifSettings();
   return result;
+}
+
+// ── Save Web Push subscription to Supabase (enables background alerts) ────────
+async function notifSavePushSubscription() {
+  if (!VAPID_PUBLIC_KEY) return; // key not configured yet
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    // Convert base64url VAPID key to Uint8Array
+    const key = VAPID_PUBLIC_KEY.replace(/-/g,'+').replace(/_/g,'/');
+    const raw = Uint8Array.from(atob(key), c => c.charCodeAt(0));
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: raw,
+    });
+    const j = sub.toJSON();
+    const userId = typeof SUPA_USER_ID !== 'undefined' ? SUPA_USER_ID : null;
+    if (!userId || !j.endpoint) return;
+    // Upsert to Supabase — conflict on (user_id, endpoint)
+    await fetch(SUPA_URL + '/rest/v1/push_subscriptions', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_ANON,
+        'Authorization': 'Bearer ' + (window._rpAccessToken || SUPA_ANON),
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        endpoint: j.endpoint,
+        p256dh: j.keys.p256dh,
+        auth: j.keys.auth,
+      }),
+    });
+  } catch(e) {
+    console.warn('Push subscription failed:', e);
+  }
 }
 
 // ── Fire an immediate notification via the SW registration ───────────────────
@@ -142,7 +183,7 @@ function renderNotifSettings() {
       + '</div>'
       + '<button onclick="notifTest()" class="btn bout" style="font-size:11px;padding:5px 12px;">Send Test</button>'
       + '</div>'
-      + '<div style="font-size:11px;color:var(--mut);margin-top:8px;line-height:1.6;">You\'ll get alerts when your Profiler horses are declared to run today, and a 30-minute countdown before each race.</div>';
+      + '<div style="font-size:11px;color:var(--mut);margin-top:8px;line-height:1.6;">Background alerts enabled — you\'ll get a push 30 minutes before any Profiler horse runs, even if the app is closed.</div>';
   } else if (perm === 'denied') {
     el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
       +   '<div style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;"></div>'
@@ -168,4 +209,6 @@ async function notifTest() {
 // ── Auto-init: render settings block on load ──────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   renderNotifSettings();
+  // Re-save subscription on load in case it expired or is new device
+  if (notifPermission() === 'granted') notifSavePushSubscription();
 });

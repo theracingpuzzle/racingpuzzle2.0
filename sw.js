@@ -6,7 +6,7 @@
 // Bump CACHE_VERSION whenever you deploy a meaningful update — this forces
 // the old cache to be cleared and a fresh copy of all assets to be fetched.
 
-const CACHE_VERSION = 'rp-v189';
+const CACHE_VERSION = 'rp-v190';
 
 const APP_SHELL = [
   './',
@@ -112,6 +112,7 @@ self.addEventListener('push', event => {
       tag:     data.tag     || 'rp-notification',
       data:    data.data    || {},
       vibrate: [200, 100, 200],
+      requireInteraction: true,
     })
   );
 });

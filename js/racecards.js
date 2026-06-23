@@ -550,12 +550,37 @@ function rcSwRenderRunners(idx, course, el){
           const _pm=_pr?_PM[_pr.reason||'eye-catcher']:null;
           const _badge='';
           const _nc=isNR?'var(--mut)':_pr?_pm.col:'var(--txt)';
+          // Bet chip for this runner
+          const _today=td();
+          const _hn2=(name||'').toLowerCase().trim();
+          const _realB=(D.bets||[]).find(function(b){return b.date===_today&&(b.horse||'').toLowerCase().trim()===_hn2;});
+          const _virtB=((getVBank().bets)||[]).find(function(b){return b.date===_today&&(b.horse||'').toLowerCase().trim()===_hn2;});
+          const _anyB=_realB||_virtB;
+          const _isVirtB=!_realB&&!!_virtB;
+          const _betChip=(function(){
+            if(!_anyB)return'';
+            const _stk=parseFloat(_anyB.stake)||0;
+            const _bt=_anyB.betType||'win';
+            const _od=_anyB.oddsDisplay||(_anyB.odds?decToFrac(_anyB.odds):'');
+            const _btLbl={win:'Win',ew:'E/W',place:'Place'}[_bt]||_bt;
+            const _col=_isVirtB?'#fb923c':'#60a5fa';
+            const _bg=_isVirtB?'rgba(251,146,60,.15)':'rgba(96,165,250,.15)';
+            const _bdr=_isVirtB?'rgba(251,146,60,.35)':'rgba(96,165,250,.35)';
+            const _pend=!_anyB.result||_anyB.result==='pending';
+            const _pnl=_pend?null:(parseFloat(_anyB.returns||0)-_stk);
+            const _suffix=_pend?'':(_pnl>=0?' +£'+_pnl.toFixed(2):' -£'+Math.abs(_pnl).toFixed(2));
+            return'<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;background:'+_bg+';border:1px solid '+_bdr+';color:'+_col+';border-radius:5px;padding:2px 6px;margin-left:5px;letter-spacing:.01em;">'
+              +(_isVirtB?'V ':'')+'£'+_stk.toFixed(2)+' '+_btLbl+(_od?' @ '+_od:'')
+              +(_suffix?'<span style="opacity:.8;">'+_suffix+'</span>':'')
+              +'</span>';
+          }());
           return'<div class="rc-runner-name-row">'
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'
             +(age?'<span class="rc-runner-age" style="font-size:0.72em;color:var(--mut);margin-left:4px;">'+age+'</span>':'')
             +(rpr?'<span class="rc-or">'+rpr+'</span>':'')
             +(_badge?'<span class="rc-wl-pill">'+_pm.svg+'</span>':'')
             +(_qr2?'<span style="font-size:10px;font-weight:800;background:rgba(234,179,8,.18);color:#854d0e;border:1px solid rgba(234,179,8,.4);border-radius:6px;padding:2px 7px;margin-left:5px;">MR '+_qr2.mr+'</span>':'')
+            +_betChip
             +(draw?'<span class="rc-runner-age">'+draw+'</span>':'')
           +'</div>'
           +(form

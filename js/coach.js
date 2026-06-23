@@ -182,7 +182,7 @@ async function autoMorningBrief(){
   try{
     const key = getApiKey();
     trackAIUsage();
-    const res = await fetch('/.netlify/functions/api', {
+    const res = await fetch('https://racing-proxy.theracingpuzzle.workers.dev', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -228,7 +228,7 @@ async function sendCoach(){
 
   try{
     trackAIUsage();
-    const res = await fetch('/.netlify/functions/api', {
+    const res = await fetch('https://racing-proxy.theracingpuzzle.workers.dev', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({

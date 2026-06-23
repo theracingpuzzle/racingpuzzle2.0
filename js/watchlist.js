@@ -727,6 +727,100 @@ function saveWLReview(profileId,horse,course){
   if(document.getElementById('wlp-modal'))openWLProfile(profileId);
 }
 
+// ── SCREENSHOT → HORSE PROFILE EXTRACTION ──
+
+function wlScanScreenshot(){
+  const key=(D.settings&&D.settings.apiKey)||'';
+  if(!key){alert('Add your Anthropic API key in Settings → Coach to use screenshot scanning.');return;}
+  const input=document.createElement('input');
+  input.type='file';input.accept='image/*';
+  input.onchange=async function(){
+    const file=input.files[0];
+    if(!file)return;
+    const btn=document.getElementById('wlf-scan-btn');
+    if(btn){btn.textContent='Scanning…';btn.disabled=true;}
+    try{
+      const base64=await new Promise(function(res,rej){
+        const r=new FileReader();
+        r.onload=function(){res(r.result.split(',')[1]);};
+        r.onerror=rej;
+        r.readAsDataURL(file);
+      });
+      const mediaType=file.type||'image/jpeg';
+      const prompt=`You are extracting horse racing data from a screenshot (Racing Post, At The Races, or a racecard).
+
+Extract every field you can find and return ONLY a JSON object with these keys (omit keys you cannot find):
+{
+  "horse": "horse name (no country suffix in brackets)",
+  "trainer": "trainer full name",
+  "jockey": "jockey full name",
+  "rating": "official rating as a number string e.g. 95",
+  "age": "age as a number string",
+  "going_prefs": ["array of going strings from: Firm, Good to Firm, Good, Good to Soft, Soft, Heavy"],
+  "distance_pref": "preferred trip e.g. 1m2f",
+  "notes": "one sentence summary of the horse's profile or recent form",
+  "reason_note": "what caught the eye or why to watch"
+}
+
+Return ONLY the JSON object, no explanation.`;
+
+      const resp=await fetch('https://racing-proxy.theracingpuzzle.workers.dev',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          type:'screenshot',
+          apiKey:key,
+          model:'claude-haiku-4-5-20251001',
+          max_tokens:512,
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+            {type:'text',text:prompt}
+          ]}]
+        })
+      });
+      const data=await resp.json();
+      const text=data.content&&data.content[0]&&data.content[0].text;
+      if(!text)throw new Error('No response from AI');
+      let parsed;
+      try{
+        const match=text.match(/\{[\s\S]*\}/);
+        parsed=JSON.parse(match?match[0]:text);
+      }catch{throw new Error('Could not parse AI response');}
+      _wlApplyScan(parsed);
+    }catch(e){
+      alert('Scan failed: '+e.message);
+    }finally{
+      if(btn){btn.textContent='📷 Scan Screenshot';btn.disabled=false;}
+    }
+  };
+  input.click();
+}
+
+function _wlApplyScan(d){
+  if(!d||typeof d!=='object')return;
+  let filled=0;
+  function set(id,val){if(!val)return;const el=document.getElementById(id);if(el){el.value=val;el.style.background='rgba(250,204,21,.08)';el.style.transition='background 1.5s';setTimeout(function(){el.style.background='';},2000);filled++;}}
+  set('wlf-horse', d.horse);
+  set('wlf-trainer', d.trainer);
+  set('wlf-rating', d.rating);
+  set('wlf-reason-note', d.reason_note||d.notes);
+  set('wlf-track', d.distance_pref);
+  set('wlf-cond-notes', d.notes);
+  // Going preferences — activate matching buttons
+  if(d.going_prefs&&d.going_prefs.length){
+    document.querySelectorAll('#wlf-going .wlf-going-btn').forEach(function(btn){
+      const g=btn.getAttribute('data-going')||'';
+      if(d.going_prefs.some(function(p){return p.toLowerCase()===g.toLowerCase();})){
+        if(!btn.classList.contains('on')){btn.click();}
+        filled++;
+      }
+    });
+  }
+  const msg=filled>0?'✓ Filled '+filled+' field'+(filled>1?'s':'')+' — review and save':'Nothing recognised — try a clearer screenshot';
+  const notice=document.getElementById('wlf-scan-notice');
+  if(notice){notice.textContent=msg;notice.style.display='block';}
+}
+
 // ── WATCHLIST DOSSIER MODAL ──
 let _wlDossier={obs:[],targets:[],goingPrefs:[]};
 
@@ -817,6 +911,10 @@ function openWLForm(id,prefill){
   +'</div></div></div>'
   +'<div class="wlf-section">'
   +'<div class="wlf-sec-hdr"><div class="wlf-sec-num">2</div><span class="wlf-sec-title">Horse</span></div>'
+  +'<div style="padding:10px 13px 0;">'
+  +'<button type="button" id="wlf-scan-btn" onclick="wlScanScreenshot()" style="width:100%;padding:11px;border-radius:9px;border:1.5px dashed rgba(250,204,21,.4);background:rgba(250,204,21,.06);color:var(--gld);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;">📷 Scan Screenshot — fill from Racing Post / ATR</button>'
+  +'<div id="wlf-scan-notice" style="display:none;font-size:12px;color:var(--grn);padding:6px 2px 0;"></div>'
+  +'</div>'
   +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
   +'<div class="fg"><label>Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'"></div>'
   +'<div class="g2">'

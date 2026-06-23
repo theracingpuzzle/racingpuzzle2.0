@@ -198,6 +198,21 @@ function renderHist(){
 function clrHF(){const hfr=document.getElementById('hfr');const hfs=document.getElementById('hfs');if(hfr)hfr.value='';if(hfs)hfs.value='';renderHist();}
 
 // ─── STATS ───
+let _statsCache = null; // { key, html }
+
+function _statsCacheKey(){
+  const scope = window._statsScope||'both';
+  const own   = window._ownStudyOnly?'1':'0';
+  const rBets = D.bets||[];
+  const vBets = (D.vBank&&D.vBank.bets)||[];
+  // Fast checksum: sum of (returns+stake) values catches result changes on any bet
+  const rSum  = rBets.reduce((a,b)=>a+(parseFloat(b.returns)||0)+(parseFloat(b.stake)||0),0).toFixed(2);
+  const vSum  = vBets.reduce((a,b)=>a+(parseFloat(b.returns)||0)+(parseFloat(b.stake)||0),0).toFixed(2);
+  return scope+'|'+own+'|'+rBets.length+'|'+vBets.length+'|'+rSum+'|'+vSum;
+}
+
+function invalidateStatsCache(){ _statsCache=null; }
+
 function toggleOwnStudy(){
   window._ownStudyOnly=!window._ownStudyOnly;
   const btn=document.getElementById('st-tog-own');
@@ -227,7 +242,14 @@ function setStatsScope(scope){
   renderStats();
 }
 
+const _STATS_ELS=['st-summary','st-insights-body','st-src-table','st-conf-table','st-type-table','st-monthly','st-trk','st-ck-impact','st-ck-signals','st-ck-table','st-ck-tip','st-jockey','st-trainer','dc-compare'];
+
 function renderStats(){
+  const ck=_statsCacheKey();
+  if(_statsCache&&_statsCache.key===ck){
+    _STATS_ELS.forEach(id=>{const el=document.getElementById(id);if(el&&_statsCache.els[id]!==undefined)el.innerHTML=_statsCache.els[id];});
+    return;
+  }
   const scope=window._statsScope||'both';
   const vbBets=getVBank().bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
   const realBets=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
@@ -675,6 +697,11 @@ function renderStats(){
   renderCkImpact(disciplineSet);
   renderCkSignals(disciplineSet);
   renderCkTip();
+
+  // Store rendered output in cache
+  const cacheEls={};
+  _STATS_ELS.forEach(id=>{const el=document.getElementById(id);if(el)cacheEls[id]=el.innerHTML;});
+  _statsCache={key:_statsCacheKey(),els:cacheEls};
 }
 
 // ─── CHECKLIST IMPACT (score bands + compliance + trend) ───

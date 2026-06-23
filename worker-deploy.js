@@ -295,6 +295,36 @@ async function handleScheduled(env) {
   }
 }
 
+// ── Anthropic API proxy (screenshot extraction + coach) ───────────────────────
+
+async function handleAI(body) {
+  const { apiKey, model, max_tokens, system, messages } = body;
+  if (!apiKey) {
+    return new Response(JSON.stringify({ error: 'No API key' }), {
+      status: 401, headers: { 'Content-Type': 'application/json', ...CORS }
+    });
+  }
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: model || 'claude-haiku-4-5-20251001',
+      max_tokens: max_tokens || 1024,
+      ...(system ? { system } : {}),
+      messages,
+    }),
+  });
+  const data = await resp.text();
+  return new Response(data, {
+    status: resp.status,
+    headers: { 'Content-Type': 'application/json', ...CORS }
+  });
+}
+
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export default {
@@ -303,8 +333,20 @@ export default {
       return new Response(null, { headers: CORS });
     }
 
+    let body;
+    try { body = await request.json(); } catch(e) {
+      return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+        status: 400, headers: { 'Content-Type': 'application/json', ...CORS }
+      });
+    }
+
+    // Route AI calls to Anthropic proxy
+    if (body.type === 'coach' || body.type === 'screenshot') {
+      return handleAI(body);
+    }
+
     try {
-      const { endpoint, params } = await request.json();
+      const { endpoint, params } = body;
 
       const username = env.RACING_API_USER;
       const password = env.RACING_API_PASS;

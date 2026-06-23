@@ -103,12 +103,14 @@ async function lgLoad(){
   }
 }
 
-// Load full detail for a league (all members + all picks)
+// Load full detail for a league (all members + last 90 days of picks)
 async function lgLoadDetail(leagueId){
   try{
+    // 90-day window keeps payload small while covering a full season
+    const cutoff=new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10);
     const [members,picks]=await Promise.all([
       _lgFetch('league_members?league_id=eq.'+encodeURIComponent(leagueId)+'&order=joined_at.asc'),
-      _lgFetch('league_picks?league_id=eq.'+encodeURIComponent(leagueId)+'&order=pick_date.desc,created_at.desc'),
+      _lgFetch('league_picks?league_id=eq.'+encodeURIComponent(leagueId)+'&pick_date=gte.'+cutoff+'&order=pick_date.desc,created_at.desc'),
     ]);
     _lgMembers[leagueId]=members;
     _lgPicks[leagueId]=picks;
@@ -1121,7 +1123,7 @@ async function lgWriteActivity(leagueId, type, message, pickId, emoji){
 
 async function lgLoadActivity(leagueId){
   try{
-    const rows=await _lgFetch('league_activity?league_id=eq.'+encodeURIComponent(leagueId)+'&order=created_at.desc&limit=40&select=*');
+    const rows=await _lgFetch('league_activity?league_id=eq.'+encodeURIComponent(leagueId)+'&order=created_at.desc&limit=30&select=*');
     _lgActivity=rows||[];
     _lgActivityLeague=leagueId;
   }catch(e){_lgActivity=[];}

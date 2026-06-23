@@ -181,6 +181,76 @@ function wlToggleGroup(r){
 
 // ─── PROFILER FILTERS ───
 let _wlFilter=null; // null = all, or one of: 'no-obs','past-target','running-today','edge'
+let _wlGroupBy='reason'; // 'reason' | 'race-type' | 'surface' | 'age'
+
+function setWLGroupBy(g){
+  _wlGroupBy=g;
+  _wlGroupOpen={};
+  renderWLList();
+}
+
+// Derive grouping key + metadata from a profile entry
+function _wlGroupKey(e){
+  if(_wlGroupBy==='reason') return e.reason||'eye-catcher';
+
+  if(_wlGroupBy==='race-type'){
+    const dist=e.distancePrefs&&e.distancePrefs.length?e.distancePrefs[0]:'';
+    // Use conditionsNotes or distance to infer handicapper vs group
+    const notes=(e.conditionsNotes||e.reasonNote||'').toLowerCase();
+    const trainer=(e.trainerIntel||'').toLowerCase();
+    if(notes.includes('group')||notes.includes('listed')||trainer.includes('group'))return 'group';
+    if(notes.includes('handicap')||notes.includes('h\'cap')||notes.includes('hcap'))return 'handicap';
+    return 'unclassified';
+  }
+
+  if(_wlGroupBy==='surface'){
+    const prefs=(e.goingPrefs||[]).join(' ').toLowerCase();
+    const notes=(e.conditionsNotes||'').toLowerCase();
+    if(prefs.includes('all weather')||prefs.includes('aw')||notes.includes('all weather')||notes.includes(' aw '))return 'aw';
+    // Use distance pref or notes to guess jumps
+    if(notes.includes('hurdle')||notes.includes('chase')||notes.includes('jump')||notes.includes('nh '))return 'jumps';
+    return 'flat';
+  }
+
+  if(_wlGroupBy==='age'){
+    const age=parseInt(e.age)||0;
+    if(age===2)return '2yo';
+    if(age===3)return '3yo';
+    if(age>=4)return '4yo+';
+    return 'unknown';
+  }
+
+  return e.reason||'eye-catcher';
+}
+
+const _WL_GROUP_META={
+  // reason groups
+  'eye-catcher':  {label:'Eye Catchers',  col:'#a78bfa'},
+  'future-target':{label:'Future Targets',col:'#34d399'},
+  'trainer-intel':{label:'Trainer Intel', col:'#38bdf8'},
+  'form-study':   {label:'Form Study',    col:'#f59e0b'},
+  'tip-source':   {label:'Tips & Sources',col:'#fb7185'},
+  // race-type groups
+  'handicap':     {label:'Handicappers',  col:'#6366f1'},
+  'group':        {label:'Group / Listed',col:'#ec4899'},
+  'unclassified': {label:'Unclassified',  col:'#94a3b8'},
+  // surface groups
+  'flat':         {label:'Flat',          col:'#22c55e'},
+  'jumps':        {label:'Jumps / NH',    col:'#f97316'},
+  'aw':           {label:'All Weather',   col:'#06b6d4'},
+  // age groups
+  '2yo':          {label:'2-Year-Olds',   col:'#a855f7'},
+  '3yo':          {label:'3-Year-Olds',   col:'#3b82f6'},
+  '4yo+':         {label:'4yo & Older',   col:'#14b8a6'},
+  'unknown':      {label:'Age Unknown',   col:'#94a3b8'},
+};
+
+const _WL_GROUPBY_ORDER={
+  reason:      ['form-study','eye-catcher','trainer-intel','tip-source','future-target'],
+  'race-type': ['handicap','group','unclassified'],
+  surface:     ['flat','jumps','aw'],
+  age:         ['2yo','3yo','4yo+','unknown'],
+};
 
 const WL_FILTERS=[
   {id:'running-today',  label:'Running Today',   title:'Horses from your profiler confirmed in today\'s racecards',
@@ -358,7 +428,7 @@ function renderWLList(){
   };
 
   const groups={};
-  entries.forEach(function(e){const r=e.reason||'eye-catcher';if(!groups[r])groups[r]=[];groups[r].push(e);});
+  entries.forEach(function(e){const k=_wlGroupKey(e);if(!groups[k])groups[k]=[];groups[k].push(e);});
 
   const total=entries.length;
   const totalObs=entries.reduce(function(a,e){return a+(e.observations||[]).length;},0);
@@ -373,22 +443,41 @@ function renderWLList(){
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--ora);">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
   +'</div>';
 
+  // ── Group-by selector ──
+  const GB_OPTS=[
+    {id:'reason',    label:'By Type'},
+    {id:'race-type', label:'Handicap / Group'},
+    {id:'surface',   label:'Flat / Jumps / AW'},
+    {id:'age',       label:'By Age'},
+  ];
+  html+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">'
+    +GB_OPTS.map(function(o){
+      const on=_wlGroupBy===o.id;
+      return'<button onclick="setWLGroupBy(\''+o.id+'\')" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:14px;cursor:pointer;white-space:nowrap;transition:all .12s;'
+        +(on?'background:var(--navy);color:#fff;border:1px solid var(--navy);':'background:var(--sur);color:var(--mut);border:1px solid var(--bdr);')+'">'+o.label+'</button>';
+    }).join('')
+  +'</div>';
+
   // ── Groups ──
-  REASON_ORDER.forEach(function(r){
+  const groupOrder=_WL_GROUPBY_ORDER[_wlGroupBy]||Object.keys(groups);
+  // Add any keys not in the predefined order (e.g. custom reason values)
+  Object.keys(groups).forEach(function(k){if(!groupOrder.includes(k))groupOrder.push(k);});
+
+  groupOrder.forEach(function(r){
     if(!groups[r]||!groups[r].length)return;
-    const rm=REASON_META[r];
+    const rm=_WL_GROUP_META[r]||{label:r,col:'#94a3b8'};
     const grp=groups[r];
 
     const isOpen=!!_wlGroupOpen[r];
     html+='<div class="wll-cat-hdr" data-grp="'+r+'" style="'
       +'display:flex;align-items:center;gap:10px;'
-      +'padding:11px 14px;cursor:pointer;border-radius:10px;'
+      +'padding:11px 14px;cursor:pointer;'
       +'background:'+rm.col+';margin-bottom:'+(isOpen?'0':'8px')+';'
       +'border-radius:'+(isOpen?'10px 10px 0 0':'10px')+';'
       +'transition:border-radius .2s;">'
       +'<span style="display:flex;align-items:center;gap:8px;flex:1;color:#fff;">'
-        +'<span style="display:flex;align-items:center;opacity:.9;">'+REASON_SVG[r]+'</span>'
-        +'<span style="font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;">'+rm.labelPlural+'</span>'
+        +(REASON_SVG[r]?'<span style="display:flex;align-items:center;opacity:.9;">'+REASON_SVG[r]+'</span>':'')
+        +'<span style="font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;">'+(rm.labelPlural||rm.label)+'</span>'
       +'</span>'
       +'<span style="font-family:var(--font);font-size:12px;font-weight:700;color:rgba(255,255,255,.75);margin-right:6px;">'+grp.length+'</span>'
       +'<span style="color:rgba(255,255,255,.85);font-size:18px;line-height:1;display:inline-block;transition:transform .2s;'+(isOpen?'transform:rotate(90deg);':'')+'">›</span>'
@@ -415,7 +504,7 @@ function renderWLList(){
           +'<div class="wll-main">'
             +'<div class="wll-name">'+(e.horse||'Unknown')+(e.needsReview?'<span class="wll-review-badge">REVIEW</span>':'')+'</div>'
             +'<div class="wll-sub">'+subParts.join(' · ')+'</div>'
-            +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+REASON_SVG[r]+' '+rm.label+'</div>'
+            +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+(REASON_SVG[r]?REASON_SVG[r]+' ':'')+rm.label+'</div>'
           +'</div>'
           +'<div class="wll-right">'
             +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--navy)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
@@ -755,7 +844,7 @@ Extract every field you can find and return ONLY a JSON object with these keys (
   "trainer": "trainer full name",
   "jockey": "jockey full name",
   "rating": "official rating as a number string e.g. 95",
-  "age": "age as a number string",
+  "age": "age as a number only e.g. 3",
   "going_prefs": ["array of going strings from: Firm, Good to Firm, Good, Good to Soft, Soft, Heavy"],
   "distance_pref": "preferred trip e.g. 1m2f",
   "notes": "one sentence summary of the horse's profile or recent form",
@@ -803,6 +892,7 @@ function _wlApplyScan(d){
   set('wlf-horse', d.horse);
   set('wlf-trainer', d.trainer);
   set('wlf-rating', d.rating);
+  set('wlf-age', d.age);
   set('wlf-reason-note', d.reason_note||d.notes);
   set('wlf-track', d.distance_pref);
   set('wlf-cond-notes', d.notes);
@@ -921,7 +1011,10 @@ function openWLForm(id,prefill){
   +'<div class="fg"><label>Current OR <span style="font-weight:400;color:var(--mut);">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(e?e.currentRating||'':p.currentRating||'')+'"></div>'
   +'<div class="fg"><label style="color:var(--gld);">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" class="wlf-mr-input"></div>'
   +'</div>'
+  +'<div class="g2">'
   +'<div class="fg"><label>Trainer</label><input type="text" id="wlf-trainer" value="'+(e?e.trainer||'':p.trainer||'')+'"></div>'
+  +'<div class="fg"><label>Age</label><input type="number" id="wlf-age" min="2" max="20" placeholder="e.g. 3" value="'+(e?e.age||'':p.age||'')+'"></div>'
+  +'</div>'
   +'</div></div>'
   +(function(){
     const pid=e?e.id:'';
@@ -1103,6 +1196,7 @@ function saveWLEntry(id){
       return prev;
     })(),
     trainer:(document.getElementById('wlf-trainer').value||'').trim(),
+    age:parseInt((document.getElementById('wlf-age')||{value:''}).value)||0,
     reason:(document.getElementById('wlf-reason')||{value:'eye-catcher'}).value||'eye-catcher',
     reasonNote:(document.getElementById('wlf-reason-note')||{value:''}).value.trim(),
     unraced:!!(document.getElementById('wlf-unraced')&&document.getElementById('wlf-unraced').checked),

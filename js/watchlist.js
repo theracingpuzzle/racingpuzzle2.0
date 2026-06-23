@@ -185,7 +185,7 @@ let _wlGroupBy='reason'; // 'reason' | 'race-type' | 'surface' | 'age'
 
 function setWLGroupBy(g){
   _wlGroupBy=g;
-  _wlGroupOpen={};
+  Object.keys(_wlGroupOpen).forEach(function(k){delete _wlGroupOpen[k];});
   renderWLList();
 }
 

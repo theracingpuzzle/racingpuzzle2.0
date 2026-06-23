@@ -215,11 +215,12 @@ function flashHdrBalance(mode, deductedAmount){
 
 // ─── HEADER ───
 function updHdr(){
-  // ── Real bank — recalculate live from settled bets ──
+  // ── Real bank — settled P&L minus pending stakes ──
   const bankStart=D.bank&&D.bank.start!=null?D.bank.start:0;
-  const realProfit=(D.bets||[]).filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';}).reduce(function(a,b){return a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);},0);
-  const bankCur=bankStart+realProfit;
-  D.bank.current=bankCur; // keep stored value in sync
+  const realSettledPnl=(D.bets||[]).filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';}).reduce(function(a,b){return a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);},0);
+  const realPendingStake=(D.bets||[]).filter(function(b){return !b.result||b.result==='pending';}).reduce(function(a,b){return a+(parseFloat(b.stake)||0);},0);
+  const bankCur=bankStart+realSettledPnl-realPendingStake;
+  D.bank.current=bankCur;
   const diff=bankCur-bankStart;
   const arrow=!bankStart?'':diff>0?'<span style="color:#4ade80;font-size:9px;">▲</span>':diff<0?'<span style="color:#f87171;font-size:9px;">▼</span>':'';
   const hbank=document.getElementById('hbank');
@@ -227,11 +228,12 @@ function updHdr(){
   if(hbank)hbank.textContent=bankCur.toFixed(2);
   if(hbankArrow)hbankArrow.innerHTML=arrow;
 
-  // ── Virtual bank — recalculate live from settled bets ──
+  // ── Virtual bank — settled P&L minus pending stakes ──
   const vs=D.vBank&&D.vBank.start!=null?D.vBank.start:500;
-  const virtProfit=(D.vBank&&D.vBank.bets||[]).filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';}).reduce(function(a,b){return a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);},0);
-  const vc=vs+virtProfit;
-  if(D.vBank)D.vBank.current=vc; // keep stored value in sync
+  const virtSettledPnl=(D.vBank&&D.vBank.bets||[]).filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';}).reduce(function(a,b){return a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);},0);
+  const virtPendingStake=(D.vBank&&D.vBank.bets||[]).filter(function(b){return !b.result||b.result==='pending';}).reduce(function(a,b){return a+(parseFloat(b.stake)||0);},0);
+  const vc=vs+virtSettledPnl-virtPendingStake;
+  if(D.vBank)D.vBank.current=vc;
   const vdiff=vc-vs;
   const varrow=!vs?'':vdiff>0?'<span style="color:#4ade80;font-size:9px;">▲</span>':vdiff<0?'<span style="color:#f87171;font-size:9px;">▼</span>':'';
   const hvbank=document.getElementById('hvbank');

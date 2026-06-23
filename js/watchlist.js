@@ -730,7 +730,7 @@ function saveWLReview(profileId,horse,course){
 // ── SCREENSHOT → HORSE PROFILE EXTRACTION ──
 
 function wlScanScreenshot(){
-  const key=(D.settings&&D.settings.apiKey)||'';
+  const key=(typeof getApiKey==='function'?getApiKey():'')||(D.settings&&D.settings.apiKey)||'';
   if(!key){alert('Add your Anthropic API key in Settings → Coach to use screenshot scanning.');return;}
   const input=document.createElement('input');
   input.type='file';input.accept='image/*';

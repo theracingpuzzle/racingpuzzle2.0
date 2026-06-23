@@ -1029,13 +1029,26 @@ function rcSwRaceCard(race, course){
         const ofr = r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||rcGetOFR(horse)||'';
         const posClass = pos==1?'rc-pos-1':pos==2?'rc-pos-2':pos==3?'rc-pos-3':'rc-pos-n';
         const hn = horse.toLowerCase().trim();
-        const myBet = todayBets.find(function(b){return (b.horse||'').toLowerCase().trim()===hn&&b.result&&b.result!=='pending';});
-        const pnl = myBet?(parseFloat(myBet.returns||0)-parseFloat(myBet.stake||0)):0;
-        const betBadge = myBet
-          ? (myBet.result==='win'||myBet.result==='place'
-              ? '<span class="rc-your-bet rc-your-bet-win">Your Bet +'+(pnl>0?fp(pnl):'')+'</span>'
-              : '<span class="rc-your-bet rc-your-bet-loss">Your Bet</span>')
-          : '';
+        const myBet = todayBets.find(function(b){return (b.horse||'').toLowerCase().trim()===hn;});
+        const myBetPnl = myBet?(parseFloat(myBet.returns||0)-parseFloat(myBet.stake||0)):0;
+        const betBadge = (function(){
+          if(!myBet)return'';
+          const _stk=parseFloat(myBet.stake)||0;
+          const _bt=myBet.betType||'win';
+          const _od=myBet.oddsDisplay||(myBet.odds?decToFrac(myBet.odds):'');
+          const _btLbl={win:'Win',ew:'E/W',place:'Place'}[_bt]||_bt;
+          const _isVirt=!!(myBet.is_virtual||myBet._virt);
+          const _pending=!myBet.result||myBet.result==='pending';
+          const _won=myBet.result==='win'||myBet.result==='place';
+          const _col=_pending?(_isVirt?'#fb923c':'#60a5fa'):_won?'#4ade80':'#f87171';
+          const _bg=_pending?(_isVirt?'rgba(251,146,60,.15)':'rgba(96,165,250,.15)'):_won?'rgba(74,222,128,.15)':'rgba(248,113,113,.15)';
+          const _bdr=_pending?(_isVirt?'rgba(251,146,60,.35)':'rgba(96,165,250,.35)'):_won?'rgba(74,222,128,.35)':'rgba(248,113,113,.35)';
+          const _pnlStr=_pending?'':myBetPnl>=0?' +£'+myBetPnl.toFixed(2):' -£'+Math.abs(myBetPnl).toFixed(2);
+          return'<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;background:'+_bg+';border:1px solid '+_bdr+';color:'+_col+';border-radius:5px;padding:2px 6px;margin-left:5px;letter-spacing:.01em;">'
+            +(_isVirt?'V ':'')+'£'+_stk.toFixed(2)+' '+_btLbl+(_od?' @ '+_od:'')
+            +(_pnlStr?'<span style="opacity:.85;">'+_pnlStr+'</span>':'')
+            +'</span>';
+        }());
         const wlEntry = getWL().find(function(w){return(w.horse||'').toLowerCase().trim()===hn;});
         const _rGoing = esc(race.going||race.going_description||'');
         const _rDate  = esc(race.date||td());

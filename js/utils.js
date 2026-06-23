@@ -192,4 +192,32 @@ function renderBetLimit(){
     +'</div>';
 }
 
-function calcLiveStake(){calcStakeGuide('real');}
+function calcLiveStake(){calcStakeGuide('real');renderBetSummary('real');}
+
+function renderBetSummary(mode){
+  const isVirt=mode==='virt';
+  const el=document.getElementById(isVirt?'vb-bet-summary':'lb-bet-summary');
+  if(!el)return;
+  const accentCol=isVirt?'#fb923c':'#60a5fa';
+  const stake=parseFloat(document.getElementById(isVirt?'vbs':'lbs').value)||0;
+  const odRaw=(document.getElementById(isVirt?'vbo':'lbo').value||'').trim();
+  const bt=(document.getElementById(isVirt?'vbtype':'lbtype')||{value:'win'}).value;
+  const conf=parseInt((document.getElementById(isVirt?'vbconf':'lbconf')||{value:'3'}).value)||3;
+  if(!stake&&!odRaw){el.style.display='none';return;}
+  const od=fo(odRaw);
+  const typeLabel={win:'Win',ew:'Each Way',place:'Place'};
+  const confLabel=['','Speculative','Interested','Solid','Strong','Best Bet'];
+  const mutCol='rgba(232,228,220,.4)';
+  let potRet='';
+  if(od>=1&&stake){
+    const r=calcReturns('win',stake,od,bt,'');
+    if(r)potRet='→ <strong style="color:'+accentCol+';">£'+r.toFixed(2)+'</strong> '+(bt==='ew'?'if win':'potential return');
+  }
+  const parts=[];
+  if(stake)parts.push('<span style="font-size:17px;font-weight:800;color:var(--txt);">£'+stake.toFixed(2)+'</span>');
+  if(bt)parts.push('<span style="font-size:14px;font-weight:700;color:'+accentCol+';">'+typeLabel[bt]+'</span>');
+  if(odRaw)parts.push('<span style="font-size:13px;color:var(--txt);">@ <strong>'+odRaw+'</strong></span>');
+  if(conf)parts.push('<span style="font-size:11px;color:'+mutCol+';">'+confLabel[conf]+'</span>');
+  el.style.display='block';
+  el.innerHTML='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:'+(potRet?'5':'0')+'px;">'+parts.join('<span style="color:'+mutCol+';padding:0 1px;">·</span>')+'</div>'+(potRet?'<div style="font-size:12px;color:'+mutCol+';">'+potRet+'</div>':'');
+}

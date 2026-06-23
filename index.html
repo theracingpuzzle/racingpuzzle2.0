@@ -190,8 +190,8 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="fg"><label>Trainer</label><input type="text" id="lbtrainer" placeholder="" autocomplete="off"></div>
             <div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="lbo" placeholder="" list="oddsl"  oninput="calcLiveStake()"><datalist id="oddsl"><option value="EVS"><option value="1/2"><option value="4/6"><option value="4/5"><option value="5/4"><option value="6/4"><option value="7/4"><option value="2/1"><option value="9/4"><option value="5/2"><option value="11/4"><option value="3/1"><option value="7/2"><option value="4/1"><option value="9/2"><option value="5/1"><option value="11/2"><option value="6/1"><option value="7/1"><option value="8/1"><option value="10/1"><option value="12/1"><option value="14/1"><option value="16/1"><option value="20/1"><option value="25/1"><option value="33/1"><option value="50/1"><option value="100/1"></datalist></div>
             <div class="fg"><label>Stake (£)</label><input type="number" id="lbs" step="0.5" min="0" placeholder="" oninput="calcLiveStake()"></div>
-            <div class="fg"><label>Type</label><select id="lbtype"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>
-            <div class="fg"><label>Confidence</label><select id="lbconf" onchange="calcLiveStake()"><option value="1">1 — Speculative</option><option value="2">2 — Interested</option><option value="3" selected>3 — Solid</option><option value="4">4 — Strong</option><option value="5">5 — Best Bet</option></select></div>
+            <div class="fg"><label>Type</label><select id="lbtype" onchange="renderBetSummary('real')"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>
+            <div class="fg"><label>Confidence</label><select id="lbconf" onchange="calcLiveStake();renderBetSummary('real')"><option value="1">1 — Speculative</option><option value="2">2 — Interested</option><option value="3" selected>3 — Solid</option><option value="4">4 — Strong</option><option value="5">5 — Best Bet</option></select></div>
           </div>
           <div id="lb-stake-guide" style="display:none;background:rgba(232,228,220,.07);border:1px solid rgba(232,228,220,.18);border-radius:9px;padding:10px 13px;margin-bottom:10px;">
             <div id="lb-stake-guide-content" class="body-txt"></div>
@@ -203,6 +203,7 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="fg"><label>Result</label><select id="lbres" onchange="onSwResChange()"><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>
             <div class="fg"><label>Returns (£)</label><input type="number" id="lbret" step="0.01" min="0" placeholder=""></div>
           </div>
+          <div id="lb-bet-summary" style="display:none;background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.25);border-radius:9px;padding:10px 13px;margin-bottom:10px;font-family:'Barlow Condensed','Arial Narrow',sans-serif;"></div>
           <button class="btn bgld bw" style="padding:14px;" onclick="saveLB()">Save Real Bet</button>
         </div>
 
@@ -224,10 +225,10 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="fg"><label>Time</label><input type="text" id="vbtime" placeholder=""></div>
             <div class="fg"><label>Jockey</label><input type="text" id="vbjockey" placeholder="" autocomplete="off"></div>
             <div class="fg"><label>Trainer</label><input type="text" id="vbtrainer" placeholder="" autocomplete="off"></div>
-            <div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="vbo" placeholder="" list="oddsl"  oninput="onVResChange();calcVirtStake()"></div>
-            <div class="fg"><label>Stake (£)</label><input type="number" id="vbs" step="0.5" min="0" placeholder="" oninput="calcVirtStake()"></div>
-            <div class="fg"><label>Type</label><select id="vbtype" onchange="calcVirtStake()"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>
-            <div class="fg"><label>Confidence</label><select id="vbconf" onchange="calcVirtStake()"><option value="1">1 — Speculative</option><option value="2">2 — Interested</option><option value="3" selected>3 — Solid</option><option value="4">4 — Strong</option><option value="5">5 — Best Bet</option></select></div>
+            <div class="fg"><label>Odds (5/1, EVS)</label><input type="text" id="vbo" placeholder="" list="oddsl"  oninput="onVResChange();calcVirtStake();renderBetSummary('virt')"></div>
+            <div class="fg"><label>Stake (£)</label><input type="number" id="vbs" step="0.5" min="0" placeholder="" oninput="calcVirtStake();renderBetSummary('virt')"></div>
+            <div class="fg"><label>Type</label><select id="vbtype" onchange="calcVirtStake();renderBetSummary('virt')"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>
+            <div class="fg"><label>Confidence</label><select id="vbconf" onchange="calcVirtStake();renderBetSummary('virt')"><option value="1">1 — Speculative</option><option value="2">2 — Interested</option><option value="3" selected>3 — Solid</option><option value="4">4 — Strong</option><option value="5">5 — Best Bet</option></select></div>
           </div>
           <!-- Stake guidance panel — mirrors real form -->
           <div id="vb-stake-guide" style="display:none;background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.18);border-radius:9px;padding:10px 13px;margin-bottom:10px;cursor:pointer;" title="Tap to use suggested stake">
@@ -241,6 +242,7 @@ RACING <span class="logo-accent">PUZZLE</span>
             <div class="fg"><label>Returns (£)</label><input type="number" id="vbret" step="0.01" min="0" placeholder=""></div>
           </div>
           <div id="vb-calc" style="display:none;background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.2);border-radius:8px;padding:9px 12px;margin-bottom:10px;font-family:monospace;font-size:12px;color:#fb923c;"></div>
+          <div id="vb-bet-summary" style="display:none;background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);border-radius:9px;padding:10px 13px;margin-bottom:10px;font-family:'Barlow Condensed','Arial Narrow',sans-serif;"></div>
           <button class="btn bw" style="background:#fb923c;color:#141414;font-weight:700;padding:14px;" onclick="saveVB()">Save Virtual Bet</button>
         </div>
       </div>

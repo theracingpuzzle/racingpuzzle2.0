@@ -297,11 +297,12 @@ async function handleScheduled(env) {
 
 // ── Anthropic API proxy (screenshot extraction + coach) ───────────────────────
 
-async function handleAI(body) {
-  const { apiKey, model, max_tokens, system, messages } = body;
+async function handleAI(body, env) {
+  const { model, max_tokens, system, messages } = body;
+  const apiKey = env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'No API key' }), {
-      status: 401, headers: { 'Content-Type': 'application/json', ...CORS }
+    return new Response(JSON.stringify({ error: 'Anthropic API key not configured on server' }), {
+      status: 500, headers: { 'Content-Type': 'application/json', ...CORS }
     });
   }
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -342,7 +343,7 @@ export default {
 
     // Route AI calls to Anthropic proxy
     if (body.type === 'coach' || body.type === 'screenshot') {
-      return handleAI(body);
+      return handleAI(body, env);
     }
 
     try {

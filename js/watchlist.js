@@ -442,12 +442,14 @@ function renderWLList(){
     {id:'surface',   label:'Flat / Jumps / AW'},
     {id:'age',       label:'By Age'},
   ];
-  html+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">'
+  const missingAges=wl.filter(function(e){return !e.age;}).length;
+  html+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">'
     +GB_OPTS.map(function(o){
       const on=_wlGroupBy===o.id;
       return'<button onclick="setWLGroupBy(\''+o.id+'\')" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:14px;cursor:pointer;white-space:nowrap;transition:all .12s;'
         +(on?'background:var(--navy);color:#fff;border:1px solid var(--navy);':'background:var(--sur);color:var(--mut);border:1px solid var(--bdr);')+'">'+o.label+'</button>';
     }).join('')
+    +(missingAges?'<button onclick="wlBulkFillAges()" id="wl-bulk-age-btn" title="Use AI to fill missing ages for '+missingAges+' horse'+(missingAges===1?'':'s')+'" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;padding:4px 10px;border-radius:14px;cursor:pointer;white-space:nowrap;background:rgba(168,85,247,.1);color:#a855f7;border:1px solid rgba(168,85,247,.35);margin-left:auto;">✨ Fill '+missingAges+' ages</button>':'')
   +'</div>';
 
   // ── Groups ──
@@ -811,10 +813,43 @@ function saveWLReview(profileId,horse,course){
 
 // ── AI HORSE ASSESSMENT ──
 
-async function wlAIAssess(){
-  const key=(typeof getApiKey==='function'?getApiKey():'')||(D.settings&&D.settings.apiKey)||'';
-  if(!key){alert('Add your Anthropic API key in Settings → Coach to use AI Assess.');return;}
+async function wlBulkFillAges(){
+  const wl=getWL();
+  const missing=wl.filter(function(e){return !e.age;});
+  if(!missing.length){alert('All horses already have an age set.');return;}
+  const btn=document.getElementById('wl-bulk-age-btn');
+  if(btn){btn.textContent='✨ Filling ages…';btn.disabled=true;}
+  const horseList=missing.map(function(e,i){return (i+1)+'. '+e.horse+(e.trainer?' (trainer: '+e.trainer+')':'');}).join('\n');
+  const prompt='You are an expert UK horse racing analyst. For each horse below, return their current age as of 2026 based on your knowledge. If you are unsure of a specific horse, make your best estimate based on typical UK racing patterns.\n\nReturn ONLY a JSON array where each object has "horse" (exact name as given) and "age" (integer, years old). Do not include any explanation.\n\nHorses:\n'+horseList;
+  try{
+    const resp=await fetch('https://racing-proxy.theracingpuzzle.workers.dev',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'screenshot',model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await resp.json();
+    const text=data.content&&data.content[0]&&data.content[0].text;
+    if(!text)throw new Error('No response from AI');
+    let parsed;
+    try{const m=text.match(/\[[\s\S]*\]/);parsed=JSON.parse(m?m[0]:text);}catch(e){throw new Error('Could not parse AI response');}
+    if(!Array.isArray(parsed)||!parsed.length)throw new Error('Empty response');
+    let updated=0;
+    parsed.forEach(function(row){
+      if(!row.horse||!row.age)return;
+      const entry=wl.find(function(e){return(e.horse||'').toLowerCase().trim()===(row.horse||'').toLowerCase().trim();});
+      if(entry&&!entry.age){entry.age=parseInt(row.age,10)||0;entry.updatedAt=Date.now();updated++;}
+    });
+    save();
+    renderWLList();
+    if(updated)alert('Updated ages for '+updated+' horse'+(updated===1?'':'s')+'. Review individual profiles to confirm.');
+    else alert('No ages were updated — AI may not have recognised the horses.');
+  }catch(e){
+    if(btn){btn.textContent='✨ Fill ages';btn.disabled=false;}
+    alert('Error: '+e.message);
+  }
+}
 
+async function wlAIAssess(){
   const horse=(document.getElementById('wlf-horse')||{value:''}).value.trim();
   if(!horse){alert('Enter a horse name first.');return;}
 
@@ -859,7 +894,6 @@ Base your assessment on UK racing norms. OR 0-59 = sellers/claimers, 60-79 = low
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         type:'screenshot',
-        apiKey:key,
         model:'claude-sonnet-4-6',
         max_tokens:600,
         messages:[{role:'user',content:prompt}]
@@ -923,8 +957,6 @@ function wlAIApplyToNotes(encodedJson){
 // ── SCREENSHOT → HORSE PROFILE EXTRACTION ──
 
 function wlScanScreenshot(){
-  const key=(typeof getApiKey==='function'?getApiKey():'')||(D.settings&&D.settings.apiKey)||'';
-  if(!key){alert('Add your Anthropic API key in Settings → Coach to use screenshot scanning.');return;}
   const input=document.createElement('input');
   input.type='file';input.accept='image/*';
   input.onchange=async function(){
@@ -962,7 +994,6 @@ Return ONLY the JSON object, no explanation.`;
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
           type:'screenshot',
-          apiKey:key,
           model:'claude-haiku-4-5-20251001',
           max_tokens:512,
           messages:[{role:'user',content:[

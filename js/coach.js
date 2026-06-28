@@ -51,9 +51,7 @@ function updateAIUsageDisplay(){
 
 let coachHistory = [];
 
-function getApiKey(){
-  return localStorage.getItem(COACH_KEY_STORE)||(D.settings&&D.settings.apiKey)||'';
-}
+function getApiKey(){ return ''; } // key is now server-side in the Cloudflare Worker
 
 function buildCoachContext(){
   const settled = D.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr');
@@ -105,9 +103,8 @@ const QUICK_PROMPTS = [
 ];
 
 function renderCoachCard(){
-  const key = getApiKey();
   const warnEl = document.getElementById('coach-key-warn');
-  if(warnEl) warnEl.style.display = key ? 'none' : 'block';
+  if(warnEl) warnEl.style.display = 'none';
 
   // Quick prompts
   const qEl = document.getElementById('coach-quick');
@@ -118,10 +115,9 @@ function renderCoachCard(){
   }
 
   // Morning brief — show button if not done today, don't auto-fire
-  if(coachHistory.length === 0 && key){
+  if(coachHistory.length === 0){
     const lastBriefDate = localStorage.getItem('re-brief-date');
     if(lastBriefDate !== td()){
-      // Show "Get briefing" button instead of auto-calling
       const msgsEl2 = document.getElementById('coach-msgs');
       if(msgsEl2) msgsEl2.innerHTML = '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--txt);">'
         +'<strong style="color:var(--navy);">Good '+( new Date().getHours()<12?'morning':'afternoon')+'. Coach ready.</strong><br><br>'
@@ -135,21 +131,10 @@ function renderCoachCard(){
   // Show welcome if still no messages
   const msgsEl = document.getElementById('coach-msgs');
   if(msgsEl && !msgsEl.children.length){
-    const hasKey = !!key;
-    if(!hasKey){
-      msgsEl.innerHTML = '<div style="text-align:center;padding:28px 16px;">'
-        +'<div style="font-size:36px;margin-bottom:12px;">🤖</div>'
-        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">Coach needs an API key</div>'
-        +'<div style="font-size:13px;color:var(--mut);line-height:1.65;margin-bottom:8px;">The Coach uses your own Claude API key to give you a personalised daily briefing, analyse your betting patterns, and answer questions about your data.</div>'
-        +'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:18px;">Get a free key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--gld2);text-decoration:none;">console.anthropic.com</a> — the Coach is very token-efficient.</div>'
-        +'<button onclick="navTo(\'settings\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Add API Key in Settings →</button>'
-        +'</div>';
-    } else {
-      msgsEl.innerHTML = '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--txt);">'
-        +'<strong style="color:var(--navy);">The Coach is ready.</strong><br><br>'
-        +'Tap a quick prompt below to get started.'
-        +'</div>';
-    }
+    msgsEl.innerHTML = '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--txt);">'
+      +'<strong style="color:var(--navy);">The Coach is ready.</strong><br><br>'
+      +'Tap a quick prompt below to get started.'
+      +'</div>';
   }
 }
 
@@ -180,14 +165,12 @@ async function autoMorningBrief(){
   coachHistory = [{role:'user', content: briefPrompt}];
 
   try{
-    const key = getApiKey();
     trackAIUsage();
     const res = await fetch('https://racing-proxy.theracingpuzzle.workers.dev', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         type:'coach',
-        apiKey: getApiKey(),
         model:'claude-sonnet-4-20250514',
         max_tokens:300,
         system: buildCoachContext(),
@@ -214,12 +197,6 @@ async function sendCoach(){
   const msg = inp.value.trim();
   if(!msg) return;
 
-  const key = getApiKey();
-  if(!key){
-    appendCoachMsg('coach','⚠️ Add your Anthropic API key in Command → Settings to use the Coach.');
-    return;
-  }
-
   inp.value = '';
   appendCoachMsg('user', msg);
   coachHistory.push({role:'user', content: msg});
@@ -233,7 +210,6 @@ async function sendCoach(){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         type:'coach',
-        apiKey: getApiKey(),
         model:'claude-sonnet-4-20250514',
         max_tokens:1000,
         system: buildCoachContext(),

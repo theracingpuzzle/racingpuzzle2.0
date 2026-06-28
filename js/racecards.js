@@ -49,7 +49,7 @@ function formatDist(d){
 }
 
 // ─── SWIPE RACECARDS / RESULTS ───
-let rcSwCurrentRaces=[], rcSwRacesByMeeting={}, rcSwView='course', _pendingRCBet=null;
+let rcSwCurrentRaces=[], rcSwRacesByMeeting={}, rcSwView='time', _pendingRCBet=null;
 
 function rcSwipeInit(){
   if(!rcSwCurrentRaces.length) rcSwLoadMeetings();
@@ -87,8 +87,8 @@ function rcSwRenderUI(){
 
   const v=rcSwView;
   let html='<div class="rc-view-tog" style="width:100%;">'
-    +'<button class="rc-view-btn '+(v==='course'?'on':'off')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
     +'<button class="rc-view-btn '+(v==='time'?'on':'off')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
+    +'<button class="rc-view-btn '+(v==='course'?'on':'off')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
     +'</div>';
 
   uiEl.innerHTML=html;
@@ -933,7 +933,7 @@ function _lboBackToChecklist(){
 }
 
 
-let rcSwResultsData = [], rcSwResultsView = 'course', rcSwResultsOpenCourse = '';
+let rcSwResultsData = [], rcSwResultsView = 'time', rcSwResultsOpenCourse = '';
 const _rcResTimeOpen = {}; // tracks which time-view result races are expanded
 
 function rcSwToggleResTime(idx){
@@ -992,8 +992,8 @@ function rcSwRenderResultsUI(){
   const _rsb='font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;';
   filterEl.innerHTML =
     '<div class="rc-view-tog">'
-    + '<button class="rc-view-btn '+(!onT?'on':'off')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
     + '<button class="rc-view-btn '+(onT?'on':'off')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
+    + '<button class="rc-view-btn '+(!onT?'on':'off')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
     + '</div>';
 
   const listEl = document.getElementById('sw-results-list');
@@ -1619,7 +1619,7 @@ function rcSlStartFromExpanded(course, raceIdx){
 
 function rcSlBackToRace(){
   // Re-open the meeting and race row
-  rcSwView='course';
+  rcSwView='time';
   rcSwRenderUI();
   if(_rcSlReturnCourse){
     setTimeout(function(){

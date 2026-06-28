@@ -1120,11 +1120,26 @@ function openWLForm(id,prefill){
   +'<div class="fg"><label>Age</label><input type="number" id="wlf-age" min="2" max="20" placeholder="e.g. 3" value="'+(e?e.age||'':p.age||'')+'"></div>'
   +'</div>'
   +'<div class="g2">'
-  +'<div class="fg"><label>Surface</label><select id="wlf-surface"><option value="">— Unknown</option><option value="flat"'+(((e&&e.surface)||'')===\'flat\'?\' selected\':\'\')+'>Flat</option><option value="jumps"'+(((e&&e.surface)||'')===\'jumps\'?\' selected\':\'\')+'>Jumps / NH</option><option value="aw"'+(((e&&e.surface)||'')===\'aw\'?\' selected\':\'\')+'>All Weather</option></select></div>'
-  +'<div class="fg"><label>Race Type</label><select id="wlf-race-type"><option value="">— Unknown</option><option value="handicap"'+(((e&&e.raceType)||'')===\'handicap\'?\' selected\':\'\')+'>Handicapper</option><option value="group"'+(((e&&e.raceType)||'')===\'group\'?\' selected\':\'\')+'>Group / Listed</option><option value="maiden"'+(((e&&e.raceType)||'')===\'maiden\'?\' selected\':\'\')+'>Maiden</option><option value="claimer"'+(((e&&e.raceType)||'')===\'claimer\'?\' selected\':\'\')+'>Claimer</option></select></div>'
+  +(function(){
+      const sf=e?e.surface||'':'';
+      const rt=e?e.raceType||'':'';
+      return '<div class="fg"><label>Surface</label><select id="wlf-surface">'
+        +'<option value="">— Unknown</option>'
+        +'<option value="flat"'+(sf==='flat'?' selected':'')+'>Flat</option>'
+        +'<option value="jumps"'+(sf==='jumps'?' selected':'')+'>Jumps / NH</option>'
+        +'<option value="aw"'+(sf==='aw'?' selected':'')+'>All Weather</option>'
+        +'</select></div>'
+        +'<div class="fg"><label>Race Type</label><select id="wlf-race-type">'
+        +'<option value="">— Unknown</option>'
+        +'<option value="handicap"'+(rt==='handicap'?' selected':'')+'>Handicapper</option>'
+        +'<option value="group"'+(rt==='group'?' selected':'')+'>Group / Listed</option>'
+        +'<option value="maiden"'+(rt==='maiden'?' selected':'')+'>Maiden</option>'
+        +'<option value="claimer"'+(rt==='claimer'?' selected':'')+'>Claimer</option>'
+        +'</select></div>';
+    }())
   +'</div>'
   +'<div style="padding:4px 0 2px;">'
-  +'<button type="button" id="wlf-ai-btn" onclick="wlAIAssess()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid rgba(168,85,247,.4);background:rgba(168,85,247,.07);color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;">✨ AI Assess — get Claude\'s read on this horse</button>'
+  +'<button type="button" id="wlf-ai-btn" onclick="wlAIAssess()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid rgba(168,85,247,.4);background:rgba(168,85,247,.07);color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;">&#10024; AI Assess &#8212; get Claude\'s read on this horse</button>'
   +'<div id="wlf-ai-result" style="display:none;margin-top:10px;border-radius:9px;border:1px solid rgba(168,85,247,.25);background:rgba(168,85,247,.06);padding:12px 13px;"></div>'
   +'</div>'
   +'</div></div>'

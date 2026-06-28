@@ -1003,8 +1003,9 @@ Return ONLY the JSON object, no explanation.`;
         })
       });
       const data=await resp.json();
+      if(data.error)throw new Error(typeof data.error==='object'?(data.error.message||JSON.stringify(data.error)):data.error);
       const text=data.content&&data.content[0]&&data.content[0].text;
-      if(!text)throw new Error('No response from AI');
+      if(!text)throw new Error('No response from AI — raw: '+JSON.stringify(data).slice(0,200));
       let parsed;
       try{
         const match=text.match(/\{[\s\S]*\}/);

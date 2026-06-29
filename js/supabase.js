@@ -246,6 +246,8 @@ async function _syncProfiles(){
     surface:e.surface||null,
     needs_review:e.needsReview||false,
     unraced:e.unraced||false,
+    ai_assessment:e.aiAssessment||null,
+    ai_assessed_at:e.aiAssessedAt?new Date(e.aiAssessedAt).toISOString():null,
     created_at:e.createdAt?new Date(e.createdAt).toISOString():new Date().toISOString(),
     updated_at:e.updatedAt?new Date(e.updatedAt).toISOString():new Date().toISOString()
   };});
@@ -451,6 +453,8 @@ async function supaLoad(){
         surface:p.surface||'',
         needsReview:p.needs_review||false,
         unraced:p.unraced||false,
+        aiAssessment:p.ai_assessment||null,
+        aiAssessedAt:p.ai_assessed_at?new Date(p.ai_assessed_at).getTime():null,
         observations:obsMap[p.id]||[],
         targets:targetMap[p.id]||[],
         createdAt:new Date(p.created_at).getTime(),

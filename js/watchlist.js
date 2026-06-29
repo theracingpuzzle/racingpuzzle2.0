@@ -442,14 +442,12 @@ function renderWLList(){
     {id:'surface',   label:'Flat / Jumps / AW'},
     {id:'age',       label:'By Age'},
   ];
-  const missingAges=wl.filter(function(e){return !e.age;}).length;
   html+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">'
     +GB_OPTS.map(function(o){
       const on=_wlGroupBy===o.id;
       return'<button onclick="setWLGroupBy(\''+o.id+'\')" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:14px;cursor:pointer;white-space:nowrap;transition:all .12s;'
         +(on?'background:var(--navy);color:#fff;border:1px solid var(--navy);':'background:var(--sur);color:var(--mut);border:1px solid var(--bdr);')+'">'+o.label+'</button>';
     }).join('')
-    +(missingAges?'<button onclick="wlBulkFillAges()" id="wl-bulk-age-btn" title="Use AI to fill missing ages for '+missingAges+' horse'+(missingAges===1?'':'s')+'" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;padding:4px 10px;border-radius:14px;cursor:pointer;white-space:nowrap;background:rgba(168,85,247,.1);color:#a855f7;border:1px solid rgba(168,85,247,.35);margin-left:auto;">✨ Fill '+missingAges+' ages</button>':'')
   +'</div>';
 
   // ── Groups ──
@@ -824,80 +822,77 @@ function saveWLReview(profileId,horse,course){
 
 // ── AI HORSE ASSESSMENT ──
 
-async function wlBulkFillAges(){
-  const wl=getWL();
-  const missing=wl.filter(function(e){return !e.age;});
-  if(!missing.length){alert('All horses already have an age set.');return;}
-  const btn=document.getElementById('wl-bulk-age-btn');
-  if(btn){btn.textContent='✨ Filling ages…';btn.disabled=true;}
-  const horseList=missing.map(function(e,i){return (i+1)+'. '+e.horse+(e.trainer?' (trainer: '+e.trainer+')':'');}).join('\n');
-  const prompt='You are an expert UK horse racing analyst. For each horse below, return their current age as of 2026 based on your knowledge. If you are unsure of a specific horse, make your best estimate based on typical UK racing patterns.\n\nReturn ONLY a JSON array where each object has "horse" (exact name as given) and "age" (integer, years old). Do not include any explanation.\n\nHorses:\n'+horseList;
-  try{
-    const resp=await fetch('https://racing-proxy.theracingpuzzle.workers.dev',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({type:'screenshot',model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})
-    });
-    const data=await resp.json();
-    const text=data.content&&data.content[0]&&data.content[0].text;
-    if(!text)throw new Error('No response from AI');
-    let parsed;
-    try{const m=text.match(/\[[\s\S]*\]/);parsed=JSON.parse(m?m[0]:text);}catch(e){throw new Error('Could not parse AI response');}
-    if(!Array.isArray(parsed)||!parsed.length)throw new Error('Empty response');
-    let updated=0;
-    parsed.forEach(function(row){
-      if(!row.horse||!row.age)return;
-      const entry=wl.find(function(e){return(e.horse||'').toLowerCase().trim()===(row.horse||'').toLowerCase().trim();});
-      if(entry&&!entry.age){entry.age=parseInt(row.age,10)||0;entry.updatedAt=Date.now();updated++;}
-    });
-    save();
-    renderWLList();
-    if(updated)alert('Updated ages for '+updated+' horse'+(updated===1?'':'s')+'. Review individual profiles to confirm.');
-    else alert('No ages were updated — AI may not have recognised the horses.');
-  }catch(e){
-    if(btn){btn.textContent='✨ Fill ages';btn.disabled=false;}
-    alert('Error: '+e.message);
-  }
-}
 
 async function wlAIAssess(){
   const horse=(document.getElementById('wlf-horse')||{value:''}).value.trim();
   if(!horse){alert('Enter a horse name first.');return;}
 
+  // Read from form fields (current state being edited)
   const or=(document.getElementById('wlf-rating')||{value:''}).value.trim();
   const age=(document.getElementById('wlf-age')||{value:''}).value.trim();
   const trainer=(document.getElementById('wlf-trainer')||{value:''}).value.trim();
   const notes=(document.getElementById('wlf-cond-notes')||{value:''}).value.trim();
   const intel=(document.getElementById('wlf-intel')||{value:''}).value.trim();
   const reasonNote=(document.getElementById('wlf-reason-note')||{value:''}).value.trim();
+  const goingPrefsForm=(_wlDossier.goingPrefs||[]).join(', ');
+  const distPrefForm=(_wlDossier.distPrefs||[]).join(', ');
+
+  // Pull stored profile data for existing profiles
+  const openProfileId=(document.getElementById('wl-modal')||{}).dataset&&document.getElementById('wl-modal').dataset.profileId;
+  const storedEntry=openProfileId?(getWL().find(function(x){return x.id===openProfileId;})):null;
+  const storedReviews=openProfileId?(D.reviews||[]).filter(function(r){return r.profileId===openProfileId;}).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');}):[];
+  const storedObs=storedEntry?(storedEntry.observations||[]).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');}):[];
+  const orHistory=storedEntry?(storedEntry.orHistory||[]):[];
 
   const btn=document.getElementById('wlf-ai-btn');
   const res=document.getElementById('wlf-ai-result');
-  if(btn){btn.textContent='✨ Assessing…';btn.disabled=true;}
+  if(btn){btn.textContent='🧩 Generating…';btn.disabled=true;}
   if(res){res.style.display='none';}
 
-  const prompt=`You are an expert UK horse racing analyst. Assess this horse profile and give a concise, punchy verdict a punter can act on.
+  // Build OR history string
+  const orHistStr=orHistory.length>1?orHistory.map(function(h){return h.or+(h.date?' ('+h.date+')':'');}).join(' → '):'';
 
+  // Build race reviews string (last 6)
+  const reviewsStr=storedReviews.slice(0,6).map(function(r){
+    const parts=[r.date||'',r.raceName||r.course||'',r.result||'',r.position?'pos:'+r.position:'',r.beatenDistance?r.beatenDistance+'l':'',r.goingConfirmed?'going:'+r.goingConfirmed:'',r.mrAdjustment?'MR adj:'+(r.mrAdjustment>0?'+':'')+r.mrAdjustment:''];
+    const line=parts.filter(Boolean).join(' | ');
+    return '• '+line+(r.notes?'\n  Note: '+r.notes:'')+(r.verdict?' ['+r.verdict+']':'');
+  }).join('\n');
+
+  // Build observations string (last 8)
+  const obsStr=storedObs.slice(0,8).map(function(o){
+    const parts=[o.date||'',o.raceName||'',o.going?'going:'+o.going:'',o.result||''];
+    return '• '+parts.filter(Boolean).join(' | ')+(o.notes?'\n  '+o.notes:'');
+  }).join('\n');
+
+  const prompt=`You are an expert UK horse racing analyst. Generate a Puzzle Report — a concise, punchy assessment a serious punter can act on. Use ALL available profile data below.
+
+HORSE PROFILE
 Horse: ${horse}
 ${or?'Official Rating (OR): '+or:''}
+${orHistStr?'OR history: '+orHistStr:''}
 ${age?'Age: '+age+'yo':''}
 ${trainer?'Trainer: '+trainer:''}
-${reasonNote?'Why watched: '+reasonNote:''}
+${reasonNote?'Why logged: '+reasonNote:''}
+${goingPrefsForm?'Going preferences: '+goingPrefsForm:''}
+${distPrefForm?'Distance preferences: '+distPrefForm:''}
 ${notes?'Conditions notes: '+notes:''}
 ${intel?'Trainer intel: '+intel:''}
+${reviewsStr?'\nRACE REVIEWS (most recent first)\n'+reviewsStr:''}
+${obsStr?'\nOBSERVATIONS\n'+obsStr:''}
 
 Respond with ONLY a JSON object:
 {
-  "level": "one line — e.g. 'Solid Class 3 handicapper, competitive off OR ${or||'this mark'}'",
-  "projection": "one line — what this horse could become or where connections might aim",
-  "sweet_spot": "ideal conditions in one line — e.g. 'Good to Soft, 1m2f, right-handed'",
-  "watch_for": "one thing to look out for next time",
+  "level": "one line — current ability level based on all available evidence",
+  "projection": "one line — where connections could realistically aim this horse",
+  "sweet_spot": "ideal conditions — going, distance, track type if discernible",
+  "watch_for": "the single most important thing to watch for next time",
   "race_type": "one of: handicap, group, maiden, claimer — best fit",
   "surface": "one of: flat, jumps, aw — best fit",
-  "verdict": "2-3 sentence punter's summary — honest, direct, no fluff"
+  "verdict": "2-3 sentences — honest punter's summary synthesising all the evidence above, no fluff"
 }
 
-Base your assessment on UK racing norms. OR 0-59 = sellers/claimers, 60-79 = lower handicaps (Class 4-6), 80-94 = solid handicapper (Class 2-3), 95-109 = Listed/Group 3 potential, 110+ = Group 1-2 level. Return ONLY the JSON.`;
+UK racing context: OR 0-59 = sellers/claimers, 60-79 = lower handicaps (Class 4-6), 80-94 = solid handicapper (Class 2-3), 95-109 = Listed/Group 3 potential, 110+ = Group 1-2. Return ONLY the JSON.`;
 
   try{
     const resp=await fetch('https://racing-proxy.theracingpuzzle.workers.dev',{
@@ -924,8 +919,22 @@ Base your assessment on UK racing norms. OR 0-59 = sellers/claimers, 60-79 = low
     if(rtEl&&!rtEl.value&&parsed.race_type)rtEl.value=parsed.race_type;
     if(sfEl&&!sfEl.value&&parsed.surface)sfEl.value=parsed.surface;
 
-    // Store result so onclick doesn't need to embed potentially unsafe text
+    // Store result in memory and auto-save to profile immediately
     window._wlLastAIAssess = parsed;
+    parsed._assessedAt = Date.now();
+
+    // Auto-save to existing profile if we have one open
+    const openProfileId=(document.getElementById('wl-modal')||{}).dataset&&document.getElementById('wl-modal').dataset.profileId;
+    if(openProfileId){
+      const wl=getWL();
+      const entry=wl.find(function(x){return x.id===openProfileId;});
+      if(entry){
+        entry.aiAssessment=parsed;
+        entry.aiAssessedAt=Date.now();
+        D.watchlist=wl;
+        save();
+      }
+    }
 
     // Render result panel
     const esc2=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
@@ -933,18 +942,20 @@ Base your assessment on UK racing norms. OR 0-59 = sellers/claimers, 60-79 = low
     if(res){
       res.style.display='block';
       res.innerHTML=
-        '<div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a855f7;margin-bottom:10px;">✨ AI Assessment — '+esc2(horse)+'</div>'
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+          +'<div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a855f7;">🧩 Puzzle Report</div>'
+          +(openProfileId?'<div style="font-size:9px;color:#4ade80;font-weight:700;">✓ Saved automatically</div>':'<div style="font-size:9px;color:#f59e0b;font-weight:700;">Save profile to keep</div>')
+        +'</div>'
         +row('Current Level',parsed.level,'#60a5fa')
         +row('Projection',parsed.projection,'#34d399')
         +row('Sweet Spot',parsed.sweet_spot,'#f59e0b')
         +row('Watch For',parsed.watch_for,'#fb7185')
-        +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(168,85,247,.2);font-size:13px;color:var(--txt);line-height:1.6;">'+esc2(parsed.verdict||'')+'</div>'
-        +'<button onclick="wlAIApplyToNotes()" style="margin-top:10px;width:100%;padding:8px;border-radius:7px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.1);color:#a855f7;font-size:12px;font-weight:700;cursor:pointer;">+ Add to Conditions Notes</button>';
+        +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(168,85,247,.2);font-size:13px;color:var(--txt);line-height:1.6;">'+esc2(parsed.verdict||'')+'</div>';
     }
   }catch(e){
     if(res){res.style.display='block';res.innerHTML='<div style="color:var(--red);font-size:13px;">Assessment failed: '+e.message+'</div>';}
   }finally{
-    if(btn){btn.textContent='✨ AI Assess — get Claude\'s read on this horse';btn.disabled=false;}
+    if(btn){btn.textContent='🧩 Generate Puzzle Report';btn.disabled=false;}
   }
 }
 
@@ -1130,7 +1141,7 @@ function openWLForm(id,prefill){
     targets:e&&e.targets?e.targets.map(function(t){return Object.assign({},t);}):p.targets||[]
   };
   const modal=document.createElement('div');
-  modal.id='wl-modal';modal.className='wlf-modal';
+  modal.id='wl-modal';modal.className='wlf-modal';if(e&&e.id)modal.dataset.profileId=e.id;
   const going=['Firm','Good to Firm','Good','Good to Soft','Soft','Heavy'];
   const goingPrefs=e?e.goingPrefs||[]:[];
   _wlDossier.goingPrefs=goingPrefs.slice();
@@ -1248,7 +1259,7 @@ function openWLForm(id,prefill){
             +'</select></div>'
           +'</div>'
           +'<div style="padding:4px 0 2px;">'
-            +'<button type="button" id="wlf-ai-btn" onclick="wlAIAssess()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid rgba(168,85,247,.4);background:rgba(168,85,247,.07);color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;">&#10024; AI Assess &#8212; get Claude\'s read on this horse</button>'
+            +'<button type="button" id="wlf-ai-btn" onclick="wlAIAssess()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid rgba(168,85,247,.4);background:rgba(168,85,247,.07);color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;">🧩 Generate Puzzle Report</button>'
             +'<div id="wlf-ai-result" style="display:none;margin-top:10px;border-radius:9px;border:1px solid rgba(168,85,247,.25);background:rgba(168,85,247,.06);padding:12px 13px;"></div>'
           +'</div>'
         +'</div>'
@@ -1542,6 +1553,8 @@ function saveWLEntry(id){
     distancePref:(_wlDossier.distPrefs||[]).join(', '),
     trackPref:(document.getElementById('wlf-track').value||'').trim(),
     conditionsNotes:(document.getElementById('wlf-cond-notes').value||'').trim(),
+    aiAssessment:old?old.aiAssessment||(window._wlLastAIAssess||null):(window._wlLastAIAssess||null),
+    aiAssessedAt:old?old.aiAssessedAt||(window._wlLastAIAssess?Date.now():null):(window._wlLastAIAssess?Date.now():null),
     raceDate,
     raceName:ioRace||'',
     notes:(document.getElementById('wlf-intel').value||'').trim(),
@@ -2317,6 +2330,24 @@ function _wlpBuildHTML(e){
     h+='<div class="wlp-intel"><span class="wlp-intel-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><div class="wlp-intel-text">'+esc(intelText)+'</div></div>';
   }
   h+='</div>';
+
+  // AI ASSESSMENT SECTION
+  if(e.aiAssessment){
+    const ai=e.aiAssessment;
+    const assessedDate=e.aiAssessedAt?_wlpFmt(new Date(e.aiAssessedAt).toISOString().split('T')[0]):'';
+    h+='<div class="wlp-section" style="border:1px solid rgba(168,85,247,.25);background:rgba(168,85,247,.04);">';
+    h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num" style="background:rgba(168,85,247,.2);color:#a855f7;">🧩</div><span class="wlp-section-title">Puzzle Report</span></div>';
+    if(assessedDate)h+='<span style="font-size:9px;color:var(--mut);">'+assessedDate+'</span>';
+    h+='</div>';
+    h+='<div style="padding:0 12px 12px;">';
+    if(ai.level)h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(168,85,247,.1);"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Current Level</span><span style="font-size:12px;font-weight:800;color:#60a5fa;">'+esc(ai.level)+'</span></div>';
+    if(ai.projection)h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(168,85,247,.1);"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Projection</span><span style="font-size:12px;font-weight:800;color:#34d399;">'+esc(ai.projection)+'</span></div>';
+    if(ai.sweet_spot)h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(168,85,247,.1);"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Sweet Spot</span><span style="font-size:12px;font-weight:800;color:#f59e0b;">'+esc(ai.sweet_spot)+'</span></div>';
+    if(ai.watch_for)h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(168,85,247,.1);"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Watch For</span><span style="font-size:12px;font-weight:700;color:#fb7185;">'+esc(ai.watch_for)+'</span></div>';
+    if(ai.verdict)h+='<div style="padding-top:10px;font-size:13px;color:var(--txt);line-height:1.6;font-style:italic;">'+esc(ai.verdict)+'</div>';
+    h+='<button onclick="openWLForm(\''+e.id+'\')" style="margin-top:10px;width:100%;padding:7px;border-radius:7px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#a855f7;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">🧩 Regenerate Puzzle Report</button>';
+    h+='</div></div>';
+  }
 
   h+='</div>'; // wlp-scroll-body
 

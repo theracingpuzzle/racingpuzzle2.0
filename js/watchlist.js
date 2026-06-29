@@ -2174,32 +2174,29 @@ function _wlpBuildHTML(e){
     const todayStr=td();
     targets.forEach(function(t){
       const isPast=t.date&&t.date<=todayStr;
-      // Check if a review already exists for this target — match by race name (case-insensitive) since dates may differ
       const raceLower=(t.race||'').toLowerCase().trim();
       const alreadyReviewed=(D.reviews||[]).some(function(r){
         if(r.profileId!==e.id)return false;
         const rn=(r.raceName||'').toLowerCase().trim();
-        // Match if race name contains the target name or vice versa (handles partial/abbreviated names)
         return rn===raceLower||rn.includes(raceLower)||raceLower.includes(rn)||(t.date&&r.date===t.date);
       });
-      const _tgtIcon=isPast
-        ?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
-        :'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>';
-      h+='<div class="wlp-target-item"><span class="wlp-target-icon">'+_tgtIcon+'</span>';
-      h+='<div style="flex:1;min-width:0;"><div class="wlp-target-race">'+esc(t.race||'—')+'</div><div class="wlp-target-meta">'+esc(t.track||'—')+'</div></div>';
-      h+='<div style="text-align:right;flex-shrink:0;">';
-      h+='<div class="wlp-target-date" style="color:'+(isPast?'var(--mut)':'var(--gld)')+';">'+(t.date?fdate(t.date):'TBC')+'</div>';
-      if(t.condition)h+='<div class="wlp-target-cond">'+esc(t.condition)+'</div>';
-      h+='<div style="display:flex;gap:4px;justify-content:flex-end;margin-top:5px;">';
-      if(alreadyReviewed){
-        h+='<div style="font-size:10px;color:#4ade80;">✓ Reviewed</div>';
-      }else{
-        const rv='openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\''+esc(t.track||'')+'\',\'\',\''+esc(t.race||'')+'\',\'\',\'\',\'\')';
-        h+='<button onclick="'+rv+'" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.05em;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.4);color:#fb923c;border-radius:6px;cursor:pointer;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Review</button>';
-      }
-      h+='<button onclick="wlDeleteTarget(\''+e.id+'\',\''+esc(t.id||t.race)+'\')" style="padding:3px 7px;font-size:10px;font-weight:700;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:6px;cursor:pointer;" title="Remove target">✕</button>';
+      const rv='openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\''+esc(t.track||'')+'\',\'\',\''+esc(t.race||'')+'\',\'\',\'\',\'\')';
+      h+='<div style="padding:11px 13px;border-bottom:1px solid var(--bdr);">';
+        // Line 1: date · course — consistent with reviews
+        h+='<div style="font-size:10px;font-weight:700;color:'+(isPast?'var(--mut)':alreadyReviewed?'#4ade80':'var(--gld)')+';letter-spacing:.04em;margin-bottom:3px;">'
+          +[t.date?fdate(t.date):'TBC',t.track||''].filter(Boolean).join(' · ')
+          +(alreadyReviewed?' · <span style="color:#4ade80;">✓ Reviewed</span>':isPast?' · <span style="color:#f59e0b;">Awaiting review</span>':'')
+        +'</div>';
+        // Line 2: race name
+        h+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:'+(isPast&&!alreadyReviewed?'var(--mut)':'var(--txt)')+';">'+esc(t.race||'—')+'</div>';
+        // Line 3: condition note if set
+        if(t.condition)h+='<div style="font-size:11px;color:var(--mut);margin-top:2px;font-style:italic;">'+esc(t.condition)+'</div>';
+        // Line 4: actions — plain text, unobtrusive
+        h+='<div style="display:flex;gap:8px;margin-top:6px;align-items:center;">';
+          if(!alreadyReviewed)h+='<button onclick="'+rv+'" style="font-size:10px;font-weight:700;color:'+(isPast?'#f59e0b':'var(--mut)');+';background:none;border:none;padding:0;cursor:pointer;">Write review</button><span style="color:var(--bdr);">·</span>';
+          h+='<button onclick="wlDeleteTarget(\''+e.id+'\',\''+esc(t.id||t.race)+'\')" style="font-size:10px;font-weight:700;color:var(--mut);background:none;border:none;padding:0;cursor:pointer;">Remove</button>';
+        h+='</div>';
       h+='</div>';
-      h+='</div></div>';
     });
   }else{
     h+='<div class="wlp-target-empty">No targets yet</div>';
@@ -2283,41 +2280,43 @@ function _wlpBuildHTML(e){
     profileReviews.forEach(function(r){
       const isObs=r.source==='observation';
       const vm=VERDICT_META[r.verdict]||null;
-      const rc=RESULT_COL[r.result]||'#3a3a5c';
-      // Observations get a visually distinct muted treatment with an "Initial Sighting" label
-      h+='<div style="padding:11px 13px;border-bottom:1px solid var(--bdr);'+(isObs?'background:rgba(255,255,255,.015);opacity:.85;':'')+'">';
-      if(isObs){
-        h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:7px;">'
-          +'<svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>'
-          +'<span style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#a78bfa;">Initial Sighting</span>'
-        +'</div>';
-      }
-      h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">';
-      h+='<div style="flex:1;min-width:0;">';
-      h+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:'+(isObs?'13':'14')+'px;font-weight:800;color:'+(isObs?'var(--mut)':'#fff')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(r.raceName||r.course||'Sighting')+'</div>';
-      h+='<div style="font-size:11px;color:var(--mut);margin-top:1px;">'+[r.date?_wlpFmt(r.date):'',r.course||'',r.distance||''].filter(Boolean).join(' · ')+'</div>';
-      if(r.odds)h+='<div style="font-size:11px;font-weight:700;color:var(--gld);margin-top:2px;">'+r.odds+'</div>';
+      const rc=RESULT_COL[r.result]||'var(--mut)';
+      h+='<div style="padding:12px 13px;border-bottom:1px solid var(--bdr);">';
+      // Row 1: date · course · race name + result badge
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:'+(isObs||r.notes||vm?'6':'0')+'px;">';
+        h+='<div style="min-width:0;flex:1;">';
+          // Date + course — always consistent, always first
+          h+='<div style="font-size:10px;font-weight:700;color:var(--mut);letter-spacing:.04em;margin-bottom:3px;">'+[r.date?_wlpFmt(r.date):'',r.course||''].filter(Boolean).join(' · ')+'</div>';
+          // Race name — primary label
+          h+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:'+(isObs?'var(--mut)':'var(--txt)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(isObs?'Initial Sighting':(r.raceName||'Race'))+'</div>';
+        h+='</div>';
+        // Result badge right-aligned
+        h+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">';
+          if(r.result)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>';
+          if(vm)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+vm.col+'15;border:1px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';
+        h+='</div>';
       h+='</div>';
-      h+='<div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">';
-      if(r.result)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>';
-      if(vm)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;padding:2px 8px;border-radius:5px;background:'+vm.col+'15;border:1px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';
-      h+='</div></div>';
+      // Row 2: detail chips (position, going, odds etc.) — only if present
       const chips=[];
-      if(r.position)chips.push('Pos: '+r.position);
-      if(r.beatenDistance)chips.push(r.beatenDistance);
-      if(r.mrAdjustment)chips.push((r.mrAdjustment>0?'+':'')+r.mrAdjustment+' MR');
-      if(r.goingConfirmed)chips.push('Going: '+r.goingConfirmed);
-      if(r.backNextTime)chips.push('Back: '+r.backNextTime);
-      if(chips.length)h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;">'+chips.map(function(c){return'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--mut);">'+c+'</span>';}).join('')+'</div>';
-      if(r.notes)h+='<div style="font-size:12px;color:var(--mut);font-style:italic;line-height:1.5;">'+esc(r.notes)+'</div>';
-      h+='<div style="margin-top:8px;display:flex;gap:6px;">'
-        +'<button onclick="openWLEditReview(\''+r.id+'\')" style="display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--mut);cursor:pointer;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Edit</button>'
-        +'<button onclick="wlDeleteReview(\''+r.id+'\',\''+e.id+'\')" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:6px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:#f87171;cursor:pointer;">Delete ✕</button>'
-        +'</div>';
+      if(r.position)chips.push({l:'Pos',v:r.position});
+      if(r.goingConfirmed)chips.push({l:'Going',v:r.goingConfirmed});
+      if(r.beatenDistance)chips.push({l:'Beaten',v:r.beatenDistance});
+      if(r.odds)chips.push({l:'SP',v:r.odds});
+      if(r.mrAdjustment)chips.push({l:'MR',v:(r.mrAdjustment>0?'+':'')+r.mrAdjustment});
+      if(r.backNextTime)chips.push({l:'Back',v:r.backNextTime});
+      if(chips.length)h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">'+chips.map(function(c){return'<div style="font-size:10px;color:var(--txt);"><span style="color:var(--mut);font-weight:600;">'+c.l+'</span> <span style="font-weight:700;">'+esc(c.v)+'</span></div>';}).join('<span style="color:var(--bdr);margin:0 1px;">·</span>')+'</div>';
+      // Row 3: notes
+      if(r.notes)h+='<div style="font-size:12px;color:var(--mut);line-height:1.55;margin-bottom:6px;">'+esc(r.notes)+'</div>';
+      // Row 4: actions — small and subtle
+      h+='<div style="display:flex;gap:8px;margin-top:4px;">'
+        +'<button onclick="openWLEditReview(\''+r.id+'\')" style="font-size:10px;font-weight:700;color:var(--mut);background:none;border:none;padding:0;cursor:pointer;letter-spacing:.03em;">Edit</button>'
+        +'<span style="color:var(--bdr);">·</span>'
+        +'<button onclick="wlDeleteReview(\''+r.id+'\',\''+e.id+'\')" style="font-size:10px;font-weight:700;color:#f87171;background:none;border:none;padding:0;cursor:pointer;letter-spacing:.03em;">Delete</button>'
+      +'</div>';
       h+='</div>';
     });
   } else {
-    h+='<div style="padding:14px 13px;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;color:var(--mut);font-style:italic;text-align:center;">No reviews yet — tap Add after a run</div>';
+    h+='<div style="padding:14px 13px;font-size:12px;color:var(--mut);font-style:italic;text-align:center;">No reviews yet — tap Add after a run</div>';
   }
   h+='</div>';
 

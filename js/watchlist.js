@@ -423,7 +423,7 @@ function renderWLList(){
   entries.forEach(function(e){const k=_wlGroupKey(e);if(!groups[k])groups[k]=[];groups[k].push(e);});
 
   const total=entries.length;
-  const totalObs=entries.reduce(function(a,e){return a+(e.observations||[]).length;},0);
+  const totalReviews=(D.reviews||[]).filter(function(r){return entries.find(function(e){return e.id===r.profileId;});}).length;
   const totalTargets=entries.reduce(function(a,e){return a+(e.targets||[]).length;},0);
 
   let html='<div class="wll-wrap">';
@@ -431,7 +431,7 @@ function renderWLList(){
   // ── Stats strip ──
   html+='<div class="wll-stats">'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--gld2);">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
-    +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--grn);">'+totalObs+'</div><div class="wll-stat-l">Observations</div></div>'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--grn);">'+totalReviews+'</div><div class="wll-stat-l">Reviews</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--ora);">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
   +'</div>';
 
@@ -1322,35 +1322,6 @@ function openWLForm(id,prefill){
     const rvws=pid?(D.reviews||[]).filter(function(r){return r.profileId===pid;}).slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');}):[];
     const RCOL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'var(--mut)',loss:'#f87171',missed:'#a78bfa'};
     return'<div id="wlft-races" class="wlf-tab-panel" style="display:none;">'
-      // Initial observation (when first logging a new sighting)
-      +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title">First Sighting</span></div>'
-        +'<div class="wlf-sec-body">'
-          +'<div id="wlf-initial-race" style="display:'+(isUnraced?'none':'')+'">'
-            +'<div class="g2" style="margin-bottom:8px;">'
-              +'<div class="fg"><label>Date</label><input type="date" id="wlf-io-date" value="'+(io.date||'')+'"></div>'
-              +'<div class="fg"><label>Result</label><select id="wlf-io-result">'
-                +'<option value=""'+((!io.result)?' selected':'')+'>— Select</option>'
-                +'<option value="win"'+((io.result==='win')?' selected':'')+'>Won</option>'
-                +'<option value="place"'+((io.result==='place')?' selected':'')+'>Placed</option>'
-                +'<option value="loss"'+((io.result==='loss')?' selected':'')+'>Unplaced</option>'
-              +'</select></div>'
-              +'<div class="fg"><label>Race / Meeting</label><input type="text" id="wlf-io-race" placeholder="e.g. Newmarket Maiden" value="'+(io.raceName||'')+'"></div>'
-              +'<div class="fg"><label>Going</label><input type="text" id="wlf-io-going" placeholder="e.g. Good to Firm" value="'+(io.going||'')+'"></div>'
-            +'</div>'
-            +'<div class="fg"><label>What you saw</label><textarea id="wlf-io-notes" placeholder="Describe what caught your eye in this race…" style="min-height:60px;">'+(io.notes||'')+'</textarea></div>'
-          +'</div>'
-          +(isUnraced?'<div style="font-size:12px;color:var(--mut);font-style:italic;">Marked as unraced — toggle in Notes tab to enable.</div>':'')
-        +'</div>'
-      +'</div>'
-      // Additional observations
-      +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--grn);">Observations</span></div>'
-        +'<div class="wlf-sec-body">'
-          +'<div id="wlf-obs-list"></div>'
-          +'<button onclick="wlAddObsRow()" class="wlf-add-btn" style="margin-top:8px;">+ Add Observation</button>'
-        +'</div>'
-      +'</div>'
       // Race reviews
       +'<div class="wlf-section">'
         +'<div class="wlf-sec-hdr"><span class="wlf-sec-title">Race Reviews</span></div>'
@@ -1360,8 +1331,8 @@ function openWLForm(id,prefill){
                 +'<div class="wlf-rvw-meta"><span>'+r.date+'</span>'+(r.raceName?'<span class="wlf-rvw-dot">·</span><span>'+r.raceName+'</span>':'')+(r.odds?'<span class="wlf-rvw-dot">·</span><span style="color:var(--gld);font-weight:700;">'+r.odds+'</span>':'')+'<span class="wlf-rvw-badge" style="color:'+rc+';">'+(r.result||'').toUpperCase()+'</span></div>'
                 +(r.notes?'<div class="wlf-rvw-notes">'+r.notes+'</div>':'')
               +'</div>';}).join('')
-            :'<div style="font-size:12px;color:var(--mut);padding:8px 0;">No race reviews yet — use the <strong>Review</strong> button on the Today page after each run.</div>')
-          +(pid?'<button onclick="openWLPostRaceReview(\''+pid+'\',\''+(e?(e.horse||'').replace(/'/g,"\\'"):'')+'\',\'\',\'\',\'\')" class="wlf-add-btn" style="margin-top:10px;">+ Add Race Review</button>':'')
+            :'<div style="font-size:12px;color:var(--mut);padding:8px 0;font-style:italic;">No race reviews yet — add one below or use the Review button on Today after a run.</div>')
+          +(pid?'<button onclick="openWLPostRaceReview(\''+pid+'\',\''+(e?(e.horse||'').replace(/'/g,"\\'"):'')+'\',\'\',\'\',\'\')" class="wlf-add-btn" style="margin-top:10px;">+ Add Race Review</button>':'<div style="font-size:11px;color:var(--mut);margin-top:8px;font-style:italic;">Save the profile first to add reviews.</div>')
         +'</div>'
       +'</div>'
       // Future targets
@@ -1446,12 +1417,6 @@ function _renderObsList(){
   }).join('');
 }
 
-function wlAddObsRow(){
-  _wlDossier.obs.push({id:gid(),date:td(),raceName:'',going:'',result:'',notes:''});
-  _renderObsList();
-  setTimeout(function(){const el=document.getElementById('wlf-obs-list');if(el&&el.lastElementChild)el.lastElementChild.scrollIntoView({behavior:'smooth',block:'nearest'});},50);
-}
-function _wlDelObs(i){_wlDossier.obs.splice(i,1);_renderObsList();}
 
 function _renderTargetsList(){
   const el=document.getElementById('wlf-targets-list');if(!el)return;
@@ -1527,15 +1492,7 @@ function saveWLEntry(id){
   const wl=getWL();
   const old=id?wl.find(x=>x.id===id):null;
   const goingPrefs=_wlDossier.goingPrefs||[];
-  // Build initial observation from inline fields (single entry in profile_observations)
-  const ioDate=(document.getElementById('wlf-io-date')||{value:''}).value;
-  const ioRace=(document.getElementById('wlf-io-race')||{value:''}).value.trim();
-  const ioGoing=(document.getElementById('wlf-io-going')||{value:''}).value.trim();
-  const ioResult=(document.getElementById('wlf-io-result')||{value:''}).value;
-  const ioNotes=(document.getElementById('wlf-io-notes')||{value:''}).value.trim();
-  const existingObsId=(old&&old.observations&&old.observations[0])?old.observations[0].id:gid();
-  const initialObs=(ioDate||ioRace||ioNotes)?[{id:existingObsId,date:ioDate,raceName:ioRace,going:ioGoing,result:ioResult,notes:ioNotes}]:[];
-  const raceDate=ioDate||(old?old.raceDate||'':'');
+  const raceDate=old?old.raceDate||'':'';
   const entry={
     id:id||gid(),horse,
     currentRating:document.getElementById('wlf-rating').value.trim()||'',
@@ -1556,7 +1513,7 @@ function saveWLEntry(id){
     reasonNote:(document.getElementById('wlf-reason-note')||{value:''}).value.trim(),
     unraced:!!(document.getElementById('wlf-unraced')&&document.getElementById('wlf-unraced').checked),
     trainerIntel:(document.getElementById('wlf-intel').value||'').trim(),
-    observations:initialObs,
+    observations:[],
     targets:_wlDossier.targets.filter(function(t){return t.race;}),
     goingPrefs,
     distancePref:(_wlDossier.distPrefs||[]).join(', '),
@@ -1565,14 +1522,11 @@ function saveWLEntry(id){
     aiAssessment:old?old.aiAssessment||(window._wlLastAIAssess||null):(window._wlLastAIAssess||null),
     aiAssessedAt:old?old.aiAssessedAt||(window._wlLastAIAssess?Date.now():null):(window._wlLastAIAssess?Date.now():null),
     raceDate,
-    raceName:ioRace||'',
     notes:(document.getElementById('wlf-intel').value||'').trim(),
     createdAt:old?old.createdAt||Date.now():Date.now(),
     updatedAt:Date.now()
   };
-  // Compute explicitly removed obs and target IDs so we can delete them from DB
   const old2=id?(D.watchlist||[]).find(x=>x.id===id):null;
-  const removedObsIds=old2?(old2.observations||[]).filter(function(o){return !entry.observations.find(function(n){return n.id===o.id;});}).map(function(o){return o.id;}).filter(Boolean):[];
   const removedTargetIds=old2?(old2.targets||[]).filter(function(t){return !entry.targets.find(function(n){return n.id===t.id;});}).map(function(t){return t.id;}).filter(Boolean):[];
   if(id){const idx=wl.findIndex(x=>x.id===id);if(idx>-1)wl[idx]=entry;else wl.push(entry);}
   else wl.push(entry);
@@ -1583,8 +1537,6 @@ function saveWLEntry(id){
     if(D.ratings[rKey])delete D.ratings[rKey];
   }
   save();
-  // Explicitly delete removed observations and targets from DB (multi-device safe)
-  if(removedObsIds.length) supaDeleteObsByIds(removedObsIds).catch(function(){});
   if(removedTargetIds.length) supaDeleteTargetsByIds(removedTargetIds).catch(function(){});
   document.getElementById('wl-modal').remove();
   renderWatchlist();
@@ -2372,51 +2324,3 @@ function _wlpBuildHTML(e){
 }
 
 // Quick observation sheet — lightweight, returns to profile view on save
-function wlAddObsFromProfile(profileId, horseName){
-  const existing=document.getElementById('wl-quick-obs');
-  if(existing)existing.remove();
-  const sheet=document.createElement('div');
-  sheet.id='wl-quick-obs';
-  sheet.style.cssText='position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;';
-  sheet.innerHTML='<div style="background:var(--sur);border-radius:16px 16px 0 0;width:100%;max-width:520px;padding:20px 16px;padding-bottom:max(24px,env(safe-area-inset-bottom,24px));">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
-      +'<div style="font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--navy);">Add Observation</div>'
-      +'<button onclick="document.getElementById(\'wl-quick-obs\').remove()" style="width:30px;height:30px;border-radius:50%;background:var(--sur2);border:1px solid var(--bdr);color:var(--mut);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>'
-    +'</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">'
-      +'<div><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:4px;">Date</label><input type="date" id="qobs-date" value="'+td()+'" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;box-sizing:border-box;"></div>'
-      +'<div><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:4px;">Result</label><select id="qobs-result" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;box-sizing:border-box;"><option value="">—</option><option value="win">Won</option><option value="place">Placed</option><option value="loss">Unplaced</option></select></div>'
-    +'</div>'
-    +'<div style="margin-bottom:10px;"><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:4px;">Race / Going</label><input type="text" id="qobs-race" placeholder="e.g. Goodwood Maiden · Good" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;box-sizing:border-box;"></div>'
-    +'<div style="margin-bottom:14px;"><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:4px;">What you saw</label><textarea id="qobs-notes" placeholder="Describe what caught your eye…" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;min-height:80px;box-sizing:border-box;resize:vertical;"></textarea></div>'
-    +'<button onclick="wlSaveQuickObs(\''+profileId+'\',\''+horseName.replace(/'/g,"\\'")+'\')" style="width:100%;padding:13px;border-radius:10px;border:none;background:var(--gld2);color:#fff;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">Save Observation</button>'
-  +'</div>';
-  document.body.appendChild(sheet);
-  setTimeout(function(){const n=document.getElementById('qobs-notes');if(n)n.focus();},100);
-}
-
-function wlSaveQuickObs(profileId, horseName){
-  const date=(document.getElementById('qobs-date')||{value:td()}).value;
-  const result=(document.getElementById('qobs-result')||{value:''}).value;
-  const race=(document.getElementById('qobs-race')||{value:''}).value.trim();
-  const notes=(document.getElementById('qobs-notes')||{value:''}).value.trim();
-  if(!notes){alert('Please add what you observed.');return;}
-
-  const wl=getWL();
-  const entry=wl.find(function(x){return x.id===profileId;});
-  if(!entry)return;
-
-  const obs={
-    id:gid(),date:date,raceName:race,going:'',result:result,
-    notes:notes,track:'',source:'manual',
-    createdAt:Date.now()
-  };
-  if(!entry.observations)entry.observations=[];
-  entry.observations.push(obs);
-  D.watchlist=wl;
-  save();
-
-  document.getElementById('wl-quick-obs').remove();
-  // Refresh profile view
-  openWLProfile(profileId);
-}

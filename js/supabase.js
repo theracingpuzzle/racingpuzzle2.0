@@ -530,6 +530,40 @@ async function supaLoad(){
       D.watchlist.forEach(function(w){w.needsReview=nrMap[w.id]||false;});
     }
 
+    // ── One-time migration: observations → race reviews ──────────────────────
+    if(!D._obsMigrated){
+      if(!D.reviews)D.reviews=[];
+      (D.watchlist||[]).forEach(function(entry){
+        (entry.observations||[]).forEach(function(o){
+          // Skip if a review with this ID already exists
+          if(D.reviews.find(function(r){return r.id===o.id;}))return;
+          // Only migrate if there's meaningful data
+          if(!o.date&&!o.raceName&&!o.notes)return;
+          D.reviews.push({
+            id:o.id,
+            profileId:entry.id,
+            date:o.date||'',
+            raceName:o.raceName||'',
+            course:o.track||'',
+            going:'',
+            goingConfirmed:o.going||'',
+            result:o.result||'',
+            position:'',
+            beatenDistance:'',
+            odds:'',
+            mrAdjustment:0,
+            verdict:'',
+            backNextTime:'',
+            notes:o.notes||'',
+            source:'observation',
+            createdAt:o.createdAt||Date.now()
+          });
+        });
+        entry.observations=[];
+      });
+      D._obsMigrated=true;
+    }
+
     saveLocal();
     return true;
   }catch(e){console.warn('[Supabase] load error:',e.message);return false;}

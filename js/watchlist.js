@@ -924,18 +924,22 @@ Base your assessment on UK racing norms. OR 0-59 = sellers/claimers, 60-79 = low
     if(rtEl&&!rtEl.value&&parsed.race_type)rtEl.value=parsed.race_type;
     if(sfEl&&!sfEl.value&&parsed.surface)sfEl.value=parsed.surface;
 
+    // Store result so onclick doesn't need to embed potentially unsafe text
+    window._wlLastAIAssess = parsed;
+
     // Render result panel
-    const row=function(label,val,col){return val?'<div style="margin-bottom:8px;"><div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:'+(col||'#a855f7')+';margin-bottom:2px;">'+label+'</div><div style="font-size:13px;color:var(--txt);line-height:1.5;">'+val+'</div></div>':'';}
+    const esc2=function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+    const row=function(label,val,col){return val?'<div style="margin-bottom:8px;"><div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:'+(col||'#a855f7')+';margin-bottom:2px;">'+label+'</div><div style="font-size:13px;color:var(--txt);line-height:1.5;">'+esc2(val)+'</div></div>':'';}
     if(res){
       res.style.display='block';
       res.innerHTML=
-        '<div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a855f7;margin-bottom:10px;">✨ AI Assessment — '+horse+'</div>'
+        '<div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a855f7;margin-bottom:10px;">✨ AI Assessment — '+esc2(horse)+'</div>'
         +row('Current Level',parsed.level,'#60a5fa')
         +row('Projection',parsed.projection,'#34d399')
         +row('Sweet Spot',parsed.sweet_spot,'#f59e0b')
         +row('Watch For',parsed.watch_for,'#fb7185')
-        +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(168,85,247,.2);font-size:13px;color:var(--txt);line-height:1.6;">'+(parsed.verdict||'')+'</div>'
-        +'<button onclick="wlAIApplyToNotes(\''+encodeURIComponent(JSON.stringify(parsed))+'\')" style="margin-top:10px;width:100%;padding:8px;border-radius:7px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.1);color:#a855f7;font-size:12px;font-weight:700;cursor:pointer;">+ Add to Conditions Notes</button>';
+        +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(168,85,247,.2);font-size:13px;color:var(--txt);line-height:1.6;">'+esc2(parsed.verdict||'')+'</div>'
+        +'<button onclick="wlAIApplyToNotes()" style="margin-top:10px;width:100%;padding:8px;border-radius:7px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.1);color:#a855f7;font-size:12px;font-weight:700;cursor:pointer;">+ Add to Conditions Notes</button>';
     }
   }catch(e){
     if(res){res.style.display='block';res.innerHTML='<div style="color:var(--red);font-size:13px;">Assessment failed: '+e.message+'</div>';}
@@ -944,9 +948,10 @@ Base your assessment on UK racing norms. OR 0-59 = sellers/claimers, 60-79 = low
   }
 }
 
-function wlAIApplyToNotes(encodedJson){
+function wlAIApplyToNotes(){
   try{
-    const d=JSON.parse(decodeURIComponent(encodedJson));
+    const d=window._wlLastAIAssess;
+    if(!d)return;
     const el=document.getElementById('wlf-cond-notes');
     if(!el)return;
     const lines=[];
@@ -1351,7 +1356,7 @@ function openWLForm(id,prefill){
 
   // ── Tab bar (always 4 tabs) ────────────────────────────────────────────────
   const TABS=[{id:'overview',label:'Overview'},{id:'horse',label:'Horse'},{id:'notes',label:'Notes'},{id:'races',label:'Races'}];
-  const tabBarHtml='<div style="display:flex;border-bottom:2px solid var(--bdr);background:var(--sur2);padding:0 8px;gap:0;position:sticky;top:0;z-index:2;">'
+  const tabBarHtml='<div class="wlf-tab-bar" style="display:flex;border-bottom:2px solid var(--bdr);background:var(--sur2);padding:0 8px;gap:0;">'
     +TABS.map(function(t){
       const on=t.id===defaultTab;
       return'<button data-wlftab="'+t.id+'" onclick="wlSwitchTab(\''+t.id+'\')" class="wlf-tab-btn" style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:11px 14px;border:none;border-bottom:2px solid '+(on?'var(--navy)':'transparent')+';margin-bottom:-2px;background:transparent;color:'+(on?'var(--navy)':'var(--mut)')+';cursor:pointer;white-space:nowrap;">'+t.label+'</button>';
@@ -1378,7 +1383,7 @@ function openWLForm(id,prefill){
       :'<div class="wlf-hero-title" style="color:rgba(255,255,255,.7);">New Profile</div><div class="wlf-hero-sub">Create a puzzle profiler entry</div>')
   +'</div>'
   +tabBarHtml
-  +'<div class="wlf-body" style="padding-bottom:80px;">'
+  +'<div class="wlf-body">'
     +overviewHtml
     +horseHtml
     +notesHtml
@@ -2047,46 +2052,7 @@ function _wlpBuildHTML(e){
 
   const editFn="document.getElementById('wlp-modal').remove();openWLForm('"+e.id+"')";
 
-  let h='<div class="wlp-page">';
-
-  // NAV
-  h+='<div class="wlp-nav">';
-  h+='<div class="wlp-back" onclick="document.getElementById(\'wlp-modal\').remove()">← Profiles</div>';
-  h+='<div class="wlp-brand">RACING <span class="wlp-brand-accent">PUZZLE</span></div>';
-  h+='<div class="wlp-edit-btn" onclick="'+editFn+'">Edit</div>';
-  h+='</div>';
-
-  // HERO
-  h+='<div class="wlp-hero">';
-  h+='<div class="wlp-hero-bg">🐎</div>';
-  h+='<div class="wlp-hero-top">';
-  h+='<div>';
-  h+='<div class="wlp-name-row"><span class="wlp-name">'+esc(e.horse)+'</span></div>';
-  h+='<div><span class="wlp-reason-badge" style="background:'+reason.col+'20;border:1px solid '+reason.col+'40;color:'+reason.col+';display:inline-flex;align-items:center;gap:5px;">'+reason.svg+' '+reason.label+'</span></div>';
-  h+='</div>';
-  h+='<div class="wlp-or-box"><span class="wlp-or-label">OR</span>';
-  h+=or?'<span class="wlp-or-value">'+or+'</span>':'<span class="wlp-or-na">—</span>';
-  h+='</div>';
-  h+='</div>';
-
-  // Meta strip
-  h+='<div class="wlp-meta">';
-  h+='<div class="wlp-meta-cell"><span class="wlp-meta-label">Trainer</span><span class="wlp-meta-val">'+esc(e.trainer||'—')+'</span></div>';
-  h+='<div class="wlp-meta-cell"><span class="wlp-meta-label">Race Reviews</span><span class="wlp-meta-val">'+horseReviews.length+' logged</span></div>';
-  h+='<div class="wlp-meta-cell"><span class="wlp-meta-label">Targets</span><span class="wlp-meta-val">'+targets.length+' races</span></div>';
-  h+='</div>';
-
-  // Silks + stats
-  h+='<div class="wlp-hero-body">';
-  h+='<div class="wlp-silks">';
-  h+='<svg width="64" height="74" viewBox="0 0 70 80" fill="none">';
-  h+='<path d="M20 20 Q35 16 50 20 L54 62 Q35 66 16 62 Z" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>';
-  h+='<path d="M20 20 Q10 24 6 38 Q10 42 16 40 L20 28 Z" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>';
-  h+='<path d="M50 20 Q60 24 64 38 Q60 42 54 40 L50 28 Z" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>';
-  h+='<ellipse cx="35" cy="12" rx="13" ry="6" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.25)" stroke-width="1.5"/>';
-  h+='</svg></div>';
-
-  // ── Betting record for this horse ──
+  // ── Betting record ──
   const horseName=(e.horse||'').toLowerCase().trim();
   const horseBets=(D.bets||[]).filter(function(b){
     return (b.horse||'').toLowerCase().trim()===horseName
@@ -2101,54 +2067,64 @@ function _wlpBuildHTML(e){
   const horseSR=horseBets.length>0?(horseWins.length/horseBets.length*100):null;
   const horseROI=horseStaked>0?(horsePnl/horseStaked*100):null;
 
-  h+='<div class="wlp-stats">';
-  // My Rating
-  const _si=function(svg){return '<span style="display:inline-flex;align-items:center;opacity:.7;margin-right:5px;">'+svg+'</span>';};
-  const _svgs={
-    star:   '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="10,2 12.5,7.5 18.5,8.2 14,12.5 15.3,18.5 10,15.5 4.7,18.5 6,12.5 1.5,8.2 7.5,7.5"/></svg>',
-    trophy: '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h8v7a4 4 0 0 1-8 0V2z"/><path d="M6 5H3a2 2 0 0 0 2 2"/><path d="M14 5h3a2 2 0 0 1-2 2"/><line x1="10" y1="13" x2="10" y2="16"/><line x1="7" y1="18" x2="13" y2="18"/></svg>',
-    bet:    '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="16" height="11" rx="2"/><path d="M2 9h16"/><circle cx="6" cy="13" r="1" fill="currentColor" stroke="none"/></svg>',
-    pnl:    '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="7"/><path d="M8 4h6a4 4 0 0 1 0 8h-1v4H9v-4H8a4 4 0 0 1 0-8z"/></svg>',
-    roi:    '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 14 7 9 11 12 17 5"/><polyline points="14 5 17 5 17 8"/></svg>',
-    cal:    '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v2M13 2v2"/></svg>',
-    target: '<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="1" x2="10" y2="3"/><line x1="10" y1="17" x2="10" y2="19"/><line x1="1" y1="10" x2="3" y2="10"/><line x1="17" y1="10" x2="19" y2="10"/></svg>',
-  };
-  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.star)+'My Rating</span>';
-  h+=mr?'<span class="wlp-stat-val" style="color:var(--gld);">'+mr+'</span>':'<span class="wlp-stat-sm" style="color:var(--mut);">Not set</span>';
-  h+='</div>';
-  // OR Edge
-  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.trophy)+'OR Edge</span>';
-  h+=edge!==null?'<span class="wlp-edge-badge" style="background:'+edgeCol+'20;color:'+edgeCol+';">'+(edge>0?'+':'')+edge+' pts</span>':'<span class="wlp-stat-sm" style="color:var(--mut);">—</span>';
-  h+='</div>';
-  // Betting record
-  if(horseBets.length>0){
-    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.bet)+'Backed</span>';
-    h+='<span class="wlp-stat-sm">'+horseWins.length+'/'+horseBets.length+' &nbsp;<span style="color:var(--mut);">SR '+horseSR.toFixed(0)+'%</span></span></div>';
-    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.pnl)+'P&amp;L</span>';
-    h+='<span class="wlp-stat-sm" style="color:'+(horsePnl>=0?'#4ade80':'#f87171')+';">'+(horsePnl>=0?'+':'')+horsePnl.toFixed(2)+'</span></div>';
-    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.roi)+'ROI</span>';
-    h+='<span class="wlp-stat-sm" style="color:'+(horseROI>=0?'#4ade80':'#f87171')+';">'+horseROI.toFixed(1)+'%</span></div>';
-  } else {
-    h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.bet)+'Backed</span>';
-    h+='<span class="wlp-stat-sm" style="color:var(--mut);">Not yet</span></div>';
-  }
-  // Last Entry
-  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.cal)+'Last Entry</span>';
-  h+='<span class="wlp-stat-sm">'+fmt(lastDate)+'</span></div>';
-  // Next Target
-  h+='<div class="wlp-stat-row"><span class="wlp-stat-left">'+_si(_svgs.target)+'Next Target</span>';
-  if(nextTarget){const tw=(nextTarget.race||'').split(' ').slice(0,2).join(' ');h+='<span class="wlp-stat-sm" style="color:var(--gld);font-size:11px;">'+esc(tw)+'</span>';}
-  else h+='<span class="wlp-stat-sm" style="color:var(--mut);">None set</span>';
-  h+='</div>';
-  h+='</div></div>'; // stats + hero-body
+  let h='<div class="wlp-page">';
 
-  // Edge bar
-  if(edge!==null){
-    const barW=Math.min(Math.abs(edge)/20*100,100);
-    h+='<div class="wlp-edge-bar"><div class="wlp-edge-bar-track"><div class="wlp-edge-bar-fill" style="width:'+barW+'%;background:'+edgeCol+';"></div></div></div>';
-  }
-  h+='</div>'; // hero
+  // ── NAV (pinned, never scrolls) ───────────────────────────────────────────
+  h+='<div class="wlp-nav">'
+    +'<div class="wlp-back" onclick="document.getElementById(\'wlp-modal\').remove()">← Profiles</div>'
+    +'<div class="wlp-brand">RACING <span class="wlp-brand-accent">PUZZLE</span></div>'
+    +'<div class="wlp-edit-btn" onclick="'+editFn+'">Edit</div>'
+  +'</div>';
 
+  // ── HERO — compact, pinned, gives race-day essentials at a glance ─────────
+  const goingPill=(e.goingPrefs&&e.goingPrefs.length)?e.goingPrefs.slice(0,2).join(' · '):'Any ground';
+  h+='<div class="wlp-hero">'
+    +'<div class="wlp-hero-bg">🐎</div>'
+    // Row 1: name + OR badge
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;">'
+      +'<div style="flex:1;min-width:0;padding-right:10px;">'
+        +'<div class="wlp-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(e.horse)+'</div>'
+        +'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600;">'
+          +esc(e.trainer||'Unknown trainer')
+          +(e.age?' · '+e.age+'yo':'')
+          +(e.surface?' · '+({flat:'Flat',jumps:'Jumps',aw:'AW'}[e.surface]||e.surface):'')
+        +'</div>'
+        // Reason + momentum badges
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">'
+          +'<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:'+reason.col+'20;border:1px solid '+reason.col+'40;color:'+reason.col+';">'+reason.svg+' '+reason.label+'</span>'
+        +'</div>'
+      +'</div>'
+      +'<div class="wlp-or-box" style="flex-shrink:0;">'
+        +'<span class="wlp-or-label">OR</span>'
+        +(or?'<span class="wlp-or-value">'+or+'</span>':'<span class="wlp-or-na">—</span>')
+      +'</div>'
+    +'</div>'
+    // ── 3-metric strip (the race-day decision strip) ──────────────────────
+    +'<div class="wlp-hero-metrics">'
+      // My Mark
+      +'<div class="wlp-hero-metric">'
+        +'<span class="wlp-hero-metric-label">My Mark ★</span>'
+        +(mr
+          ?'<div class="wlp-hero-metric-val" style="color:var(--gld);">'+mr+'</div>'
+          :'<div style="font-size:13px;color:rgba(255,255,255,.3);font-weight:700;padding-top:2px;">—</div>')
+      +'</div>'
+      // Edge vs OR
+      +'<div class="wlp-hero-metric">'
+        +'<span class="wlp-hero-metric-label">Edge</span>'
+        +(edge!==null
+          ?'<div class="wlp-hero-metric-val" style="color:'+edgeCol+';">'+(edge>0?'+':'')+edge+'</div>'
+          :'<div style="font-size:13px;color:rgba(255,255,255,.3);font-weight:700;padding-top:2px;">—</div>')
+      +'</div>'
+      // Going pref
+      +'<div class="wlp-hero-metric">'
+        +'<span class="wlp-hero-metric-label">Going</span>'
+        +'<div style="font-size:12px;font-weight:800;color:'+(e.goingPrefs&&e.goingPrefs.length?'#4ade80':'rgba(255,255,255,.3)')+';line-height:1.2;margin-top:2px;">'+goingPill+'</div>'
+      +'</div>'
+    +'</div>'
+  +'</div>';
+
+  // ── SCROLLABLE CONTENT ────────────────────────────────────────────────────
+  h+='<div class="wlp-scroll-body">';
   h+='<div class="wlp-sections-grid">';
   // SECTION 1: WHY LOGGED
   h+='<div class="wlp-section">';
@@ -2342,7 +2318,65 @@ function _wlpBuildHTML(e){
   }
   h+='</div>';
 
-  h+='<div style="height:30px;"></div>';
+  h+='</div>'; // wlp-scroll-body
+
+  // ── QUICK ACTION BAR — always visible at bottom ───────────────────────────
+  h+='<div class="wlp-quick-bar">'
+    +'<button class="wlp-quick-btn" onclick="wlAddObsFromProfile(\''+e.id+'\',\''+esc(e.horse)+'\')">+ Observation</button>'
+    +'<button class="wlp-quick-btn" onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\'\')">+ Review</button>'
+    +'<button class="wlp-quick-btn wlp-quick-btn-primary" onclick="'+editFn+'">✏ Edit</button>'
+  +'</div>';
+
   h+='</div>'; // page
   return h;
+}
+
+// Quick observation sheet — lightweight, returns to profile view on save
+function wlAddObsFromProfile(profileId, horseName){
+  const existing=document.getElementById('wl-quick-obs');
+  if(existing)existing.remove();
+  const sheet=document.createElement('div');
+  sheet.id='wl-quick-obs';
+  sheet.style.cssText='position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;';
+  sheet.innerHTML='<div style="background:var(--sur);border-radius:16px 16px 0 0;width:100%;max-width:520px;padding:20px 16px;padding-bottom:max(24px,env(safe-area-inset-bottom,24px));">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+      +'<div style="font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--navy);">Add Observation</div>'
+      +'<button onclick="document.getElementById(\'wl-quick-obs\').remove()" style="width:30px;height:30px;border-radius:50%;background:var(--sur2);border:1px solid var(--bdr);color:var(--mut);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">'
+      +'<div><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:4px;">Date</label><input type="date" id="qobs-date" value="'+td()+'" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;box-sizing:border-box;"></div>'
+      +'<div><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:4px;">Result</label><select id="qobs-result" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;box-sizing:border-box;"><option value="">—</option><option value="win">Won</option><option value="place">Placed</option><option value="loss">Unplaced</option></select></div>'
+    +'</div>'
+    +'<div style="margin-bottom:10px;"><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:4px;">Race / Going</label><input type="text" id="qobs-race" placeholder="e.g. Goodwood Maiden · Good" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;box-sizing:border-box;"></div>'
+    +'<div style="margin-bottom:14px;"><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:4px;">What you saw</label><textarea id="qobs-notes" placeholder="Describe what caught your eye…" style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--sur2);color:var(--txt);font-size:14px;min-height:80px;box-sizing:border-box;resize:vertical;"></textarea></div>'
+    +'<button onclick="wlSaveQuickObs(\''+profileId+'\',\''+horseName.replace(/'/g,"\\'")+'\')" style="width:100%;padding:13px;border-radius:10px;border:none;background:var(--gld2);color:#fff;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">Save Observation</button>'
+  +'</div>';
+  document.body.appendChild(sheet);
+  setTimeout(function(){const n=document.getElementById('qobs-notes');if(n)n.focus();},100);
+}
+
+function wlSaveQuickObs(profileId, horseName){
+  const date=(document.getElementById('qobs-date')||{value:td()}).value;
+  const result=(document.getElementById('qobs-result')||{value:''}).value;
+  const race=(document.getElementById('qobs-race')||{value:''}).value.trim();
+  const notes=(document.getElementById('qobs-notes')||{value:''}).value.trim();
+  if(!notes){alert('Please add what you observed.');return;}
+
+  const wl=getWL();
+  const entry=wl.find(function(x){return x.id===profileId;});
+  if(!entry)return;
+
+  const obs={
+    id:gid(),date:date,raceName:race,going:'',result:result,
+    notes:notes,track:'',source:'manual',
+    createdAt:Date.now()
+  };
+  if(!entry.observations)entry.observations=[];
+  entry.observations.push(obs);
+  D.watchlist=wl;
+  save();
+
+  document.getElementById('wl-quick-obs').remove();
+  // Refresh profile view
+  openWLProfile(profileId);
 }

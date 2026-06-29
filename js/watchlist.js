@@ -542,6 +542,19 @@ function renderWLEntry(e){
   const comp=_wlCompleteness(e);
   const mom=_wlMomentum(e);
   const compCol=comp.pct>=80?'#4ade80':comp.pct>=50?'#f59e0b':'#f87171';
+  // Overdue targets (past date, no review within 7 days)
+  const todayStr=td();
+  const rvwDates=(D.reviews||[]).filter(function(r){return r.profileId===e.id;}).map(function(r){return r.date||'';});
+  const overdueCount=(e.targets||[]).filter(function(t){
+    if(!t.date||t.date>=todayStr)return false;
+    const tMs=new Date(t.date+'T00:00:00').getTime();
+    return!rvwDates.some(function(d){return Math.abs(new Date(d+'T00:00:00').getTime()-tMs)<=7*24*60*60*1000;});
+  }).length;
+  const pendingCount=(D.pendingReviews||[]).filter(function(p){
+    if(p.profileId!==e.id)return false;
+    return!(D.reviews||[]).some(function(r){return r.profileId===e.id&&r.date===p.date;});
+  }).length;
+  const awaitingCount=overdueCount+pendingCount;
   const puzzleBadge=e.aiAssessment
     ?'<span title="Puzzle Report generated" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.35);flex-shrink:0;">'
       +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
@@ -552,7 +565,7 @@ function renderWLEntry(e){
   return'<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
     +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
     +'<div class="wll-main">'
-      +'<div class="wll-name">'+(e.horse||'Unknown')+(mom?'<span style="font-size:10px;font-weight:700;margin-left:6px;color:'+mom.col+';">'+mom.icon+'</span>':'')+'</div>'
+      +'<div class="wll-name">'+(e.horse||'Unknown')+(mom?'<span style="font-size:10px;font-weight:700;margin-left:6px;color:'+mom.col+';">'+mom.icon+'</span>':'')+(awaitingCount?'<span style="font-size:9px;font-weight:800;margin-left:7px;padding:1px 6px;border-radius:8px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#f59e0b;vertical-align:middle;">'+awaitingCount+' review'+(awaitingCount>1?'s':'')+' due</span>':'')+'</div>'
       +'<div class="wll-sub">'+subParts.join(' · ')+(daysAgo?' · '+daysAgo:'')+'</div>'
       +'<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">'
         +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
@@ -2194,39 +2207,64 @@ function _wlpBuildHTML(e){
   h+='</div>';
 
 
-  // SECTION 4b: PENDING REVIEWS (unsaved race data awaiting write-up)
+  // SECTION 4b: AWAITING REVIEW — merges pendingReviews + overdue targets
+  // Overdue targets: date has passed, no review exists within 7 days of target date
+  const today=td();
+  const profileReviewDates=(D.reviews||[]).filter(function(r){return r.profileId===e.id;}).map(function(r){return r.date||'';});
+  function _dateReviewed(targetDate){
+    // Consider reviewed if any review date falls within 7 days either side of target date
+    const tMs=new Date(targetDate+'T00:00:00').getTime();
+    return profileReviewDates.some(function(d){
+      const dMs=new Date(d+'T00:00:00').getTime();
+      return Math.abs(dMs-tMs)<=7*24*60*60*1000;
+    });
+  }
+  const overdueTargets=(e.targets||[])
+    .filter(function(t){return t.date&&t.date<today&&!_dateReviewed(t.date);})
+    .map(function(t){return{_type:'target',id:t.id,date:t.date,raceName:t.race||'',course:t.track||''};})
+    .sort(function(a,b){return b.date.localeCompare(a.date);});
+
   const pendingReviews=((D.pendingReviews||[]).filter(function(p){
     if(p.profileId!==e.id)return false;
-    // Only show if not since been reviewed
     const reviewed=(D.reviews||[]).some(function(r){return r.profileId===e.id&&r.date===p.date;});
     return!reviewed;
-  })).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
-  if(pendingReviews.length){
+  })).map(function(p){return Object.assign({_type:'pending'},p);})
+    .sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+
+  // Merge — dedupe by date (pending takes priority over overdue target for same date)
+  const pendingDates=new Set(pendingReviews.map(function(p){return p.date;}));
+  const awaitingItems=pendingReviews.concat(
+    overdueTargets.filter(function(t){return!pendingDates.has(t.date);})
+  ).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+
+  if(awaitingItems.length){
     h+='<div class="wlp-section" style="border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.04);">';
     h+='<div class="wlp-section-hdr">'
       +'<div class="wlp-section-left">'
         +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
         +'<span class="wlp-section-title" style="color:#f59e0b;">Awaiting Review</span>'
       +'</div>'
+      +'<span style="font-size:10px;font-weight:800;color:#f59e0b;background:rgba(245,158,11,.15);border-radius:10px;padding:2px 8px;">'+awaitingItems.length+'</span>'
     +'</div>';
-    pendingReviews.forEach(function(p){
-      const RCOL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'#3a3a5c',missed:'#a78bfa'};
-      const rc=RCOL[p.result]||'';
+    const RCOL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'#3a3a5c',missed:'#a78bfa'};
+    awaitingItems.forEach(function(item){
+      const rc=item.result?RCOL[item.result]||'':'';
+      const label=item._type==='target'?'Target passed — did they run?':'';
       h+='<div style="padding:11px 13px;border-top:1px solid rgba(245,158,11,.15);">'
         +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">'
           +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(p.raceName||p.course||'Race')+'</div>'
+            +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(item.raceName||item.course||'Race')+'</div>'
             +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'
-              +[p.date?_wlpFmt(p.date):'',p.course,p.raceDist,p.raceGoing].filter(Boolean).join(' · ')
+              +[item.date?_wlpFmt(item.date):'',item.course,item.raceDist,item.raceGoing].filter(Boolean).join(' · ')
             +'</div>'
-            +(p.position?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">Finished: <strong>'+esc(p.position)+'</strong></div>':'')
+            +(item.position?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">Finished: <strong>'+esc(item.position)+'</strong></div>':'')
+            +(label?'<div style="font-size:10px;color:#f59e0b;margin-top:3px;font-style:italic;">'+label+'</div>':'')
           +'</div>'
           +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'
-            +(p.result&&rc?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+p.result+'</span>':'')
-            +'<button onclick="wlCompletePendingReview(\''+p.id+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;">'
-              +'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>'
-              +'Write Up'
-            +'</button>'
+            +(rc?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+item.result+'</span>':'')
+            +(item._type==='pending'
+              ?'<button onclick="wlCompletePendingReview(\''+item.id+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>'
+              :'<button onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\''+esc(item.raceName||'')+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>')
           +'</div>'
         +'</div>'
       +'</div>';
@@ -2243,12 +2281,20 @@ function _wlpBuildHTML(e){
   h+='<span class="wlp-section-action" onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\'\')">Add +</span></div>';
   if(profileReviews.length){
     profileReviews.forEach(function(r){
+      const isObs=r.source==='observation';
       const vm=VERDICT_META[r.verdict]||null;
       const rc=RESULT_COL[r.result]||'#3a3a5c';
-      h+='<div style="padding:11px 13px;border-bottom:1px solid var(--bdr);">';
+      // Observations get a visually distinct muted treatment with an "Initial Sighting" label
+      h+='<div style="padding:11px 13px;border-bottom:1px solid var(--bdr);'+(isObs?'background:rgba(255,255,255,.015);opacity:.85;':'')+'">';
+      if(isObs){
+        h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:7px;">'
+          +'<svg width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>'
+          +'<span style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#a78bfa;">Initial Sighting</span>'
+        +'</div>';
+      }
       h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">';
       h+='<div style="flex:1;min-width:0;">';
-      h+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(r.raceName||r.course||'Race')+'</div>';
+      h+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:'+(isObs?'13':'14')+'px;font-weight:800;color:'+(isObs?'var(--mut)':'#fff')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(r.raceName||r.course||'Sighting')+'</div>';
       h+='<div style="font-size:11px;color:var(--mut);margin-top:1px;">'+[r.date?_wlpFmt(r.date):'',r.course||'',r.distance||''].filter(Boolean).join(' · ')+'</div>';
       if(r.odds)h+='<div style="font-size:11px;font-weight:700;color:var(--gld);margin-top:2px;">'+r.odds+'</div>';
       h+='</div>';

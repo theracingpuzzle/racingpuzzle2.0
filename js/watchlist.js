@@ -542,6 +542,13 @@ function renderWLEntry(e){
   const comp=_wlCompleteness(e);
   const mom=_wlMomentum(e);
   const compCol=comp.pct>=80?'#4ade80':comp.pct>=50?'#f59e0b':'#f87171';
+  const puzzleBadge=e.aiAssessment
+    ?'<span title="Puzzle Report generated" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.35);flex-shrink:0;">'
+      +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        +'<path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/>'
+      +'</svg>'
+    +'</span>'
+    :'';
   return'<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
     +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
     +'<div class="wll-main">'
@@ -550,6 +557,7 @@ function renderWLEntry(e){
       +'<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">'
         +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
         +(e.unraced?'<div class="wll-tag" style="background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);color:#fb7185;">Unraced</div>':'')
+        +puzzleBadge
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:5px;margin-top:5px;">'
         +'<div style="flex:1;max-width:70px;height:3px;background:var(--sur2);border-radius:2px;">'
@@ -846,7 +854,8 @@ async function wlAIAssess(){
 
   const btn=document.getElementById('wlf-ai-btn');
   const res=document.getElementById('wlf-ai-result');
-  if(btn){btn.textContent='🧩 Generating…';btn.disabled=true;}
+  const _puzzleSVG='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/></svg>';
+  if(btn){btn.innerHTML=_puzzleSVG+' Generating…';btn.disabled=true;}
   if(res){res.style.display='none';}
 
   // Build OR history string
@@ -943,7 +952,7 @@ UK racing context: OR 0-59 = sellers/claimers, 60-79 = lower handicaps (Class 4-
       res.style.display='block';
       res.innerHTML=
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
-          +'<div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a855f7;">🧩 Puzzle Report</div>'
+          +'<div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#a855f7;display:flex;align-items:center;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/></svg>Puzzle Report</div>'
           +(openProfileId?'<div style="font-size:9px;color:#4ade80;font-weight:700;">✓ Saved automatically</div>':'<div style="font-size:9px;color:#f59e0b;font-weight:700;">Save profile to keep</div>')
         +'</div>'
         +row('Current Level',parsed.level,'#60a5fa')
@@ -955,7 +964,7 @@ UK racing context: OR 0-59 = sellers/claimers, 60-79 = lower handicaps (Class 4-
   }catch(e){
     if(res){res.style.display='block';res.innerHTML='<div style="color:var(--red);font-size:13px;">Assessment failed: '+e.message+'</div>';}
   }finally{
-    if(btn){btn.textContent='🧩 Generate Puzzle Report';btn.disabled=false;}
+    if(btn){btn.innerHTML=_puzzleSVG+' Generate Puzzle Report';btn.disabled=false;}
   }
 }
 
@@ -1259,7 +1268,7 @@ function openWLForm(id,prefill){
             +'</select></div>'
           +'</div>'
           +'<div style="padding:4px 0 2px;">'
-            +'<button type="button" id="wlf-ai-btn" onclick="wlAIAssess()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid rgba(168,85,247,.4);background:rgba(168,85,247,.07);color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;">🧩 Generate Puzzle Report</button>'
+            +'<button type="button" id="wlf-ai-btn" onclick="wlAIAssess()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid rgba(168,85,247,.4);background:rgba(168,85,247,.07);color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/></svg>Generate Puzzle Report</button>'
             +'<div id="wlf-ai-result" style="display:none;margin-top:10px;border-radius:9px;border:1px solid rgba(168,85,247,.25);background:rgba(168,85,247,.06);padding:12px 13px;"></div>'
           +'</div>'
         +'</div>'
@@ -2336,7 +2345,7 @@ function _wlpBuildHTML(e){
     const ai=e.aiAssessment;
     const assessedDate=e.aiAssessedAt?_wlpFmt(new Date(e.aiAssessedAt).toISOString().split('T')[0]):'';
     h+='<div class="wlp-section" style="border:1px solid rgba(168,85,247,.25);background:rgba(168,85,247,.04);">';
-    h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num" style="background:rgba(168,85,247,.2);color:#a855f7;">🧩</div><span class="wlp-section-title">Puzzle Report</span></div>';
+    h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num" style="background:rgba(168,85,247,.2);color:#a855f7;display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/></svg></div><span class="wlp-section-title">Puzzle Report</span></div>';
     if(assessedDate)h+='<span style="font-size:9px;color:var(--mut);">'+assessedDate+'</span>';
     h+='</div>';
     h+='<div style="padding:0 12px 12px;">';
@@ -2345,7 +2354,7 @@ function _wlpBuildHTML(e){
     if(ai.sweet_spot)h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(168,85,247,.1);"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Sweet Spot</span><span style="font-size:12px;font-weight:800;color:#f59e0b;">'+esc(ai.sweet_spot)+'</span></div>';
     if(ai.watch_for)h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(168,85,247,.1);"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Watch For</span><span style="font-size:12px;font-weight:700;color:#fb7185;">'+esc(ai.watch_for)+'</span></div>';
     if(ai.verdict)h+='<div style="padding-top:10px;font-size:13px;color:var(--txt);line-height:1.6;font-style:italic;">'+esc(ai.verdict)+'</div>';
-    h+='<button onclick="openWLForm(\''+e.id+'\')" style="margin-top:10px;width:100%;padding:7px;border-radius:7px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#a855f7;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">🧩 Regenerate Puzzle Report</button>';
+    h+='<button onclick="openWLForm(\''+e.id+'\')" style="margin-top:10px;width:100%;padding:7px;border-radius:7px;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#a855f7;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/></svg>Regenerate Puzzle Report</button>';
     h+='</div></div>';
   }
 

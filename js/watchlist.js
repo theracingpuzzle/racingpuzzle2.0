@@ -182,6 +182,41 @@ function wlToggleGroup(r){
 // ─── PROFILER FILTERS ───
 let _wlFilter=null; // null = all, or one of: 'no-obs','past-target','running-today','edge'
 let _wlGroupBy='reason'; // 'reason' | 'race-type' | 'surface' | 'age'
+let _wlShowCold=false;
+
+const BR_STAGES=[
+  {id:'watching',   label:'Watching',       col:'#60a5fa'},
+  {id:'interesting',label:'Interesting',    col:'#f59e0b'},
+  {id:'on-radar',   label:'On Radar',       col:'#fb923c'},
+  {id:'ready',      label:'Ready to Back',  col:'#4ade80'},
+  {id:'cold',       label:'Cold',           col:'#6b7280'},
+];
+function _brStage(e){return BR_STAGES.find(function(s){return s.id===(e.betReadiness||'watching');})||BR_STAGES[0];}
+function wlSetReadiness(id,status,ev){
+  if(ev){ev.stopPropagation();}
+  const wl=getWL();
+  const entry=wl.find(function(x){return x.id===id;});
+  if(!entry)return;
+  entry.betReadiness=status;
+  entry.updatedAt=Date.now();
+  D.watchlist=wl;
+  save();
+  renderWLList();
+}
+function wlCycleReadiness(id,ev){
+  if(ev){ev.stopPropagation();}
+  const wl=getWL();
+  const entry=wl.find(function(x){return x.id===id;});
+  if(!entry)return;
+  const cur=entry.betReadiness||'watching';
+  const idx=BR_STAGES.findIndex(function(s){return s.id===cur;});
+  const next=BR_STAGES[(idx+1)%BR_STAGES.length];
+  entry.betReadiness=next.id;
+  entry.updatedAt=Date.now();
+  D.watchlist=wl;
+  save();
+  renderWLList();
+}
 
 function setWLGroupBy(g){
   _wlGroupBy=g;
@@ -255,7 +290,11 @@ const WL_FILTERS=[
     svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v2M13 2v2M10 12v.5M10 15v.1"/></svg>'},
   {id:'edge',           label:'Edge',            title:'Your rating is above the official rating — potential value',
     svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 14 7 9 11 12 17 5"/><polyline points="14 5 17 5 17 8"/></svg>'},
+  {id:'ready',          label:'Ready to Back',   title:'Horses you have marked as ready to back',
+    svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><polyline points="6 10 9 13 14 7"/></svg>'},
 ];
+
+function _wlToggleCold(){_wlShowCold=!_wlShowCold;renderWLList();}
 
 function setWLFilter(id){
   _wlFilter=(_wlFilter===id)?null:id; // toggle off if already active
@@ -297,6 +336,13 @@ function _applyWLFilter(entries){
       const mr=parseFloat(e.myRating), or=parseFloat(e.currentRating);
       return !isNaN(mr)&&!isNaN(or)&&mr>or;
     });
+  }
+  if(_wlFilter==='ready'){
+    return entries.filter(function(e){return e.betReadiness==='ready';});
+  }
+  // Default: hide Cold unless toggled on
+  if(!_wlShowCold){
+    return entries.filter(function(e){return (e.betReadiness||'watching')!=='cold';});
   }
   return entries;
 }
@@ -428,12 +474,23 @@ function renderWLList(){
 
   let html='<div class="wll-wrap">';
 
+  const coldCount=getWL().filter(function(e){return e.betReadiness==='cold';}).length;
+  const readyCount=getWL().filter(function(e){return e.betReadiness==='ready';}).length;
+
   // ── Stats strip ──
   html+='<div class="wll-stats">'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--gld2);">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
-    +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--grn);">'+totalReviews+'</div><div class="wll-stat-l">Reviews</div></div>'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#4ade80;">'+readyCount+'</div><div class="wll-stat-l">Ready</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--ora);">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
   +'</div>';
+  // Cold toggle
+  if(coldCount){
+    html+='<div style="text-align:center;margin-bottom:10px;">'
+      +'<button onclick="_wlToggleCold()" style="font-size:10px;font-weight:700;color:var(--mut);background:none;border:none;padding:0;cursor:pointer;letter-spacing:.04em;">'
+        +(_wlShowCold?'▲ Hide':'▼ Show')+' '+coldCount+' Cold horse'+(coldCount>1?'s':'')
+      +'</button>'
+    +'</div>';
+  }
 
   // ── Group-by selector ──
   const GB_OPTS=[
@@ -491,11 +548,32 @@ function renderWLList(){
       const addedDate=e.createdAt?'Added '+_daysAgo(e.createdAt):'';
       const updatedDate=e.updatedAt&&e.updatedAt!==e.createdAt?'Updated '+_daysAgo(e.updatedAt):'';
 
+      const _cmdBR=_brStage(e);
+      const _cmdBRDot='<span onclick="wlCycleReadiness(\''+e.id+'\',event)" title="Bet Readiness: '+_cmdBR.label+' — tap to change" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+_cmdBR.col+';flex-shrink:0;cursor:pointer;margin-right:7px;vertical-align:middle;box-shadow:0 0 0 2px '+_cmdBR.col+'33;"></span>';
+      const _cmdPuzzleBadge=e.aiAssessment
+        ?'<span title="Puzzle Report generated" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:3px;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.35);flex-shrink:0;vertical-align:middle;margin-left:6px;">'
+          +'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/></svg>'
+        +'</span>'
+        :'';
+      const _cmdAwaitingCount=(function(){
+        const todayS=td();
+        const rvDates=(D.reviews||[]).filter(function(rv){return rv.profileId===e.id;}).map(function(rv){return rv.date||'';});
+        const ov=(e.targets||[]).filter(function(t){
+          if(!t.date||t.date>=todayS)return false;
+          const tMs=new Date(t.date+'T00:00:00').getTime();
+          return!rvDates.some(function(d){return Math.abs(new Date(d+'T00:00:00').getTime()-tMs)<=7*24*60*60*1000;});
+        }).length;
+        const pv=(D.pendingReviews||[]).filter(function(p){
+          if(p.profileId!==e.id)return false;
+          return!(D.reviews||[]).some(function(rv){return rv.profileId===e.id&&rv.date===p.date;});
+        }).length;
+        return ov+pv;
+      })();
       html+='<div style="position:relative;border-bottom:1px solid var(--bdr);" data-wl-id="'+e.id+'">'
         +'<div class="wll-row" style="border-left:none;border-bottom:none;">'
           +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
           +'<div class="wll-main">'
-            +'<div class="wll-name">'+(e.horse||'Unknown')+(e.needsReview?'<span class="wll-review-badge">REVIEW</span>':'')+'</div>'
+            +'<div class="wll-name">'+_cmdBRDot+(e.horse||'Unknown')+_cmdPuzzleBadge+(_cmdAwaitingCount?'<span style="font-size:9px;font-weight:800;margin-left:6px;padding:1px 6px;border-radius:8px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#f59e0b;vertical-align:middle;">'+_cmdAwaitingCount+' due</span>':'')+(e.needsReview?'<span class="wll-review-badge">REVIEW</span>':'')+'</div>'
             +'<div class="wll-sub">'+subParts.join(' · ')+'</div>'
             +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+(REASON_SVG[r]?REASON_SVG[r]+' ':'')+rm.label+'</div>'
           +'</div>'
@@ -542,6 +620,8 @@ function renderWLEntry(e){
   const comp=_wlCompleteness(e);
   const mom=_wlMomentum(e);
   const compCol=comp.pct>=80?'#4ade80':comp.pct>=50?'#f59e0b':'#f87171';
+  const brStage=_brStage(e);
+  const brDot='<span onclick="wlCycleReadiness(\''+e.id+'\',event)" title="'+brStage.label+' — tap to change" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+brStage.col+';flex-shrink:0;cursor:pointer;margin-right:7px;vertical-align:middle;box-shadow:0 0 0 2px '+brStage.col+'33;"></span>';
   // Overdue targets (past date, no review within 7 days)
   const todayStr=td();
   const rvwDates=(D.reviews||[]).filter(function(r){return r.profileId===e.id;}).map(function(r){return r.date||'';});
@@ -565,7 +645,7 @@ function renderWLEntry(e){
   return'<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
     +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
     +'<div class="wll-main">'
-      +'<div class="wll-name">'+(e.horse||'Unknown')+(mom?'<span style="font-size:10px;font-weight:700;margin-left:6px;color:'+mom.col+';">'+mom.icon+'</span>':'')+(awaitingCount?'<span style="font-size:9px;font-weight:800;margin-left:7px;padding:1px 6px;border-radius:8px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#f59e0b;vertical-align:middle;">'+awaitingCount+' review'+(awaitingCount>1?'s':'')+' due</span>':'')+'</div>'
+      +'<div class="wll-name">'+brDot+(e.horse||'Unknown')+(mom?'<span style="font-size:10px;font-weight:700;margin-left:6px;color:'+mom.col+';">'+mom.icon+'</span>':'')+(awaitingCount?'<span style="font-size:9px;font-weight:800;margin-left:7px;padding:1px 6px;border-radius:8px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#f59e0b;vertical-align:middle;">'+awaitingCount+' review'+(awaitingCount>1?'s':'')+' due</span>':'')+'</div>'
       +'<div class="wll-sub">'+subParts.join(' · ')+(daysAgo?' · '+daysAgo:'')+'</div>'
       +'<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">'
         +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+rm.emoji+' '+rm.label+'</div>'
@@ -2077,10 +2157,17 @@ function _wlpBuildHTML(e){
           +(e.age?' · '+e.age+'yo':'')
           +(e.surface?' · '+({flat:'Flat',jumps:'Jumps',aw:'AW'}[e.surface]||e.surface):'')
         +'</div>'
-        // Reason + momentum badges
-        +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">'
-          +'<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:'+reason.col+'20;border:1px solid '+reason.col+'40;color:'+reason.col+';">'+reason.svg+' '+reason.label+'</span>'
-        +'</div>'
+        // Reason + bet readiness badges
+        +(function(){
+          const br=_brStage(e);
+          return'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">'
+            +'<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:'+reason.col+'20;border:1px solid '+reason.col+'40;color:'+reason.col+';">'+reason.svg+' '+reason.label+'</span>'
+            +'<span onclick="(function(){var opts='+JSON.stringify(BR_STAGES.map(function(s){return s.id;}))+';var el=document.getElementById(\'wlp-br-picker-'+e.id+'\');if(el){el.remove();}else{var d=document.createElement(\'div\');d.id=\'wlp-br-picker-'+e.id+'\';d.style.cssText=\'position:absolute;top:100%;left:0;z-index:99;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:4px;min-width:150px;margin-top:4px;\';'+BR_STAGES.map(function(s){return'd.innerHTML+=\'<button onclick="wlSetReadiness(\\\''+e.id+'\\\',\\\''+s.id+'\\\',event);document.getElementById(\\\'wlp-br-picker-'+e.id+'\\\').remove();" style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:7px;border:none;background:\'+(\''+e.betReadiness+'\'===\''+s.id+'\'?\''+s.col+'22\':\'transparent\')+\';color:var(--txt);font-size:12px;font-weight:700;cursor:pointer;text-align:left;"><span style=\\\'display:inline-block;width:8px;height:8px;border-radius:50%;background:'+s.col+';flex-shrink:0;\\\"></span>'+s.label+'</button>\';';}).join('')+'document.body.appendChild(d);}})();" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:5px;background:'+br.col+'20;border:1px solid '+br.col+'40;color:'+br.col+';cursor:pointer;position:relative;">'
+              +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+br.col+';flex-shrink:0;"></span>'
+              +br.label
+            +'</span>'
+          +'</div>';
+        })()
       +'</div>'
       +'<div class="wlp-or-box" style="flex-shrink:0;">'
         +'<span class="wlp-or-label">OR</span>'

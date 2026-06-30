@@ -1153,6 +1153,7 @@ function wlSwitchTab(name){
 
 function openWLForm(id,prefill){
   try{
+  window._wlLastAIAssess=null;
   // Remove any existing modal first to avoid conflicts
   const existing=document.getElementById('wl-modal');if(existing)existing.remove();
   const wl=getWL();
@@ -1532,8 +1533,8 @@ function saveWLEntry(id){
     distancePref:(_wlDossier.distPrefs||[]).join(', '),
     trackPref:(document.getElementById('wlf-track').value||'').trim(),
     conditionsNotes:(document.getElementById('wlf-cond-notes').value||'').trim(),
-    aiAssessment:old?old.aiAssessment||(window._wlLastAIAssess||null):(window._wlLastAIAssess||null),
-    aiAssessedAt:old?old.aiAssessedAt||(window._wlLastAIAssess?Date.now():null):(window._wlLastAIAssess?Date.now():null),
+    aiAssessment:old?old.aiAssessment||null:null,
+    aiAssessedAt:old?old.aiAssessedAt||null:null,
     raceDate,
     notes:(document.getElementById('wlf-intel').value||'').trim(),
     createdAt:old?old.createdAt||Date.now():Date.now(),

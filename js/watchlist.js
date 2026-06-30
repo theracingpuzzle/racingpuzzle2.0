@@ -203,6 +203,31 @@ function wlSetReadiness(id,status,ev){
   save();
   renderWLList();
 }
+function wlToggleBRPicker(profileId){
+  const el=document.getElementById('wlp-br-picker-'+profileId);
+  if(!el)return;
+  if(el.style.display!=='none'){el.style.display='none';return;}
+  const wl=getWL();
+  const entry=wl.find(function(x){return x.id===profileId;})||{};
+  const cur=entry.betReadiness||'watching';
+  el.innerHTML=BR_STAGES.map(function(s){
+    const active=s.id===cur;
+    return'<button onclick="wlSetReadiness(\''+profileId+'\',\''+s.id+'\',event);document.getElementById(\'wlp-br-picker-'+profileId+'\').style.display=\'none\';openWLProfile(\''+profileId+'\')" '
+      +'style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:7px;border:none;background:'+(active?s.col+'22':'transparent')+';color:var(--txt);font-size:12px;font-weight:'+(active?'800':'600')+';cursor:pointer;text-align:left;">'
+      +'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+s.col+';flex-shrink:0;"></span>'
+      +s.label
+    +'</button>';
+  }).join('');
+  el.style.display='flex';
+  el.style.flexDirection='column';
+  // Close picker when clicking outside
+  setTimeout(function(){
+    document.addEventListener('click',function _close(ev){
+      if(!el.contains(ev.target)){el.style.display='none';document.removeEventListener('click',_close);}
+    });
+  },0);
+}
+
 function wlCycleReadiness(id,ev){
   if(ev){ev.stopPropagation();}
   const wl=getWL();
@@ -2162,10 +2187,11 @@ function _wlpBuildHTML(e){
           const br=_brStage(e);
           return'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">'
             +'<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:'+reason.col+'20;border:1px solid '+reason.col+'40;color:'+reason.col+';">'+reason.svg+' '+reason.label+'</span>'
-            +'<span onclick="(function(){var opts='+JSON.stringify(BR_STAGES.map(function(s){return s.id;}))+';var el=document.getElementById(\'wlp-br-picker-'+e.id+'\');if(el){el.remove();}else{var d=document.createElement(\'div\');d.id=\'wlp-br-picker-'+e.id+'\';d.style.cssText=\'position:absolute;top:100%;left:0;z-index:99;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:6px;display:flex;flex-direction:column;gap:4px;min-width:150px;margin-top:4px;\';'+BR_STAGES.map(function(s){return'd.innerHTML+=\'<button onclick="wlSetReadiness(\\\''+e.id+'\\\',\\\''+s.id+'\\\',event);document.getElementById(\\\'wlp-br-picker-'+e.id+'\\\').remove();" style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:7px;border:none;background:\'+(\''+e.betReadiness+'\'===\''+s.id+'\'?\''+s.col+'22\':\'transparent\')+\';color:var(--txt);font-size:12px;font-weight:700;cursor:pointer;text-align:left;"><span style=\\\'display:inline-block;width:8px;height:8px;border-radius:50%;background:'+s.col+';flex-shrink:0;\\\"></span>'+s.label+'</button>\';';}).join('')+'document.body.appendChild(d);}})();" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:5px;background:'+br.col+'20;border:1px solid '+br.col+'40;color:'+br.col+';cursor:pointer;position:relative;">'
+            +'<span onclick="wlToggleBRPicker(\''+e.id+'\')" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:5px;background:'+br.col+'20;border:1px solid '+br.col+'40;color:'+br.col+';cursor:pointer;">'
               +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+br.col+';flex-shrink:0;"></span>'
-              +br.label
+              +br.label+' ▾'
             +'</span>'
+            +'<div id="wlp-br-picker-'+e.id+'" style="display:none;position:absolute;left:0;top:auto;z-index:99;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:6px;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,.3);"></div>'
           +'</div>';
         })()
       +'</div>'

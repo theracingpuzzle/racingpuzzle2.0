@@ -204,28 +204,29 @@ function wlSetReadiness(id,status,ev){
   renderWLList();
 }
 function wlToggleBRPicker(profileId){
-  const el=document.getElementById('wlp-br-picker-'+profileId);
-  if(!el)return;
-  if(el.style.display!=='none'){el.style.display='none';return;}
+  const existing=document.getElementById('wl-br-sheet');
+  if(existing){existing.remove();return;}
   const wl=getWL();
   const entry=wl.find(function(x){return x.id===profileId;})||{};
   const cur=entry.betReadiness||'watching';
-  el.innerHTML=BR_STAGES.map(function(s){
-    const active=s.id===cur;
-    return'<button onclick="wlSetReadiness(\''+profileId+'\',\''+s.id+'\',event);document.getElementById(\'wlp-br-picker-'+profileId+'\').style.display=\'none\';openWLProfile(\''+profileId+'\')" '
-      +'style="display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border-radius:7px;border:none;background:'+(active?s.col+'22':'transparent')+';color:var(--txt);font-size:12px;font-weight:'+(active?'800':'600')+';cursor:pointer;text-align:left;">'
-      +'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+s.col+';flex-shrink:0;"></span>'
-      +s.label
-    +'</button>';
-  }).join('');
-  el.style.display='flex';
-  el.style.flexDirection='column';
-  // Close picker when clicking outside
-  setTimeout(function(){
-    document.addEventListener('click',function _close(ev){
-      if(!el.contains(ev.target)){el.style.display='none';document.removeEventListener('click',_close);}
-    });
-  },0);
+  const sheet=document.createElement('div');
+  sheet.id='wl-br-sheet';
+  sheet.style.cssText='position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;';
+  sheet.innerHTML='<div style="background:var(--sur);border-radius:16px 16px 0 0;width:100%;max-width:520px;padding:16px;padding-bottom:max(20px,env(safe-area-inset-bottom,20px));">'
+    +'<div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:12px;text-align:center;">Bet Readiness</div>'
+    +BR_STAGES.map(function(s){
+      const active=s.id===cur;
+      return'<button onclick="wlSetReadiness(\''+profileId+'\',\''+s.id+'\',event);document.getElementById(\'wl-br-sheet\').remove();openWLProfile(\''+profileId+'\')" '
+        +'style="display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border-radius:10px;border:1px solid '+(active?s.col+'50':'transparent')+';background:'+(active?s.col+'15':'transparent')+';color:var(--txt);font-size:14px;font-weight:'+(active?'800':'600')+';cursor:pointer;text-align:left;margin-bottom:4px;">'
+        +'<span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:'+s.col+';flex-shrink:0;box-shadow:0 0 0 3px '+s.col+'33;"></span>'
+        +s.label
+        +(active?'<span style="margin-left:auto;font-size:10px;color:'+s.col+';">Current</span>':'')
+      +'</button>';
+    }).join('')
+    +'<button onclick="document.getElementById(\'wl-br-sheet\').remove()" style="width:100%;margin-top:8px;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-size:13px;font-weight:700;cursor:pointer;">Cancel</button>'
+  +'</div>';
+  sheet.addEventListener('click',function(ev){if(ev.target===sheet)sheet.remove();});
+  document.body.appendChild(sheet);
 }
 
 function wlCycleReadiness(id,ev){
@@ -2191,7 +2192,6 @@ function _wlpBuildHTML(e){
               +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+br.col+';flex-shrink:0;"></span>'
               +br.label+' ▾'
             +'</span>'
-            +'<div id="wlp-br-picker-'+e.id+'" style="display:none;position:absolute;left:0;top:auto;z-index:99;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:6px;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,.3);"></div>'
           +'</div>';
         })()
       +'</div>'
@@ -2473,7 +2473,7 @@ function _wlpBuildHTML(e){
 
   // ── QUICK ACTION BAR — always visible at bottom ───────────────────────────
   h+='<div class="wlp-quick-bar">'
-    +'<button class="wlp-quick-btn" onclick="wlAddObsFromProfile(\''+e.id+'\',\''+esc(e.horse)+'\')">+ Observation</button>'
+    +'<button class="wlp-quick-btn" onclick="wlToggleBRPicker(\''+e.id+'\')">⬤ Readiness</button>'
     +'<button class="wlp-quick-btn" onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\'\')">+ Review</button>'
     +'<button class="wlp-quick-btn wlp-quick-btn-primary" onclick="'+editFn+'">✏ Edit</button>'
   +'</div>';

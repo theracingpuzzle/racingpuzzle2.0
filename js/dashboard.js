@@ -164,12 +164,14 @@ function renderHist(){
   const rf=(document.getElementById('hfr')||{value:''}).value;
   const sf=(document.getElementById('hfs')||{value:''}).value.toLowerCase();
   let bets=[...D.bets].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-  if(rf)bets=bets.filter(b=>b.result===rf);
+  if(rf==='needs-review')bets=bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr'&&!b.postNotes);
+  else if(rf)bets=bets.filter(b=>b.result===rf);
   if(sf)bets=bets.filter(b=>(b.horse||'').toLowerCase().includes(sf)||(b.track||'').toLowerCase().includes(sf));
   const cnt=document.getElementById('hcnt');if(cnt)cnt.textContent=bets.length+' bet'+(bets.length!==1?'s':'');
   const listEl=document.getElementById('hist-list');if(!listEl)return;
   if(!bets.length){
     const isFiltered=rf||sf;
+
     listEl.innerHTML=isFiltered
       ?'<div class="es">No bets match your filters.</div>'
       :'<div style="text-align:center;padding:32px 16px;">'
@@ -375,7 +377,7 @@ function renderStats(){
       +'<div style="display:flex;">'
         +perfCard('Jockey',bestJockey,'roi')
         +perfCard('Trainer',bestTrainer,'roi')
-        +perfCard('Source',bestSource,'roi')
+        +(!ownStudyOnly?perfCard('Source',bestSource,'roi'):'')
         +(bestTrack?'<div style="flex:1;min-width:0;padding:11px 10px;overflow:hidden;">'
           +'<div style="font-size:11px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">Racecourse</div>'
           +'<div style="font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;" title="'+bestTrack.k+'">'+bestTrack.k+'</div>'

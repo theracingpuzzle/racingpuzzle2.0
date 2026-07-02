@@ -41,11 +41,14 @@ function decToFrac(dec){
   const fracs=[[1,10],[2,10],[3,10],[4,10],[1,5],[2,9],[1,4],[3,10],[2,7],[1,3],[2,5],[1,2],[4,7],[8,13],[4,6],[8,11],[4,5],[5,6],[10,11],[1,1],[6,5],[5,4],[11,8],[6,4],[13,8],[7,4],[15,8],[2,1],[9,4],[5,2],[11,4],[3,1],[10,3],[7,2],[4,1],[9,2],[5,1],[11,2],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[14,1],[16,1],[20,1],[25,1],[33,1],[40,1],[50,1],[66,1],[100,1]];
   let best=null,bestDiff=999;
   for(const[a,b]of fracs){const d=a/b+1;const diff=Math.abs(d-dec);if(diff<bestDiff){bestDiff=diff;best=[a,b];}}
-  if(best&&bestDiff<0.02)return best[0]+'/'+best[1];
-  // fallback: simplify
-  const gcd=(a,b)=>b?gcd(b,a%b):a;
-  const num=Math.round(n*100),den=100,g=gcd(Math.abs(num),den);
-  return(num/g)+'/'+(den/g);
+  if(best&&bestDiff<0.06)return best[0]+'/'+best[1];
+  // fallback: snap to nearest clean fraction using common denominators only
+  const cleanDens=[1,2,4,5,8,10];
+  let fb=null,fbErr=999;
+  for(const d of cleanDens){const num=Math.round(n*d);if(num<=0)continue;const err=Math.abs(n-num/d);if(err<fbErr){fbErr=err;fb=num+'/'+d;}}
+  // simplify
+  if(fb){const[a,b]=fb.split('/').map(Number);const gcd=(x,y)=>y?gcd(y,x%y):x;const g=gcd(a,b);const sn=a/g,sd=b/g;if(sn===1&&sd===1)return'Evs';return sn+'/'+sd;}
+  return Math.round(n)+'/1';
 }
 
 function calcReturns(result,stake,odDec,betType,ewTerms){

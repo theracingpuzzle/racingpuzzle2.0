@@ -185,11 +185,11 @@ let _wlGroupBy='reason'; // 'reason' | 'race-type' | 'surface' | 'age'
 let _wlShowCold=false;
 
 const BR_STAGES=[
-  {id:'watching',   label:'Watching',       col:'#60a5fa'},
-  {id:'interesting',label:'Interesting',    col:'#f59e0b'},
-  {id:'on-radar',   label:'On Radar',       col:'#fb923c'},
-  {id:'ready',      label:'Ready to Back',  col:'#4ade80'},
-  {id:'cold',       label:'Cold',           col:'#6b7280'},
+  {id:'watching',   label:'Watching',       col:'#94a3b8'},
+  {id:'interesting',label:'Interesting',    col:'#60a5fa'},
+  {id:'on-radar',   label:'On Radar',       col:'#f59e0b'},
+  {id:'ready',      label:'Ready to Back',  col:'#10b981'},
+  {id:'cold',       label:'Cold',           col:'#a78bfa'},
 ];
 function _brStage(e){return BR_STAGES.find(function(s){return s.id===(e.betReadiness||'watching');})||BR_STAGES[0];}
 function wlSetReadiness(id,status,ev){
@@ -506,7 +506,7 @@ function renderWLList(){
   // ── Stats strip ──
   html+='<div class="wll-stats">'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--gld2);">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
-    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#4ade80;">'+readyCount+'</div><div class="wll-stat-l">Ready</div></div>'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#10b981;">'+readyCount+'</div><div class="wll-stat-l">Ready</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--ora);">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
   +'</div>';
   // Cold toggle

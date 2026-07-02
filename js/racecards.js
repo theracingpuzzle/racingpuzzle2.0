@@ -1084,9 +1084,9 @@ function rcSwRaceCard(race, course){
 
 
 function rcSwRenderResultsTime(listEl){
-  // Sort all races chronologically (ascending)
+  // Sort all races chronologically (descending — latest first)
   const all = rcSwResultsData.slice().sort(function(a,b){
-    return cmpTime(a.off_time||a.off||a.time||'', b.off_time||b.off||b.time||'');
+    return cmpTime(b.off_time||b.off||b.time||'', a.off_time||a.off||a.time||'');
   });
 
   let idx = 0;
@@ -1312,7 +1312,10 @@ async function rcLoadResults(){
       if(el)el.innerHTML='<div class="rc-empty">No results yet today.</div>';
       return;
     }
-    // Group by course
+    // Sort latest first, then render
+    results.sort(function(a,b){
+      return cmpTime(b.off_time||b.off||b.time||'', a.off_time||a.off||a.time||'');
+    });
     if(el){
       el.innerHTML=results.map(function(race){
         const course=race.course||race.venue||'Unknown';

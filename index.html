@@ -11,7 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-apple.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-apple.png">
 <title>The Racing Puzzle</title>
 <!-- Supabase JS client — used for auth only (session persistence + auto token refresh) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -69,7 +70,6 @@ RACING <span class="logo-accent">PUZZLE</span>
               <div class="card-title" style="color:var(--red);" id="tdlbl">Today</div>
             </div>
             <div class="row-g8">
-              <button class="btn-refresh" onclick="runTodayDemo()" id="t-demo-btn">Demo ›</button>
               <div style="text-align:right;" id="tstreak-tile"></div>
             </div>
           </div>
@@ -973,7 +973,7 @@ RACING <span class="logo-accent">PUZZLE</span>
 
 <div id="splash" style="position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;touch-action:none;">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;">
-    <div style="width:52px;height:4px;border-radius:2px;background:var(--gld2);margin-bottom:22px;"></div>
+    <img src="icons/icon-192.png" alt="The Racing Puzzle" style="width:110px;height:110px;border-radius:24px;margin-bottom:28px;box-shadow:0 8px 32px rgba(0,0,0,.3);">
     <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:36px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#fff;line-height:1;">
       RACING <span style="color:var(--gld2);">PUZZLE</span>
     </div>

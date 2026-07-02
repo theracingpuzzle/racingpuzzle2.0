@@ -6,12 +6,16 @@
 // Bump CACHE_VERSION whenever you deploy a meaningful update — this forces
 // the old cache to be cleared and a fresh copy of all assets to be fetched.
 
-const CACHE_VERSION = 'rp-v233';
+const CACHE_VERSION = 'rp-v234';
 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-apple.png',
+  './icons/favicon-32.png',
   './css/app.css',
   './css/racecards.css',
   './css/today.css',

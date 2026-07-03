@@ -752,7 +752,7 @@ function openWLEditReview(reviewId){
     const goingPre=document.getElementById('rvw-going-prefill');if(goingPre)goingPre.value=r.going||'';
     // Pre-select toggle buttons
     ['result','verdict','going','back'].forEach(function(grp){
-      const val={result:r.result,verdict:r.verdict,going:r.goingConfirmed,back:r.backNextTime}[grp];
+      const val={result:r.result,verdict:r.verdict,going:r.goingConfirmed}[grp];
       if(!val)return;
       const btn=document.querySelector('.rvw-btn[data-grp="'+grp+'"][data-'+grp+'="'+val+'"]');
       if(btn)wlRvwToggle(btn);
@@ -775,7 +775,6 @@ function openWLEditReview(reviewId){
         r.result=_rvwGet('result')||r.result;
         r.verdict=_rvwGet('verdict')||r.verdict;
         r.goingConfirmed=_rvwGet('going')||r.goingConfirmed;
-        r.backNextTime=_rvwGet('back')||r.backNextTime;
         r.mrAdjustment=parseInt((document.getElementById('rvw-mr-adj')||{value:0}).value)||0;
         r.notes=(document.getElementById('rvw-notes').value||'').trim();
         r.going=(document.getElementById('rvw-going-prefill')||{value:''}).value;
@@ -831,9 +830,10 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'<div class="fg" id="rvw-going-row"><label>Going'+(raceGoing?' <span style="color:var(--mut);font-weight:400;font-size:11px;">('+raceGoing+')</span>':'')+'</label><div class="rvw-btn-group">'
     +[{k:'confirmed',lbl:'✓ Confirmed'},{k:'mixed',lbl:'~ Mixed'},{k:'against',lbl:'✗ Against'}].map(function(g){return'<button data-going="'+g.k+'" data-grp="going" class="rvw-btn" style="--rvw-col:var(--txt)" onclick="wlRvwToggle(this)">'+g.lbl+'</button>';}).join('')
     +'</div></div>'
-    +'<div class="fg" id="rvw-back-row"><label>Back Next Time?</label><div class="rvw-btn-group">'
-    +[{k:'yes',col:'var(--grn)',lbl:'Yes'},{k:'depends',col:'var(--gld)',lbl:'Depends'},{k:'no',col:'var(--red)',lbl:'No'}].map(function(b){return'<button data-back="'+b.k+'" data-grp="back" class="rvw-btn" style="--rvw-col:'+b.col+'" onclick="wlRvwToggle(this)">'+b.lbl+'</button>';}).join('')
+    +'<div class="fg"><label>Bet Readiness</label><div class="rvw-btn-group" id="rvw-readiness-row">'
+    +BR_STAGES.map(function(s){const isCur=(entry&&(entry.betReadiness||'watching')===s.id);return'<button data-readiness="'+s.id+'" data-grp="readiness" class="rvw-btn" style="--rvw-col:'+s.col+';'+(isCur?'opacity:1':'opacity:0.4')+'" data-selected="'+(isCur?'1':'')+'" onclick="wlRvwToggle(this)">'+s.label+'</button>';}).join('')
     +'</div></div>'
+    +'<div id="rvw-signals" style="margin:4px 0 2px;"></div>'
     +'<div class="fg"><label>Notes</label><textarea id="rvw-notes" placeholder="What you saw, sectionals, paddock notes…" style="min-height:64px;"></textarea></div>'
     +'<div style="display:flex;gap:8px;margin-top:4px;">'
     +'<button onclick="saveWLReview(\''+profileId+'\',\''+horse+'\',\''+course+'\')" class="btn bgld" style="flex:1;">Save Review</button>'
@@ -866,7 +866,6 @@ function wlRvwToggle(btn){
     b.style.opacity=isThis?'1':'0.4';
     b.dataset.selected=isThis?'1':'';
   });
-  // Result-specific UX
   if(grp==='result'){
     const result=btn.dataset.result;
     const posEl=document.getElementById('rvw-pos');
@@ -875,10 +874,8 @@ function wlRvwToggle(btn){
     const oddsRow=document.getElementById('rvw-odds-row');
     const verdictRow=document.getElementById('rvw-verdict-row');
     const goingRow=document.getElementById('rvw-going-row');
-    const backRow=document.getElementById('rvw-back-row');
     const raceOnly=result==='nr'||result==='missed';
-    // Rows that vanish for NR / Missed Target
-    [posRow,beatenRow,oddsRow,verdictRow,goingRow,backRow].forEach(function(el){
+    [posRow,beatenRow,oddsRow,verdictRow,goingRow].forEach(function(el){
       if(el)el.style.display=raceOnly?'none':'';
     });
     if(raceOnly){
@@ -891,12 +888,61 @@ function wlRvwToggle(btn){
       if(beatenRow)beatenRow.style.display='';
     }
   }
+  _rvwUpdateSignals();
 }
 
 function _rvwGet(grp){
   const sel=document.querySelector('.rvw-btn[data-grp="'+grp+'"][data-selected="1"]');
   if(!sel)return'';
-  return sel.dataset[grp]||sel.dataset.result||sel.dataset.verdict||sel.dataset.going||sel.dataset.back||'';
+  return sel.dataset[grp]||sel.dataset.result||sel.dataset.verdict||sel.dataset.going||sel.dataset.readiness||'';
+}
+
+function _rvwUpdateSignals(){
+  const el=document.getElementById('rvw-signals');if(!el)return;
+  const result=_rvwGet('result');
+  const verdict=_rvwGet('verdict');
+  const going=_rvwGet('going');
+  const readiness=_rvwGet('readiness');
+  if(!result&&!verdict&&!going){el.innerHTML='';return;}
+  const alerts=[];
+  const hot=[];
+  const cold=[];
+  // Result signals
+  if(result==='win'){hot.push('Won the race');}
+  else if(result==='place'){hot.push('Placed — ran to form');}
+  else if(result==='unplaced'){cold.push('Unplaced');}
+  else if(result==='nr'){alerts.push({col:'#94a3b8',msg:'Non-runner — no data gained'});}
+  else if(result==='missed'){alerts.push({col:'#94a3b8',msg:'Missed target — nothing to assess'});}
+  // Going signals
+  if(going==='confirmed'){hot.push('Going suited ✓');}
+  else if(going==='against'){cold.push('Going against preferences ✗');}
+  else if(going==='mixed'){alerts.push({col:'#f59e0b',msg:'Going was mixed — monitor'});}
+  // Verdict signals
+  if(verdict==='upgrade'){hot.push('Verdict: Upgrade ↑');}
+  else if(verdict==='downgrade'){cold.push('Verdict: Downgrade ↓');}
+  // Readiness suggestion
+  if(result==='win'||verdict==='upgrade'){
+    const cur=readiness||document.querySelector('.rvw-btn[data-grp="readiness"][data-selected="1"]')?.dataset.readiness||'watching';
+    if(cur!=='ready')alerts.push({col:'#10b981',msg:'Consider marking as Ready to Back'});
+  }
+  if(verdict==='downgrade'||going==='against'){
+    const cur=readiness||document.querySelector('.rvw-btn[data-grp="readiness"][data-selected="1"]')?.dataset.readiness||'watching';
+    if(cur!=='cold')alerts.push({col:'#a78bfa',msg:'Consider marking as Cold'});
+  }
+  // Stars: 1 per hot, -1 per cold, base 3, clamped 1-5
+  const starScore=Math.min(5,Math.max(1,3+hot.length-cold.length));
+  const starCol=starScore>=4?'#10b981':starScore===3?'#f59e0b':'#f87171';
+  const stars='★'.repeat(starScore)+'☆'.repeat(5-starScore);
+  let html='<div style="background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;">';
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+    +'<span style="font-size:18px;letter-spacing:2px;color:'+starCol+';">'+stars+'</span>'
+    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Horse Signal</span>'
+    +'</div>';
+  hot.forEach(function(m){html+='<div style="font-size:13px;color:#10b981;margin-bottom:3px;">✓ '+m+'</div>';});
+  cold.forEach(function(m){html+='<div style="font-size:13px;color:#f87171;margin-bottom:3px;">✗ '+m+'</div>';});
+  alerts.forEach(function(a){html+='<div style="font-size:13px;color:'+a.col+';margin-bottom:3px;">⚠ '+a.msg+'</div>';});
+  html+='</div>';
+  el.innerHTML=html;
 }
 
 function saveWLReview(profileId,horse,course){
@@ -920,7 +966,6 @@ function saveWLReview(profileId,horse,course){
     verdict:_rvwGet('verdict'),
     mrAdjustment:mrAdj,
     goingConfirmed:_rvwGet('going'),
-    backNextTime:_rvwGet('back'),
     notes:(document.getElementById('rvw-notes').value||'').trim(),
     source:'manual',createdAt:Date.now()
   };
@@ -937,9 +982,14 @@ function saveWLReview(profileId,horse,course){
       D.watchlist[idx].updatedAt=Date.now();
     }
   }
-  // Clear needsReview flag
+  // Update bet readiness and clear needsReview flag
+  const newReadiness=_rvwGet('readiness');
   const idx2=D.watchlist.findIndex(function(x){return x.id===profileId;});
-  if(idx2>-1&&D.watchlist[idx2].needsReview)D.watchlist[idx2].needsReview=false;
+  if(idx2>-1){
+    if(newReadiness)D.watchlist[idx2].betReadiness=newReadiness;
+    D.watchlist[idx2].needsReview=false;
+    D.watchlist[idx2].updatedAt=Date.now();
+  }
 
   save();
   document.getElementById('wl-review-modal').remove();
@@ -2417,7 +2467,6 @@ function _wlpBuildHTML(e){
       if(r.beatenDistance)chips.push({l:'Beaten',v:r.beatenDistance});
       if(r.odds)chips.push({l:'SP',v:r.odds});
       if(r.mrAdjustment)chips.push({l:'MR',v:(r.mrAdjustment>0?'+':'')+r.mrAdjustment});
-      if(r.backNextTime)chips.push({l:'Back',v:r.backNextTime});
       if(chips.length)h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">'+chips.map(function(c){return'<div style="font-size:10px;color:var(--txt);"><span style="color:var(--mut);font-weight:600;">'+c.l+'</span> <span style="font-weight:700;">'+esc(c.v)+'</span></div>';}).join('<span style="color:var(--bdr);margin:0 1px;">·</span>')+'</div>';
       // Row 3: notes
       if(r.notes)h+='<div style="font-size:12px;color:var(--mut);line-height:1.55;margin-bottom:6px;">'+esc(r.notes)+'</div>';

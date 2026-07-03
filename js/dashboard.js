@@ -304,14 +304,14 @@ function renderStats(){
     const bankStart=scope==='virt'?(_vb.start||0):scope==='real'?(D.bank.start||0):((D.bank.start||0)+(_vb.start||0));
     const bankCurrent=scope==='virt'?(_vb.current||0):scope==='real'?(D.bank.current||0):((D.bank.current||0)+(_vb.current||0));
     const bankChange=bankCurrent-bankStart;
-    const pCol=p>=0?'#10b981':'#f87171';
-    const roiCol=roi>=0?'#10b981':'#f87171';
-    const bankCol=bankChange>=0?'#10b981':'#f87171';
+    const pCol=p>=0?'#34d399':'#f87171';
+    const roiCol=roi>=0?'#34d399':'#f87171';
+    const bankCol=bankChange>=0?'#34d399':'#f87171';
 
     const metric=function(label,value,sub,col){
       return'<div style="flex:1;min-width:0;padding:14px 8px;text-align:center;border-right:1px solid var(--bdr);last-child:border-right:none;">'
-        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:24px;font-weight:900;color:'+(col||'var(--txt)')+';">'+value+'</div>'
-        +'<div style="font-size:11px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-top:2px;">'+label+'</div>'
+        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:700;letter-spacing:-.5px;color:'+(col||'var(--txt)')+';">'+value+'</div>'
+        +'<div style="font-size:11px;font-family:\'Barlow Condensed\',sans-serif;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-top:2px;">'+label+'</div>'
         +(sub?'<div style="font-size:11px;color:var(--mut);margin-top:1px;">'+sub+'</div>':'')
       +'</div>';
     };

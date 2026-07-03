@@ -242,6 +242,36 @@
   100% { transform: translateX(-50%); }
 }
 
+/* ── League reminder banner ── */
+.t-league-banner {
+  cursor: pointer; display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: rgba(30,58,95,.08); border: 1px solid rgba(30,58,95,.2);
+  border-radius: 11px;
+}
+.t-league-icon {
+  width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+  background: rgba(30,58,95,.12); border: 1px solid rgba(30,58,95,.2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--navy);
+}
+.t-league-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px;
+  font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--navy);
+}
+.t-league-body  { font-size: 13px; color: var(--txt); margin-top: 2px; }
+.t-league-arrow { color: var(--navy); font-size: 16px; flex-shrink: 0; opacity: .6; }
+
+/* Dark mode — navy card, white text */
+body.dark .cT .t-league-banner {
+  background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.18);
+}
+body.dark .cT .t-league-icon  { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); color: #fff; }
+body.dark .cT .t-league-title { color: #f5c500; }
+body.dark .cT .t-league-body  { color: rgba(255,255,255,.85); }
+body.dark .cT .t-league-arrow { color: rgba(255,255,255,.6); }
+
 /* ── Section label (base — works in both modes) ── */
 .t-section-lbl {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;

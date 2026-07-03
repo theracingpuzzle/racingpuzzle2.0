@@ -544,7 +544,7 @@ async function checkWatchlistRunners(races){
         +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7;flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>'
         +'Running Today'
       +'</div>'
-      +'<button onclick="generateWatchlistPDF()" class="t-pdf-btn">↓ PDF</button>'
+      +'<button onclick="shareWatchlistAlerts()" class="t-pdf-btn" style="display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>'
     +'</div>'
     +alerts.map(function(a){
       const wid=(a.wlEntry&&a.wlEntry.id)?a.wlEntry.id:'';
@@ -601,11 +601,14 @@ async function checkWatchlistRunners(races){
           +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>'
           +' Racecard'
         +'</button>';
+      const profileClick=wid?'window._wlProfileSource=\'today\';openWLProfile(\''+wid+'\');':'';
       return'<div class="t-alert-row-pur">'
         +'<div class="t-row-sb-gap">'
-          +'<div class="t-flex-info">'
-            +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:3px;">'
+          +'<div class="t-flex-info"'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
+            +'<div style="margin-bottom:4px;">'
               +'<span class="t-horse-name">'+a.horse+'</span>'
+            +'</div>'
+            +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px;">'
               +reviewedInline
               +reasonBadge
               +edgeBadge
@@ -617,7 +620,6 @@ async function checkWatchlistRunners(races){
           +'</div>'
           +'<div class="t-flex-col-end">'
             +primaryBtn
-            +(wid?'<button data-wlid="'+wid+'" class="t-wl-profile-btn" style="background:none;border:none;padding:2px 0;cursor:pointer;font-size:10px;color:var(--mut);text-align:right;letter-spacing:.02em;">Profile →</button>':'')
           +'</div>'
         +'</div>'
       +'</div>';
@@ -658,6 +660,28 @@ async function checkWatchlistRunners(races){
       });
     });
   },0);
+}
+
+// ── WATCHLIST SHARE ──
+function shareWatchlistAlerts(){
+  const alerts=window._wlAlerts||[];
+  if(!alerts.length){alert('No watchlist horses running today.');return;}
+  const today=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const lines=alerts.map(function(a){
+    const meta=[a.time,a.course,a.raceName].filter(Boolean).join(' · ');
+    const edge=a.edge>0?' [MR '+a.mr+' OR '+a.or+' +'+a.edge+']':'';
+    return '🐎 '+a.horse+edge+'\n   '+meta+(a.jockey?'\n   J: '+a.jockey:'');
+  });
+  const text='Racing Puzzle — Tracker Alerts\n'+today+'\n\n'+lines.join('\n\n');
+  if(navigator.share){
+    navigator.share({title:'My Tracker Alerts — '+today,text:text}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text).then(function(){
+      flash('Copied to clipboard');
+    }).catch(function(){
+      alert(text);
+    });
+  }
 }
 
 // ── WATCHLIST PDF EXPORT ──
@@ -1251,15 +1275,15 @@ function renderLeagueReminder(){
   const names=missing.map(function(l){return l.name;});
   const multi=missing.length>1;
   el.style.display='block';
-  el.innerHTML='<div onclick="navTo(\'leagues\')" style="cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:11px;">'
-    +'<div style="width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
-      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+  el.innerHTML='<div onclick="navTo(\'leagues\')" class="t-league-banner">'
+    +'<div class="t-league-icon">'
+      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
     +'</div>'
     +'<div style="flex:1;min-width:0;">'
-      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#f5c500;">League Pick Needed</div>'
-      +'<div style="font-size:13px;color:rgba(255,255,255,.85);margin-top:2px;">No selection yet for <strong>'+names.join('</strong> &amp; <strong>')+'</strong></div>'
+      +'<div class="t-league-title">League Pick Needed</div>'
+      +'<div class="t-league-body">No selection yet for <strong>'+names.join('</strong> &amp; <strong>')+'</strong></div>'
     +'</div>'
-    +'<div style="color:rgba(255,255,255,.6);font-size:16px;flex-shrink:0;">›</div>'
+    +'<div class="t-league-arrow">›</div>'
   +'</div>';
 }
 

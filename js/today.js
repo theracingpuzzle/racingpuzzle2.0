@@ -646,7 +646,7 @@ async function checkWatchlistRunners(races){
     alertEl.querySelectorAll('.t-wl-profile-btn').forEach(function(btn){
       btn.addEventListener('click',function(ev){
         ev.stopPropagation();
-        var id=btn.getAttribute('data-wlid');if(id)openWLProfile(id);
+        var id=btn.getAttribute('data-wlid');if(id){window._wlProfileSource='today';openWLProfile(id);}
       });
     });
     alertEl.querySelectorAll('.t-wl-race-btn').forEach(function(btn){
@@ -1070,6 +1070,9 @@ function renderToday(){
   // ── Today's bets ──
   renderTodayBets(tb, vtb);
 
+  // ── League reminder ──
+  renderLeagueReminder();
+
   // ── Outstanding ──
   renderOutstanding();
 
@@ -1224,6 +1227,34 @@ function renderTodayBets(tb, vtb){
       +'<div class="mp '+(p2===null?'':p2>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p2===null?'—':fmt(p2))+'</div></div>';
     return el.outerHTML;
   }).join('');
+}
+
+function renderLeagueReminder(){
+  const el=document.getElementById('t-league-reminder');if(!el)return;
+  if(typeof _lgMyLeagues==='undefined'||!_lgMyLeagues){el.style.display='none';return;}
+  const today=td();
+  const active=_lgMyLeagues.filter(function(l){return !_lgIsEnded(l);});
+  if(!active.length){el.style.display='none';return;}
+  const uid=typeof _lgUid==='function'?_lgUid():null;
+  const missing=active.filter(function(l){
+    const picks=(_lgPicks[l.id]||[]);
+    const todayPick=picks.find(function(p){return p.user_id===uid&&p.pick_date===today;});
+    return !todayPick;
+  });
+  if(!missing.length){el.style.display='none';return;}
+  const names=missing.map(function(l){return l.name;});
+  const multi=missing.length>1;
+  el.style.display='block';
+  el.innerHTML='<div onclick="navTo(\'leagues\')" style="cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(30,58,95,.12);border:1px solid rgba(30,58,95,.35);border-radius:11px;">'
+    +'<div style="width:36px;height:36px;border-radius:9px;background:rgba(30,58,95,.2);border:1px solid rgba(30,58,95,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+    +'</div>'
+    +'<div style="flex:1;min-width:0;">'
+      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--navy);">League Pick Needed</div>'
+      +'<div style="font-size:13px;color:var(--txt);margin-top:2px;">No selection yet for <strong>'+names.join('</strong> &amp; <strong>')+'</strong></div>'
+    +'</div>'
+    +'<div style="color:var(--navy);font-size:16px;flex-shrink:0;">›</div>'
+  +'</div>';
 }
 
 function renderOutstanding(){

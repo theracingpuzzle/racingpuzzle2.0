@@ -620,7 +620,7 @@ function renderWLList(){
   el.querySelectorAll('[data-wl-id]').forEach(function(row){
     row.addEventListener('click',function(ev){
       ev.stopPropagation();
-      openWLProfile(row.getAttribute('data-wl-id'));
+      window._wlProfileSource='tracker';openWLProfile(row.getAttribute('data-wl-id'));
     });
   });
   el.querySelectorAll('[data-grp]').forEach(function(sec){
@@ -1573,7 +1573,7 @@ function openWLForm(id,prefill){
     +'<div class="wlf-brand">RACING <span class="wlf-brand-accent">PUZZLE</span></div>'
     +'<div class="wlf-nav-btns">'
       +(e?'<button onclick="delWLEntry(\''+e.id+'\')" class="wlf-del-btn">Delete</button>':'')
-      +'<button onclick="document.getElementById(\'wl-modal\').remove()" class="wlf-close-btn">✕</button>'
+      +'<button onclick="var _r=window._wlEditReturnId;window._wlEditReturnId=null;document.getElementById(\'wl-modal\').remove();if(_r)openWLProfile(_r);" class="wlf-close-btn">✕</button>'
     +'</div>'
   +'</div>'
   +'<div class="wlf-hero">'
@@ -1595,7 +1595,7 @@ function openWLForm(id,prefill){
   +'</div>'
   +'<div class="wlf-actions">'
     +'<button class="wlf-save-btn" onclick="saveWLEntry(\''+(e?e.id:'')+'\')">'+( e?'Save Profile':'Create Profile')+'</button>'
-    +'<button class="wlf-cancel-btn" onclick="document.getElementById(\'wl-modal\').remove()">Cancel</button>'
+    +'<button class="wlf-cancel-btn" onclick="var _r=window._wlEditReturnId;window._wlEditReturnId=null;document.getElementById(\'wl-modal\').remove();if(_r)openWLProfile(_r);">Cancel</button>'
   +'</div>'
   +'</div>';
 
@@ -1751,9 +1751,11 @@ function saveWLEntry(id){
   }
   save();
   if(removedTargetIds.length) supaDeleteTargetsByIds(removedTargetIds).catch(function(){});
+  const _retId=window._wlEditReturnId;window._wlEditReturnId=null;
   document.getElementById('wl-modal').remove();
   renderWatchlist();
-  if(entry.raceDate&&wlView==='cal'){wlCalDate=new Date(entry.raceDate+'T00:00:00');renderWLCal();setTimeout(function(){wlSelectDay(entry.raceDate);},100);}
+  if(_retId)openWLProfile(_retId);
+  else if(entry.raceDate&&wlView==='cal'){wlCalDate=new Date(entry.raceDate+'T00:00:00');renderWLCal();setTimeout(function(){wlSelectDay(entry.raceDate);},100);}
 }
 
 function wlDeleteReview(reviewId, profileId){
@@ -2237,7 +2239,7 @@ function _wlpBuildHTML(e){
     {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>',label:'Track',    value:e.trackPref||'—',     color:e.trackPref?'#8b5cf6':'#3a3a5c'},
   ];
 
-  const editFn="document.getElementById('wlp-modal').remove();openWLForm('"+e.id+"')";
+  const editFn="window._wlEditReturnId='"+e.id+"';document.getElementById('wlp-modal').remove();openWLForm('"+e.id+"')";
 
   // ── Betting record ──
   const horseName=(e.horse||'').toLowerCase().trim();
@@ -2258,7 +2260,7 @@ function _wlpBuildHTML(e){
 
   // ── NAV (pinned, never scrolls) ───────────────────────────────────────────
   h+='<div class="wlp-nav">'
-    +'<div class="wlp-back" onclick="document.getElementById(\'wlp-modal\').remove()">← Profiles</div>'
+    +'<div class="wlp-back" onclick="document.getElementById(\'wlp-modal\').remove();if(window._wlProfileSource===\'today\')navTo(\'today\');">← Back</div>'
     +'<div class="wlp-brand">RACING <span class="wlp-brand-accent">PUZZLE</span></div>'
     +'<div class="wlp-edit-btn" onclick="'+editFn+'">Edit</div>'
   +'</div>';

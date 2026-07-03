@@ -172,8 +172,8 @@ async function _syncBank(){
   await _supa('DELETE','bank',null,'user_id=eq.'+SUPA_USER_ID);
   await _supa('POST','bank',[{
     user_id:SUPA_USER_ID,
-    real_start:b.start||0,
-    real_current:b.current||0,
+    real_start:b.start!=null?b.start:0,
+    real_current:b.current!=null?b.current:0,
     virtual_start:vb.start||500,
     virtual_current:vb.current||500,
     updated_at:new Date().toISOString()
@@ -393,7 +393,7 @@ async function supaLoad(){
     // ── Bank ──
     if(bankRows&&bankRows.length){
       const b=bankRows[0];
-      D.bank={start:b.real_start,current:b.real_current};
+      D.bank={start:b.real_start!=null?b.real_start:0,current:b.real_current!=null?b.real_current:0};
       D.vBank=D.vBank||{};
       D.vBank.start=b.virtual_start;
       D.vBank.current=b.virtual_current;

@@ -525,7 +525,7 @@ function rcSwRenderRunners(idx, course, el){
   html+=runners.map(function(r,i){
     const name=stripCountrySuffix(r.horse||r.name||'—');
     const no=r.number||r.saddle_cloth||(i+1);
-    const draw=r.draw?'('+r.draw+')':'';
+    const draw=(r.draw&&r.draw!==0&&r.draw!=='0')?'('+r.draw+')':'';
     const jock=fmtJockey(r.jockey||r.jockeyName);
     const trainer=r.trainer||r.trainerName||'—';
     const age=r.age?r.age+'yo':'';
@@ -1666,7 +1666,7 @@ function rcSlRenderCard(){
 
   const name=stripCountrySuffix(r.horse||r.name||'—');
   const no=r.number||r.saddle_cloth||(_rcSlIdx+1);
-  const draw=r.draw?'('+r.draw+')':'';
+  const draw=(r.draw&&r.draw!==0&&r.draw!=='0')?'('+r.draw+')':'';
   const jock=fmtJockey(r.jockey||r.jockeyName);
   const trainer=r.trainer||r.trainerName||'';
   const age=r.age?r.age+'yo':'';

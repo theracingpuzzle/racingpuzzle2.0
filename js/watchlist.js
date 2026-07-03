@@ -36,8 +36,8 @@ function setWLView(v){
   document.getElementById('wl-cal-view').style.display=v==='cal'?'block':'none';
   document.getElementById('wl-list-view').style.display=v==='list'?'block':'none';
   const cb=document.getElementById('wl-cal-btn'),lb=document.getElementById('wl-list-btn');
-  if(cb){cb.className='wl-tog-btn '+(v==='cal'?'on':'off');}
-  if(lb){lb.className='wl-tog-btn '+(v==='list'?'on':'off');}
+  if(cb){cb.style.background=v==='cal'?'var(--clr-watch-a1)':'transparent';cb.style.opacity=v==='cal'?'1':'0.45';}
+  if(lb){lb.style.background=v==='list'?'var(--clr-watch-a1)':'transparent';lb.style.opacity=v==='list'?'1':'0.45';}
   if(v==='cal')renderWLCal();else renderWLList();
 }
 

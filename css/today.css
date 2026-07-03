@@ -242,82 +242,13 @@
   100% { transform: translateX(-50%); }
 }
 
-/* ══════════════════════════════════════════════
-   TODAY CARD — Navy theme
-══════════════════════════════════════════════ */
-.cT .cin {
-  background: var(--navy);
-}
-.cT .card-hdr {
-  background: rgba(0,0,0,.25);
-  border-radius: 12px;
-  padding: 14px;
-  margin-bottom: 2px;
-  border: 1px solid rgba(255,255,255,.08);
-}
-.cT .lbl { color: rgba(255,255,255,.5); }
-.cT #tdlbl { color: #fff !important; }
-.cT .t-pnl-tile {
-  background: rgba(255,255,255,.07);
-  border-color: rgba(255,255,255,.12);
-}
-.cT .t-pnl-label { opacity: .85; }
-.cT .t-pnl-bank  { color: rgba(255,255,255,.45); }
-
-/* Alert boxes on navy */
-.cT .t-alert-pur {
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.12);
-}
-.cT .t-alert-row-pur { border-bottom-color: rgba(255,255,255,.07); }
-.cT .t-alert-lbl-pur { color: rgba(255,255,255,.55); }
-.cT .t-horse-name    { color: #fff; font-size: 16px; }
-.cT .t-jockey        { color: rgba(255,255,255,.55); }
-.cT .t-muted         { color: rgba(255,255,255,.5); }
-
-/* Check-in strip on navy */
-.cT #tmood-btns {
-  background: rgba(255,255,255,.06) !important;
-  border-color: rgba(255,255,255,.1) !important;
-}
-.cT #tmood-btns span,
-.cT #tmood-btns .mood-btn-sm { color: rgba(255,255,255,.55); border-color: rgba(255,255,255,.12) !important; }
-.cT #t-focus { color: #fff !important; }
-.cT #t-focus::placeholder { color: rgba(255,255,255,.35); }
-
-/* Section labels on navy */
-.cT .t-section-lbl {
+/* ── Section label (base — works in both modes) ── */
+.t-section-lbl {
   font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
   font-size: 9px; font-weight: 800; letter-spacing: .18em;
-  text-transform: uppercase; color: rgba(255,255,255,.4);
+  text-transform: uppercase; color: var(--mut);
   margin-bottom: 7px;
 }
-
-/* Outstanding + today bets sections */
-.cT #t-outstanding-wrap .lbl { color: rgba(255,200,200,.7); }
-.cT .mb {
-  background: rgba(255,255,255,.07) !important;
-  border-color: rgba(255,255,255,.15) !important;
-}
-.cT .mh { color: #fff !important; }
-.cT .mm { color: rgba(255,255,255,.5) !important; }
-.cT .t-empty { color: rgba(255,255,255,.4); }
-
-/* Next race card on navy */
-.cT .t-next-card {
-  background: rgba(255,255,255,.07);
-  border-color: rgba(255,255,255,.12);
-}
-.cT .t-next-title { color: #fff; }
-.cT .t-next-cta   { color: rgba(255,255,255,.5); }
-
-/* League reminder on navy */
-.cT #t-league-reminder [style*="rgba(30,58,95,.12)"] { background: rgba(255,255,255,.08) !important; }
-
-/* This week on navy */
-.cT .t-week-row   { border-bottom-color: rgba(255,255,255,.08); }
-.cT .t-week-label { color: #fff; }
-.cT .t-week-day   { color: rgba(255,255,255,.45); }
 
 /* Reviewed badge inline variant */
 .t-reviewed-inline {
@@ -327,6 +258,75 @@
   border: 1px solid rgba(22,163,74,.35);
   flex-shrink: 0;
 }
+
+/* ══════════════════════════════════════════════
+   TODAY CARD — Dark/Navy theme (dark mode only)
+══════════════════════════════════════════════ */
+body.dark .cT .cin {
+  background: var(--navy);
+}
+body.dark .cT .card-hdr {
+  background: rgba(0,0,0,.25);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 2px;
+  border: 1px solid rgba(255,255,255,.08);
+}
+body.dark .cT .lbl { color: rgba(255,255,255,.5); }
+body.dark .cT #tdlbl { color: #fff !important; }
+body.dark .cT .t-pnl-tile {
+  background: rgba(255,255,255,.07);
+  border-color: rgba(255,255,255,.12);
+}
+body.dark .cT .t-pnl-label { opacity: .85; }
+body.dark .cT .t-pnl-bank  { color: rgba(255,255,255,.45); }
+
+/* Alert boxes on navy */
+body.dark .cT .t-alert-pur {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+}
+body.dark .cT .t-alert-row-pur { border-bottom-color: rgba(255,255,255,.07); }
+body.dark .cT .t-alert-lbl-pur { color: rgba(255,255,255,.55); }
+body.dark .cT .t-horse-name    { color: #fff; font-size: 16px; }
+body.dark .cT .t-jockey        { color: rgba(255,255,255,.55); }
+body.dark .cT .t-muted         { color: rgba(255,255,255,.5); }
+
+/* Check-in strip on navy */
+body.dark .cT #tmood-btns {
+  background: rgba(255,255,255,.06) !important;
+  border-color: rgba(255,255,255,.1) !important;
+}
+body.dark .cT #tmood-btns span,
+body.dark .cT #tmood-btns .mood-btn-sm { color: rgba(255,255,255,.55); border-color: rgba(255,255,255,.12) !important; }
+body.dark .cT #t-focus { color: #fff !important; }
+body.dark .cT #t-focus::placeholder { color: rgba(255,255,255,.35); }
+
+/* Section labels on navy */
+body.dark .cT .t-section-lbl { color: rgba(255,255,255,.4); }
+
+/* Outstanding + today bets sections */
+body.dark .cT #t-outstanding-wrap .lbl { color: rgba(255,200,200,.7); }
+body.dark .cT .mb {
+  background: rgba(255,255,255,.07) !important;
+  border-color: rgba(255,255,255,.15) !important;
+}
+body.dark .cT .mh { color: #fff !important; }
+body.dark .cT .mm { color: rgba(255,255,255,.5) !important; }
+body.dark .cT .t-empty { color: rgba(255,255,255,.4); }
+
+/* Next race card on navy */
+body.dark .cT .t-next-card {
+  background: rgba(255,255,255,.07);
+  border-color: rgba(255,255,255,.12);
+}
+body.dark .cT .t-next-title { color: #fff; }
+body.dark .cT .t-next-cta   { color: rgba(255,255,255,.5); }
+
+/* This week on navy */
+body.dark .cT .t-week-row   { border-bottom-color: rgba(255,255,255,.08); }
+body.dark .cT .t-week-label { color: #fff; }
+body.dark .cT .t-week-day   { color: rgba(255,255,255,.45); }
 
 /* ── P&L tiles ── */
 .t-pnl-tile {

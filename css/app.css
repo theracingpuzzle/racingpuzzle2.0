@@ -52,6 +52,43 @@
   --card-r: 14px;
 }
 
+/* ── Dark mode variables ── */
+body.dark {
+  --bg:   #0d1b2a;
+  --sur:  #152132;
+  --sur2: #111c29;
+  --bdr:  rgba(255,255,255,.1);
+  --txt:  #e8edf3;
+  --mut:  rgba(232,237,243,.45);
+  --dim:  rgba(232,237,243,.2);
+}
+
+/* Dark mode card overrides */
+body.dark .card         { background: var(--sur); border-color: var(--bdr); box-shadow: 0 2px 16px rgba(0,0,0,.4); }
+body.dark .cT           { background: var(--navy); }
+body.dark .card-hdr-std { border-bottom-color: var(--bdr); }
+body.dark .card-title-std { color: var(--txt); }
+body.dark .card-sec-divider { color: var(--mut); border-top-color: var(--bdr); }
+body.dark .mb           { background: rgba(255,255,255,.05) !important; border-color: var(--bdr) !important; }
+body.dark .mh           { color: var(--txt); }
+body.dark .mm           { color: var(--mut); }
+body.dark input, body.dark textarea, body.dark select {
+  background: rgba(255,255,255,.06); color: var(--txt); border-color: var(--bdr);
+}
+body.dark input::placeholder, body.dark textarea::placeholder { color: var(--mut); }
+
+/* Dark mode toggle button */
+.dark-toggle {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.8);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.dark-toggle:active { background: rgba(255,255,255,.18); }
+
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--txt); font-family: var(--font); font-size: 16px; -webkit-font-smoothing: antialiased; }

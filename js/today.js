@@ -569,8 +569,9 @@ async function checkWatchlistRunners(races){
           raceDate.setHours(parseInt(parts[1]),parseInt(parts[2]),0,0);
           return now>raceDate;}catch(e){return false;}
       })();
+      const reviewedInline=alreadyReviewed?'<span class="t-reviewed-inline">✓ Reviewed</span>':'';
       const reviewBtn=alreadyReviewed
-        ?'<span class="t-reviewed-badge">✓ Reviewed</span>'
+        ?''
         :addedToday?''
         :(ri||raceMinsPast)
           ?'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" data-dist="'+(a.raceDist||'')+'" data-going="'+(a.raceGoing||'')+'" data-class="'+(a.raceClass||'')+'"'
@@ -605,6 +606,7 @@ async function checkWatchlistRunners(races){
           +'<div class="t-flex-info">'
             +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:3px;">'
               +'<span class="t-horse-name">'+a.horse+'</span>'
+              +reviewedInline
               +reasonBadge
               +edgeBadge
               +finishBadge

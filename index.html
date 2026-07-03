@@ -91,11 +91,22 @@
           <div id="tbetlimit" style="margin-top:6px;"></div>
         </div>
 
+        <!-- ── RUNNING TODAY (watchlist + edge combined) ── -->
+        <div id="t-today-alerts" style="display:none;margin-top:12px;"></div>
+
+        <!-- ── NEXT RACE ── -->
+        <div id="t-next-race" style="display:none;margin-top:12px;">
+          <div id="t-next-race-content"></div>
+        </div>
+
+        <!-- ── LEAGUE REMINDER ── -->
+        <div id="t-league-reminder" style="display:none;margin-top:12px;"></div>
+
         <!-- ── TRACK PULSE ── -->
-        <div id="t-track-pulse" style="display:none;"></div>
+        <div id="t-track-pulse" style="display:none;margin-top:10px;"></div>
 
         <!-- ── CHECK-IN — compact strip ── -->
-        <div style="margin-top:10px;" id="tcin">
+        <div style="margin-top:12px;" id="tcin">
           <div id="tmood-btns" style="display:flex;align-items:center;gap:5px;padding:6px 10px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:9px;">
             <span style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);flex-shrink:0;margin-right:2px;">Mood</span>
             <!-- poor -->
@@ -122,36 +133,25 @@
           </div>
         </div>
 
-        <!-- ── RUNNING TODAY (watchlist + edge combined) ── -->
-        <div id="t-today-alerts" class="mt20" style="display:none;"></div>
-
-        <!-- ── NEXT RACE ── -->
-        <div id="t-next-race" class="mt20" style="display:none;">
-          <div id="t-next-race-content"></div>
-        </div>
-
-        <!-- ── LEAGUE REMINDER ── -->
-        <div id="t-league-reminder" style="display:none;margin-top:14px;"></div>
-
         <!-- ── OUTSTANDING BETS ── -->
-        <div id="t-outstanding-wrap" class="mt20" style="display:none;">
+        <div id="t-outstanding-wrap" style="display:none;margin-top:14px;">
           <div class="row-g8 mb12">
-            <div class="lbl" style="color:var(--red);opacity:.8;">Needs Settling</div>
-            <div id="t-outstanding-count" style="font-size:9px;background:rgba(196,58,58,.15);color:var(--red);padding:2px 7px;border-radius:10px;"></div>
+            <div class="t-section-lbl" style="color:rgba(255,150,150,.7);margin-bottom:0;">Needs Settling</div>
+            <div id="t-outstanding-count" style="font-size:9px;background:rgba(196,58,58,.25);color:#f87171;padding:2px 7px;border-radius:10px;"></div>
           </div>
           <div id="t-outstanding"></div>
         </div>
 
         <!-- ── TODAY'S BETS ── -->
-        <div class="mt20">
-          <div class="lbl" class="mb12" style="margin-bottom:8px;">Today's Bets</div>
-          <div id="tbets"><div class="status-txt" style="padding:6px 0;">No bets logged today.</div></div>
+        <div style="margin-top:16px;">
+          <div class="t-section-lbl">Today's Bets</div>
+          <div id="tbets"><div class="t-empty" style="padding:6px 0;">No bets logged today.</div></div>
         </div>
 
         <!-- ── THIS WEEK ── -->
         <div id="t-running-today" style="display:none;margin-bottom:14px;"></div>
-    <div id="t-this-week" style="margin-top:14px;display:none;">
-          <div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:8px;">Coming Up</div>
+        <div id="t-this-week" style="margin-top:16px;display:none;">
+          <div class="t-section-lbl">Coming Up</div>
           <div id="t-this-week-list"></div>
         </div>
 

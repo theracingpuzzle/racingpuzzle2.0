@@ -209,3 +209,10 @@
   padding: 12px 14px; border-bottom: 1px solid var(--bdr);
 }
 .rc-sl-summary-row:last-child { border-bottom: none; }
+
+/* ── Dark mode overrides ── */
+body.dark .rc-race-time { color: #fff; }
+body.dark .rc-info-val  { color: var(--txt); }
+body.dark .rc-cloth     { color: var(--txt); }
+body.dark .rc-meeting   { background: var(--sur); border-color: var(--bdr); }
+body.dark .rc-view-tog  { background: var(--sur); border-color: var(--bdr); }

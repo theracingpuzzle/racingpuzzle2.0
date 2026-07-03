@@ -4,7 +4,7 @@
 
 /* ── Bet limit tile ── */
 .t-bet-lbl {
-  font-size: 9px; color: var(--mut);
+  font-size: 13px; color: var(--mut);
   text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px;
 }
 .t-bet-val { font-size: 17px; font-weight: 700; color: var(--gld); }
@@ -17,12 +17,12 @@
   display: flex; align-items: center; justify-content: space-between;
 }
 .t-checkin-lbl {
-  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
   color: var(--grn); margin-bottom: 3px;
 }
 .t-checkin-emoji { font-size: 22px; }
-.t-no-focus { font-size: 12px; color: var(--mut); font-style: italic; }
-.t-body     { font-size: 13px; color: var(--txt); }
+.t-no-focus { font-size: 14px; color: var(--mut); font-style: italic; }
+.t-body     { font-size: 15px; color: var(--txt); }
 
 /* ── Alert boxes (edge / watchlist / next race) ── */
 .t-alert-grn {
@@ -40,15 +40,15 @@
 
 /* ── Alert section labels ── */
 .t-alert-lbl-grn {
-  font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
   color: var(--grn); margin-bottom: 8px;
 }
 .t-alert-lbl-pur {
-  font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
   color: var(--mut); margin-bottom: 0;
 }
 .t-alert-lbl-blu {
-  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
   color: var(--blu); margin-bottom: 6px;
 }
 
@@ -65,35 +65,35 @@
 
 /* ── Alert badges / buttons ── */
 .t-edge-badge {
-  font-size: 11px; font-weight: 700; color: var(--grn);
+  font-size: 13px; font-weight: 700; color: var(--grn);
   background: rgba(22,163,74,.12); border: 1px solid rgba(22,163,74,.25);
   padding: 3px 8px; border-radius: 8px; white-space: nowrap;
 }
 .t-reviewed-badge {
-  font-size: 9px; font-weight: 800; letter-spacing: 1px;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px;
   background: rgba(22,163,74,.12); color: var(--grn);
   padding: 3px 9px; border-radius: 6px; border: 1px solid rgba(22,163,74,.2);
 }
 .t-review-btn {
-  font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
   background: var(--clr-watch-a3); color: var(--clr-watch);
   padding: 4px 10px; border-radius: 6px; border: 1px solid var(--clr-watch-a5);
   cursor: pointer; white-space: nowrap;
 }
 .t-profile-btn {
-  font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
   background: transparent; color: var(--mut);
   padding: 4px 10px; border-radius: 6px; border: 1px solid var(--bdr);
   cursor: pointer; white-space: nowrap;
 }
 .t-race-btn {
-  font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
   background: rgba(96,165,250,.08); color: var(--blu);
   padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(96,165,250,.25);
   cursor: pointer; white-space: nowrap;
 }
 .t-pdf-btn {
-  font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
   padding: 4px 10px; border-radius: 6px;
   border: 1px solid var(--clr-watch-a5); background: var(--clr-watch-a2);
   color: var(--clr-watch); cursor: pointer; white-space: nowrap;
@@ -106,7 +106,7 @@
 .t-horse-name {
   font-size: 15px; font-weight: 800; letter-spacing: .5px; color: var(--txt);
 }
-.t-jockey { font-size: 11px; color: var(--mut); }
+.t-jockey { font-size: 13px; color: var(--mut); }
 .t-flex-col-end { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; align-items: flex-end; }
 .t-flex-info    { flex: 1; min-width: 0; }
 .t-row-sb-gap   { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
@@ -119,7 +119,7 @@
   gap: 10px; cursor: pointer;
 }
 .t-next-title   { font-size: 14px; font-weight: 700; color: var(--txt); }
-.t-next-cta     { font-size: 9px; color: var(--mut); }
+.t-next-cta     { font-size: 13px; color: var(--mut); }
 .t-next-count   { font-size: 15px; font-weight: 700; text-align: right; flex-shrink: 0; }
 
 /* ── Study reminder card ── */
@@ -132,8 +132,8 @@
 .t-study-card.pending {
   border: 1px solid rgba(253,230,138,1); border-left: 3px solid #f59e0b;
 }
-.t-study-lbl-done    { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--grn); margin-bottom: 3px; }
-.t-study-lbl-pending { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--gld); margin-bottom: 3px; }
+.t-study-lbl-done    { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--grn); margin-bottom: 3px; }
+.t-study-lbl-pending { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--gld); margin-bottom: 3px; }
 .t-study-done-ico    { font-size: 20px; }
 .t-study-btn {
   flex-shrink: 0; font-size: 10px; font-weight: 700;
@@ -159,7 +159,7 @@
   font-size: 12px; font-weight: 600; color: var(--navy);
 }
 .t-track-rm { cursor: pointer; font-size: 14px; opacity: .5; margin-left: 1px; }
-.t-no-tracks { font-size: 12px; color: var(--mut); font-style: italic; }
+.t-no-tracks { font-size: 14px; color: var(--mut); font-style: italic; }
 
 /* ── VIRT label inline ── */
 .t-virt-lbl { font-size: 9px; color: var(--ora); }

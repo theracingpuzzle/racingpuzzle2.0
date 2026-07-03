@@ -796,6 +796,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
   const modal=document.createElement('div');
   modal.id='wl-review-modal';
   modal.className='wlr-modal';
+  modal._rvwEntry=entry||{};
   const F='width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',sans-serif;outline:none;box-sizing:border-box;';
   const L='display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;';
   modal.innerHTML=
@@ -826,7 +827,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'<div class="fg" id="rvw-verdict-row"><label>Verdict</label><div class="rvw-btn-group">'
     +[{k:'upgrade',col:'var(--grn)',lbl:'Upgrade ↑'},{k:'hold',col:'var(--blu)',lbl:'Hold →'},{k:'downgrade',col:'var(--red)',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="--rvw-col:'+v.col+'" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
     +'</div></div>'
-    +(currentMR?'<div class="fg"><label>MR Adjustment <span style="color:var(--mut);font-weight:400;">(current: '+currentMR+')</span></label><input type="number" id="rvw-mr-adj" placeholder="e.g. 5 or -3"></div>':'<input type="hidden" id="rvw-mr-adj" value="0">')
+    +(currentMR?'<div class="fg"><label>MR Adjustment <span style="color:var(--mut);font-weight:400;">(current: '+currentMR+')</span></label><input type="number" id="rvw-mr-adj" placeholder="e.g. 5 or -3" oninput="_rvwUpdateSignals()"></div>':'<input type="hidden" id="rvw-mr-adj" value="0">')
     +'<div class="fg" id="rvw-going-row"><label>Going'+(raceGoing?' <span style="color:var(--mut);font-weight:400;font-size:11px;">('+raceGoing+')</span>':'')+'</label><div class="rvw-btn-group">'
     +[{k:'confirmed',lbl:'✓ Confirmed'},{k:'mixed',lbl:'~ Mixed'},{k:'against',lbl:'✗ Against'}].map(function(g){return'<button data-going="'+g.k+'" data-grp="going" class="rvw-btn" style="--rvw-col:var(--txt)" onclick="wlRvwToggle(this)">'+g.lbl+'</button>';}).join('')
     +'</div></div>'
@@ -902,45 +903,87 @@ function _rvwUpdateSignals(){
   const result=_rvwGet('result');
   const verdict=_rvwGet('verdict');
   const going=_rvwGet('going');
-  const readiness=_rvwGet('readiness');
   if(!result&&!verdict&&!going){el.innerHTML='';return;}
-  const alerts=[];
-  const hot=[];
-  const cold=[];
-  // Result signals
-  if(result==='win'){hot.push('Won the race');}
-  else if(result==='place'){hot.push('Placed — ran to form');}
-  else if(result==='unplaced'){cold.push('Unplaced');}
-  else if(result==='nr'){alerts.push({col:'#94a3b8',msg:'Non-runner — no data gained'});}
-  else if(result==='missed'){alerts.push({col:'#94a3b8',msg:'Missed target — nothing to assess'});}
-  // Going signals
-  if(going==='confirmed'){hot.push('Going suited ✓');}
-  else if(going==='against'){cold.push('Going against preferences ✗');}
-  else if(going==='mixed'){alerts.push({col:'#f59e0b',msg:'Going was mixed — monitor'});}
-  // Verdict signals
-  if(verdict==='upgrade'){hot.push('Verdict: Upgrade ↑');}
-  else if(verdict==='downgrade'){cold.push('Verdict: Downgrade ↓');}
-  // Readiness suggestion
-  if(result==='win'||verdict==='upgrade'){
-    const cur=readiness||document.querySelector('.rvw-btn[data-grp="readiness"][data-selected="1"]')?.dataset.readiness||'watching';
-    if(cur!=='ready')alerts.push({col:'#10b981',msg:'Consider marking as Ready to Back'});
+
+  const modal=document.getElementById('wl-review-modal');
+  const entry=(modal&&modal._rvwEntry)||{};
+  const course=(document.getElementById('rvw-course')||{value:''}).value.trim().toLowerCase();
+  const dist=(document.getElementById('rvw-dist')||{value:''}).value.trim().toLowerCase();
+  const mrAdj=parseInt((document.getElementById('rvw-mr-adj')||{value:'0'}).value)||0;
+  const readinessSel=document.querySelector('.rvw-btn[data-grp="readiness"][data-selected="1"]');
+  const curReadiness=readinessSel?readinessSel.dataset.readiness:'watching';
+
+  const pos=[];  // positive signals
+  const neg=[];  // negative signals
+  const neu=[];  // neutral/info
+
+  // ── Result ──
+  if(result==='win')pos.push({label:'Won the race',key:'result'});
+  else if(result==='place')pos.push({label:'Placed — ran to form',key:'result'});
+  else if(result==='unplaced')neg.push({label:'Unplaced',key:'result'});
+  else if(result==='nr')neu.push({label:'Non-runner — no data gained',key:'result'});
+  else if(result==='missed')neu.push({label:'Missed target — nothing to assess',key:'result'});
+
+  // ── Going vs profile preferences ──
+  const goingPrefs=entry.goingPrefs||[];
+  if(going==='confirmed'){
+    if(goingPrefs.length)pos.push({label:'Going matched your preference ('+goingPrefs[0]+')',key:'going'});
+    else pos.push({label:'Going suited — consider saving going preference',key:'going'});
+  } else if(going==='against'){
+    if(goingPrefs.length)neg.push({label:'Going against preference ('+goingPrefs[0]+') — excuses apply',key:'going'});
+    else neg.push({label:'Going was against — update going preferences on profile',key:'going'});
+  } else if(going==='mixed'){
+    neu.push({label:'Going was mixed — difficult to draw firm conclusions',key:'going'});
   }
-  if(verdict==='downgrade'||going==='against'){
-    const cur=readiness||document.querySelector('.rvw-btn[data-grp="readiness"][data-selected="1"]')?.dataset.readiness||'watching';
-    if(cur!=='cold')alerts.push({col:'#a78bfa',msg:'Consider marking as Cold'});
+
+  // ── Track vs profile preference ──
+  if(course&&entry.trackPref){
+    const trackMatch=entry.trackPref.toLowerCase().includes(course)||course.includes(entry.trackPref.toLowerCase());
+    if(trackMatch)pos.push({label:'Ran at preferred track ('+entry.trackPref+')',key:'track'});
+    else neu.push({label:'Track not listed as preferred (pref: '+entry.trackPref+')',key:'track'});
+  } else if(course&&!entry.trackPref){
+    neu.push({label:'No track preference set — consider adding '+course+' if it handles it well',key:'track'});
   }
-  // Stars: 1 per hot, -1 per cold, base 3, clamped 1-5
-  const starScore=Math.min(5,Math.max(1,3+hot.length-cold.length));
+
+  // ── Distance vs profile preference ──
+  if(dist&&entry.distancePref){
+    const distMatch=entry.distancePref.toLowerCase().includes(dist)||dist.includes(entry.distancePref.toLowerCase());
+    if(distMatch)pos.push({label:'Distance suited ('+entry.distancePref+')',key:'dist'});
+    else neg.push({label:'Distance may not suit — profile says '+entry.distancePref,key:'dist'});
+  }
+
+  // ── My Rating adjustment ──
+  if(mrAdj>0)pos.push({label:'MR adjusted up by +'+mrAdj+' — improved on assessment',key:'mr'});
+  else if(mrAdj<0)neg.push({label:'MR adjusted down by '+mrAdj+' — performed below expectation',key:'mr'});
+
+  // ── Verdict ──
+  if(verdict==='upgrade')pos.push({label:'Verdict: Upgrade ↑ — more to offer',key:'verdict'});
+  else if(verdict==='downgrade')neg.push({label:'Verdict: Downgrade ↓ — question the assessment',key:'verdict'});
+  else if(verdict==='hold')neu.push({label:'Verdict: Hold — consistent, keep monitoring',key:'verdict'});
+
+  // ── Readiness suggestions ──
+  const positiveCount=pos.length;
+  const negativeCount=neg.length;
+  if(positiveCount>=2&&curReadiness!=='ready')
+    neu.push({label:'Strong signals — consider moving to Ready to Back',key:'suggest',col:'#10b981'});
+  if(negativeCount>=2&&curReadiness!=='cold')
+    neu.push({label:'Multiple concerns — consider moving to Cold',key:'suggest',col:'#a78bfa'});
+  if(going==='against'&&result==='unplaced'&&curReadiness!=='watching')
+    neu.push({label:'Going excuses — drop back to Watching until conditions suit',key:'suggest',col:'#f59e0b'});
+
+  // ── Stars: base 3, +1 per positive, -1 per negative, clamp 1-5 ──
+  const starScore=Math.min(5,Math.max(1,3+positiveCount-negativeCount));
   const starCol=starScore>=4?'#10b981':starScore===3?'#f59e0b':'#f87171';
-  const stars='★'.repeat(starScore)+'☆'.repeat(5-starScore);
-  let html='<div style="background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;">';
-  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
-    +'<span style="font-size:18px;letter-spacing:2px;color:'+starCol+';">'+stars+'</span>'
-    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Horse Signal</span>'
+  const starLabel=starScore>=4?'Looking good':starScore===3?'Mixed picture':starScore<=2?'Concerns flagged':'';
+
+  let html='<div style="background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;margin-bottom:4px;">';
+  html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
+    +'<span style="font-size:20px;letter-spacing:3px;color:'+starCol+';">'+'★'.repeat(starScore)+'☆'.repeat(5-starScore)+'</span>'
+    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:'+starCol+';">'+starLabel+'</span>'
     +'</div>';
-  hot.forEach(function(m){html+='<div style="font-size:13px;color:#10b981;margin-bottom:3px;">✓ '+m+'</div>';});
-  cold.forEach(function(m){html+='<div style="font-size:13px;color:#f87171;margin-bottom:3px;">✗ '+m+'</div>';});
-  alerts.forEach(function(a){html+='<div style="font-size:13px;color:'+a.col+';margin-bottom:3px;">⚠ '+a.msg+'</div>';});
+  pos.forEach(function(s){html+='<div style="font-size:13px;color:#10b981;margin-bottom:5px;display:flex;gap:6px;"><span>✓</span><span>'+s.label+'</span></div>';});
+  neg.forEach(function(s){html+='<div style="font-size:13px;color:#f87171;margin-bottom:5px;display:flex;gap:6px;"><span>✗</span><span>'+s.label+'</span></div>';});
+  neu.forEach(function(s){const c=s.col||'#f59e0b';html+='<div style="font-size:13px;color:'+c+';margin-bottom:5px;display:flex;gap:6px;"><span>→</span><span>'+s.label+'</span></div>';});
   html+='</div>';
   el.innerHTML=html;
 }

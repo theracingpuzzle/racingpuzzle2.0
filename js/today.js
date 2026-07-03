@@ -1052,6 +1052,10 @@ function renderToday(){
   const virtBankSub=document.getElementById('t-virt-bank-sub');
   if(virtBankSub)virtBankSub.textContent=fp(vb.current!=null?vb.current:500);
 
+  // ── Show/hide P&L tiles ──
+  const pnlTiles=document.getElementById('t-pnl-tiles');
+  if(pnlTiles)pnlTiles.style.display=(tb.length||vtb.length)?'grid':'none';
+
   // ── Bet strip ──
   renderBetLimit();
 

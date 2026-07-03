@@ -74,7 +74,7 @@ RACING <span class="logo-accent">PUZZLE</span>
             </div>
           </div>
           <!-- P&L tiles + bet strip -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+          <div id="t-pnl-tiles" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
             <div class="t-pnl-tile" style="border-left-color:#3b82f6;">
               <div class="t-pnl-label" style="color:#3b82f6;">Real Today</div>
               <div class="t-pnl-value" id="tpnl">£0.00</div>
@@ -599,6 +599,10 @@ RACING <span class="logo-accent">PUZZLE</span>
 
 <!-- BOTTOM NAV -->
 <nav class="bnav" id="bnav">
+  <div class="bnav-logo" onclick="navTo('today')">
+    <img src="icons/icon-192.png" alt="The Racing Puzzle" class="bnav-logo-img">
+    <span class="bnav-logo-lbl">Racing Puzzle</span>
+  </div>
   <button class="bnav-collapse-btn" id="bnav-collapse-btn" onclick="toggleNavCollapse()" title="Collapse menu">
     <svg id="bnav-collapse-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M11 4L6 9l5 5"/>

@@ -166,6 +166,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 /* Hidden on mobile — only shown on desktop via media query */
 .bnav-collapse-btn { display: none; }
+.bnav-logo { display: none; }
 
 .bnav-item {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
@@ -536,6 +537,36 @@ tr:hover td { background: var(--sur2); }
     z-index: 70;
     transition: width .22s cubic-bezier(.4,0,.2,1);
   }
+
+  .bnav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 14px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    margin-bottom: 4px;
+  }
+  .bnav-logo-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .bnav-logo-lbl {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.75);
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity .2s, width .22s;
+  }
+  body.nav-collapsed .bnav-logo-lbl { opacity: 0; width: 0; overflow: hidden; }
+  body.nav-collapsed .bnav-logo { justify-content: center; padding: 10px 0; }
 
   /* Collapse toggle button */
   .bnav-collapse-btn {

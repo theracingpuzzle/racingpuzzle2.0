@@ -249,7 +249,7 @@ function updHdr(){
   if(ch){let d=new Date(ch);while(all.has(d.toISOString().slice(0,10))){streak++;d.setDate(d.getDate()-1);}}
   window._streak=streak;
   const st=document.getElementById('tstreak-tile');
-  if(st){st.innerHTML='<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:800;color:var(--navy);margin-bottom:2px;letter-spacing:1px;">'+streak+'</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);">Day Streak</div>';}
+  if(st){st.innerHTML='<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:800;color:#fff;margin-bottom:2px;letter-spacing:1px;">'+streak+'</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);">Day Streak</div>';}
 
 }
 

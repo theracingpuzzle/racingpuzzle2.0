@@ -177,8 +177,8 @@
   display: flex;
   align-items: stretch;
   overflow: hidden;
-  background: var(--sur);
-  border: 1px solid var(--bdr);
+  background: #f5c500;
+  border: none;
   border-radius: 7px;
   margin: 10px 0 0;
 }
@@ -190,9 +190,9 @@
   font-weight: 900;
   letter-spacing: .2em;
   text-transform: uppercase;
-  color: #f5c500;
-  background: rgba(245,197,0,.1);
-  border-right: 1px solid var(--bdr);
+  color: rgba(0,0,0,.5);
+  background: rgba(0,0,0,.12);
+  border-right: 1px solid rgba(0,0,0,.15);
   padding: 0 10px;
   display: flex;
   align-items: center;
@@ -213,24 +213,24 @@
 
 .tp-item {
   font-size: 11px;
-  font-weight: 500;
-  color: var(--mut);
+  font-weight: 600;
+  color: rgba(0,0,0,.75);
   padding: 5px 9px;
   flex-shrink: 0;
 }
 
 .tp-item-highlight {
-  color: var(--mut);
-  font-weight: 600;
+  color: rgba(0,0,0,.9);
+  font-weight: 800;
 }
 
 .tp-item-warn {
-  color: var(--mut);
-  font-weight: 600;
+  color: rgba(0,0,0,.9);
+  font-weight: 800;
 }
 
 .tp-sep {
-  color: var(--bdr);
+  color: rgba(0,0,0,.25);
   padding: 0 4px;
   font-size: 14px;
   font-weight: 900;

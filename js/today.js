@@ -593,7 +593,7 @@ async function checkWatchlistRunners(races){
         :'';
       // Race meta: time · course · race name on first line, jockey on second
       const raceMeta=[a.time,a.course,a.raceName].filter(Boolean).join(' · ');
-      const jockeyLine=a.jockey?'<div class="t-muted" style="font-size:11px;margin-top:1px;">J: '+fmtJockey(a.jockey)+'</div>':'';
+      const jockeyLine=a.jockey?'<div class="t-muted" style="font-size:13px;margin-top:2px;">J: '+fmtJockey(a.jockey)+'</div>':'';
       // Primary action: review (if available/past) or race (if upcoming)
       const primaryBtn=reviewBtn
         ?reviewBtn
@@ -611,9 +611,9 @@ async function checkWatchlistRunners(races){
               +edgeBadge
               +finishBadge
             +'</div>'
-            +'<div class="t-muted" style="font-size:11px;">'+raceMeta+'</div>'
+            +'<div class="t-muted" style="font-size:13px;margin-top:1px;">'+raceMeta+'</div>'
             +jockeyLine
-            +(a.orUpdated?'<div style="font-size:10px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
+            +(a.orUpdated?'<div style="font-size:12px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
           +'</div>'
           +'<div class="t-flex-col-end">'
             +primaryBtn
@@ -1036,7 +1036,7 @@ function renderToday(){
   const pe=document.getElementById('tpnl');
   if(pe){
     pe.textContent=set.length?fmt(p):'—';
-    pe.style.color=!set.length?'var(--mut)':'#60a5fa';
+    pe.style.color=!set.length?'rgba(255,255,255,.4)':'#60a5fa';
   }
   const realBankSub=document.getElementById('t-real-bank-sub');
   if(realBankSub)realBankSub.textContent=fp(D.bank&&D.bank.current!=null?D.bank.current:0);
@@ -1049,7 +1049,7 @@ function renderToday(){
   const vpe=document.getElementById('t-virt-pnl');
   if(vpe){
     vpe.textContent=vset.length?fmt(vp):'—';
-    vpe.style.color=!vset.length?'var(--mut)':'#fb923c';
+    vpe.style.color=!vset.length?'rgba(255,255,255,.4)':'#fb923c';
   }
   const virtBankSub=document.getElementById('t-virt-bank-sub');
   if(virtBankSub)virtBankSub.textContent=fp(vb.current!=null?vb.current:500);

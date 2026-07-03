@@ -19,7 +19,7 @@
 .rc-mtg-ora  { background:rgba(234,88,12,.65); }
 .rc-meeting-flag { font-size:17px; flex-shrink:0; }
 .rc-meeting-info { flex:1; min-width:0; overflow:hidden; }
-.rc-mtg-course { font-size:17px; font-weight:900; color:#fff; letter-spacing:.2px; line-height:1; }
+.rc-mtg-course { font-size:20px; font-weight:900; color:#fff; letter-spacing:.2px; line-height:1; }
 .rc-mtg-meta   { font-size:11px; color:rgba(255,255,255,.75); margin-top:3px; font-weight:600; letter-spacing:.2px; }
 .rc-meeting-chevron { color:rgba(255,255,255,.7); font-size:18px; line-height:1; transition:transform .2s; flex-shrink:0; align-self:center; }
 .rc-meeting-chevron.open { transform:rotate(90deg); color:#fff; }

@@ -196,7 +196,7 @@ function lgRenderList(el){
   // Action buttons row
   h+='<div style="display:flex;gap:8px;margin-bottom:14px;">'
     +'<button onclick="lgShowJoin()" class="btn-refresh" style="flex:1;">Join a League</button>'
-    +'<button onclick="lgShowCreate()" style="flex:1;padding:6px 12px;border-radius:8px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">+ Create</button>'
+    +'<button onclick="lgShowCreate()" class="btn-refresh" style="flex:1;">+ Create</button>'
   +'</div>';
 
   const activeLeagues=_lgMyLeagues.filter(function(l){return !_lgIsEnded(l);});

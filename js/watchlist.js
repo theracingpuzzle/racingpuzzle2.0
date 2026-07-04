@@ -744,6 +744,7 @@ function openWLEditReview(reviewId){
     const d=document.getElementById('rvw-date');if(d)d.value=r.date||'';
     const c=document.getElementById('rvw-course');if(c)c.value=r.course||'';
     const dist=document.getElementById('rvw-dist');if(dist)dist.value=r.distance||'';
+    const ground=document.getElementById('rvw-ground');if(ground)ground.value=r.groundConditions||'';
     const pos=document.getElementById('rvw-pos');if(pos)pos.value=r.position||'';
     const beaten=document.getElementById('rvw-beaten');if(beaten)beaten.value=r.beatenDistance||'';
     const odds=document.getElementById('rvw-odds');if(odds)odds.value=r.odds||'';
@@ -769,6 +770,7 @@ function openWLEditReview(reviewId){
         r.date=document.getElementById('rvw-date').value||r.date;
         r.course=(document.getElementById('rvw-course').value||'').trim()||r.course;
         r.distance=(document.getElementById('rvw-dist')||{value:''}).value.trim();
+        r.groundConditions=(document.getElementById('rvw-ground')||{value:''}).value.trim();
         r.position=(document.getElementById('rvw-pos').value||'').trim();
         r.beatenDistance=(document.getElementById('rvw-beaten').value||'').trim();
         r.odds=(document.getElementById('rvw-odds')||{value:''}).value.trim();
@@ -815,7 +817,21 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
       +'<div class="fg"><label>Date</label><input type="date" id="rvw-date" value="'+td()+'"></div>'
       +'<div class="fg"><label>Course</label><input type="text" id="rvw-course" value="'+(course||'')+'" placeholder="e.g. Haydock"></div>'
     +'</div>'
-    +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" value="'+(raceDist||'')+'" placeholder="e.g. 1m2f"></div>'
+    +'<div class="g2">'
+      +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" value="'+(raceDist||'')+'" placeholder="e.g. 1m2f"></div>'
+      +'<div class="fg"><label>Ground</label><select id="rvw-ground" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;">'
+        +'<option value="">— Select —</option>'
+        +'<option>Firm</option>'
+        +'<option>Good to Firm</option>'
+        +'<option>Good</option>'
+        +'<option>Good to Soft</option>'
+        +'<option>Soft</option>'
+        +'<option>Heavy</option>'
+        +'<option>Standard</option>'
+        +'<option>Standard to Slow</option>'
+        +'<option>Slow</option>'
+      +'</select></div>'
+    +'</div>'
     +'<div class="fg"><label>Result</label><div class="rvw-btn-group">'
     +[{k:'win',lbl:'Win'},{k:'place',lbl:'Place'},{k:'unplaced',lbl:'Unplaced'},{k:'nr',lbl:'NR'},{k:'missed',lbl:'Missed Target'}].map(function(r){const cols={win:'var(--grn)',place:'var(--gld)',unplaced:'var(--red)',nr:'var(--mut)',missed:'#a78bfa'};return'<button data-result="'+r.k+'" data-grp="result" class="rvw-btn" style="--rvw-col:'+cols[r.k]+'" onclick="wlRvwToggle(this)">'+r.lbl+'</button>';}).join('')
     +'</div></div>'
@@ -843,6 +859,35 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'</div></div>';
   document.body.appendChild(modal);
   modal.addEventListener('click',function(ev){if(ev.target===modal)modal.remove();});
+
+  // Pre-fill ground conditions from raceGoing if it matches a dropdown option
+  if(raceGoing){
+    setTimeout(function(){
+      const sel=document.getElementById('rvw-ground');
+      if(!sel)return;
+      // Normalise: capitalise first letter of each word, trim whitespace
+      const norm=raceGoing.trim().toLowerCase().replace(/\b\w/g,function(c){return c.toUpperCase();});
+      // Try exact match first, then case-insensitive against options
+      let matched=false;
+      for(let i=0;i<sel.options.length;i++){
+        if(sel.options[i].value.toLowerCase()===norm.toLowerCase()){
+          sel.value=sel.options[i].value;
+          matched=true;
+          break;
+        }
+      }
+      // Partial fallback: "good to firm (good places)" → "Good to Firm"
+      if(!matched){
+        const lower=raceGoing.toLowerCase();
+        for(let i=0;i<sel.options.length;i++){
+          if(lower.includes(sel.options[i].value.toLowerCase())&&sel.options[i].value){
+            sel.value=sel.options[i].value;
+            break;
+          }
+        }
+      }
+    },0);
+  }
 
   // Auto-populate from a known race result (already fetched for Track Pulse / results tab).
   // NOTE: results/today/free does not return beaten distance or SP, so only result + position
@@ -1037,6 +1082,7 @@ function saveWLReview(profileId,horse,course){
     id:gid(),profileId:profileId,
     date:date,raceName:raceName,course:rvwCourse,
     distance:rvwDist,going:(document.getElementById('rvw-going-prefill')||{value:''}).value,
+    groundConditions:(document.getElementById('rvw-ground')||{value:''}).value.trim(),
     result:_rvwGet('result'),
     position:(document.getElementById('rvw-pos').value||'').trim(),
     beatenDistance:(document.getElementById('rvw-beaten').value||'').trim(),
@@ -1593,14 +1639,77 @@ function openWLForm(id,prefill){
     +'</div>';
   }());
 
-  // ── Tab bar (always 4 tabs) ────────────────────────────────────────────────
+  // ── Tab bar (existing profiles only) ──────────────────────────────────────
   const TABS=[{id:'overview',label:'Overview'},{id:'horse',label:'Horse'},{id:'notes',label:'Notes'},{id:'races',label:'Races'}];
-  const tabBarHtml='<div class="wlf-tab-bar" style="display:flex;border-bottom:2px solid var(--bdr);background:var(--sur2);padding:0 8px;gap:0;">'
+  const tabBarHtml=e?('<div class="wlf-tab-bar" style="display:flex;border-bottom:2px solid var(--bdr);background:var(--sur2);padding:0 8px;gap:0;">'
     +TABS.map(function(t){
       const on=t.id===defaultTab;
       return'<button data-wlftab="'+t.id+'" onclick="wlSwitchTab(\''+t.id+'\')" class="wlf-tab-btn" style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:11px 14px;border:none;border-bottom:2px solid '+(on?'var(--navy)':'transparent')+';margin-bottom:-2px;background:transparent;color:'+(on?'var(--navy)':'var(--mut)')+';cursor:pointer;white-space:nowrap;">'+t.label+'</button>';
     }).join('')
-  +'</div>';
+  +'</div>'):'';
+
+  // ── Single-page scrollable form for new profiles ───────────────────────────
+  const newProfileBodyHtml=!e?(function(){
+    var distHtml2=DIST_GROUPS.map(function(grp){
+      return'<div style="margin-bottom:6px;">'
+        +'<div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:4px;">'+grp.label+'</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:5px;">'
+        +grp.opts.map(function(d){var sel=_wlDossier.distPrefs.includes(d);return'<button type="button" data-dist="'+d+'" onclick="wlToggleDist(this)" class="wlf-going-btn'+(sel?' on':'')+'">'+d+'</button>';}).join('')
+        +'</div></div>';
+    }).join('');
+    return'<div class="wlf-body">'
+      // ── Horse Identity ──
+      +'<div class="wlf-section">'
+        +'<div style="padding:12px 13px 0;">'
+          +'<button type="button" id="wlf-scan-btn" onclick="wlScanScreenshot()" style="width:100%;padding:11px;border-radius:9px;border:1.5px dashed rgba(250,204,21,.4);background:rgba(250,204,21,.06);color:var(--gld);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;">📷 Scan Screenshot — fill from Racing Post / ATR</button>'
+          +'<div id="wlf-scan-notice" style="display:none;font-size:12px;color:var(--grn);padding:6px 2px 0;"></div>'
+        +'</div>'
+        +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
+          +'<div class="fg"><label>Horse Name</label><input type="text" id="wlf-horse" value="'+(p.horse||'')+'"></div>'
+          +'<div class="g2">'
+            +'<div class="fg"><label>Trainer</label><input type="text" id="wlf-trainer" value="'+(p.trainer||'')+'"></div>'
+            +'<div class="fg"><label>Age</label><input type="number" id="wlf-age" min="2" max="20" placeholder="e.g. 3" value="'+(p.age||'')+'"></div>'
+          +'</div>'
+          +'<div class="g2">'
+            +'<div class="fg"><label>Current OR <span style="font-weight:400;color:var(--mut);">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(p.currentRating||'')+'"></div>'
+            +'<div class="fg"><label style="color:var(--gld);">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="" class="wlf-mr-input"></div>'
+          +'</div>'
+          +'<div class="g2">'
+            +'<div class="fg"><label>Surface</label><select id="wlf-surface"><option value="">— Unknown</option><option value="flat">Flat</option><option value="jumps">Jumps / NH</option><option value="aw">All Weather</option></select></div>'
+            +'<div class="fg"><label>Race Type</label><select id="wlf-race-type"><option value="">— Unknown</option><option value="handicap">Handicapper</option><option value="group">Group / Listed</option><option value="maiden">Maiden</option><option value="claimer">Claimer</option></select></div>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+      // ── Why Am I Watching ──
+      +'<div class="wlf-section">'
+        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title">Why Am I Watching?</span></div>'
+        +'<div style="display:flex;gap:5px;flex-wrap:wrap;padding:12px 13px 13px;" id="wlf-reasons">'+reasonHtml+'</div>'
+        +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
+        +'<div class="wlf-sec-body">'
+          +'<div class="fg"><label>In a sentence…</label><input type="text" id="wlf-reason-note" placeholder="e.g. Kept on well from rear, bumped 2f out — needs a clearer run" value="" autocomplete="off"></div>'
+          +'<div id="wlf-unraced-row" style="display:'+(showUnraced?'flex':'none')+';align-items:center;gap:10px;padding:10px 13px;background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.2);border-radius:9px;margin-bottom:4px;">'
+            +'<input type="checkbox" id="wlf-unraced" onchange="wlToggleUnraced()" style="width:16px;height:16px;accent-color:#fb7185;cursor:pointer;flex-shrink:0;">'
+            +'<label for="wlf-unraced" style="font-size:12px;font-weight:700;color:var(--txt);cursor:pointer;margin:0;">Unraced — no observations possible yet</label>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+      // ── Conditions Sweet Spot ──
+      +'<div class="wlf-section">'
+        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--grn);">Conditions Sweet Spot</span></div>'
+        +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
+          +'<div class="fg"><label>Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
+          +'<div class="fg"><label>Preferred Distance</label><div id="wlf-dist-btns" style="padding:4px 0;">'+distHtml2+'</div></div>'
+          +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight, Galloping, Sharp" value=""></div>'
+          +'<div class="fg"><label>Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="min-height:64px;"></textarea></div>'
+        +'</div>'
+      +'</div>'
+      // ── Trainer Intel ──
+      +'<div class="wlf-section">'
+        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--blu);">Trainer / Connections Intel</span></div>'
+        +'<div class="wlf-sec-body"><div class="fg"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="min-height:64px;"></textarea></div></div>'
+      +'</div>'
+    +'</div>';
+  }()):'';
 
   modal.innerHTML=
   '<div class="wlf-page">'
@@ -1622,12 +1731,9 @@ function openWLForm(id,prefill){
       :'<div class="wlf-hero-title" style="color:rgba(255,255,255,.7);">New Profile</div><div class="wlf-hero-sub">Create a puzzle profiler entry</div>')
   +'</div>'
   +tabBarHtml
-  +'<div class="wlf-body">'
-    +overviewHtml
-    +horseHtml
-    +notesHtml
-    +racesHtml
-  +'</div>'
+  +(e
+    ?('<div class="wlf-body">'+overviewHtml+horseHtml+notesHtml+racesHtml+'</div>')
+    :newProfileBodyHtml)
   +'<div class="wlf-actions">'
     +'<button class="wlf-save-btn" onclick="saveWLEntry(\''+(e?e.id:'')+'\')">'+( e?'Save Profile':'Create Profile')+'</button>'
     +'<button class="wlf-cancel-btn" onclick="var _r=window._wlEditReturnId;window._wlEditReturnId=null;document.getElementById(\'wl-modal\').remove();if(_r)openWLProfile(_r);">Cancel</button>'
@@ -1636,9 +1742,9 @@ function openWLForm(id,prefill){
 
   document.body.appendChild(modal);
   _renderObsList();_renderTargetsList();
-  wlSwitchTab(defaultTab);
+  if(e)wlSwitchTab(defaultTab);
   setTimeout(function(){
-    if(defaultTab==='horse'){const f=document.getElementById('wlf-horse');if(f)f.focus();}
+    const f=document.getElementById('wlf-horse');if(f)f.focus();
   },100);
   }catch(err){alert('Profile error: '+err.message);console.error(err);}
 }
@@ -2543,6 +2649,7 @@ function _wlpBuildHTML(e){
       // Row 2: detail chips (position, going, odds etc.) — only if present
       const chips=[];
       if(r.position)chips.push({l:'Pos',v:r.position});
+      if(r.groundConditions)chips.push({l:'Ground',v:r.groundConditions});
       if(r.goingConfirmed)chips.push({l:'Going',v:r.goingConfirmed});
       if(r.beatenDistance)chips.push({l:'Beaten',v:r.beatenDistance});
       if(r.odds)chips.push({l:'SP',v:r.odds});

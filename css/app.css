@@ -104,18 +104,18 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   background: var(--navy);
   position: relative; z-index: 80; flex-shrink: 0; box-sizing: content-box;
 }
-.hdr-top  { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.logo     { font-size: 18px; font-weight: 800; cursor: pointer; letter-spacing: .04em; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: #fff; text-transform: uppercase; }
+.hdr-top  { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.logo     { font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: .03em; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: #fff; text-transform: uppercase; flex-shrink: 0; }
 .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gld2); }
-.hdr-r    { display: flex; align-items: center; gap: 8px; }
+.hdr-r    { display: flex; align-items: center; gap: 6px; }
 /* Right side of header: balances + profile icon */
-.hdr-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.hdr-bal   { display: flex; align-items: center; gap: 4px; }
-.hdr-bal-pill { display: flex; align-items: center; gap: 4px; padding: 3px 0; }
-.hdr-bal-lbl  { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.45); }
-.hdr-bal-val  { font-size: 16px; font-weight: 700; white-space: nowrap; }
-.hdr-bal-arrow { margin-left: 2px; }
-.hdr-bal-sep  { color: rgba(255,255,255,.2); font-size: 14px; margin: 0 2px; line-height: 1; }
+.hdr-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.hdr-bal   { display: flex; align-items: center; gap: 2px; }
+.hdr-bal-pill { display: flex; align-items: center; gap: 3px; padding: 2px 0; }
+.hdr-bal-lbl  { display: none; }
+.hdr-bal-val  { font-size: 13px; font-weight: 700; white-space: nowrap; }
+.hdr-bal-arrow { margin-left: 1px; }
+.hdr-bal-sep  { color: rgba(255,255,255,.2); font-size: 12px; margin: 0 3px; line-height: 1; }
 /* Profile icon button */
 .hdr-profile-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: rgba(255,255,255,.8); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s; -webkit-tap-highlight-color: transparent; }
 .hdr-profile-btn:active { background: rgba(255,255,255,.18); }

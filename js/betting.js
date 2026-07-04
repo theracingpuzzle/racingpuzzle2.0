@@ -426,12 +426,42 @@ function _betFlowSourceHtml(){
 
 function _ckEnabled(){return!(D.settings&&D.settings.checklistEnabled===false);}
 
+function _betFlowShowModeSelect(){
+  const content=document.getElementById('_bflow-content');
+  if(!content)return;
+  const BF_LBL='font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:16px;';
+  content.innerHTML=`<div style="padding:24px 18px 24px;">`
+    +`<div style="${BF_LBL}">Log as real or virtual?</div>`
+    +`<div style="display:flex;flex-direction:column;gap:10px;">`
+      +`<button onclick="_betFlowSkipProceed('real')" style="width:100%;text-align:left;padding:16px;border-radius:14px;border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.08);color:var(--txt);cursor:pointer;display:flex;align-items:center;gap:14px;box-sizing:border-box;">`
+        +`<div style="width:40px;height:40px;border-radius:10px;background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">`
+          +`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`
+        +`</div>`
+        +`<div><div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#60a5fa;">Real Bet</div><div style="font-size:12px;color:var(--mut);margin-top:2px;">Count against my real bank</div></div>`
+      +`</button>`
+      +`<button onclick="_betFlowSkipProceed('virt')" style="width:100%;text-align:left;padding:16px;border-radius:14px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.08);color:var(--txt);cursor:pointer;display:flex;align-items:center;gap:14px;box-sizing:border-box;">`
+        +`<div style="width:40px;height:40px;border-radius:10px;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">`
+          +`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`
+        +`</div>`
+        +`<div><div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fb923c;">Virtual Bet</div><div style="font-size:12px;color:var(--mut);margin-top:2px;">Paper trade against virtual bank</div></div>`
+      +`</button>`
+    +`</div>`
+  +`</div>`;
+}
+
+function _betFlowSkipProceed(chosenMode){
+  _pendingCkScore=0;_pendingCkAnswers={};
+  _betFlowState.mode=chosenMode;
+  const s=Object.assign({},_betFlowState,{mode:chosenMode});
+  _betFlowClose(function(){_rcDoLogBet(s);});
+}
+
 function _betFlowSelectSource(source){
   _betFlowState.source=source;
   const content=document.getElementById('_bflow-content');
   if(!content)return;
   if(source==='own'){
-    if(!_ckEnabled()){_pendingCkScore=0;_pendingCkAnswers={};_betFlowClose(function(){_rcDoLogBet(_betFlowState);});return;}
+    if(!_ckEnabled()){_betFlowShowModeSelect();return;}
     _flowActiveCKS=CKS_OWN;
     _betFlowShowChecklist();
   } else {
@@ -475,7 +505,7 @@ function _betFlowConfirmTip(){
 }
 function _betFlowConfirmTipName(name){
   _betFlowState.tipSource=name;
-  if(!_ckEnabled()){_pendingCkScore=0;_pendingCkAnswers={};_betFlowClose(function(){_rcDoLogBet(_betFlowState);});return;}
+  if(!_ckEnabled()){_betFlowShowModeSelect();return;}
   _flowActiveCKS=CKS_TIP;
   _betFlowShowChecklist();
 }

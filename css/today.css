@@ -108,6 +108,14 @@
 }
 .t-jockey { font-size: 13px; color: var(--mut); }
 .t-flex-col-end { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; align-items: flex-end; }
+.t-wl-bet-btn {
+  width: 28px; height: 28px; padding: 0; border-radius: 7px;
+  border: 1px solid rgba(37,99,235,.3); background: rgba(37,99,235,.1);
+  color: var(--blu); cursor: pointer; display: inline-flex; align-items: center;
+  justify-content: center; flex-shrink: 0; -webkit-appearance: none; appearance: none;
+  -webkit-tap-highlight-color: transparent; transition: all .12s;
+}
+.t-wl-bet-btn:active { transform: scale(.88); opacity: .7; }
 .t-flex-info    { flex: 1; min-width: 0; }
 .t-row-sb-gap   { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 

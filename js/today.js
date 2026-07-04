@@ -591,8 +591,28 @@ async function checkWatchlistRunners(races){
       const reasonBadge=_rm
         ?'<span style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+_rm.col+'18;border:1px solid '+_rm.col+'35;color:'+_rm.col+';">'+_rm.label+'</span>'
         :'';
-      // Race meta: time · course · race name on first line, jockey on second
-      const raceMeta=[a.time,a.course,a.raceName].filter(Boolean).join(' · ');
+      // Race meta: time · course only (no race name)
+      const raceMeta=[a.time,a.course].filter(Boolean).join(' · ');
+      // Derive race type from name
+      const _rn2=a.raceName||'';
+      const _rc=String(a.raceClass||'').trim();
+      let raceType='';
+      if(/\bGroup\s*1\b|\bGr(ade)?\s*1\b|\bG1\b/i.test(_rn2)||_rc==='1')raceType='Group 1';
+      else if(/\bGroup\s*2\b|\bGr(ade)?\s*2\b|\bG2\b/i.test(_rn2)||_rc==='2')raceType='Group 2';
+      else if(/\bGroup\s*3\b|\bGr(ade)?\s*3\b|\bG3\b/i.test(_rn2)||_rc==='3')raceType='Group 3';
+      else if(/\bListed\b/i.test(_rn2))raceType='Listed';
+      else if(/\bHandicap\b|\bHcap\b|H'cap/i.test(_rn2))raceType='Handicap';
+      else if(/\bNovice\b/i.test(_rn2))raceType='Novice';
+      else if(/\bMaiden\b/i.test(_rn2))raceType='Maiden';
+      else if(/\bChase\b/i.test(_rn2))raceType='Chase';
+      else if(/\bHurdle\b/i.test(_rn2))raceType='Hurdle';
+      else if(_rc)raceType='Class '+_rc;
+      const detailParts=[raceType,a.raceGoing,a.raceDist].filter(Boolean);
+      const detailLine=detailParts.length
+        ?'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:3px;">'
+          +detailParts.map(function(p){return'<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid var(--bdr);color:var(--mut);">'+p+'</span>';}).join('')
+          +'</div>'
+        :'';
       const jockeyLine=a.jockey?'<div class="t-muted" style="font-size:13px;margin-top:2px;">J: '+fmtJockey(a.jockey)+'</div>':'';
       // Primary action: review (if available/past) or race (if upcoming)
       const primaryBtn=reviewBtn
@@ -602,6 +622,14 @@ async function checkWatchlistRunners(races){
           +' Racecard'
         +'</button>';
       const profileClick=wid?'window._wlProfileSource=\'today\';openWLProfile(\''+wid+'\');':'';
+      const _hn=a.horse.replace(/'/g,"\\'");
+      const _co=(a.course||'').replace(/'/g,"\\'");
+      const _ti=a.time||'';
+      const _jk=(a.jockey||'').replace(/'/g,"\\'");
+      const _rn=(a.raceName||'').replace(/'/g,"\\'");
+      const betBtn='<button onclick="event.stopPropagation();openBetFlow(\'real\',\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\'\',\''+_rn+'\')" class="t-wl-bet-btn" title="Log a bet">'
+        +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
+        +'</button>';
       return'<div class="t-alert-row-pur">'
         +'<div class="t-row-sb-gap">'
           +'<div class="t-flex-info"'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
@@ -615,10 +643,12 @@ async function checkWatchlistRunners(races){
               +finishBadge
             +'</div>'
             +'<div class="t-muted" style="font-size:13px;margin-top:1px;">'+raceMeta+'</div>'
+            +detailLine
             +jockeyLine
             +(a.orUpdated?'<div style="font-size:12px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
           +'</div>'
-          +'<div class="t-flex-col-end">'
+          +'<div class="t-flex-col-end" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">'
+            +betBtn
             +primaryBtn
           +'</div>'
         +'</div>'

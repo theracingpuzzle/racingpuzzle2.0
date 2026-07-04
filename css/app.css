@@ -65,7 +65,7 @@ body.dark {
 
 /* Dark mode card overrides */
 body.dark .card         { background: var(--sur); border-color: var(--bdr); box-shadow: 0 2px 16px rgba(0,0,0,.4); }
-body.dark .cT           { background: var(--navy); }
+body.dark .cT           { background: var(--sur); }
 body.dark .card-hdr-std { border-bottom-color: var(--bdr); }
 body.dark .card-title-std { color: var(--txt); }
 body.dark .card-sec-divider { color: var(--mut); border-top-color: var(--bdr); }

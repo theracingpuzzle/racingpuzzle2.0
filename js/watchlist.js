@@ -1859,6 +1859,14 @@ function saveWLEntry(id){
       }
       return prev;
     })(),
+    mrHistory:(function(){
+      const newMR=(document.getElementById('wlf-myrating').value||'').trim();
+      const prev=old?old.mrHistory||[]:[];
+      if(newMR&&(!prev.length||prev[prev.length-1].mr!==newMR)){
+        return [...prev,{mr:newMR,date:td()}];
+      }
+      return prev;
+    })(),
     trainer:(document.getElementById('wlf-trainer').value||'').trim(),
     age:parseInt((document.getElementById('wlf-age')||{value:''}).value)||0,
     surface:(document.getElementById('wlf-surface')||{value:''}).value||'',
@@ -2397,6 +2405,82 @@ function _wlpBuildHTML(e){
   const horseSR=horseBets.length>0?(horseWins.length/horseBets.length*100):null;
   const horseROI=horseStaked>0?(horsePnl/horseStaked*100):null;
 
+  function _wlRatingsChart(entry){
+    const orH=(entry.orHistory||[]).filter(function(p){return parseFloat(p.or);}).map(function(p){return{val:parseFloat(p.or),date:p.date||''};});
+    const mrH=(entry.mrHistory||[]).filter(function(p){return parseFloat(p.mr);}).map(function(p){return{val:parseFloat(p.mr),date:p.date||''};});
+    // Need at least one series with 2+ points, or one series with 1 point each to draw something
+    if(!orH.length&&!mrH.length)return '';
+    // Merge all dates to build x-axis
+    const allDates=[...new Set([...orH.map(function(p){return p.date;}), ...mrH.map(function(p){return p.date;})].filter(Boolean))].sort();
+    // If only one data point total, still show as a dot — pad with a synthetic second point
+    const pts=allDates.length;
+    const W=280,H=90,PL=28,PR=12,PT=10,PB=22;
+    const cW=W-PL-PR,cH=H-PT-PB;
+    // Value range
+    const allVals=[...orH.map(function(p){return p.val;}), ...mrH.map(function(p){return p.val;})];
+    const minV=Math.max(0,Math.min.apply(null,allVals)-8);
+    const maxV=Math.max.apply(null,allVals)+8;
+    const range=maxV-minV||1;
+    function xOf(i){return PL+(pts<2?cW/2:i/(pts-1)*cW);}
+    function yOf(v){return PT+cH-(v-minV)/range*cH;}
+    function interpSeries(series){
+      // fill value at each date by carrying forward last known value
+      var last=null;
+      return allDates.map(function(d){
+        var p=series.find(function(s){return s.date===d;});
+        if(p)last=p.val;
+        return last;
+      });
+    }
+    function polyline(series,col){
+      const vals=interpSeries(series);
+      if(!vals.some(function(v){return v!==null;}))return '';
+      var first=true,d='';
+      vals.forEach(function(v,i){
+        if(v===null)return;
+        const x=xOf(i),y=yOf(v);
+        d+=(first?'M':'L')+x.toFixed(1)+' '+y.toFixed(1)+' ';
+        first=false;
+      });
+      // filled area path
+      var filled=d,startI=-1,endI=-1;
+      vals.forEach(function(v,i){if(v!==null){if(startI<0)startI=i;endI=i;}});
+      const areaD=d+'L'+xOf(endI).toFixed(1)+' '+(PT+cH)+' L'+xOf(startI).toFixed(1)+' '+(PT+cH)+' Z';
+      return '<path d="'+areaD+'" fill="'+col+'" fill-opacity="0.08" stroke="none"/>'
+            +'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+            +vals.map(function(v,i){return v!==null?'<circle cx="'+xOf(i).toFixed(1)+'" cy="'+yOf(v).toFixed(1)+'" r="3" fill="'+col+'" stroke="var(--sur)" stroke-width="1.5"/>':'';}).join('');
+    }
+    // X axis labels — show up to 4, prefer first, last, evenly spaced
+    function fmtD(d){if(!d||d.length<7)return d||'';var p=d.split('-');return(p[2]?p[2]+'/':'')+(p[1]||'');}
+    const labelIdxs=pts<=1?[0]:pts===2?[0,1]:[0,Math.floor((pts-1)/2),pts-1];
+    const xLabels=labelIdxs.map(function(i){
+      return'<text x="'+xOf(i).toFixed(1)+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" fill="var(--mut)">'+fmtD(allDates[i])+'</text>';
+    }).join('');
+    // Y axis labels — min and max
+    const yLabels='<text x="'+(PL-4)+'" y="'+(yOf(maxV)+3)+'" text-anchor="end" font-size="9" fill="var(--mut)">'+Math.round(maxV-8)+'</text>'
+                 +'<text x="'+(PL-4)+'" y="'+(yOf(minV+8)+3)+'" text-anchor="end" font-size="9" fill="var(--mut)">'+Math.round(minV+8)+'</text>';
+    // Horizontal gridlines
+    const grid=[minV+8,maxV-8].map(function(v){
+      return'<line x1="'+PL+'" y1="'+yOf(v).toFixed(1)+'" x2="'+(W-PR)+'" y2="'+yOf(v).toFixed(1)+'" stroke="var(--bdr)" stroke-width="0.5"/>';
+    }).join('');
+    const svg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block;overflow:visible;">'
+      +grid
+      +polyline(orH,'var(--txt)')
+      +polyline(mrH,'#f97316')
+      +'<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+cH)+'" stroke="var(--bdr)" stroke-width="0.5"/>'
+      +'<line x1="'+PL+'" y1="'+(PT+cH)+'" x2="'+(W-PR)+'" y2="'+(PT+cH)+'" stroke="var(--bdr)" stroke-width="0.5"/>'
+      +xLabels+yLabels
+      +'</svg>';
+    const legend='<div style="display:flex;gap:12px;margin-top:6px;">'
+      +(orH.length?'<div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mut);"><span style="width:12px;height:2px;background:var(--txt);display:inline-block;border-radius:1px;"></span>OR</div>':'')
+      +(mrH.length?'<div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--mut);"><span style="width:12px;height:2px;background:#f97316;display:inline-block;border-radius:1px;"></span>MR</div>':'')
+      +'</div>';
+    return'<div style="padding:10px 14px 6px;">'
+      +'<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">Rating History</div>'
+      +svg+legend
+      +'</div>';
+  }
+
   let h='<div class="wlp-page">';
 
   // ── NAV (pinned, never scrolls) ───────────────────────────────────────────
@@ -2509,11 +2593,7 @@ function _wlpBuildHTML(e){
     h+='</div>';
   });
   h+='</div>';
-  if((e.orHistory||[]).length>0){
-    h+='<div class="wlp-or-hist"><span class="wlp-hist-label">OR LOG</span>';
-    e.orHistory.forEach(function(o){h+='<div class="wlp-hist-pill"><span>'+esc(o.or)+'</span><span class="wlp-hist-date">'+fmt(o.date)+'</span></div>';});
-    h+='</div>';
-  }
+  h+=_wlRatingsChart(e);
   h+='</div>';
 
   // Section 3: Targets

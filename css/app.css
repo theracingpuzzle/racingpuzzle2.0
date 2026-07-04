@@ -347,6 +347,7 @@ button { -webkit-appearance: none; appearance: none; }
 .bp1  { background: rgba(37,99,235,.12);  color: var(--blu); border: 1px solid rgba(37,99,235,.25); }
 .bl1  { background: rgba(220,38,38,.12);  color: var(--red); border: 1px solid rgba(220,38,38,.25); }
 .bpend{ background: rgba(217,119,6,.12);  color: var(--gld); border: 1px solid rgba(217,119,6,.25); }
+.bpend-neu { background: rgba(148,163,184,.1); color: var(--mut); border: 1px solid rgba(148,163,184,.25); }
 .bnr, .bvd { background: var(--sur2); color: var(--mut); border: 1px solid var(--bdr); }
 
 /* Success alert */

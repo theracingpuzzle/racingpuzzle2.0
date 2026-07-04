@@ -551,8 +551,14 @@ async function checkWatchlistRunners(races){
       const alreadyReviewed=(D.reviews||[]).some(function(r){
         return r.profileId===wid&&r.date===todayStr;
       });
-      const edgeBadge=a.edge>0
-        ?'<span class="t-edge-badge" style="margin-left:7px;">MR '+a.mr+' · OR '+a.or+' · +'+a.edge+'</span>'
+      const _hasOR=a.or&&a.or>0,_hasMR=a.mr&&a.mr>0;
+      const edgeBadge=(_hasOR||_hasMR)
+        ?'<span class="t-edge-badge" style="margin-left:7px;">'
+          +(_hasMR?'MR '+a.mr:'MR —')
+          +' · '
+          +(_hasOR?'OR '+a.or:'OR —')
+          +(a.edge>0?' · <span style="color:#4ade80;font-weight:800;">+'+a.edge+'</span>':'')
+          +'</span>'
         :'';
       const ri=a.resultInfo;
       const finishBadge=ri
@@ -1277,13 +1283,15 @@ function renderTodayBets(tb, vtb){
     const p2=isV?((b.result&&b.result!=='pending'&&b.result!=='nr')?(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0):null):pnl(b);
     const os=b.oddsDisplay||(b.odds||'—');
     const el=document.createElement('div');
+    const isPend=!b.result||b.result==='pending';
+    const pendBadge=isPend?(isV?'bpend':'bpend-neu'):(bg[b.result]||'bpend');
     el.className='mb '+(b.result||'pending');
-    el.style.borderLeftColor=isV?'var(--ora)':'';
+    el.style.borderLeftColor=isV?'var(--ora)':'var(--blu)';
     el.style.cursor='pointer';
     el.setAttribute('onclick',isV?'openVEM("'+b.id+'")':'openEM("'+b.id+'")');
     el.innerHTML='<div class="mbl"><div class="mh">'+b.horse+(isV?' <span class="t-virt-lbl">VIRT</span>':'')+'</div>'
       +'<div class="mm">'+(b.track||'—')+(b.time?' · '+b.time:'')+' · <span style="font-family:var(--font-ui);">'+os+'</span></div></div>'
-      +'<div class="mbr"><span class="bdg '+(bg[b.result]||'bpend')+'">'+(b.result||'pending')+'</span>'
+      +'<div class="mbr"><span class="bdg '+pendBadge+'">'+(b.result||'pending')+'</span>'
       +'<div class="mp '+(p2===null?'':p2>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p2===null?'—':fmt(p2))+'</div></div>';
     return el.outerHTML;
   }).join('');
@@ -1333,7 +1341,7 @@ function renderOutstanding(){
       const isV=b._type==='virt';
       const fn=isV?'openVEM':'openEM';
       const os=b.oddsDisplay||(b.odds||'—');
-      return'<div class="mb pending" onclick="'+fn+'(\''+b.id+'\')" style="cursor:pointer;border-left-color:'+(isV?'var(--ora)':'var(--red)')+';">'
+      return'<div class="mb pending" onclick="'+fn+'(\''+b.id+'\')" style="cursor:pointer;border-left-color:'+(isV?'var(--ora)':'var(--blu)')+';">'
         +'<div class="mbl"><div class="mh">'+b.horse+(isV?' <span class="t-virt-lbl">VIRT</span>':'')+'</div>'
         +'<div class="mm">'+b.date+' · '+(b.track||'—')+' · <span style="font-family:var(--font-ui);">'+os+'</span> · '+fp(b.stake)+'</div></div>'
         +'<div class="mbr"><span class="bdg bdg-settle">settle</span></div></div>';

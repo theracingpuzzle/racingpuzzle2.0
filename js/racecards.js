@@ -537,7 +537,7 @@ function rcSwRenderRunners(idx, course, el){
     const _pr2=_wl2.find(function(w){return(w.horse||'').toLowerCase().trim()===_nl2;});
     const _PM2={'eye-catcher':{emoji:'👁',col:'#a78bfa'},'future-target':{emoji:'📰',col:'#34d399'},'trainer-intel':{emoji:'🗣',col:'#38bdf8'},'form-study':{emoji:'📊',col:'#f59e0b'},'tip-source':{emoji:'💡',col:'#fb7185'}};
     const _pm2=_pr2?_PM2[_pr2.reason||'eye-catcher']:null;
-    const _qr2=D.ratings&&D.ratings[_nl2];
+    const _qr2=(_pr2&&_pr2.myRating)?{mr:_pr2.myRating}:(D.ratings&&D.ratings[_nl2]);
     const pid='sw-profile-'+course.replace(/\W/g,'_')+'-'+i;
     const _profileStrip=(!isNR&&!_bh&&_pm2)?'border-left:3px solid '+_pm2.col+';padding-left:11px;':'';
     return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'" style="'+_profileStrip+'">'
@@ -1057,8 +1057,7 @@ function rcSwRaceCard(race, course){
         const watchBtn = wlEntry
           ? '<button class="rc-act-btn" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.1);color:var(--grn);" title="Watching">'+_eyeSvg+'</button>'
           : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
-        const _qrRes=D.ratings&&D.ratings[hn];
-        const _mrBadgeRes=_qrRes?'<span style="font-size:10px;font-weight:800;background:rgba(234,179,8,.18);color:#854d0e;border:1px solid rgba(234,179,8,.4);border-radius:6px;padding:2px 7px;margin-left:5px;">MR '+_qrRes.mr+'</span>':'';
+        const _qrRes=(wlEntry&&wlEntry.myRating)?{mr:wlEntry.myRating}:(D.ratings&&D.ratings[hn]);
         const rateBtnRes='<span onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\')" class="rc-mr-chip'+(_qrRes?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qrRes?_qrRes.mr:'\u2014')+'</span>';
         return '<div class="rc-res-runner">'
           + '<span class="rc-pos '+posClass+'">'+pos+'</span>'

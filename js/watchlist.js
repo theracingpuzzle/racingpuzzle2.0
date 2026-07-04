@@ -497,6 +497,11 @@ function renderWLList(){
   const total=entries.length;
   const totalReviews=(D.reviews||[]).filter(function(r){return entries.find(function(e){return e.id===r.profileId;});}).length;
   const totalTargets=entries.reduce(function(a,e){return a+(e.targets||[]).length;},0);
+  // MR count — profiles with myRating set, plus quick ratings for horses without a profile
+  const profilesWithMR=getWL().filter(function(e){return parseFloat(e.myRating)>0;}).length;
+  const profileHorseNames=new Set(getWL().map(function(e){return(e.horse||'').toLowerCase().trim();}));
+  const quickRatingsOnly=Object.keys(D.ratings||{}).filter(function(k){return!profileHorseNames.has(k);}).length;
+  const totalMR=profilesWithMR+quickRatingsOnly;
 
   let html='<div class="wll-wrap">';
 
@@ -508,6 +513,7 @@ function renderWLList(){
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--gld2);">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:#10b981;">'+readyCount+'</div><div class="wll-stat-l">Ready</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--ora);">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
+    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#d97706;">'+totalMR+'</div><div class="wll-stat-l">Rated</div></div>'
   +'</div>';
   // Cold toggle
   if(coldCount){

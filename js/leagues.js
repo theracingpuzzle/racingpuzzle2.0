@@ -709,10 +709,10 @@ function lgRenderPick(el){
       if(!runners.length)return;
       h+='<div class="blk" style="padding:0;margin-bottom:10px;overflow:hidden;">'
         +'<div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;">'
-          +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:900;color:var(--txt);flex-shrink:0;">'+time+'</span>'
+          +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;color:var(--txt);flex-shrink:0;">'+time+'</span>'
           +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+item.course+'</div>'
-            +'<div style="font-size:10px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+raceName+'</div>'
+            +'<div style="font-size:15px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+item.course+'</div>'
+            +'<div style="font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+raceName+'</div>'
           +'</div>'
           +'<span style="color:var(--mut);">›</span>'
         +'</div>'
@@ -724,8 +724,8 @@ function lgRenderPick(el){
           const isPicked=pickedNames.includes(horse.toLowerCase().trim());
           return'<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid var(--bdr);">'
             +'<div style="flex:1;min-width:0;">'
-              +'<div style="font-size:13px;font-weight:700;color:var(--txt);">'+horse+'</div>'
-              +'<div style="font-size:10px;color:var(--mut);">'+(jock?'J: '+jock:'')+(odds?' · '+odds:'')+'</div>'
+              +'<div style="font-size:15px;font-weight:700;color:var(--txt);">'+horse+'</div>'
+              +'<div style="font-size:12px;color:var(--mut);">'+(jock?'J: '+jock:'')+(odds?' · '+odds:'')+'</div>'
             +'</div>'
             +(isPicked
               ?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.25);color:var(--grn);">Picked ✓</span>'
@@ -741,8 +741,8 @@ function lgRenderPick(el){
                       +'<input id="'+oddsId+'" type="text" inputmode="decimal" placeholder="'+(isStakes?'Odds*':'Odds')+'" value="'+_lgEsc(odds)+'" '
                         +'oninput="lgOddsInputChange(\''+safeKey+'\',\''+l.id+'\','+isStakes+')" '
                         +'style="width:68px;padding:5px 7px;font-size:12px;border-radius:7px;border:1px solid '+(isStakes?'rgba(245,158,11,.5)':'var(--bdr)')+';background:var(--inp);color:var(--txt);text-align:center;">'
-                      +'<button id="lg-pick-btn-'+safeKey+'" onclick="lgConfirmPick(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+item.course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+safeKey+'\')" class="btn-refresh" '
-                        +'style="color:var(--txt);border-color:var(--bdr);white-space:nowrap;"'
+                      +'<button id="lg-pick-btn-'+safeKey+'" onclick="lgConfirmPick(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+item.course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+safeKey+'\')" '
+                        +'style="padding:6px 14px;border-radius:7px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"'
                         +'>Pick</button>'
                     +'</div>'
                     +oddsHint

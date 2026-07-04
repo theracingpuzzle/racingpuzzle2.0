@@ -898,6 +898,24 @@ function _rvwGet(grp){
   return sel.dataset[grp]||sel.dataset.result||sel.dataset.verdict||sel.dataset.going||sel.dataset.readiness||'';
 }
 
+function _distToFurlongs(s){
+  if(!s)return null;
+  s=String(s).toLowerCase().replace(/\s+/g,'').replace('½','.5').replace('¼','.25').replace('¾','.75');
+  // metres (value > 100 and ends in m)
+  const metres=s.match(/^(\d+(\.\d+)?)m$/);
+  if(metres&&parseFloat(metres[1])>100)return parseFloat(metres[1])/201.168;
+  // miles + furlongs: 1m2f, 2m4f, 1m2f110y
+  const mf=s.match(/^(\d+)m(\d+(\.\d+)?)?f?/);
+  if(mf){return parseInt(mf[1])*8+parseFloat(mf[2]||0);}
+  // furlongs only: 6f, 10f, 5.5f
+  const fo=s.match(/^(\d+(\.\d+)?)f/);
+  if(fo)return parseFloat(fo[1]);
+  // miles only: 1m, 2m (≤20 to avoid metres clash)
+  const mo=s.match(/^(\d+(\.\d+)?)m$/);
+  if(mo&&parseFloat(mo[1])<=20)return parseFloat(mo[1])*8;
+  return null;
+}
+
 function _rvwUpdateSignals(){
   const el=document.getElementById('rvw-signals');if(!el)return;
   const result=_rvwGet('result');
@@ -945,11 +963,28 @@ function _rvwUpdateSignals(){
     neu.push({label:'No track preference set — consider adding '+course+' if it handles it well',key:'track'});
   }
 
-  // ── Distance vs profile preference ──
-  if(dist&&entry.distancePref){
-    const distMatch=entry.distancePref.toLowerCase().includes(dist)||dist.includes(entry.distancePref.toLowerCase());
-    if(distMatch)pos.push({label:'Distance suited ('+entry.distancePref+')',key:'dist'});
-    else neg.push({label:'Distance may not suit — profile says '+entry.distancePref,key:'dist'});
+  // ── Distance vs preference, judged against result ──
+  if(entry.distancePref&&dist){
+    const df=_distToFurlongs(dist);
+    const pf=_distToFurlongs(entry.distancePref);
+    if(df&&pf){
+      const diff=Math.abs(df-pf);
+      const suited=diff<=1;
+      const close=diff<=2;
+      const ran_well=result==='win'||result==='place';
+      const ran_poor=result==='unplaced';
+      if(suited&&ran_well)      pos.push({label:(result==='win'?'Won':'Placed')+' at preferred distance ('+dist+') — distance confirmed',key:'dist'});
+      else if(suited&&ran_poor) neu.push({label:'Ran at preferred distance ('+dist+') but unplaced — distance not the issue today',key:'dist'});
+      else if(suited)           pos.push({label:'Distance suits — '+dist+' matches preference ('+entry.distancePref+')',key:'dist'});
+      else if(close&&ran_well)  pos.push({label:(result==='win'?'Won':'Placed')+' at '+dist+' — close to preferred distance ('+entry.distancePref+')',key:'dist'});
+      else if(!suited&&ran_well)neu.push({label:(result==='win'?'Won':'Placed')+' at '+dist+' — outside preference ('+entry.distancePref+'), consider updating',key:'dist'});
+      else if(!suited&&ran_poor)neg.push({label:'Unplaced — distance ('+dist+') may be a factor vs preference ('+entry.distancePref+')',key:'dist'});
+      else                      neu.push({label:'Distance '+dist+' vs preference '+entry.distancePref,key:'dist'});
+    } else {
+      neu.push({label:'Profile distance: '+entry.distancePref+' (today: '+dist+')',key:'dist'});
+    }
+  } else if(entry.distancePref&&!dist){
+    neu.push({label:'Profile distance preference: '+entry.distancePref+' — add race distance to compare',key:'dist'});
   }
 
   // ── My Rating adjustment ──

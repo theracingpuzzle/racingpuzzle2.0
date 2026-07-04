@@ -578,8 +578,8 @@ function rcSwRenderRunners(idx, course, el){
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'
             +(age?'<span class="rc-runner-age" style="font-size:0.72em;color:var(--mut);margin-left:4px;">'+age+'</span>':'')
             +(rpr?'<span class="rc-or">'+rpr+'</span>':'')
+            +(!isNR?'<span onclick="rcQuickRate(event,\''+name.replace(/'/g,"\\'")+'\',\''+rpr+'\')" class="rc-mr-chip'+((_qr2)?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qr2?_qr2.mr:'—')+'</span>':'')
             +(_badge?'<span class="rc-wl-pill">'+_pm.svg+'</span>':'')
-            +(_qr2?'<span style="font-size:10px;font-weight:800;background:rgba(234,179,8,.18);color:#854d0e;border:1px solid rgba(234,179,8,.4);border-radius:6px;padding:2px 7px;margin-left:5px;">MR '+_qr2.mr+'</span>':'')
             +_betChip
             +(draw?'<span class="rc-runner-age">'+draw+'</span>':'')
           +'</div>'
@@ -594,7 +594,6 @@ function rcSwRenderRunners(idx, course, el){
         +(isNR?''
           :'<button onclick="rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\')\" class="rc-act-btn rc-bet-btn" title="Log a bet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>')
         +(!isNR&&typeof _lgMyLeagues!=='undefined'&&_lgMyLeagues.length?'<button onclick="event.stopPropagation();lgPickFromRacecard(\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+(r.sp||r.price||r.odds||'')+'\')" title="Pick for League" class="rc-act-btn" style="border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.08);color:#10b981;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></button>':'')
-        +(!isNR?'<button onclick="rcQuickRate(event,\''+name.replace(/'/g,"\\'")+'\',\''+rpr+'\')\" class="rc-act-btn rc-rate-btn" title="Log My Rating"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></button>':'')
         +(_pr2&&!isNR?'<button onclick="rcToggleProfile(\''+pid+'\',this)" class="rc-profile-tog" style="border-color:'+_pm2.col+';color:'+_pm2.col+';">\u25bc</button>':'')
       +'</div>'
     +'</div>'

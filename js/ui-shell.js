@@ -262,6 +262,6 @@ function setTab(name, btn) {
   if(panel) panel.classList.add('on');
   // Trigger any lazy renders needed for this tab
   if(name==='banks'){if(typeof renderBkCard==='function')renderBkCard();if(typeof renderVBKDisp==='function')renderVBKDisp();if(typeof loadStartBankField==='function')loadStartBankField();}
-  if(name==='setup'){if(typeof renderSettingsSources==='function')renderSettingsSources();if(typeof renderCmdRules==='function')renderCmdRules();}
+  if(name==='setup'){if(typeof renderSettingsSources==='function')renderSettingsSources();if(typeof renderCmdRules==='function')renderCmdRules();if(typeof initChecklistToggle==='function')initChecklistToggle();}
   if(name==='racing'){if(typeof loadRacingCredsFields==='function')loadRacingCredsFields();}
 }

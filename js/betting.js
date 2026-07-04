@@ -104,6 +104,27 @@ function renderSetSources(){
   }).join('');
 }
 function renderSettingsSources(){renderSetSources();}
+
+function saveChecklistPref(){
+  const el=document.getElementById('set-ck-enabled');
+  if(!el)return;
+  if(!D.settings)D.settings={};
+  D.settings.checklistEnabled=el.checked;
+  _ckToggleUI(el.checked);
+  save();
+}
+function _ckToggleUI(on){
+  const track=document.getElementById('set-ck-track');
+  const thumb=document.getElementById('set-ck-thumb');
+  if(track)track.style.background=on?'var(--grn)':'var(--bdr)';
+  if(thumb)thumb.style.transform=on?'translateX(20px)':'translateX(0)';
+}
+function initChecklistToggle(){
+  const enabled=!(D.settings&&D.settings.checklistEnabled===false);
+  const el=document.getElementById('set-ck-enabled');
+  if(el)el.checked=enabled;
+  _ckToggleUI(enabled);
+}
 function settingsAddSource(){
   const labelEl=document.getElementById('set-src-new-label');
   const typeEl=document.getElementById('set-src-new-type');
@@ -403,11 +424,14 @@ function _betFlowSourceHtml(){
   +`</div>`;
 }
 
+function _ckEnabled(){return!(D.settings&&D.settings.checklistEnabled===false);}
+
 function _betFlowSelectSource(source){
   _betFlowState.source=source;
   const content=document.getElementById('_bflow-content');
   if(!content)return;
   if(source==='own'){
+    if(!_ckEnabled()){_pendingCkScore=0;_pendingCkAnswers={};_betFlowClose(function(){_rcDoLogBet(_betFlowState);});return;}
     _flowActiveCKS=CKS_OWN;
     _betFlowShowChecklist();
   } else {
@@ -451,6 +475,7 @@ function _betFlowConfirmTip(){
 }
 function _betFlowConfirmTipName(name){
   _betFlowState.tipSource=name;
+  if(!_ckEnabled()){_pendingCkScore=0;_pendingCkAnswers={};_betFlowClose(function(){_rcDoLogBet(_betFlowState);});return;}
   _flowActiveCKS=CKS_TIP;
   _betFlowShowChecklist();
 }

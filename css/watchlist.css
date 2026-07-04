@@ -320,3 +320,11 @@
 .wlp-intel      { padding:10px 13px 13px; display:flex; gap:9px; align-items:flex-start; }
 .wlp-intel-icon { font-size:16px; opacity:.6; flex-shrink:0; margin-top:1px; }
 .wlp-intel-text { font-size:14px; line-height:1.6; color:var(--mut); white-space:pre-line; }
+
+/* ── Dark mode overrides ── */
+body.dark .wlp-section-title { color: var(--txt); }
+body.dark .wlf-sec-title     { color: var(--txt); }
+body.dark .wlr-title         { color: var(--txt); }
+body.dark .wll-rating-val    { color: var(--txt) !important; }
+body.dark .wlf-tab-btn       { color: var(--mut); border-bottom-color: transparent; }
+body.dark .wlf-tab-btn[style*="var(--navy)"] { color: var(--txt) !important; border-bottom-color: var(--txt) !important; }

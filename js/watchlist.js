@@ -604,7 +604,7 @@ function renderWLList(){
             +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+(REASON_SVG[r]?REASON_SVG[r]+' ':'')+rm.label+'</div>'
           +'</div>'
           +'<div class="wll-right">'
-            +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--navy)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+            +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--txt)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
             +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
           +'</div>'
         +'</div>'
@@ -686,7 +686,7 @@ function renderWLEntry(e){
       +'</div>'
     +'</div>'
     +'<div class="wll-right">'
-      +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--navy)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
+      +'<div class="wll-rating"><div class="wll-rating-lbl">OR</div><div class="wll-rating-val" style="color:'+(or?'var(--txt)':'var(--mut)')+';">'+(or?String(or):'—')+'</div></div>'
       +'<div class="wll-rating"><div class="wll-rating-lbl">MR</div><div class="wll-rating-val" style="color:'+(mr?'var(--gld)':'var(--mut)')+';">'+(mr?String(mr):'—')+'</div></div>'
     +'</div>'
   +'</div>';
@@ -1442,7 +1442,7 @@ function openWLForm(id,prefill){
       +(orH.length?'<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:12px;">'
         +'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">OR History</div>'
         +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
-        +orH.slice(-6).map(function(h){return'<div style="text-align:center;"><div style="font-size:15px;font-weight:800;color:var(--navy);">'+(h.rating||'—')+'</div><div style="font-size:9px;color:var(--mut);">'+(h.date?h.date.slice(2):'')+'</div></div>';}).join('<div style="color:var(--bdr);">→</div>')
+        +orH.slice(-6).map(function(h){return'<div style="text-align:center;"><div style="font-size:15px;font-weight:800;color:var(--txt);">'+(h.rating||'—')+'</div><div style="font-size:9px;color:var(--mut);">'+(h.date?h.date.slice(2):'')+'</div></div>';}).join('<div style="color:var(--bdr);">→</div>')
         +'</div></div>':'')
     +'</div>';
   }());
@@ -2359,7 +2359,7 @@ function _wlpBuildHTML(e){
   if((e.orHistory||[]).length>1)h+='<span class="wlp-section-action">History ›</span>';
   h+='</div>';
   h+='<div class="wlp-ratings-row">';
-  [{key:'Official Rating',val:e.currentRating,col:'var(--navy)'},{key:'My Rating',val:e.myRating,col:'#f97316'}].forEach(function(r){
+  [{key:'Official Rating',val:e.currentRating,col:'var(--txt)'},{key:'My Rating',val:e.myRating,col:'#f97316'}].forEach(function(r){
     const v=parseFloat(r.val)||null;
     h+='<div class="wlp-rating-col"><span class="wlp-rating-key">'+r.key+'</span>';
     if(v){h+='<span class="wlp-rating-val" style="color:'+r.col+';">'+v+'</span>';

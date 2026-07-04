@@ -1,6 +1,6 @@
 // ─── UTILS ─── formatting, odds, returns
 
-function fmt(n){const v=parseFloat(n)||0;return(v>=0?'+':'')+'£'+Math.abs(v).toFixed(2);}
+function fmt(n){const v=parseFloat(n)||0;return(v>=0?'+':'-')+'£'+Math.abs(v).toFixed(2);}
 // Ensures a space between jockey name and apprentice claim e.g. "J.Smith(5)" → "J.Smith (5)"
 function fmtJockey(j){return(j||'—').replace(/([a-zA-Z])\(/g,'$1 (');}
 function fp(n){return'£'+(parseFloat(n)||0).toFixed(2);}

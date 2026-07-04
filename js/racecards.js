@@ -1053,19 +1053,20 @@ function rcSwRaceCard(race, course){
         const _rDate  = esc(race.date||td());
         const _rDist  = esc(race.distance_f||race.distance_round||race.distance||'');
         const _rPos   = String(pos);
+        const _eyeSvg='<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>';
         const watchBtn = wlEntry
-          ? '<button class="rc-watch-btn rc-watch-btn-on">\u2713 Watching</button>'
-          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\')" class="rc-watch-btn rc-watch-btn-add">+ Watch</button>';
+          ? '<button class="rc-act-btn" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.1);color:var(--grn);" title="Watching">'+_eyeSvg+'</button>'
+          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
         const _qrRes=D.ratings&&D.ratings[hn];
         const _mrBadgeRes=_qrRes?'<span style="font-size:10px;font-weight:800;background:rgba(234,179,8,.18);color:#854d0e;border:1px solid rgba(234,179,8,.4);border-radius:6px;padding:2px 7px;margin-left:5px;">MR '+_qrRes.mr+'</span>':'';
-        const rateBtnRes='<button onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\')" class="rc-rate-btn" title="Rate this horse" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:#eab308;border-radius:7px;padding:5px 9px;font-size:13px;cursor:pointer;margin-left:4px;">\u2605</button>';
+        const rateBtnRes='<span onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\')" class="rc-mr-chip'+(_qrRes?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qrRes?_qrRes.mr:'\u2014')+'</span>';
         return '<div class="rc-res-runner">'
           + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
           + '<div class="rc-runner-main">'
             + '<div class="rc-runner-name-row">'
               + '<span class="rc-runner-name">'+horse+'</span>'
               + (ofr?'<span class="rc-or">'+ofr+'</span>':'')
-              + _mrBadgeRes
+              + rateBtnRes
               + betBadge
             + '</div>'
             + (jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
@@ -1073,7 +1074,6 @@ function rcSwRaceCard(race, course){
           + '</div>'
           + '<div class="rc-runner-right">'
             + (sp?'<span class="rc-sp">'+sp+'</span>':'')
-            + rateBtnRes
             + watchBtn
           + '</div>'
         + '</div>';

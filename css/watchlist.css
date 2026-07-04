@@ -291,11 +291,11 @@
 
 /* Notepad (observations) */
 .wlp-notepad      { background:#fffdf5; border-radius:0 0 10px 10px; padding:11px 13px 13px; }
-.wlp-notepad-meta { font-size:12px; font-weight:700; letter-spacing:1px; color:#8a8060; margin-bottom:7px; display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
-.wlp-notepad-dot  { color:#c5b87a; }
+.wlp-notepad-meta { font-size:12px; font-weight:700; letter-spacing:1px; color:var(--mut); margin-bottom:7px; display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+.wlp-notepad-dot  { color:var(--mut); }
 .wlp-result-badge { padding:1px 6px; border-radius:4px; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
-.wlp-notepad-text { font-size:14px; line-height:1.7; color:#2a2510; white-space:pre-line; }
-.wlp-notepad-empty { font-size:13px; color:#8a8060; font-style:italic; padding:14px 13px; text-align:center; line-height:1.6; }
+.wlp-notepad-text { font-size:14px; line-height:1.7; color:var(--txt); white-space:pre-line; }
+.wlp-notepad-empty { font-size:13px; color:var(--mut); font-style:italic; padding:14px 13px; text-align:center; line-height:1.6; }
 .wlp-obs-count    { border-top:1px solid var(--bdr); padding:9px; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--gld2); text-align:center; cursor:pointer; }
 
 /* Targets */

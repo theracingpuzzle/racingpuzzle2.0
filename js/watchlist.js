@@ -2680,7 +2680,7 @@ function _wlpBuildHTML(e){
       h+='<div style="padding:11px 13px;border-top:1px solid rgba(245,158,11,.15);">'
         +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">'
           +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:#fff;">'+(item.raceName||item.course||'Race')+'</div>'
+            +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:var(--txt);">'+(item.raceName||item.course||'Race')+'</div>'
             +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'
               +[item.date?_wlpFmt(item.date):'',item.course,item.raceDist,item.raceGoing].filter(Boolean).join(' · ')
             +'</div>'

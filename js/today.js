@@ -418,7 +418,7 @@ async function checkWatchlistRunners(races){
         +'<div style="font-size:28px;margin-bottom:10px;">⭐</div>'
         +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No horses on your Profiler</div>'
         +'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:14px;">Add horses to your Puzzle Profiler and they\'ll appear here when they\'re declared to run today.</div>'
-        +'<button onclick="navTo(\'watchlist\')" style="padding:9px 18px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Open Profiler →</button>'
+        +'<button onclick="navTo(\'watch\')" style="padding:9px 18px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Open Profiler →</button>'
         +'</div>';
     }
     return;

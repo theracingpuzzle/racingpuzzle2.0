@@ -146,6 +146,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   will-change: transform; overflow: hidden;
   background: var(--sur); border: 1px solid var(--bdr);
   box-shadow: 0 2px 12px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.06);
+  opacity: 0;
 }
 .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 2; }
 .cT::before  { background: #ef4444; }
@@ -303,6 +304,7 @@ textarea { resize: vertical; min-height: 56px; }
 .gfull { grid-column: 1 / -1; }
 
 /* Buttons */
+button { -webkit-appearance: none; appearance: none; }
 .btn { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 12px 18px; border-radius: 9px; border: none; cursor: pointer; transition: all .12s; }
 .btn:active { transform: scale(.97); }
 .bgld  { background: var(--gld); color: #fff; }

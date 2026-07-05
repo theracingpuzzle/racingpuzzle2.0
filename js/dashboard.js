@@ -673,11 +673,20 @@ function renderStats(){
     const months={};disciplineSet.forEach(b=>{const m=b.date?b.date.slice(0,7):'?';months[m]=(months[m]||0)+(pnl(b)||0);});
     const mArr=Object.entries(months).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12);
     if(!mArr.length){monthEl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:15px;">Not enough data.</div>';}
-    else{monthEl.innerHTML='<div style="display:flex;align-items:flex-end;gap:6px;height:80px;padding-bottom:24px;position:relative;">'
-      +mArr.map(([m,v])=>{const maxV=Math.max(...mArr.map(([,v])=>Math.abs(v)),1);const h=Math.max(4,(Math.abs(v)/maxV*70));const isPos=v>=0;return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:default;" title="'+m+': '+fmt(v)+'">'
-        +'<div style="width:100%;height:'+h+'px;background:'+(isPos?'var(--grn)':'var(--red)')+';border-radius:3px 3px 0 0;min-width:8px;"></div>'
-        +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:8px;color:var(--mut);transform:rotate(-45deg);white-space:nowrap;margin-top:4px;">'+m.slice(5)+'</div>'
-        +'</div>';}).join('')+'</div>';
+    else{
+      const maxV=Math.max(...mArr.map(([,v])=>Math.abs(v)),1);
+      monthEl.innerHTML='<div style="display:flex;align-items:flex-end;gap:6px;height:120px;padding-bottom:22px;">'
+        +mArr.map(([m,v])=>{
+          const h=Math.max(4,(Math.abs(v)/maxV*72));
+          const isPos=v>=0;
+          const valLabel=fmt(v).replace('+','');
+          return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;height:100%;" title="'+m+': '+fmt(v)+'">'
+            +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:8px;font-weight:700;color:'+(isPos?'var(--grn)':'var(--red)')+';margin-bottom:3px;white-space:nowrap;text-align:center;">'+(isPos?'+':'')+valLabel+'</div>'
+            +'<div style="width:100%;height:'+h+'px;background:'+(isPos?'var(--grn)':'var(--red)')+';border-radius:3px 3px 0 0;min-width:8px;"></div>'
+            +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:8px;color:var(--mut);transform:rotate(-45deg);white-space:nowrap;margin-top:5px;">'+m.slice(5)+'</div>'
+          +'</div>';
+        }).join('')
+      +'</div>';
     }
   }
   // Real vs Virtual comparison — only shown in Both mode and NOT own study

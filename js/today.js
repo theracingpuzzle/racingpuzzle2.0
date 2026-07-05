@@ -65,7 +65,7 @@ function _showTodayDemo(){
   if(ta){
     ta.style.display = 'block';
     ta.innerHTML = '<div class="t-alert-pur">'
-      + '<div class="t-wl-hdr"><div class="t-alert-lbl-pur" style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7;flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>Running Today</div></div>'
+      + '<div class="t-wl-hdr"><div class="t-alert-lbl-pur">Running Today</div></div>'
       + [
           // Frankel — 2000 Guineas, Newmarket 2011
           {horse:'Frankel',       course:'Newmarket', time:'14:00', jockey:'T. Queally',   race:"2000 Guineas (Group 1)",        edge:8, mr:140, or:132},
@@ -540,10 +540,7 @@ async function checkWatchlistRunners(races){
 
   alertEl.innerHTML='<div class="t-alert-pur">'
     +'<div class="t-wl-hdr">'
-      +'<div class="t-alert-lbl-pur" style="display:flex;align-items:center;gap:6px;">'
-        +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7;flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>'
-        +'Running Today'
-      +'</div>'
+      +'<div class="t-alert-lbl-pur">Running Today</div>'
       +'<button onclick="shareWatchlistAlerts()" class="t-pdf-btn" style="display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>'
     +'</div>'
     +alerts.map(function(a){

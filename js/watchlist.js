@@ -1537,7 +1537,7 @@ function openWLForm(id,prefill){
       +(orH.length?'<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:12px;">'
         +'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">OR History</div>'
         +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
-        +orH.slice(-6).map(function(h){return'<div style="text-align:center;"><div style="font-size:15px;font-weight:800;color:var(--txt);">'+(h.rating||'—')+'</div><div style="font-size:9px;color:var(--mut);">'+(h.date?h.date.slice(2):'')+'</div></div>';}).join('<div style="color:var(--bdr);">→</div>')
+        +orH.slice(-6).map(function(h){return'<div style="text-align:center;"><div style="font-size:15px;font-weight:800;color:var(--txt);">'+(h.or||h.rating||'—')+'</div><div style="font-size:9px;color:var(--mut);">'+(h.date?h.date.slice(2):'')+'</div></div>';}).join('<div style="color:var(--bdr);">→</div>')
         +'</div></div>':'')
       // ── Ideal Conditions panel ──────────────────────────────────────────────
       +(function(){
@@ -1958,19 +1958,23 @@ function saveWLEntry(id){
     reasonNote:(document.getElementById('wlf-reason-note')||{value:''}).value.trim(),
     unraced:!!(document.getElementById('wlf-unraced')&&document.getElementById('wlf-unraced').checked),
     trainerIntel:(document.getElementById('wlf-intel').value||'').trim(),
-    observations:[],
+    observations:old?old.observations||[]:(_wlDossier.obs||[]),
     targets:_wlDossier.targets.filter(function(t){return t.race;}),
     goingPrefs,
     distancePref:(_wlDossier.distPrefs||[]).join(', '),
+    distanceWins:old?old.distanceWins||[]:[], // preserved — set by review inference
+    _goingPoor:old?old._goingPoor||{}:{},    // preserved — set by review inference
     trackPref:(document.getElementById('wlf-track').value||'').trim(),
     classPref:(document.getElementById('wlf-classpref')||{value:''}).value||'',
     fieldSizePref:(document.getElementById('wlf-fieldsize')||{value:''}).value||'',
     runStyle:(function(){const b=document.querySelector('[data-rs].on');return b?b.dataset.rs:'';})(),
     conditionsNotes:(document.getElementById('wlf-cond-notes').value||'').trim(),
+    notes:(document.getElementById('wlf-cond-notes').value||'').trim(), // kept for legacy fallback reads
+    betReadiness:old?old.betReadiness||'watching':'watching', // preserved — set by review flow
+    needsReview:old?old.needsReview||false:false,             // preserved — set by review flow
     aiAssessment:old?old.aiAssessment||null:null,
     aiAssessedAt:old?old.aiAssessedAt||null:null,
     raceDate,
-    notes:(document.getElementById('wlf-intel').value||'').trim(),
     createdAt:old?old.createdAt||Date.now():Date.now(),
     updatedAt:Date.now()
   };

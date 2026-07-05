@@ -596,20 +596,23 @@ async function checkWatchlistRunners(races){
         :'';
       // Race meta: time · course only (no race name)
       const raceMeta=[a.time,a.course].filter(Boolean).join(' · ');
-      // Derive race type from name
+      // Derive race type from name + explicit class number
       const _rn2=a.raceName||'';
       const _rc=String(a.raceClass||'').trim();
       let raceType='';
-      if(/\bGroup\s*1\b|\bGr(ade)?\s*1\b|\bG1\b/i.test(_rn2)||_rc==='1')raceType='Group 1';
-      else if(/\bGroup\s*2\b|\bGr(ade)?\s*2\b|\bG2\b/i.test(_rn2)||_rc==='2')raceType='Group 2';
-      else if(/\bGroup\s*3\b|\bGr(ade)?\s*3\b|\bG3\b/i.test(_rn2)||_rc==='3')raceType='Group 3';
+      let raceClassLabel=''; // the numeric class label shown separately
+      if(/\bGroup\s*1\b|\bGr(ade)?\s*1\b|\bG1\b/i.test(_rn2)||_rc==='1')raceType='G1';
+      else if(/\bGroup\s*2\b|\bGr(ade)?\s*2\b|\bG2\b/i.test(_rn2)||_rc==='2')raceType='G2';
+      else if(/\bGroup\s*3\b|\bGr(ade)?\s*3\b|\bG3\b/i.test(_rn2)||_rc==='3')raceType='G3';
       else if(/\bListed\b/i.test(_rn2))raceType='Listed';
       else if(/\bHandicap\b|\bHcap\b|H'cap/i.test(_rn2))raceType='Handicap';
       else if(/\bNovice\b/i.test(_rn2))raceType='Novice';
       else if(/\bMaiden\b/i.test(_rn2))raceType='Maiden';
       else if(/\bChase\b/i.test(_rn2))raceType='Chase';
       else if(/\bHurdle\b/i.test(_rn2))raceType='Hurdle';
-      else if(_rc)raceType='Class '+_rc;
+      // Always show class number when available (as separate chip)
+      if(_rc&&!/^[123]$/.test(_rc))raceClassLabel='C'+_rc;
+      else if(_rc&&!raceType)raceClassLabel='C'+_rc;
       // ── Conditions suitability chips ─────────────────────────────────────────
       const _wle=a.wlEntry||{};
       const _goingPrefs=Array.isArray(_wle.goingPrefs)?_wle.goingPrefs:[];
@@ -715,9 +718,12 @@ async function checkWatchlistRunners(races){
       const chipClass=raceType
         ?'<span style="'+chipBase+(classChipStyle||'')+'">'+classIcon+raceType+'</span>'
         :'';
-      const detailLine=(chipClass||chipGoing||chipDist)
+      const chipClassNum=raceClassLabel
+        ?'<span style="'+chipBase+'">'+raceClassLabel+'</span>'
+        :'';
+      const detailLine=(chipClass||chipClassNum||chipGoing||chipDist)
         ?'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:3px;">'
-          +chipClass+chipGoing+chipDist
+          +chipClass+chipClassNum+chipGoing+chipDist
           +'</div>'
         :'';
       const jockeyLine=a.jockey?'<div class="t-muted" style="font-size:13px;margin-top:2px;">J: '+fmtJockey(a.jockey)+'</div>':'';

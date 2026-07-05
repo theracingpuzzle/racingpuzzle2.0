@@ -708,7 +708,7 @@ function wlCompletePendingReview(pendingId){
   const wl=getWL();
   const entry=wl.find(function(x){return x.id===p.profileId;})||{};
   // Open the review modal pre-filled with all saved race data
-  openWLPostRaceReview(p.profileId, entry.horse||p.horse||'', p.course||'', p.result||'', p.raceName||'', p.raceDist||'', p.raceGoing||'', '');
+  openWLPostRaceReview(p.profileId, entry.horse||p.horse||'', p.course||'', p.result||'', p.raceName||'', p.raceDist||'', p.raceGoing||'', p.raceClass||'');
   setTimeout(function(){
     const d=document.getElementById('rvw-date');if(d)d.value=p.date||'';
     const c=document.getElementById('rvw-course');if(c)c.value=p.course||'';
@@ -824,6 +824,13 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'</div>'
     +'<div class="g2">'
       +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" value="'+(raceDist||'')+'" placeholder="e.g. 1m2f"></div>'
+      +'<div class="fg"><label>Class</label>'
+      +(raceClass
+        ?'<div style="padding:9px 11px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px;font-weight:700;">Class '+raceClass+'</div><input type="hidden" id="rvw-class" value="'+raceClass+'">'
+        :'<input type="text" id="rvw-class" placeholder="e.g. 4" value="" style="width:100%;padding:9px 11px;background:var(--inp,var(--sur));border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px;box-sizing:border-box;">'
+      )+'</div>'
+    +'</div>'
+    +'<div class="g2">'
       +'<div class="fg"><label>Ground</label>'
       +(raceGoing
         ?'<div style="padding:9px 11px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px;">'+raceGoing+'</div>'
@@ -1049,6 +1056,7 @@ function saveWLReview(profileId,horse,course){
     date:date,raceName:raceName,course:rvwCourse,
     distance:rvwDist,going:(document.getElementById('rvw-going-prefill')||{value:''}).value||(document.getElementById('rvw-ground')||{value:''}).value.trim(),
     groundConditions:(document.getElementById('rvw-ground')||{value:''}).value.trim(),
+    raceClass:(document.getElementById('rvw-class')||{value:''}).value.trim(),
     result:_rvwGet('result'),
     position:(document.getElementById('rvw-pos').value||'').trim(),
     beatenDistance:(document.getElementById('rvw-beaten').value||'').trim(),

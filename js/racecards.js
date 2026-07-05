@@ -205,8 +205,7 @@ function rcSwRenderCourse(listEl){
       +'<div class="rc-meeting-hdr rc-mtg-blue" data-course="'+escapedCourse+'" onclick="rcSwToggleCourse(this)">'
         +'<span class="rc-meeting-flag">'+flag+'</span>'
         +'<div class="rc-meeting-info">'
-          +'<div class="rc-mtg-course">'+course+'</div>'
-
+          +'<div class="rc-mtg-course" style="display:flex;align-items:center;gap:7px;">'+course+(function(){const s=_rcCourseStats(course);return s?' '+s:'';})()+'</div>'
           +'<div class="rc-mtg-meta">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
         +'</div>'
         +'<span class="rc-meeting-chevron'+(isOpen?' open':'')+'" >›</span>'
@@ -218,6 +217,28 @@ function rcSwRenderCourse(listEl){
         : '')
       +'</div>';
   }).join('');
+}
+
+// ── Course strike-rate badge ───────────────────────────────────────────────────
+function _rcCourseStats(course){
+  const norm=function(c){return(c||'').toLowerCase().replace(/\s*\(aw\)/i,'').replace(/\s*\([a-z]+\)/i,'').trim();};
+  const cn=norm(course);
+  const bets=(D.bets||[]).filter(function(b){
+    return b.result&&b.result!=='pending'&&b.result!=='nr'&&norm(b.track)===cn;
+  });
+  if(!bets.length)return null;
+  const total=bets.length;
+  const wins=bets.filter(function(b){return b.result==='won'||b.result==='win';}).length;
+  const places=bets.filter(function(b){return b.result==='placed'||b.result==='place';}).length;
+  const wr=wins/total;
+  // Colour: green ≥20% wins, amber any win or ≥20% places, red no wins/places from ≥4 bets
+  let col,bg;
+  if(wr>=0.2){col='#4ade80';bg='rgba(22,163,74,.18)';}
+  else if(wins>0||(places/total)>=0.2){col='#fbbf24';bg='rgba(245,158,11,.15)';}
+  else if(total>=4){col='#f87171';bg='rgba(220,38,38,.14)';}
+  else{col='var(--mut)';bg='rgba(255,255,255,.06)';}
+  const label=(wins?wins+'W':'0W')+(places?' '+places+'P':'')+(total?' / '+total+'R':'');
+  return'<span style="font-size:9px;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:5px;background:'+bg+';color:'+col+';border:1px solid '+col+'28;white-space:nowrap;">'+label+'</span>';
 }
 
 // Store flattened races for index-based onclick access
@@ -245,7 +266,7 @@ function rcSwRaceCardPreview(r, course, isNext, isPast){
       +'<div class="rc-meeting-info">'
         +'<div style="display:flex;align-items:baseline;gap:10px;">'
           +'<span class="rc-mtg-course" style="letter-spacing:.5px;">'+(isNext?'<span class="rc-next-badge" style="vertical-align:middle;">NEXT</span> ':'')+time+'</span>'
-          +'<span class="rc-mtg-course" style="color:rgba(255,255,255,.9);letter-spacing:.2px;">'+course+'</span>'
+          +'<span class="rc-mtg-course" style="color:rgba(255,255,255,.9);letter-spacing:.2px;display:inline-flex;align-items:center;gap:6px;">'+course+(function(){const s=_rcCourseStats(course);return s?' '+s:'';})()+'</span>'
         +'</div>'
         +'<div class="rc-mtg-meta">'+activeRunners+' runners'+(name?' · '+name:'')+'</div>'
       +'</div>'

@@ -55,16 +55,24 @@ async function _supa(method,table,body,params){
   return resp;
 }
 
-// Supabase status banner
+// Supabase status pill toast (bottom of screen)
 function showSupaBanner(msg, type){
-  const el=document.getElementById('supa-banner');
-  if(!el)return;
   const cols={ok:'#34d399',error:'#ef4444',info:'#60a5fa'};
-  el.style.background=cols[type]||cols.info;
+  const col=cols[type]||cols.info;
+  let el=document.getElementById('_supa-toast');
+  if(!el){
+    el=document.createElement('div');
+    el.id='_supa-toast';
+    el.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:20px;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.06em;z-index:9000;pointer-events:none;transition:opacity .3s;white-space:nowrap;';
+    document.body.appendChild(el);
+  }
+  el.style.background=col;
   el.style.color='#0d1b2a';
-  el.style.display='block';
+  el.style.opacity='1';
   el.textContent=msg;
-  if(type==='ok') setTimeout(function(){el.style.display='none';},4000);
+  clearTimeout(el._t);
+  const delay=type==='error'?6000:3000;
+  el._t=setTimeout(function(){el.style.opacity='0';},delay);
 }
 
 // Manual test sync — called from Settings button

@@ -624,11 +624,48 @@ function renderStats(){
     }).join('')||'<div style="color:var(--mut);font-style:italic;font-size:15px;">Not enough data.</div>';
   }
 
-  // ── Track bar chart ──
-  function bar(id,data){const el=document.getElementById(id);if(!el)return;if(!Object.keys(data).length){el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:15px;">Not enough data.</div>';return;}const mx=Math.max(...Object.values(data).map(Math.abs),1);el.innerHTML=Object.entries(data).map(([k,v])=>{const pct=Math.abs(v)/mx*100,neg=v<0,lbl=(v>=0?'+£':'-£')+Math.abs(v).toFixed(2);return'<div class="brow"><div class="blbl" title="'+k+'">'+String(k).slice(0,14)+'</div><div class="btrk"><div class="bfil '+(neg?'nb':'pb')+'" style="width:'+pct.toFixed(1)+'%;"><span class="bval">'+lbl+'</span></div></div></div>';}).join('');}
-  const tkD={};disciplineSet.forEach(b=>{const k=b.track||'Unknown';tkD[k]=(tkD[k]||0)+(pnl(b)||0);});
-  const tkSorted=[...Object.entries(tkD).filter(([,v])=>v>=0).sort((a,b)=>b[1]-a[1]),...Object.entries(tkD).filter(([,v])=>v<0).sort((a,b)=>b[1]-a[1])];
-  bar('st-trk',Object.fromEntries(tkSorted));
+  // ── Track / Course table ──
+  (function(){
+    const el=document.getElementById('st-trk');if(!el)return;
+    const map={};
+    disciplineSet.forEach(function(b){
+      const k=(b.track||'Unknown').trim();
+      if(!map[k])map[k]={n:0,wins:0,places:0,p:0,staked:0};
+      map[k].n++;
+      map[k].staked+=(parseFloat(b.stake)||0);
+      map[k].p+=(pnl(b)||0);
+      if(b.result==='win')map[k].wins++;
+      else if(b.result==='place'||b.result==='placed')map[k].places++;
+    });
+    const rows=Object.entries(map)
+      .map(function([k,v]){return{k,n:v.n,wins:v.wins,places:v.places,p:v.p,staked:v.staked,sr:v.n>0?((v.wins+v.places)/v.n*100):0};})
+      .sort(function(a,b){return b.n-a.n;});
+    if(!rows.length){el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:15px;">Not enough data.</div>';return;}
+    const TH='text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);';
+    el.style.maxHeight='280px';el.style.overflowY='auto';
+    el.innerHTML='<table style="width:100%;font-size:14px;border-collapse:collapse;">'
+      +'<thead><tr>'
+      +'<th style="text-align:left;'+TH+'">Course</th>'
+      +'<th style="'+TH+'">Bets</th>'
+      +'<th style="'+TH+'">W</th>'
+      +'<th style="'+TH+'">P</th>'
+      +'<th style="'+TH+'">SR%</th>'
+      +'<th style="'+TH+'">P&L</th>'
+      +'</tr></thead><tbody>'
+      +rows.map(function(r){
+        const bd='padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);';
+        const srCol=r.sr>=20?'var(--grn)':r.sr>=10?'var(--gld)':r.n>=4?'var(--red)':'var(--mut)';
+        return'<tr>'
+          +'<td style="'+bd+'max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+r.k+'">'+r.k+'</td>'
+          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;'+bd+'color:var(--mut);">'+r.n+'</td>'
+          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;'+bd+'color:#4ade80;font-weight:700;">'+r.wins+'</td>'
+          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;'+bd+'color:#fbbf24;font-weight:700;">'+r.places+'</td>'
+          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;'+bd+'color:'+srCol+';font-weight:700;">'+r.sr.toFixed(0)+'%</td>'
+          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;'+bd+'color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
+        +'</tr>';
+      }).join('')
+      +'</tbody></table>';
+  })();
 
   // ── Jockey + Trainer tables (combined real + virtual) ──
   const allBets=disciplineSet;

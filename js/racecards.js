@@ -334,9 +334,9 @@ const ENG_COURSES=['aintree','ascot','bath','beverley','brighton','carlisle','ca
 const SCO_COURSES=['ayr','hamilton','kelso','musselburgh','perth'];
 const WAL_COURSES=['bangor','bangor-on-dee','chepstow','ffos las'];
 const IRE_COURSES=['curragh','leopardstown','naas','navan','gowran park','galway','tipperary','cork','killarney','listowel','down royal','downpatrick','dundalk','fairyhouse','kilbeggan','laytown','limerick','roscommon','sligo','tramore','thurles','punchestown','ballinrobe','bellewstown','clonmel','wexford'];
-const GER_COURSES=['cologne','baden-baden'];
+const GER_COURSES=['cologne','baden-baden','hamburg'];
 const USA_COURSES=['santa anita','saratoga'];
-const FRA_COURSES=['longchamp','auteuil','chantilly'];
+const FRA_COURSES=['longchamp','auteuil','chantilly','saint-cloud','saint cloud','deauville'];
 const AUS_COURSES=['eagle farm','flemington','randwick','moonee valley','caulfield','morphettville'];
 const RSA_COURSES=['greyville','turffontein','kenilworth'];
 

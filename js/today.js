@@ -610,10 +610,64 @@ async function checkWatchlistRunners(races){
       else if(/\bChase\b/i.test(_rn2))raceType='Chase';
       else if(/\bHurdle\b/i.test(_rn2))raceType='Hurdle';
       else if(_rc)raceType='Class '+_rc;
-      const detailParts=[raceType,a.raceGoing,a.raceDist].filter(Boolean);
-      const detailLine=detailParts.length
+      // ── Conditions suitability chips ─────────────────────────────────────────
+      const _wle=a.wlEntry||{};
+      const _goingPrefs=Array.isArray(_wle.goingPrefs)?_wle.goingPrefs:[];
+      const _goingPoor=_wle._goingPoor||{};
+      const _distanceWins=Array.isArray(_wle.distanceWins)?_wle.distanceWins:[];
+      const _distancePref=(_wle.distancePref||'').trim();
+      const _raceGoing=(a.raceGoing||'').trim();
+      const _raceDist=(a.raceDist||'').trim();
+
+      // Normalise for loose matching (e.g. "Good to Firm" ≈ "Good To Firm")
+      function _normGoing(g){return(g||'').toLowerCase().replace(/\s+/g,' ').trim();}
+      function _distMatch(a,b){return(a||'').toLowerCase().replace(/\s/g,'')===(b||'').toLowerCase().replace(/\s/g,'');}
+
+      // Going suitability
+      let goingChipStyle='';
+      let goingLabel=_raceGoing;
+      let goingIcon='';
+      if(_raceGoing&&(_goingPrefs.length||Object.keys(_goingPoor).length)){
+        const suitsGoing=_goingPrefs.some(function(g){return _normGoing(g)===_normGoing(_raceGoing);});
+        const poorCount=_goingPoor[_raceGoing]||_goingPoor[Object.keys(_goingPoor).find(function(k){return _normGoing(k)===_normGoing(_raceGoing);})||'']||0;
+        if(suitsGoing){
+          goingChipStyle='background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.4);color:#4ade80;';
+          goingIcon='✓ ';
+        } else if(poorCount>=2){
+          goingChipStyle='background:rgba(220,38,38,.12);border-color:rgba(220,38,38,.35);color:#f87171;';
+          goingIcon='✗ ';
+        } else if(poorCount===1){
+          goingChipStyle='background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.3);color:#fb923c;';
+          goingIcon='? ';
+        }
+      }
+
+      // Distance suitability
+      let distChipStyle='';
+      let distIcon='';
+      if(_raceDist&&(_distancePref||_distanceWins.length)){
+        const suitsDistPref=_distancePref&&_distMatch(_distancePref,_raceDist);
+        const suitsDistWins=_distanceWins.some(function(d){return _distMatch(d,_raceDist);});
+        if(suitsDistPref||suitsDistWins){
+          distChipStyle='background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.4);color:#4ade80;';
+          distIcon='✓ ';
+        }
+      }
+
+      // Race class chip — simple label with no suitability colouring (no class history yet)
+      const chipBase='font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;border:1px solid var(--bdr);background:rgba(255,255,255,.06);color:var(--mut);';
+      const chipGoing=_raceGoing
+        ?'<span style="'+chipBase+(goingChipStyle||'')+'" title="Going">'+goingIcon+_raceGoing+'</span>'
+        :'';
+      const chipDist=_raceDist
+        ?'<span style="'+chipBase+(distChipStyle||'')+'" title="Distance">'+distIcon+_raceDist+'</span>'
+        :'';
+      const chipClass=raceType
+        ?'<span style="'+chipBase+'">'+raceType+'</span>'
+        :'';
+      const detailLine=(chipClass||chipGoing||chipDist)
         ?'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:3px;">'
-          +detailParts.map(function(p){return'<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid var(--bdr);color:var(--mut);">'+p+'</span>';}).join('')
+          +chipClass+chipGoing+chipDist
           +'</div>'
         :'';
       const jockeyLine=a.jockey?'<div class="t-muted" style="font-size:13px;margin-top:2px;">J: '+fmtJockey(a.jockey)+'</div>':'';

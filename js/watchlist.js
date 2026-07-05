@@ -750,7 +750,6 @@ function openWLEditReview(reviewId){
     const d=document.getElementById('rvw-date');if(d)d.value=r.date||'';
     const c=document.getElementById('rvw-course');if(c)c.value=r.course||'';
     const dist=document.getElementById('rvw-dist');if(dist)dist.value=r.distance||'';
-    const ground=document.getElementById('rvw-ground');if(ground)ground.value=r.groundConditions||'';
     const pos=document.getElementById('rvw-pos');if(pos)pos.value=r.position||'';
     const beaten=document.getElementById('rvw-beaten');if(beaten)beaten.value=r.beatenDistance||'';
     const odds=document.getElementById('rvw-odds');if(odds)odds.value=r.odds||'';
@@ -758,8 +757,8 @@ function openWLEditReview(reviewId){
     const notes=document.getElementById('rvw-notes');if(notes)notes.value=r.notes||'';
     const goingPre=document.getElementById('rvw-going-prefill');if(goingPre)goingPre.value=r.going||'';
     // Pre-select toggle buttons
-    ['result','verdict','going','back'].forEach(function(grp){
-      const val={result:r.result,verdict:r.verdict,going:r.goingConfirmed}[grp];
+    ['result','verdict','back'].forEach(function(grp){
+      const val={result:r.result,verdict:r.verdict}[grp];
       if(!val)return;
       const btn=document.querySelector('.rvw-btn[data-grp="'+grp+'"][data-'+grp+'="'+val+'"]');
       if(btn)wlRvwToggle(btn);
@@ -776,13 +775,13 @@ function openWLEditReview(reviewId){
         r.date=document.getElementById('rvw-date').value||r.date;
         r.course=(document.getElementById('rvw-course').value||'').trim()||r.course;
         r.distance=(document.getElementById('rvw-dist')||{value:''}).value.trim();
-        r.groundConditions=(document.getElementById('rvw-ground')||{value:''}).value.trim();
+        r.groundConditions=(document.getElementById('rvw-ground')||{value:''}).value.trim()||r.groundConditions;
+        if(r.groundConditions)r.going=r.groundConditions;
         r.position=(document.getElementById('rvw-pos').value||'').trim();
         r.beatenDistance=(document.getElementById('rvw-beaten').value||'').trim();
         r.odds=(document.getElementById('rvw-odds')||{value:''}).value.trim();
         r.result=_rvwGet('result')||r.result;
         r.verdict=_rvwGet('verdict')||r.verdict;
-        r.goingConfirmed=_rvwGet('going')||r.goingConfirmed;
         r.mrAdjustment=parseInt((document.getElementById('rvw-mr-adj')||{value:0}).value)||0;
         r.notes=(document.getElementById('rvw-notes').value||'').trim();
         r.going=(document.getElementById('rvw-going-prefill')||{value:''}).value;
@@ -825,18 +824,11 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'</div>'
     +'<div class="g2">'
       +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" value="'+(raceDist||'')+'" placeholder="e.g. 1m2f"></div>'
-      +'<div class="fg"><label>Ground</label><select id="rvw-ground" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;">'
-        +'<option value="">— Select —</option>'
-        +'<option>Firm</option>'
-        +'<option>Good to Firm</option>'
-        +'<option>Good</option>'
-        +'<option>Good to Soft</option>'
-        +'<option>Soft</option>'
-        +'<option>Heavy</option>'
-        +'<option>Standard</option>'
-        +'<option>Standard to Slow</option>'
-        +'<option>Slow</option>'
-      +'</select></div>'
+      +'<div class="fg"><label>Ground</label>'
+      +(raceGoing
+        ?'<div style="padding:9px 11px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px;">'+raceGoing+'</div>'
+        :'<select id="rvw-ground" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;"><option value="">— Select —</option><option>Firm</option><option>Good to Firm</option><option>Good</option><option>Good to Soft</option><option>Soft</option><option>Heavy</option><option>Standard</option><option>Standard to Slow</option><option>Slow</option></select>'
+      )+'</div>'
     +'</div>'
     +'<div class="fg"><label>Result</label><div class="rvw-btn-group">'
     +[{k:'win',lbl:'Win'},{k:'place',lbl:'Place'},{k:'unplaced',lbl:'Unplaced'},{k:'nr',lbl:'NR'},{k:'missed',lbl:'Missed Target'}].map(function(r){const cols={win:'var(--grn)',place:'var(--gld)',unplaced:'var(--red)',nr:'var(--mut)',missed:'#a78bfa'};return'<button data-result="'+r.k+'" data-grp="result" class="rvw-btn" style="--rvw-col:'+cols[r.k]+'" onclick="wlRvwToggle(this)">'+r.lbl+'</button>';}).join('')
@@ -850,9 +842,6 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +[{k:'upgrade',col:'var(--grn)',lbl:'Upgrade ↑'},{k:'hold',col:'var(--blu)',lbl:'Hold →'},{k:'downgrade',col:'var(--red)',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="--rvw-col:'+v.col+'" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
     +'</div></div>'
     +(currentMR?'<div class="fg"><label>MR Adjustment <span style="color:var(--mut);font-weight:400;">(current: '+currentMR+')</span></label><input type="number" id="rvw-mr-adj" placeholder="e.g. 5 or -3" oninput="_rvwUpdateSignals()"></div>':'<input type="hidden" id="rvw-mr-adj" value="0">')
-    +'<div class="fg" id="rvw-going-row"><label>Going'+(raceGoing?' <span style="color:var(--mut);font-weight:400;font-size:11px;">('+raceGoing+')</span>':'')+'</label><div class="rvw-btn-group">'
-    +[{k:'confirmed',lbl:'✓ Confirmed'},{k:'mixed',lbl:'~ Mixed'},{k:'against',lbl:'✗ Against'}].map(function(g){return'<button data-going="'+g.k+'" data-grp="going" class="rvw-btn" style="--rvw-col:var(--txt)" onclick="wlRvwToggle(this)">'+g.lbl+'</button>';}).join('')
-    +'</div></div>'
     +'<div class="fg"><label>Bet Readiness</label><div class="rvw-btn-group" id="rvw-readiness-row">'
     +BR_STAGES.map(function(s){const isCur=(entry&&(entry.betReadiness||'watching')===s.id);return'<button data-readiness="'+s.id+'" data-grp="readiness" class="rvw-btn" style="--rvw-col:'+s.col+';'+(isCur?'opacity:1':'opacity:0.4')+'" data-selected="'+(isCur?'1':'')+'" onclick="wlRvwToggle(this)">'+s.label+'</button>';}).join('')
     +'</div></div>'
@@ -865,35 +854,6 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'</div></div>';
   document.body.appendChild(modal);
   modal.addEventListener('click',function(ev){if(ev.target===modal)modal.remove();});
-
-  // Pre-fill ground conditions from raceGoing if it matches a dropdown option
-  if(raceGoing){
-    setTimeout(function(){
-      const sel=document.getElementById('rvw-ground');
-      if(!sel)return;
-      // Normalise: capitalise first letter of each word, trim whitespace
-      const norm=raceGoing.trim().toLowerCase().replace(/\b\w/g,function(c){return c.toUpperCase();});
-      // Try exact match first, then case-insensitive against options
-      let matched=false;
-      for(let i=0;i<sel.options.length;i++){
-        if(sel.options[i].value.toLowerCase()===norm.toLowerCase()){
-          sel.value=sel.options[i].value;
-          matched=true;
-          break;
-        }
-      }
-      // Partial fallback: "good to firm (good places)" → "Good to Firm"
-      if(!matched){
-        const lower=raceGoing.toLowerCase();
-        for(let i=0;i<sel.options.length;i++){
-          if(lower.includes(sel.options[i].value.toLowerCase())&&sel.options[i].value){
-            sel.value=sel.options[i].value;
-            break;
-          }
-        }
-      }
-    },0);
-  }
 
   // Auto-populate from a known race result (already fetched for Track Pulse / results tab).
   // NOTE: results/today/free does not return beaten distance or SP, so only result + position
@@ -1087,7 +1047,7 @@ function saveWLReview(profileId,horse,course){
   const review={
     id:gid(),profileId:profileId,
     date:date,raceName:raceName,course:rvwCourse,
-    distance:rvwDist,going:(document.getElementById('rvw-going-prefill')||{value:''}).value,
+    distance:rvwDist,going:(document.getElementById('rvw-going-prefill')||{value:''}).value||(document.getElementById('rvw-ground')||{value:''}).value.trim(),
     groundConditions:(document.getElementById('rvw-ground')||{value:''}).value.trim(),
     result:_rvwGet('result'),
     position:(document.getElementById('rvw-pos').value||'').trim(),
@@ -1095,7 +1055,6 @@ function saveWLReview(profileId,horse,course){
     odds:(document.getElementById('rvw-odds')||{value:''}).value.trim(),
     verdict:_rvwGet('verdict'),
     mrAdjustment:mrAdj,
-    goingConfirmed:_rvwGet('going'),
     notes:(document.getElementById('rvw-notes').value||'').trim(),
     source:'manual',createdAt:Date.now()
   };
@@ -1121,10 +1080,59 @@ function saveWLReview(profileId,horse,course){
     D.watchlist[idx2].updatedAt=Date.now();
   }
 
+  // Auto-infer going and distance preferences from this review
+  _wlInferFromReview(profileId, review);
+
   save();
   document.getElementById('wl-review-modal').remove();
   if(typeof checkWatchlistRunners==='function'&&window._cachedRaces)checkWatchlistRunners(window._cachedRaces);
   if(document.getElementById('wlp-modal'))openWLProfile(profileId);
+}
+
+function _wlInferFromReview(profileId, review){
+  const idx=D.watchlist.findIndex(function(x){return x.id===profileId;});
+  if(idx<0)return;
+  const entry=D.watchlist[idx];
+  const result=review.result||'';
+  const ranWell=result==='win'||result==='place';
+  const ranPoor=result==='unplaced';
+  const going=(review.groundConditions||review.going||'').trim();
+  const dist=(review.distance||'').trim();
+  let changed=false;
+
+  // ── Going inference ──────────────────────────────────────────────────────────
+  if(going){
+    if(!entry.goingPrefs)entry.goingPrefs=[];
+    const already=entry.goingPrefs.some(function(g){return g.toLowerCase()===going.toLowerCase();});
+    if(ranWell&&!already){
+      entry.goingPrefs.push(going);
+      changed=true;
+    }
+    // Track poor-going patterns so we can flag them later
+    if(!entry._goingPoor)entry._goingPoor={};
+    if(ranPoor){
+      entry._goingPoor[going]=(entry._goingPoor[going]||0)+1;
+      changed=true;
+    }
+  }
+
+  // ── Distance inference ───────────────────────────────────────────────────────
+  if(dist&&ranWell){
+    // Record every winning/placed distance, deduplicated
+    if(!entry.distanceWins)entry.distanceWins=[];
+    const alreadyDist=entry.distanceWins.some(function(d){return d.toLowerCase()===dist.toLowerCase();});
+    if(!alreadyDist){
+      entry.distanceWins.push(dist);
+      changed=true;
+    }
+    // Update primary distancePref to most recent win/place distance
+    entry.distancePref=dist;
+    changed=true;
+  }
+
+  if(changed){
+    entry.updatedAt=Date.now();
+  }
 }
 
 // ── AI HORSE ASSESSMENT ──

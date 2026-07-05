@@ -295,7 +295,7 @@ function rcSwFullRaceCard(r, course){
       +'<div class="rc-race-hdr-left">'
         +'<div class="rc-race-time">'+time+'</div>'
         +'<div class="rc-race-name">'+name+'</div>'
-        +'<div class="rc-race-meta"><span class="rc-race-count">'+runnerCount+' runners'+(nrCount?' ('+nrCount+' NR)':'')+'</span></div>'
+        +'<div class="rc-race-meta" style="display:flex;align-items:center;gap:5px;">'+(function(){const _c=String(r.race_class||r.class||'').trim();const _n=r.race_name||r.name||r.title||'';const isG1=/group\s*1|\bg1\b/i.test(_n);const isG2=/group\s*2|\bg2\b/i.test(_n);const isG3=/group\s*3|\bg3\b/i.test(_n);const isL=/listed/i.test(_n);const lbl=isG1?'G1':isG2?'G2':isG3?'G3':isL?'Listed':(_c?'Cls '+_c:'');const col=isG1||isG2?'#f59e0b':isG3||isL?'#a78bfa':'rgba(255,255,255,.5)';return lbl?'<span style="font-size:9px;font-weight:800;padding:1px 5px;border-radius:3px;background:'+col+'18;border:1px solid '+col+'40;color:'+col+';">'+lbl+'</span>':'';})()+' <span class="rc-race-count">'+runnerCount+' runners'+(nrCount?' ('+nrCount+' NR)':'')+'</span></div>'
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
         +'<button onclick="event.stopPropagation();rcSlStartFromFlat('+idx+')" title="Shortlist runners" style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);cursor:pointer;flex-shrink:0;padding:0;">'
@@ -419,9 +419,13 @@ function rcSwRenderMeetingRaces(course, el){
     const dist=formatDist(r.distance_round||r.distance_f||r.distance||r.dist||'');
     const runners=(r.runners||r.horses||[]).length;
     const rname=name.toLowerCase();
-    const isG1=rname.includes('group 1');const isG2=rname.includes('group 2');
-    const isG3=rname.includes('group 3');const isListed=rname.includes('listed');
+    const isG1=rname.includes('group 1')||/\bg1\b/i.test(name);const isG2=rname.includes('group 2')||/\bg2\b/i.test(name);
+    const isG3=rname.includes('group 3')||/\bg3\b/i.test(name);const isListed=rname.includes('listed');
     const nameCol=isG1||isG2?'#f59e0b':isG3?'#a78bfa':isListed?'#a78bfa':'var(--txt)';
+    const _rrc=String(r.race_class||r.class||'').trim();
+    const _rcLabel=isG1?'G1':isG2?'G2':isG3?'G3':isListed?'Listed':(_rrc?'Cls '+_rrc:'');
+    const _rcChipCol=isG1||isG2?'#f59e0b':isG3||isListed?'#a78bfa':(_rrc?'rgba(255,255,255,.5)':'');
+    const classChip=_rcLabel?'<span style="font-size:9px;font-weight:800;letter-spacing:.04em;padding:1px 5px;border-radius:3px;background:'+_rcChipCol+'18;border:1px solid '+_rcChipCol+'40;color:'+_rcChipCol+';flex-shrink:0;">'+_rcLabel+'</span>':'';
     const _rbt=getRaceBetType(course,time);
     const _betDot=_rbt==='real'
       ?'<span title="Real bet placed" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#3b82f6;flex-shrink:0;margin-left:6px;box-shadow:0 0 0 2px rgba(59,130,246,.25);"></span>'
@@ -435,7 +439,7 @@ function rcSwRenderMeetingRaces(course, el){
             +'<div class="rc-race-time">'+time+'</div>'
             +_betDot
           +'</div>'
-          +'<div class="rc-race-meta-row">'+(dist?'<span class="rc-dist-chip">'+dist+'</span>':'')+runners+' runners</div>'
+          +'<div class="rc-race-meta-row">'+(dist?'<span class="rc-dist-chip">'+dist+'</span>':'')+(r.going?'<span class="rc-dist-chip" style="color:var(--mut);">'+r.going+'</span>':'')+classChip+' '+runners+' runners</div>'
           +'<div class="rc-race-name" style="color:'+nameCol+';">'+name+'</div>'
         +'</div>'
         +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'

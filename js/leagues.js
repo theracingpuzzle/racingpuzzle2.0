@@ -540,26 +540,54 @@ function lgRenderDetail(el){
 }
 
 // ─── Screen 3: Create ─────────────────────────────────────────────────────────
-function lgShowCreate(){_lgView='create';lgRender();}
-function lgRenderCreate(el){
-  el.innerHTML=
-    _lgBackBtn('Leagues')
-    +'<div class="blk">'
-      +'<div class="bttl">Create League</div>'
-      +'<div class="fg"><label>League Name</label><input id="lg-new-name" type="text" placeholder="e.g. Friday Night Punters" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
-      +'<div class="fg"><label>Your Display Name</label><input id="lg-new-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
-      +'<div class="fg"><label>End Date <span style="color:var(--mut);font-weight:400;">(optional)</span></label><input id="lg-new-end" type="date" style="width:100%;box-sizing:border-box;"></div>'
-      +'<div class="fg"><label>Scoring Method</label>'
-        +'<div class="rc-view-tog" style="width:100%;margin-top:4px;">'
-          +'<button id="lg-sc-stakes" onclick="lgPickScoring(\'stakes\')" class="rc-view-btn on" style="flex:1;">£1 Stakes</button>'
-          +'<button id="lg-sc-wins" onclick="lgPickScoring(\'wins\')" class="rc-view-btn off" style="flex:1;">Win Count</button>'
-        +'</div>'
-        +'<div style="font-size:11px;color:var(--mut);margin-top:6px;" id="lg-sc-desc">Win at 5/1 = +5pts, loss = −1pt. Rewards value hunting.</div>'
+function _lgOpenModal(title, bodyHtml){
+  const old=document.getElementById('_lg-modal-ov');if(old)old.remove();
+  const ov=document.createElement('div');
+  ov.id='_lg-modal-ov';
+  ov.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.7);display:flex;flex-direction:column;justify-content:flex-end;opacity:0;transition:opacity .2s;';
+  ov.innerHTML=
+    '<div id="_lg-modal-sheet" style="background:var(--sur);border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom,0px);max-height:92vh;display:flex;flex-direction:column;transform:translateY(50px);transition:transform .28s cubic-bezier(.2,.8,.4,1),opacity .28s;opacity:0;">'
+      +'<div style="display:flex;justify-content:center;padding:10px 0 0;flex-shrink:0;"><div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);"></div></div>'
+      +'<div style="padding:16px 18px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;">'
+        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:20px;font-weight:900;letter-spacing:.03em;text-transform:uppercase;color:var(--txt);">'+title+'</div>'
+        +'<button onclick="_lgCloseModal()" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1px solid var(--bdr);background:rgba(128,128,128,.08);color:var(--mut);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>'
       +'</div>'
-      +'<button id="lg-create-btn" onclick="lgCreateSubmit()" style="width:100%;padding:11px;border-radius:9px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:4px;">Create League</button>'
-      +'<div id="lg-create-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
+      +'<div style="overflow-y:auto;flex:1;padding:18px 18px 8px;">'+bodyHtml+'</div>'
     +'</div>';
+  ov.addEventListener('click',function(e){if(e.target===ov)_lgCloseModal();});
+  document.body.appendChild(ov);
+  requestAnimationFrame(function(){
+    ov.style.opacity='1';
+    const sh=document.getElementById('_lg-modal-sheet');
+    if(sh){sh.style.transform='translateY(0)';sh.style.opacity='1';}
+  });
 }
+function _lgCloseModal(){
+  const ov=document.getElementById('_lg-modal-ov');
+  if(!ov)return;
+  ov.style.opacity='0';
+  const sh=document.getElementById('_lg-modal-sheet');
+  if(sh){sh.style.transform='translateY(40px)';sh.style.opacity='0';}
+  setTimeout(function(){ov.remove();},280);
+}
+
+function lgShowCreate(){
+  _lgOpenModal('Create League',
+    '<div class="fg"><label>League Name</label><input id="lg-new-name" type="text" placeholder="e.g. Friday Night Punters" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
+    +'<div class="fg"><label>Your Display Name</label><input id="lg-new-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
+    +'<div class="fg"><label>End Date <span style="color:var(--mut);font-weight:400;">(optional)</span></label><input id="lg-new-end" type="date" style="width:100%;box-sizing:border-box;"></div>'
+    +'<div class="fg"><label>Scoring Method</label>'
+      +'<div class="rc-view-tog" style="width:100%;margin-top:4px;">'
+        +'<button id="lg-sc-stakes" onclick="lgPickScoring(\'stakes\')" class="rc-view-btn on" style="flex:1;">£1 Stakes</button>'
+        +'<button id="lg-sc-wins" onclick="lgPickScoring(\'wins\')" class="rc-view-btn off" style="flex:1;">Win Count</button>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-top:6px;" id="lg-sc-desc">Win at 5/1 = +5pts, loss = −1pt. Rewards value hunting.</div>'
+    +'</div>'
+    +'<button id="lg-create-btn" onclick="lgCreateSubmit()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:8px;">Create League</button>'
+    +'<div id="lg-create-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
+  );
+}
+function lgRenderCreate(el){}
 
 let _lgScoring='stakes';
 function lgPickScoring(s){
@@ -606,6 +634,7 @@ async function lgCreateSubmit(){
     await lgLoad();
     const l=_lgMyLeagues.find(function(x){return x.id===leagueId;});
     if(l){_lgCurrent=l;_lgView='detail';}
+    _lgCloseModal();
     lgRender();
   }catch(e){
     _lgSetBtnLoading('lg-create-btn', false, 'Create League');
@@ -614,18 +643,15 @@ async function lgCreateSubmit(){
 }
 
 // ─── Screen 4: Join ───────────────────────────────────────────────────────────
-function lgShowJoin(){_lgView='join';lgRender();}
-function lgRenderJoin(el){
-  el.innerHTML=
-    _lgBackBtn('Leagues')
-    +'<div class="blk">'
-      +'<div class="bttl">Join a League</div>'
-      +'<div class="fg"><label>Invite Code</label><input id="lg-join-code" type="text" placeholder="ABC123" autocomplete="off" style="width:100%;box-sizing:border-box;text-transform:uppercase;letter-spacing:.15em;font-size:16px;" maxlength="6" oninput="this.value=this.value.toUpperCase()"></div>'
-      +'<div class="fg"><label>Your Display Name</label><input id="lg-join-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
-      +'<button id="lg-join-btn" onclick="lgJoinSubmit()" style="width:100%;padding:11px;border-radius:9px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:4px;">Join League</button>'
-      +'<div id="lg-join-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
-    +'</div>';
+function lgShowJoin(){
+  _lgOpenModal('Join a League',
+    '<div class="fg"><label>Invite Code</label><input id="lg-join-code" type="text" placeholder="ABC123" autocomplete="off" style="width:100%;box-sizing:border-box;text-transform:uppercase;letter-spacing:.15em;font-size:16px;" maxlength="6" oninput="this.value=this.value.toUpperCase()"></div>'
+    +'<div class="fg"><label>Your Display Name</label><input id="lg-join-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
+    +'<button id="lg-join-btn" onclick="lgJoinSubmit()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:8px;">Join League</button>'
+    +'<div id="lg-join-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
+  );
 }
+function lgRenderJoin(el){}
 
 async function lgJoinSubmit(){
   const code=(document.getElementById('lg-join-code')||{value:''}).value.trim().toUpperCase();
@@ -653,6 +679,7 @@ async function lgJoinSubmit(){
     await lgLoad();
     const joined=_lgMyLeagues.find(function(x){return x.id===l.id;});
     if(joined){_lgCurrent=joined;_lgView='detail';}
+    _lgCloseModal();
     lgRender();
   }catch(e){
     _lgSetBtnLoading('lg-join-btn', false, 'Join League');

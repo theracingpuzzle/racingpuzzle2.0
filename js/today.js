@@ -654,7 +654,57 @@ async function checkWatchlistRunners(races){
         }
       }
 
-      // Race class chip — simple label with no suitability colouring (no class history yet)
+      // Class suitability
+      const _classPref=(_wle.classPref||'').trim();
+      let classChipStyle='';
+      let classIcon='';
+      if(_classPref&&raceType){
+        const normClass=function(s){return s.toLowerCase().replace(/\s+/g,'');};
+        if(normClass(_classPref)===normClass(raceType)||
+           ((_classPref==='Group'||_classPref==='Class 1')&&/group|grade|listed|g[123]|class\s*[12]/i.test(raceType))){
+          classChipStyle='background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.4);color:#4ade80;';
+          classIcon='✓ ';
+        } else if(_classPref){
+          classChipStyle='background:rgba(220,38,38,.12);border-color:rgba(220,38,38,.35);color:#f87171;';
+          classIcon='✗ ';
+        }
+      }
+
+      // ── Match score ──────────────────────────────────────────────────────────
+      const _conditions=[];
+      if(_goingPrefs.length&&_raceGoing){
+        const suitsG=_goingPrefs.some(function(g){return _normGoing(g)===_normGoing(_raceGoing);});
+        _conditions.push({label:'Going',ok:suitsG});
+      }
+      if((_distancePref||_distanceWins.length)&&_raceDist){
+        const suitsD=(_distancePref&&_distMatch(_distancePref,_raceDist))||_distanceWins.some(function(d){return _distMatch(d,_raceDist);});
+        _conditions.push({label:'Distance',ok:suitsD});
+      }
+      if(_classPref&&raceType){
+        _conditions.push({label:'Class',ok:!!classIcon&&classIcon.trim()==='✓'});
+      }
+      if(a.mr&&a.or){
+        _conditions.push({label:'My Mark',ok:a.edge>0});
+      }
+      const _matched=_conditions.filter(function(c){return c.ok;}).length;
+      const _total=_conditions.length;
+      const _pct=_total?Math.round((_matched/_total)*100):0;
+
+      const matchBadge=_total>=2?(function(){
+        const allGood=_matched===_total;
+        const someGood=_matched>0;
+        const bg=allGood?'rgba(22,163,74,.18)':someGood?'rgba(245,158,11,.15)':'rgba(220,38,38,.12)';
+        const col=allGood?'#4ade80':someGood?'#fbbf24':'#f87171';
+        const bdr=allGood?'rgba(22,163,74,.4)':someGood?'rgba(245,158,11,.35)':'rgba(220,38,38,.3)';
+        return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">'
+          +'<span style="font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:'+bg+';color:'+col+';border:1px solid '+bdr+';">'+_matched+'/'+_total+' CONDITIONS MATCHED</span>'
+          +'<span style="font-size:11px;font-weight:800;color:'+col+';">'+_pct+'%</span>'
+          +'<div style="display:flex;gap:3px;align-items:center;">'
+          +_conditions.map(function(c){return'<span title="'+c.label+'" style="width:7px;height:7px;border-radius:50%;background:'+(c.ok?'#4ade80':'rgba(255,255,255,.18)')+';flex-shrink:0;"></span>';}).join('')
+          +'</div>'
+        +'</div>';
+      })():'';
+
       const chipBase='font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;border:1px solid var(--bdr);background:rgba(255,255,255,.06);color:var(--mut);';
       const chipGoing=_raceGoing
         ?'<span style="'+chipBase+(goingChipStyle||'')+'" title="Going">'+goingIcon+_raceGoing+'</span>'
@@ -663,7 +713,7 @@ async function checkWatchlistRunners(races){
         ?'<span style="'+chipBase+(distChipStyle||'')+'" title="Distance">'+distIcon+_raceDist+'</span>'
         :'';
       const chipClass=raceType
-        ?'<span style="'+chipBase+'">'+raceType+'</span>'
+        ?'<span style="'+chipBase+(classChipStyle||'')+'">'+classIcon+raceType+'</span>'
         :'';
       const detailLine=(chipClass||chipGoing||chipDist)
         ?'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:3px;">'
@@ -690,6 +740,7 @@ async function checkWatchlistRunners(races){
       return'<div class="t-alert-row-pur">'
         +'<div class="t-row-sb-gap">'
           +'<div class="t-flex-info"'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
+            +matchBadge
             +'<div style="margin-bottom:4px;">'
               +'<span class="t-horse-name">'+a.horse+'</span>'
             +'</div>'

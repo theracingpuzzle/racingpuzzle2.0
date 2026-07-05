@@ -1539,6 +1539,37 @@ function openWLForm(id,prefill){
         +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
         +orH.slice(-6).map(function(h){return'<div style="text-align:center;"><div style="font-size:15px;font-weight:800;color:var(--txt);">'+(h.rating||'—')+'</div><div style="font-size:9px;color:var(--mut);">'+(h.date?h.date.slice(2):'')+'</div></div>';}).join('<div style="color:var(--bdr);">→</div>')
         +'</div></div>':'')
+      // ── Ideal Conditions panel ──────────────────────────────────────────────
+      +(function(){
+        const gp=(e.goingPrefs||[]);
+        const dp=(e.distancePref||'').trim();
+        const tp=(e.trackPref||'').trim();
+        const cp=(e.classPref||'').trim();
+        const fs=(e.fieldSizePref||'').trim();
+        const rs=(e.runStyle||'').trim();
+        const fsLabel={small:'Small (≤8)',medium:'Medium (9–14)',large:'Large (15+)'};
+        const rows=[
+          {label:'Going',      val:gp.length?gp.join(', '):'',       col:'#38bdf8'},
+          {label:'Distance',   val:dp,                                col:'#38bdf8'},
+          {label:'Track',      val:tp,                                col:'#a78bfa'},
+          {label:'Class',      val:cp,                                col:'#fbbf24'},
+          {label:'Field Size', val:fs?fsLabel[fs]||fs:'',             col:'#fbbf24'},
+          {label:'Run Style',  val:rs,                                col:'#34d399'},
+        ].filter(function(r){return r.val;});
+        if(!rows.length)return'<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;">'
+          +'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;">Ideal Conditions</div>'
+          +'<div style="font-size:12px;color:var(--mut);font-style:italic;">No conditions set yet — add them in the Notes tab</div>'
+        +'</div>';
+        return'<div style="background:var(--sur);border:1px solid rgba(56,189,248,.2);border-radius:12px;padding:12px;margin-bottom:12px;">'
+          +'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#38bdf8;margin-bottom:10px;">Ideal Conditions</div>'
+          +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'
+          +rows.map(function(r){return'<div style="background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;">'
+            +'<div style="font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:3px;">'+r.label+'</div>'
+            +'<div style="font-size:13px;font-weight:700;color:'+r.col+';">'+r.val+'</div>'
+          +'</div>';}).join('')
+          +'</div>'
+        +'</div>';
+      })()
     +'</div>';
   }());
 
@@ -1614,6 +1645,28 @@ function openWLForm(id,prefill){
           +'<div class="fg"><label>Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
           +'<div class="fg"><label>Preferred Distance</label><div id="wlf-dist-btns" style="padding:4px 0;">'+distHtml+'</div></div>'
           +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight, Galloping, Sharp" value="'+(e?e.trackPref||'':'')+'"></div>'
+          +'<div class="g2">'
+            +'<div class="fg"><label>Preferred Class</label><select id="wlf-classpref" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;">'
+              +'<option value="">— Any —</option>'
+              +'<option value="Group"'+(e&&e.classPref==='Group'?' selected':'')+'>Group / Listed</option>'
+              +'<option value="Class 1"'+(e&&e.classPref==='Class 1'?' selected':'')+'>Class 1</option>'
+              +'<option value="Class 2"'+(e&&e.classPref==='Class 2'?' selected':'')+'>Class 2</option>'
+              +'<option value="Class 3"'+(e&&e.classPref==='Class 3'?' selected':'')+'>Class 3</option>'
+              +'<option value="Class 4"'+(e&&e.classPref==='Class 4'?' selected':'')+'>Class 4</option>'
+              +'<option value="Class 5"'+(e&&e.classPref==='Class 5'?' selected':'')+'>Class 5</option>'
+              +'<option value="Class 6"'+(e&&e.classPref==='Class 6'?' selected':'')+'>Class 6</option>'
+              +'<option value="Class 7"'+(e&&e.classPref==='Class 7'?' selected':'')+'>Class 7</option>'
+            +'</select></div>'
+            +'<div class="fg"><label>Field Size</label><select id="wlf-fieldsize" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;">'
+              +'<option value="">— Any —</option>'
+              +'<option value="small"'+(e&&e.fieldSizePref==='small'?' selected':'')+'>Small (≤8)</option>'
+              +'<option value="medium"'+(e&&e.fieldSizePref==='medium'?' selected':'')+'>Medium (9–14)</option>'
+              +'<option value="large"'+(e&&e.fieldSizePref==='large'?' selected':'')+'>Large (15+)</option>'
+            +'</select></div>'
+          +'</div>'
+          +'<div class="fg"><label>Running Style</label><div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'
+          +['Front Runner','Prominent','Hold Up','Flexible'].map(function(rs){const sel=e&&e.runStyle===rs;return'<button type="button" onclick="wlSetRunStyle(this)" data-rs="'+rs+'" class="wlf-going-btn'+(sel?' on':'')+'" style="'+(sel?'--wlg-col:var(--grn);':'')+'">'+rs+'</button>';}).join('')
+          +'</div></div>'
           +'<div class="fg"><label>Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="min-height:64px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
         +'</div>'
       +'</div>'
@@ -1714,6 +1767,13 @@ function openWLForm(id,prefill){
           +'<div class="fg"><label>Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
           +'<div class="fg"><label>Preferred Distance</label><div id="wlf-dist-btns" style="padding:4px 0;">'+distHtml2+'</div></div>'
           +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight, Galloping, Sharp" value=""></div>'
+          +'<div class="g2">'
+            +'<div class="fg"><label>Preferred Class</label><select id="wlf-classpref" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;"><option value="">— Any —</option><option value="Group">Group / Listed</option><option value="Class 1">Class 1</option><option value="Class 2">Class 2</option><option value="Class 3">Class 3</option><option value="Class 4">Class 4</option><option value="Class 5">Class 5</option><option value="Class 6">Class 6</option><option value="Class 7">Class 7</option></select></div>'
+            +'<div class="fg"><label>Field Size</label><select id="wlf-fieldsize" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;"><option value="">— Any —</option><option value="small">Small (≤8)</option><option value="medium">Medium (9–14)</option><option value="large">Large (15+)</option></select></div>'
+          +'</div>'
+          +'<div class="fg"><label>Running Style</label><div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'
+          +['Front Runner','Prominent','Hold Up','Flexible'].map(function(rs){return'<button type="button" onclick="wlSetRunStyle(this)" data-rs="'+rs+'" class="wlf-going-btn">'+rs+'</button>';}).join('')
+          +'</div></div>'
           +'<div class="fg"><label>Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="min-height:64px;"></textarea></div>'
         +'</div>'
       +'</div>'
@@ -1854,6 +1914,15 @@ function wlToggleGoing(btn){
   btn.className='wlf-going-btn'+(sel?' on':'');
 }
 
+function wlSetRunStyle(btn){
+  const rs=btn.dataset.rs;
+  const isOn=btn.classList.contains('on');
+  document.querySelectorAll('[data-rs]').forEach(function(b){b.classList.remove('on');b.style.removeProperty('--wlg-col');});
+  if(!isOn){btn.classList.add('on');btn.style.setProperty('--wlg-col','var(--grn)');}
+  const hid=document.getElementById('wlf-runstyle-val');
+  if(hid)hid.value=isOn?'':rs;
+}
+
 function saveWLEntry(id){
   const horse=(document.getElementById('wlf-horse').value||'').trim();
   if(!horse){alert('Enter a horse name.');return;}
@@ -1894,6 +1963,9 @@ function saveWLEntry(id){
     goingPrefs,
     distancePref:(_wlDossier.distPrefs||[]).join(', '),
     trackPref:(document.getElementById('wlf-track').value||'').trim(),
+    classPref:(document.getElementById('wlf-classpref')||{value:''}).value||'',
+    fieldSizePref:(document.getElementById('wlf-fieldsize')||{value:''}).value||'',
+    runStyle:(function(){const b=document.querySelector('[data-rs].on');return b?b.dataset.rs:'';})(),
     conditionsNotes:(document.getElementById('wlf-cond-notes').value||'').trim(),
     aiAssessment:old?old.aiAssessment||null:null,
     aiAssessedAt:old?old.aiAssessedAt||null:null,

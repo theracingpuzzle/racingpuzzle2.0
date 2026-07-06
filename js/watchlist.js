@@ -1506,95 +1506,19 @@ function openWLForm(id,prefill){
   const io=(_wlDossier.obs&&_wlDossier.obs[0])||{};
   const defaultTab=e?'overview':'horse';
 
-  // ── Tab 1: Overview ────────────────────────────────────────────────────────
-  const overviewHtml=(function(){
-    if(!e) return'<div id="wlft-overview" class="wlf-tab-panel" style="display:none;padding:24px 14px;text-align:center;">'
-      +'<div style="font-size:32px;margin-bottom:12px;">📊</div>'
-      +'<div style="font-size:14px;font-weight:700;color:var(--txt);margin-bottom:6px;">Save your profile first</div>'
-      +'<div style="font-size:13px;color:var(--mut);line-height:1.6;">Analytics, momentum, bets P&L and OR history will appear here once the profile is saved.</div>'
-    +'</div>';
-    const betsOnHorse=(D.bets||[]).filter(function(b){return(b.horse||'').toLowerCase().trim()===(e.horse||'').toLowerCase().trim();});
-    const settled=betsOnHorse.filter(function(b){return b.result&&b.result!=='pending';});
-    const wins=settled.filter(function(b){return b.result==='win';}).length;
-    const totalStaked=settled.reduce(function(a,b){return a+(parseFloat(b.stake)||0);},0);
-    const totalRet=settled.reduce(function(a,b){return a+(parseFloat(b.returns)||0);},0);
-    const horsePnl=totalRet-totalStaked;
-    const nextTarget=(e.targets||[]).filter(function(t){return t.race||t.track;}).sort(function(a,b){return(a.date||'').localeCompare(b.date||'');}).find(function(t){return !t.date||t.date>=td();});
-    const orH=e.orHistory||[];
-    const orTrend=orH.length>=2?(function(){const d=(orH[orH.length-1].rating||0)-(orH[orH.length-2].rating||0);return d>0?'+'+d+'lb':d<0?d+'lb':'no change';}()):'';
-    return'<div id="wlft-overview" class="wlf-tab-panel" style="display:none;padding:14px 14px 0;">'
-      +'<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:12px;">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
-          +'<div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);">Profile Completeness</div>'
-          +'<div style="font-size:14px;font-weight:800;color:'+pctCol+';">'+c.score+'/'+c.total+'</div>'
-        +'</div>'
-        +'<div style="height:6px;background:var(--sur2);border-radius:4px;overflow:hidden;margin-bottom:10px;">'
-          +'<div style="height:100%;width:'+c.pct+'%;background:'+pctCol+';border-radius:4px;"></div>'
-        +'</div>'
-        +(c.missing.length?'<div style="font-size:11px;color:var(--mut);">Missing: <span style="color:var(--txt);">'+c.missing.join(', ')+'</span></div>':'<div style="font-size:11px;color:#4ade80;font-weight:600;">✓ Profile complete</div>')
-      +'</div>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">'
-        +'<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:12px;">'
-          +'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;">Momentum</div>'
-          +(mom?'<div style="font-size:20px;font-weight:800;color:'+mom.col+';">'+mom.icon+' '+mom.label+'</div>'+(orTrend?'<div style="font-size:10px;color:var(--mut);margin-top:3px;">OR: '+orTrend+'</div>':''):'<div style="font-size:13px;color:var(--mut);">No data yet</div>')
-        +'</div>'
-        +'<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:12px;">'
-          +'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;">Your Bets</div>'
-          +(betsOnHorse.length?'<div style="font-size:20px;font-weight:800;color:'+(horsePnl>=0?'#4ade80':'#f87171')+';">'+(horsePnl>=0?'+':'')+fmt(horsePnl)+'</div><div style="font-size:10px;color:var(--mut);margin-top:3px;">'+betsOnHorse.length+' bet'+(betsOnHorse.length===1?'':'s')+' · '+wins+' win'+(wins===1?'':'s')+'</div>':'<div style="font-size:13px;color:var(--mut);">No bets logged</div>')
-        +'</div>'
-      +'</div>'
-      +(nextTarget?'<div style="background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.2);border-radius:12px;padding:12px;margin-bottom:12px;">'
-        +'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ora);margin-bottom:4px;">🎯 Next Target</div>'
-        +'<div style="font-size:14px;font-weight:700;color:var(--txt);">'+(nextTarget.race||'')+(nextTarget.track?' · '+nextTarget.track:'')+'</div>'
-        +(nextTarget.date?'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'+nextTarget.date+'</div>':'')
-      +'</div>':'')
-      +(orH.length?'<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:12px;">'
-        +'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">OR History</div>'
-        +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'
-        +orH.slice(-6).map(function(h){return'<div style="text-align:center;"><div style="font-size:15px;font-weight:800;color:var(--txt);">'+(h.or||h.rating||'—')+'</div><div style="font-size:9px;color:var(--mut);">'+(h.date?h.date.slice(2):'')+'</div></div>';}).join('<div style="color:var(--bdr);">→</div>')
-        +'</div></div>':'')
-      // ── Ideal Conditions panel ──────────────────────────────────────────────
-      +(function(){
-        const gp=(e.goingPrefs||[]);
-        const dp=(e.distancePref||'').trim();
-        const tp=(e.trackPref||'').trim();
-        const cp=(e.classPref||'').trim();
-        const fs=(e.fieldSizePref||'').trim();
-        const rs=(e.runStyle||'').trim();
-        const fsLabel={small:'Small (≤8)',medium:'Medium (9–14)',large:'Large (15+)'};
-        const rows=[
-          {label:'Going',      val:gp.length?gp.join(', '):'',       col:'#38bdf8'},
-          {label:'Distance',   val:dp,                                col:'#38bdf8'},
-          {label:'Track',      val:tp,                                col:'#a78bfa'},
-          {label:'Class',      val:cp,                                col:'#fbbf24'},
-          {label:'Field Size', val:fs?fsLabel[fs]||fs:'',             col:'#fbbf24'},
-          {label:'Run Style',  val:rs,                                col:'#34d399'},
-        ].filter(function(r){return r.val;});
-        if(!rows.length)return'<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;">'
-          +'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:6px;">Ideal Conditions</div>'
-          +'<div style="font-size:12px;color:var(--mut);font-style:italic;">No conditions set yet — add them in the Notes tab</div>'
-        +'</div>';
-        return'<div style="background:var(--sur);border:1px solid rgba(56,189,248,.2);border-radius:12px;padding:12px;margin-bottom:12px;">'
-          +'<div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#38bdf8;margin-bottom:10px;">Ideal Conditions</div>'
-          +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'
-          +rows.map(function(r){return'<div style="background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;">'
-            +'<div style="font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:3px;">'+r.label+'</div>'
-            +'<div style="font-size:13px;font-weight:700;color:'+r.col+';">'+r.val+'</div>'
-          +'</div>';}).join('')
-          +'</div>'
-        +'</div>';
-      })()
-    +'</div>';
-  }());
+  const defaultTab='horse';
 
-  // ── Tab 2: Horse (identity) ────────────────────────────────────────────────
-  const horseHtml=(function(){
+  // ── Tab 1: Horse (identity + why watching + AI) ────────────────────────────
+  const horseTabHtml=(function(){
+    if(!e) return'';
+    // ── Horse tab content ──────────────────────────────────────────────────
     return'<div id="wlft-horse" class="wlf-tab-panel" style="display:none;">'
       +'<div class="wlf-section">'
         +'<div style="padding:12px 13px 0;">'
           +'<button type="button" id="wlf-scan-btn" onclick="wlScanScreenshot()" style="width:100%;padding:11px;border-radius:9px;border:1.5px dashed rgba(250,204,21,.4);background:rgba(250,204,21,.06);color:var(--gld);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;">📷 Scan Screenshot — fill from Racing Post / ATR</button>'
           +'<div id="wlf-scan-notice" style="display:none;font-size:12px;color:var(--grn);padding:6px 2px 0;"></div>'
         +'</div>'
+        +'<div class="wlf-sec-hdr" style="margin-top:12px;"><span class="wlf-sec-title">Identity &amp; Ratings</span></div>'
         +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
           +'<div class="fg"><label>Horse Name</label><input type="text" id="wlf-horse" value="'+(e?e.horse:p.horse||'')+'"></div>'
           +'<div class="g2">'
@@ -1606,31 +1530,35 @@ function openWLForm(id,prefill){
             +'<div class="fg"><label style="color:var(--gld);">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="'+(e?e.myRating||'':'')+'" class="wlf-mr-input"></div>'
           +'</div>'
           +'<div class="g2">'
-            +'<div class="fg"><label>Surface</label><select id="wlf-surface">'
-              +'<option value="">— Unknown</option>'
-              +'<option value="flat"'+(sf==='flat'?' selected':'')+'>Flat</option>'
-              +'<option value="jumps"'+(sf==='jumps'?' selected':'')+'>Jumps / NH</option>'
-              +'<option value="aw"'+(sf==='aw'?' selected':'')+'>All Weather</option>'
-            +'</select></div>'
-            +'<div class="fg"><label>Race Type</label><select id="wlf-race-type">'
-              +'<option value="">— Unknown</option>'
-              +'<option value="handicap"'+(rt==='handicap'?' selected':'')+'>Handicapper</option>'
-              +'<option value="group"'+(rt==='group'?' selected':'')+'>Group / Listed</option>'
-              +'<option value="maiden"'+(rt==='maiden'?' selected':'')+'>Maiden</option>'
-              +'<option value="claimer"'+(rt==='claimer'?' selected':'')+'>Claimer</option>'
-            +'</select></div>'
+            +'<div class="fg"><label>Surface</label><select id="wlf-surface"><option value="">— Unknown</option><option value="flat"'+(sf==='flat'?' selected':'')+'>Flat</option><option value="jumps"'+(sf==='jumps'?' selected':'')+'>Jumps / NH</option><option value="aw"'+(sf==='aw'?' selected':'')+'>All Weather</option></select></div>'
+            +'<div class="fg"><label>Race Type</label><select id="wlf-race-type"><option value="">— Unknown</option><option value="handicap"'+(rt==='handicap'?' selected':'')+'>Handicapper</option><option value="group"'+(rt==='group'?' selected':'')+'>Group / Listed</option><option value="maiden"'+(rt==='maiden'?' selected':'')+'>Maiden</option><option value="claimer"'+(rt==='claimer'?' selected':'')+'>Claimer</option></select></div>'
           +'</div>'
-          +'<div style="padding:4px 0 2px;">'
-            +'<button type="button" id="wlf-ai-btn" onclick="wlAIAssess()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid rgba(168,85,247,.4);background:rgba(168,85,247,.07);color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/></svg>Generate Puzzle Report</button>'
-            +'<div id="wlf-ai-result" style="display:none;margin-top:10px;border-radius:9px;border:1px solid rgba(168,85,247,.25);background:rgba(168,85,247,.06);padding:12px 13px;"></div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="wlf-section">'
+        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title">Why Am I Watching?</span></div>'
+        +'<div style="display:flex;gap:5px;flex-wrap:wrap;padding:12px 13px 13px;" id="wlf-reasons">'+reasonHtml+'</div>'
+        +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
+        +'<div class="wlf-sec-body">'
+          +'<div class="fg"><label>In a sentence…</label><input type="text" id="wlf-reason-note" placeholder="e.g. Kept on well from rear, bumped 2f out — needs a clearer run" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off"></div>'
+          +'<div id="wlf-unraced-row" style="display:'+(showUnraced?'flex':'none')+';align-items:center;gap:10px;padding:10px 13px;background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.2);border-radius:9px;">'
+            +'<input type="checkbox" id="wlf-unraced" onchange="wlToggleUnraced()" style="width:16px;height:16px;accent-color:#fb7185;cursor:pointer;flex-shrink:0;"'+(isUnraced?' checked':'')+'>'
+            +'<label for="wlf-unraced" style="font-size:12px;font-weight:700;color:var(--txt);cursor:pointer;margin:0;">Unraced — no observations possible yet</label>'
           +'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="wlf-section">'
+        +'<div class="wlf-sec-body" style="padding-top:12px;">'
+          +'<button type="button" id="wlf-ai-btn" onclick="wlAIAssess()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid rgba(168,85,247,.4);background:rgba(168,85,247,.07);color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/></svg>Generate Puzzle Report</button>'
+          +'<div id="wlf-ai-result" style="display:none;margin-top:10px;border-radius:9px;border:1px solid rgba(168,85,247,.25);background:rgba(168,85,247,.06);padding:12px 13px;"></div>'
         +'</div>'
       +'</div>'
     +'</div>';
   }());
 
-  // ── Tab 3: Notes (why watching + conditions + intel) ───────────────────────
-  const notesHtml=(function(){
+  // ── Tab 2: Conditions ─────────────────────────────────────────────────────
+  const conditionsTabHtml=(function(){
+    if(!e) return'';
     var distHtml=DIST_GROUPS.map(function(grp){
       return'<div style="margin-bottom:6px;">'
         +'<div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:4px;">'+grp.label+'</div>'
@@ -1638,50 +1566,25 @@ function openWLForm(id,prefill){
         +grp.opts.map(function(d){var sel=_wlDossier.distPrefs.includes(d);return'<button type="button" data-dist="'+d+'" onclick="wlToggleDist(this)" class="wlf-going-btn'+(sel?' on':'')+'">'+d+'</button>';}).join('')
         +'</div></div>';
     }).join('');
-    return'<div id="wlft-notes" class="wlf-tab-panel" style="display:none;">'
+    return'<div id="wlft-conditions" class="wlf-tab-panel" style="display:none;">'
       +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title">Why Am I Watching?</span></div>'
-        +'<div style="display:flex;gap:5px;flex-wrap:wrap;padding:12px 13px 13px;" id="wlf-reasons">'+reasonHtml+'</div>'
-        +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
-        +'<div class="wlf-sec-body">'
-          +'<div class="fg"><label>In a sentence…</label>'
-            +'<input type="text" id="wlf-reason-note" placeholder="e.g. Kept on well from rear, bumped 2f out — needs a clearer run" value="'+(e?e.reasonNote||'':'')+'" autocomplete="off">'
-          +'</div>'
-          +'<div id="wlf-unraced-row" style="display:'+(showUnraced?'flex':'none')+';align-items:center;gap:10px;padding:10px 13px;background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.2);border-radius:9px;margin-bottom:4px;">'
-            +'<input type="checkbox" id="wlf-unraced" onchange="wlToggleUnraced()" style="width:16px;height:16px;accent-color:#fb7185;cursor:pointer;flex-shrink:0;"'+(isUnraced?' checked':'')+'>'
-            +'<label for="wlf-unraced" style="font-size:12px;font-weight:700;color:var(--txt);cursor:pointer;margin:0;">Unraced — no observations possible yet</label>'
-          +'</div>'
-        +'</div>'
-      +'</div>'
-      +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--grn);">Conditions Sweet Spot</span></div>'
+        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--grn);">Going &amp; Distance</span></div>'
         +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
           +'<div class="fg"><label>Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
           +'<div class="fg"><label>Preferred Distance</label><div id="wlf-dist-btns" style="padding:4px 0;">'+distHtml+'</div></div>'
-          +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight, Galloping, Sharp" value="'+(e?e.trackPref||'':'')+'"></div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="wlf-section">'
+        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--grn);">Class, Style &amp; Track</span></div>'
+        +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
           +'<div class="g2">'
-            +'<div class="fg"><label>Preferred Class</label><select id="wlf-classpref" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;">'
-              +'<option value="">— Any —</option>'
-              +'<option value="Group"'+(e&&e.classPref==='Group'?' selected':'')+'>Group / Listed</option>'
-              +'<option value="Class 1"'+(e&&e.classPref==='Class 1'?' selected':'')+'>Class 1</option>'
-              +'<option value="Class 2"'+(e&&e.classPref==='Class 2'?' selected':'')+'>Class 2</option>'
-              +'<option value="Class 3"'+(e&&e.classPref==='Class 3'?' selected':'')+'>Class 3</option>'
-              +'<option value="Class 4"'+(e&&e.classPref==='Class 4'?' selected':'')+'>Class 4</option>'
-              +'<option value="Class 5"'+(e&&e.classPref==='Class 5'?' selected':'')+'>Class 5</option>'
-              +'<option value="Class 6"'+(e&&e.classPref==='Class 6'?' selected':'')+'>Class 6</option>'
-              +'<option value="Class 7"'+(e&&e.classPref==='Class 7'?' selected':'')+'>Class 7</option>'
-            +'</select></div>'
-            +'<div class="fg"><label>Field Size</label><select id="wlf-fieldsize" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;">'
-              +'<option value="">— Any —</option>'
-              +'<option value="small"'+(e&&e.fieldSizePref==='small'?' selected':'')+'>Small (≤8)</option>'
-              +'<option value="medium"'+(e&&e.fieldSizePref==='medium'?' selected':'')+'>Medium (9–14)</option>'
-              +'<option value="large"'+(e&&e.fieldSizePref==='large'?' selected':'')+'>Large (15+)</option>'
-            +'</select></div>'
+            +'<div class="fg"><label>Preferred Class</label><select id="wlf-classpref" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;"><option value="">— Any —</option><option value="Group"'+(e&&e.classPref==='Group'?' selected':'')+'>Group / Listed</option><option value="Class 1"'+(e&&e.classPref==='Class 1'?' selected':'')+'>Class 1</option><option value="Class 2"'+(e&&e.classPref==='Class 2'?' selected':'')+'>Class 2</option><option value="Class 3"'+(e&&e.classPref==='Class 3'?' selected':'')+'>Class 3</option><option value="Class 4"'+(e&&e.classPref==='Class 4'?' selected':'')+'>Class 4</option><option value="Class 5"'+(e&&e.classPref==='Class 5'?' selected':'')+'>Class 5</option><option value="Class 6"'+(e&&e.classPref==='Class 6'?' selected':'')+'>Class 6</option><option value="Class 7"'+(e&&e.classPref==='Class 7'?' selected':'')+'>Class 7</option></select></div>'
+            +'<div class="fg"><label>Field Size</label><select id="wlf-fieldsize" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;"><option value="">— Any —</option><option value="small"'+(e&&e.fieldSizePref==='small'?' selected':'')+'>Small (≤8)</option><option value="medium"'+(e&&e.fieldSizePref==='medium'?' selected':'')+'>Medium (9–14)</option><option value="large"'+(e&&e.fieldSizePref==='large'?' selected':'')+'>Large (15+)</option></select></div>'
           +'</div>'
           +'<div class="fg"><label>Running Style</label><div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'
-          +['Front Runner','Prominent','Hold Up','Flexible'].map(function(rs){const sel=e&&e.runStyle===rs;return'<button type="button" onclick="wlSetRunStyle(this)" data-rs="'+rs+'" class="wlf-going-btn'+(sel?' on':'')+'" style="'+(sel?'--wlg-col:var(--grn);':'')+'">'+rs+'</button>';}).join('')
+            +['Front Runner','Prominent','Hold Up','Flexible'].map(function(rs){const sel=e&&e.runStyle===rs;return'<button type="button" onclick="wlSetRunStyle(this)" data-rs="'+rs+'" class="wlf-going-btn'+(sel?' on':'')+'" style="'+(sel?'--wlg-col:var(--grn);':'')+'">'+rs+'</button>';}).join('')
           +'</div></div>'
-          +'<div class="fg"><label>Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="min-height:64px;">'+(e?e.conditionsNotes||e.notes||'':'')+'</textarea></div>'
+          +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight, Galloping, Sharp" value="'+(e?e.trackPref||'':'')+'"></div>'
         +'</div>'
       +'</div>'
       +'<div class="wlf-section">'
@@ -1691,7 +1594,7 @@ function openWLForm(id,prefill){
         +'</div>'
         +'<div class="wlf-sec-body" style="padding-top:0;">'
           +'<div id="wlf-intel-list"></div>'
-          +'<div id="wlf-intel-new" style="display:none;border-top:1px solid var(--bdr);padding-top:10px;margin-top:6px;display:flex;flex-direction:column;gap:8px;">'
+          +'<div id="wlf-intel-new" style="display:none;border-top:1px solid var(--bdr);padding-top:10px;margin-top:6px;flex-direction:column;gap:8px;">'
             +'<div class="g2">'
               +'<div class="fg"><label>Date</label><input type="date" id="wlf-intel-new-date" value="'+td()+'"></div>'
               +'<div class="fg" style="flex:2;"><label>Source / Context</label><input type="text" id="wlf-intel-new-src" placeholder="e.g. Post-race interview, Press, Paddock" autocomplete="off"></div>'
@@ -1707,37 +1610,37 @@ function openWLForm(id,prefill){
     +'</div>';
   }());
 
-  // ── Tab 4: Races (observations + reviews + targets) ───────────────────────
+  // ── Tab 3: Races ──────────────────────────────────────────────────────────
   const racesHtml=(function(){
-    const pid=e?e.id:'';
-    const rvws=pid?(D.reviews||[]).filter(function(r){return r.profileId===pid;}).slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');}):[];
+    if(!e) return'';
+    const pid=e.id;
+    const rvws=(D.reviews||[]).filter(function(r){return r.profileId===pid;}).slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
     const RCOL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'var(--mut)',loss:'#f87171',missed:'#a78bfa'};
     return'<div id="wlft-races" class="wlf-tab-panel" style="display:none;">'
-      // Race reviews
       +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title">Race Reviews</span></div>'
+        +'<div class="wlf-sec-hdr" style="justify-content:space-between;"><span class="wlf-sec-title">Race Reviews</span>'
+          +'<button onclick="openWLPostRaceReview(\''+pid+'\',\''+(e.horse||'').replace(/'/g,"\\'")+'\',\'\',\'\',\'\')" class="wlf-add-btn" style="margin:0;padding:4px 10px;font-size:11px;">+ Add Review</button>'
+        +'</div>'
         +'<div class="wlf-sec-body">'
           +(rvws.length
             ?rvws.map(function(r){const rc=RCOL[r.result||'']||'var(--mut)';return'<div class="wlf-rvw-row">'
                 +'<div class="wlf-rvw-meta"><span>'+r.date+'</span>'+(r.raceName?'<span class="wlf-rvw-dot">·</span><span>'+r.raceName+'</span>':'')+(r.odds?'<span class="wlf-rvw-dot">·</span><span style="color:var(--gld);font-weight:700;">'+r.odds+'</span>':'')+'<span class="wlf-rvw-badge" style="color:'+rc+';">'+(r.result||'').toUpperCase()+'</span></div>'
                 +(r.notes?'<div class="wlf-rvw-notes">'+r.notes+'</div>':'')
               +'</div>';}).join('')
-            :'<div style="font-size:12px;color:var(--mut);padding:8px 0;font-style:italic;">No race reviews yet — add one below or use the Review button on Today after a run.</div>')
-          +(pid?'<button onclick="openWLPostRaceReview(\''+pid+'\',\''+(e?(e.horse||'').replace(/'/g,"\\'"):'')+'\',\'\',\'\',\'\')" class="wlf-add-btn" style="margin-top:10px;">+ Add Race Review</button>':'<div style="font-size:11px;color:var(--mut);margin-top:8px;font-style:italic;">Save the profile first to add reviews.</div>')
+            :'<div style="font-size:12px;color:var(--mut);padding:8px 0;font-style:italic;">No race reviews yet — tap Add Review or use the Review button on Today after a run.</div>')
         +'</div>'
       +'</div>'
-      // Future targets
       +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--ora);">Future Targets</span></div>'
-        +'<div class="wlf-sec-body"><div id="wlf-targets-list"></div>'
-          +'<button onclick="wlAddTargetRow()" class="wlf-add-btn">+ Add Target Race</button>'
+        +'<div class="wlf-sec-hdr" style="justify-content:space-between;"><span class="wlf-sec-title" style="color:var(--ora);">Future Targets</span>'
+          +'<button onclick="wlAddTargetRow()" class="wlf-add-btn" style="margin:0;padding:4px 10px;font-size:11px;">+ Add Target</button>'
         +'</div>'
+        +'<div class="wlf-sec-body"><div id="wlf-targets-list"></div></div>'
       +'</div>'
     +'</div>';
   }());
 
   // ── Tab bar (existing profiles only) ──────────────────────────────────────
-  const TABS=[{id:'overview',label:'Overview'},{id:'horse',label:'Horse'},{id:'notes',label:'Notes'},{id:'races',label:'Races'}];
+  const TABS=e?[{id:'horse',label:'Horse'},{id:'conditions',label:'Conditions'},{id:'races',label:'Races'}]:[];
   const tabBarHtml=e?('<div class="wlf-tab-bar" style="display:flex;border-bottom:2px solid var(--bdr);background:var(--sur2);padding:0 8px;gap:0;">'
     +TABS.map(function(t){
       const on=t.id===defaultTab;
@@ -1747,13 +1650,6 @@ function openWLForm(id,prefill){
 
   // ── Single-page scrollable form for new profiles ───────────────────────────
   const newProfileBodyHtml=!e?(function(){
-    var distHtml2=DIST_GROUPS.map(function(grp){
-      return'<div style="margin-bottom:6px;">'
-        +'<div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:4px;">'+grp.label+'</div>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:5px;">'
-        +grp.opts.map(function(d){var sel=_wlDossier.distPrefs.includes(d);return'<button type="button" data-dist="'+d+'" onclick="wlToggleDist(this)" class="wlf-going-btn'+(sel?' on':'')+'">'+d+'</button>';}).join('')
-        +'</div></div>';
-    }).join('');
     return'<div class="wlf-body">'
       // ── Horse Identity ──
       +'<div class="wlf-section">'
@@ -1768,7 +1664,7 @@ function openWLForm(id,prefill){
             +'<div class="fg"><label>Age</label><input type="number" id="wlf-age" min="2" max="20" placeholder="e.g. 3" value="'+(p.age||'')+'"></div>'
           +'</div>'
           +'<div class="g2">'
-            +'<div class="fg"><label>Current OR <span style="font-weight:400;color:var(--mut);">auto-updates</span></label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(p.currentRating||'')+'"></div>'
+            +'<div class="fg"><label>Current OR</label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(p.currentRating||'')+'"></div>'
             +'<div class="fg"><label style="color:var(--gld);">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="" class="wlf-mr-input"></div>'
           +'</div>'
           +'<div class="g2">'
@@ -1784,75 +1680,44 @@ function openWLForm(id,prefill){
         +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
         +'<div class="wlf-sec-body">'
           +'<div class="fg"><label>In a sentence…</label><input type="text" id="wlf-reason-note" placeholder="e.g. Kept on well from rear, bumped 2f out — needs a clearer run" value="" autocomplete="off"></div>'
-          +'<div id="wlf-unraced-row" style="display:'+(showUnraced?'flex':'none')+';align-items:center;gap:10px;padding:10px 13px;background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.2);border-radius:9px;margin-bottom:4px;">'
+          +'<div id="wlf-unraced-row" style="display:'+(showUnraced?'flex':'none')+';align-items:center;gap:10px;padding:10px 13px;background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.2);border-radius:9px;">'
             +'<input type="checkbox" id="wlf-unraced" onchange="wlToggleUnraced()" style="width:16px;height:16px;accent-color:#fb7185;cursor:pointer;flex-shrink:0;">'
             +'<label for="wlf-unraced" style="font-size:12px;font-weight:700;color:var(--txt);cursor:pointer;margin:0;">Unraced — no observations possible yet</label>'
           +'</div>'
         +'</div>'
       +'</div>'
-      // ── Conditions Sweet Spot ──
-      +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--grn);">Conditions Sweet Spot</span></div>'
-        +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
-          +'<div class="fg"><label>Going Preferences</label><div id="wlf-going" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'+goingHtml+'</div></div>'
-          +'<div class="fg"><label>Preferred Distance</label><div id="wlf-dist-btns" style="padding:4px 0;">'+distHtml2+'</div></div>'
-          +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight, Galloping, Sharp" value=""></div>'
-          +'<div class="g2">'
-            +'<div class="fg"><label>Preferred Class</label><select id="wlf-classpref" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;"><option value="">— Any —</option><option value="Group">Group / Listed</option><option value="Class 1">Class 1</option><option value="Class 2">Class 2</option><option value="Class 3">Class 3</option><option value="Class 4">Class 4</option><option value="Class 5">Class 5</option><option value="Class 6">Class 6</option><option value="Class 7">Class 7</option></select></div>'
-            +'<div class="fg"><label>Field Size</label><select id="wlf-fieldsize" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;"><option value="">— Any —</option><option value="small">Small (≤8)</option><option value="medium">Medium (9–14)</option><option value="large">Large (15+)</option></select></div>'
-          +'</div>'
-          +'<div class="fg"><label>Running Style</label><div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;">'
-          +['Front Runner','Prominent','Hold Up','Flexible'].map(function(rs){return'<button type="button" onclick="wlSetRunStyle(this)" data-rs="'+rs+'" class="wlf-going-btn">'+rs+'</button>';}).join('')
-          +'</div></div>'
-          +'<div class="fg"><label>Conditions Notes</label><textarea id="wlf-cond-notes" placeholder="Your evolving view on what suits this horse..." style="min-height:64px;"></textarea></div>'
-        +'</div>'
-      +'</div>'
-      // ── Trainer Intel ──
-      +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr" style="justify-content:space-between;">'
-          +'<span class="wlf-sec-title" style="color:var(--blu);">Trainer / Connections Intel</span>'
-          +'<button type="button" onclick="wlAddIntelEntry()" style="font-size:11px;font-weight:700;color:var(--blu);background:rgba(56,189,248,.12);border:none;border-radius:6px;padding:3px 9px;cursor:pointer;">+ Add Entry</button>'
-        +'</div>'
-        +'<div class="wlf-sec-body" style="padding-top:0;">'
-          +'<div id="wlf-intel-list"></div>'
-          +'<div id="wlf-intel-new" style="display:none;border-top:1px solid var(--bdr);padding-top:10px;margin-top:6px;display:flex;flex-direction:column;gap:8px;">'
-            +'<div class="g2">'
-              +'<div class="fg"><label>Date</label><input type="date" id="wlf-intel-new-date" value="'+td()+'"></div>'
-              +'<div class="fg" style="flex:2;"><label>Source / Context</label><input type="text" id="wlf-intel-new-src" placeholder="e.g. Post-race interview, Press, Paddock" autocomplete="off"></div>'
-            +'</div>'
-            +'<div class="fg"><label>What they said / What you heard</label><textarea id="wlf-intel-new-text" placeholder="Trainer quote, connections update, paddock observation..." style="min-height:72px;"></textarea></div>'
-            +'<div style="display:flex;gap:8px;justify-content:flex-end;">'
-              +'<button type="button" onclick="wlCancelIntelEntry()" style="font-size:12px;font-weight:600;color:var(--mut);background:none;border:1px solid var(--bdr);border-radius:7px;padding:5px 14px;cursor:pointer;">Cancel</button>'
-              +'<button type="button" onclick="wlSaveIntelEntry()" style="font-size:12px;font-weight:700;color:#fff;background:var(--blu);border:none;border-radius:7px;padding:5px 14px;cursor:pointer;">Save Entry</button>'
-            +'</div>'
-          +'</div>'
-        +'</div>'
-      +'</div>'
       // ── First Sighting ──
-      +'<div class="wlf-section" style="border:1px solid rgba(56,189,248,.25);border-radius:12px;background:rgba(56,189,248,.04);">'
-        +'<div class="wlf-sec-hdr" style="border-color:rgba(56,189,248,.15);">'
-          +'<span class="wlf-sec-title" style="color:#38bdf8;">First Sighting</span>'
-          +'<span style="font-size:11px;font-weight:400;color:var(--mut);margin-left:8px;">— what did you see?</span>'
-        +'</div>'
-        +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
-          +'<div class="g2">'
-            +'<div class="fg"><label>Date Seen</label><input type="date" id="wlf-sight-date" value="'+td()+'"></div>'
-            +'<div class="fg"><label>Course</label><input type="text" id="wlf-sight-course" placeholder="e.g. Newmarket" autocomplete="off"></div>'
+      +(function(){
+        const fs=p.firstSighting||{};
+        const goingOpts=['Firm','Good to Firm','Good','Good to Soft','Soft','Heavy','Standard','Standard to Slow','Slow'];
+        const resultBtns=[{k:'win',lbl:'Win',col:'var(--grn)'},{k:'place',lbl:'Place',col:'var(--gld)'},{k:'unplaced',lbl:'Unplaced',col:'var(--red)'}];
+        return'<div class="wlf-section" style="border:1px solid rgba(56,189,248,.25);border-radius:12px;background:rgba(56,189,248,.04);">'
+          +'<div class="wlf-sec-hdr" style="border-color:rgba(56,189,248,.15);">'
+            +'<span class="wlf-sec-title" style="color:#38bdf8;">First Sighting</span>'
+            +(fs.course?'<span style="font-size:11px;font-weight:400;color:#38bdf8;margin-left:8px;">Pre-filled from results</span>':'<span style="font-size:11px;font-weight:400;color:var(--mut);margin-left:8px;">— what did you see?</span>')
           +'</div>'
-          +'<div class="g2">'
-            +'<div class="fg"><label>Race Name</label><input type="text" id="wlf-sight-race" placeholder="e.g. Betfair Handicap" autocomplete="off"></div>'
-            +'<div class="fg"><label>Distance</label><input type="text" id="wlf-sight-dist" placeholder="e.g. 1m2f" autocomplete="off"></div>'
+          +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
+            +'<div class="g2">'
+              +'<div class="fg"><label>Date Seen</label><input type="date" id="wlf-sight-date" value="'+(fs.date||td())+'"></div>'
+              +'<div class="fg"><label>Course</label><input type="text" id="wlf-sight-course" placeholder="e.g. Newmarket" value="'+(fs.course||'')+'" autocomplete="off"></div>'
+            +'</div>'
+            +'<div class="g2">'
+              +'<div class="fg"><label>Race Name</label><input type="text" id="wlf-sight-race" placeholder="e.g. Betfair Handicap" value="'+(fs.race||'')+'" autocomplete="off"></div>'
+              +'<div class="fg"><label>Distance</label><input type="text" id="wlf-sight-dist" placeholder="e.g. 1m2f" value="'+(fs.dist||'')+'" autocomplete="off"></div>'
+            +'</div>'
+            +'<div class="g2">'
+              +'<div class="fg"><label>Going</label><select id="wlf-sight-going" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;"><option value="">— Select —</option>'
+              +goingOpts.map(function(g){return'<option'+(fs.going===g?' selected':'')+'>'+g+'</option>';}).join('')
+              +'</select></div>'
+              +'<div class="fg"><label>Class</label><input type="text" id="wlf-sight-class" placeholder="e.g. 4" value="'+(fs.cls||'')+'" autocomplete="off"></div>'
+            +'</div>'
+            +'<div class="fg"><label>Result</label><div class="rvw-btn-group" id="wlf-sight-result-row">'
+            +resultBtns.map(function(r){const on=fs.result===r.k;return'<button type="button" data-sr="'+r.k+'" onclick="wlSightResult(this)" class="rvw-btn'+(on?' on':'')+'" style="--rvw-col:'+r.col+';'+(on?'background:'+r.col+';color:#fff;border-color:'+r.col+';':'')+'"  >'+r.lbl+'</button>';}).join('')
+            +'</div></div>'
+            +'<div class="fg"><label>What did you see?</label><textarea id="wlf-sight-notes" placeholder="What caught your eye — running style, finish, unlucky in running, potential..." style="min-height:72px;"></textarea></div>'
           +'</div>'
-          +'<div class="g2">'
-            +'<div class="fg"><label>Going</label><select id="wlf-sight-going" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;"><option value="">— Select —</option><option>Firm</option><option>Good to Firm</option><option>Good</option><option>Good to Soft</option><option>Soft</option><option>Heavy</option><option>Standard</option><option>Standard to Slow</option><option>Slow</option></select></div>'
-            +'<div class="fg"><label>Class</label><input type="text" id="wlf-sight-class" placeholder="e.g. 4" autocomplete="off"></div>'
-          +'</div>'
-          +'<div class="fg"><label>Result</label><div class="rvw-btn-group" id="wlf-sight-result-row">'
-          +[{k:'win',lbl:'Win',col:'var(--grn)'},{k:'place',lbl:'Place',col:'var(--gld)'},{k:'unplaced',lbl:'Unplaced',col:'var(--red)'},{k:'watched',lbl:'Watched Only',col:'var(--mut)'}].map(function(r){return'<button type="button" data-sr="'+r.k+'" onclick="wlSightResult(this)" class="rvw-btn" style="--rvw-col:'+r.col+';">'+r.lbl+'</button>';}).join('')
-          +'</div></div>'
-          +'<div class="fg"><label>What did you see?</label><textarea id="wlf-sight-notes" placeholder="What caught your eye — running style, finish, unlucky in running, potential..." style="min-height:72px;"></textarea></div>'
-        +'</div>'
-      +'</div>'
+        +'</div>';
+      }())
     +'</div>';
   }()):'';
 
@@ -1877,7 +1742,7 @@ function openWLForm(id,prefill){
   +'</div>'
   +tabBarHtml
   +(e
-    ?('<div class="wlf-body">'+overviewHtml+horseHtml+notesHtml+racesHtml+'</div>')
+    ?('<div class="wlf-body">'+horseTabHtml+conditionsTabHtml+racesHtml+'</div>')
     :newProfileBodyHtml)
   +'<div class="wlf-actions">'
     +'<button class="wlf-save-btn" onclick="saveWLEntry(\''+(e?e.id:'')+'\')">'+( e?'Save Profile':'Create Profile')+'</button>'
@@ -2091,12 +1956,12 @@ function saveWLEntry(id){
     distancePref:(_wlDossier.distPrefs||[]).join(', '),
     distanceWins:old?old.distanceWins||[]:[], // preserved — set by review inference
     _goingPoor:old?old._goingPoor||{}:{},    // preserved — set by review inference
-    trackPref:(document.getElementById('wlf-track').value||'').trim(),
+    trackPref:((document.getElementById('wlf-track')||{value:''}).value||'').trim(),
     classPref:(document.getElementById('wlf-classpref')||{value:''}).value||'',
     fieldSizePref:(document.getElementById('wlf-fieldsize')||{value:''}).value||'',
     runStyle:(function(){const b=document.querySelector('[data-rs].on');return b?b.dataset.rs:'';})(),
-    conditionsNotes:(document.getElementById('wlf-cond-notes').value||'').trim(),
-    notes:(document.getElementById('wlf-cond-notes').value||'').trim(), // kept for legacy fallback reads
+    conditionsNotes:old?old.conditionsNotes||'':'', // field removed from form — preserve existing value
+    notes:old?old.notes||'':'',
     betReadiness:old?old.betReadiness||'watching':'watching', // preserved — set by review flow
     needsReview:old?old.needsReview||false:false,             // preserved — set by review flow
     aiAssessment:old?old.aiAssessment||null:null,

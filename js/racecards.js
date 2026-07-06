@@ -87,14 +87,23 @@ function rcSwRenderUI(){
 
   const v=rcSwView;
   const f=rcSwFilter;
+  const _svgTarget='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>';
+  const _svgTrophy='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M6 9a6 6 0 0 0 12 0V3H6z"/></svg>';
+  const _svgEye='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const filters=[
+    {k:'all',  lbl:'All Races', icon:''},
+    {k:'bets', lbl:'My Bets',   icon:_svgTarget},
+    {k:'league',lbl:'League',   icon:_svgTrophy},
+    {k:'watchlist',lbl:'Watchlist',icon:_svgEye},
+  ];
   let html='<div class="rc-view-tog" style="width:100%;">'
     +'<button class="rc-view-btn '+(v==='time'?'on':'off')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
     +'<button class="rc-view-btn '+(v==='course'?'on':'off')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
     +'</div>'
     +'<div style="display:flex;gap:6px;padding:0 2px 10px;flex-wrap:wrap;">'
-    +[{k:'all',lbl:'All Races'},{k:'bets',lbl:'🎯 My Bets'},{k:'league',lbl:'🏆 League Picks'},{k:'watchlist',lbl:'👁 Watchlist'}].map(function(opt){
+    +filters.map(function(opt){
       const on=f===opt.k;
-      return'<button onclick="rcSwFilter=\''+opt.k+'\';rcSwRenderUI();" style="font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;border:1px solid '+(on?'var(--blu)':'var(--bdr)')+';background:'+(on?'var(--blu)':'transparent')+';color:'+(on?'#fff':'var(--mut)')+';cursor:pointer;white-space:nowrap;">'+opt.lbl+'</button>';
+      return'<button onclick="rcSwFilter=\''+opt.k+'\';rcSwRenderUI();" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;border:1px solid '+(on?'var(--blu)':'var(--bdr)')+';background:'+(on?'var(--blu)':'transparent')+';color:'+(on?'#fff':'var(--mut)')+';cursor:pointer;white-space:nowrap;">'+(opt.icon?opt.icon+' ':'')+opt.lbl+'</button>';
     }).join('')
     +'</div>';
 
@@ -112,11 +121,17 @@ function _rcFilterHorseNames(){
   const norm=function(s){return(s||'').toLowerCase().trim();};
   const today=td();
   if(rcSwFilter==='bets'){
-    return new Set((D.bets||[]).filter(function(b){return b.bet_date===today||b.betDate===today;}).map(function(b){return norm(b.horse);}));
+    // Local bets use b.date (not b.bet_date)
+    return new Set((D.bets||[]).filter(function(b){return b.date===today;}).map(function(b){return norm(b.horse);}));
   }
   if(rcSwFilter==='league'){
+    // Picks live in _lgMyPicks {leagueId: pick[]} in leagues.js, each pick has pick_date + horse
     const picks=[];
-    (D.leagues||[]).forEach(function(lg){(lg.picks||[]).forEach(function(p){if(p.date===today||p.pickDate===today)picks.push(norm(p.horse||p.horseName||''));});});
+    if(typeof _lgMyPicks!=='undefined'){
+      Object.values(_lgMyPicks).forEach(function(arr){
+        (arr||[]).forEach(function(p){if(p.pick_date===today)picks.push(norm(p.horse||''));});
+      });
+    }
     return new Set(picks.filter(Boolean));
   }
   if(rcSwFilter==='watchlist'){
@@ -1103,7 +1118,7 @@ function rcSwRaceCard(race, course){
     + (function(){
         const _g=race.going||'';
         const _d=formatDist(race.distance_round||race.distance_f||race.distance||'');
-        const _c=String(race.race_class||race.class||'').trim();
+        const _c=String(race.race_class||race.class||'').trim().replace(/^class\s*/i,'');
         const _p=race.prize||race.total_prize_money||'';
         const items=[
           _g?{lbl:'Going',val:_g}:null,

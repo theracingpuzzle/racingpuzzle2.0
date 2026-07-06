@@ -1504,8 +1504,6 @@ function openWLForm(id,prefill){
   const isUnraced=e&&e.unraced?true:false;
   const showUnraced=(curReason==='trainer-intel'||curReason==='tip-source');
   const io=(_wlDossier.obs&&_wlDossier.obs[0])||{};
-  const defaultTab=e?'overview':'horse';
-
   const defaultTab='horse';
 
   // ── Tab 1: Horse (identity + why watching + AI) ────────────────────────────

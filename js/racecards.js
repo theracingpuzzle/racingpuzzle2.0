@@ -221,12 +221,12 @@ function rcSwRenderCourse(listEl){
 
 // ── Race class chip (shared) ──────────────────────────────────────────────────
 function _rcClassChip(raceName, raceClass){
-  const _n=raceName||'';const _c=String(raceClass||'').trim();
+  const _n=raceName||'';const _c=String(raceClass||'').trim().replace(/^class\s*/i,'');
   const isG1=/group\s*1|\bg1\b/i.test(_n)||_c==='1';
   const isG2=/group\s*2|\bg2\b/i.test(_n)||_c==='2';
   const isG3=/group\s*3|\bg3\b/i.test(_n)||_c==='3';
   const isL=/listed/i.test(_n);
-  const lbl=isG1?'G1':isG2?'G2':isG3?'G3':isL?'Listed':(_c?'C'+_c:'');
+  const lbl=isG1?'G1':isG2?'G2':isG3?'G3':isL?'Listed':(_c?'Class '+_c:'');
   if(!lbl)return'';
   const col=isG1||isG2?'#f59e0b':isG3||isL?'#a78bfa':'rgba(255,255,255,.55)';
   return'<span style="font-size:9px;font-weight:800;letter-spacing:.04em;padding:1px 5px;border-radius:3px;background:'+col+'18;border:1px solid '+col+'40;color:'+col+';flex-shrink:0;">'+lbl+'</span>';
@@ -541,10 +541,13 @@ function rcSwRenderRunners(idx, course, el){
   const dist=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||'');
   const prize=race.prize||race.total_prize_money||'';
   const going=race.going||'';
+  const raceClassRaw=String(race.race_class||race.class||'').trim().replace(/^class\s*/i,'');
+  const raceClassVal=raceClassRaw?'Class '+raceClassRaw:'';
   const infoItems=[
-    going ? {lbl:'Going',    val:going} : null,
-    dist  ? {lbl:'Distance', val:dist}  : null,
-    prize ? {lbl:'Prize',    val:prize} : null,
+    going        ? {lbl:'Going',    val:going}        : null,
+    dist         ? {lbl:'Distance', val:dist}         : null,
+    raceClassVal ? {lbl:'Class',    val:raceClassVal} : null,
+    prize        ? {lbl:'Prize',    val:prize}        : null,
   ].filter(Boolean);
   let html=infoItems.length
     ? '<div class="rc-info-bar">'
@@ -1051,10 +1054,22 @@ function rcSwRaceCard(race, course){
       + '<div class="rc-race-hdr-left">'
         + '<div class="rc-race-time">'+time+'</div>'
         + '<div class="rc-race-name">'+name+'</div>'
-        + '<div style="display:flex;align-items:center;gap:4px;margin-top:2px;">'+_rcClassChip(name,race.race_class||race.class)+(race.distance_round||race.distance_f||race.distance?'<span class="rc-dist-chip">'+formatDist(race.distance_round||race.distance_f||race.distance||'')+'</span>':'')+(race.going?'<span class="rc-dist-chip" style="color:var(--mut);">'+race.going+'</span>':'')+'</div>'
       + '</div>'
       + '<span class="rc-race-count">'+places.length+' shown</span>'
     + '</div>'
+    + (function(){
+        const _g=race.going||'';
+        const _d=formatDist(race.distance_round||race.distance_f||race.distance||'');
+        const _c=String(race.race_class||race.class||'').trim();
+        const _p=race.prize||race.total_prize_money||'';
+        const items=[
+          _g?{lbl:'Going',val:_g}:null,
+          _d?{lbl:'Distance',val:_d}:null,
+          _c?{lbl:'Class',val:'Class '+_c}:null,
+          _p?{lbl:'Prize',val:_p}:null,
+        ].filter(Boolean);
+        return items.length?'<div class="rc-info-bar">'+items.map(function(it){return'<div class="rc-info-item"><div class="rc-info-lbl">'+it.lbl+'</div><div class="rc-info-val">'+it.val+'</div></div>';}).join('')+'</div>':'';
+      }())
     + places.map(function(r,i){
         const pos = r.position||r.place||(i+1);
         const horse = stripCountrySuffix(r.horse||r.name||'—');

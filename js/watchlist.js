@@ -1790,6 +1790,31 @@ function openWLForm(id,prefill){
         +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--blu);">Trainer / Connections Intel</span></div>'
         +'<div class="wlf-sec-body"><div class="fg"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="min-height:64px;"></textarea></div></div>'
       +'</div>'
+      // ── First Sighting ──
+      +'<div class="wlf-section" style="border:1px solid rgba(56,189,248,.25);border-radius:12px;background:rgba(56,189,248,.04);">'
+        +'<div class="wlf-sec-hdr" style="border-color:rgba(56,189,248,.15);">'
+          +'<span class="wlf-sec-title" style="color:#38bdf8;">First Sighting</span>'
+          +'<span style="font-size:11px;font-weight:400;color:var(--mut);margin-left:8px;">— what did you see?</span>'
+        +'</div>'
+        +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
+          +'<div class="g2">'
+            +'<div class="fg"><label>Date Seen</label><input type="date" id="wlf-sight-date" value="'+td()+'"></div>'
+            +'<div class="fg"><label>Course</label><input type="text" id="wlf-sight-course" placeholder="e.g. Newmarket" autocomplete="off"></div>'
+          +'</div>'
+          +'<div class="g2">'
+            +'<div class="fg"><label>Race Name</label><input type="text" id="wlf-sight-race" placeholder="e.g. Betfair Handicap" autocomplete="off"></div>'
+            +'<div class="fg"><label>Distance</label><input type="text" id="wlf-sight-dist" placeholder="e.g. 1m2f" autocomplete="off"></div>'
+          +'</div>'
+          +'<div class="g2">'
+            +'<div class="fg"><label>Going</label><select id="wlf-sight-going" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;"><option value="">— Select —</option><option>Firm</option><option>Good to Firm</option><option>Good</option><option>Good to Soft</option><option>Soft</option><option>Heavy</option><option>Standard</option><option>Standard to Slow</option><option>Slow</option></select></div>'
+            +'<div class="fg"><label>Class</label><input type="text" id="wlf-sight-class" placeholder="e.g. 4" autocomplete="off"></div>'
+          +'</div>'
+          +'<div class="fg"><label>Result</label><div class="rvw-btn-group" id="wlf-sight-result-row">'
+          +[{k:'win',lbl:'Win',col:'var(--grn)'},{k:'place',lbl:'Place',col:'var(--gld)'},{k:'unplaced',lbl:'Unplaced',col:'var(--red)'},{k:'watched',lbl:'Watched Only',col:'var(--mut)'}].map(function(r){return'<button type="button" data-sr="'+r.k+'" onclick="wlSightResult(this)" class="rvw-btn" style="--rvw-col:'+r.col+';">'+r.lbl+'</button>';}).join('')
+          +'</div></div>'
+          +'<div class="fg"><label>What did you see?</label><textarea id="wlf-sight-notes" placeholder="What caught your eye — running style, finish, unlucky in running, potential..." style="min-height:72px;"></textarea></div>'
+        +'</div>'
+      +'</div>'
     +'</div>';
   }()):'';
 

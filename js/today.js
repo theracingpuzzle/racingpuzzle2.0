@@ -598,7 +598,7 @@ async function checkWatchlistRunners(races){
       const raceMeta=[a.time,a.course].filter(Boolean).join(' · ');
       // Derive race type from name + explicit class number
       const _rn2=a.raceName||'';
-      const _rc=String(a.raceClass||'').trim();
+      const _rc=String(a.raceClass||'').trim().replace(/^class\s*/i,'');
       let raceType='';
       let raceClassLabel=''; // the numeric class label shown separately
       if(/\bGroup\s*1\b|\bGr(ade)?\s*1\b|\bG1\b/i.test(_rn2)||_rc==='1')raceType='G1';
@@ -611,8 +611,8 @@ async function checkWatchlistRunners(races){
       else if(/\bChase\b/i.test(_rn2))raceType='Chase';
       else if(/\bHurdle\b/i.test(_rn2))raceType='Hurdle';
       // Always show class number when available (as separate chip)
-      if(_rc&&!/^[123]$/.test(_rc))raceClassLabel='C'+_rc;
-      else if(_rc&&!raceType)raceClassLabel='C'+_rc;
+      if(_rc&&!/^[123]$/.test(_rc))raceClassLabel='Class '+_rc;
+      else if(_rc&&!raceType)raceClassLabel='Class '+_rc;
       // ── Conditions suitability chips ─────────────────────────────────────────
       const _wle=a.wlEntry||{};
       const _goingPrefs=Array.isArray(_wle.goingPrefs)?_wle.goingPrefs:[];

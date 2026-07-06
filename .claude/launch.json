@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "racing-puzzle",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-l", "4321", "."],
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4321"],
       "port": 4321
     }
   ]

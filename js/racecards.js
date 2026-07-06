@@ -49,7 +49,7 @@ function formatDist(d){
 }
 
 // ─── SWIPE RACECARDS / RESULTS ───
-let rcSwCurrentRaces=[], rcSwRacesByMeeting={}, rcSwView='time', _pendingRCBet=null;
+let rcSwCurrentRaces=[], rcSwRacesByMeeting={}, rcSwView='time', _pendingRCBet=null, rcSwFilter='all';
 
 function rcSwipeInit(){
   if(!rcSwCurrentRaces.length) rcSwLoadMeetings();
@@ -86,9 +86,16 @@ function rcSwRenderUI(){
   if(!uiEl)return;
 
   const v=rcSwView;
+  const f=rcSwFilter;
   let html='<div class="rc-view-tog" style="width:100%;">'
     +'<button class="rc-view-btn '+(v==='time'?'on':'off')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
     +'<button class="rc-view-btn '+(v==='course'?'on':'off')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:6px;padding:0 2px 10px;flex-wrap:wrap;">'
+    +[{k:'all',lbl:'All Races'},{k:'bets',lbl:'🎯 My Bets'},{k:'league',lbl:'🏆 League Picks'},{k:'watchlist',lbl:'👁 Watchlist'}].map(function(opt){
+      const on=f===opt.k;
+      return'<button onclick="rcSwFilter=\''+opt.k+'\';rcSwRenderUI();" style="font-size:11px;font-weight:700;padding:4px 11px;border-radius:20px;border:1px solid '+(on?'var(--blu)':'var(--bdr)')+';background:'+(on?'var(--blu)':'transparent')+';color:'+(on?'#fff':'var(--mut)')+';cursor:pointer;white-space:nowrap;">'+opt.lbl+'</button>';
+    }).join('')
     +'</div>';
 
   uiEl.innerHTML=html;
@@ -98,6 +105,34 @@ function rcSwRenderUI(){
 
   if(v==='time') rcSwRenderTime(listEl);
   else           rcSwRenderCourse(listEl);
+}
+
+function _rcFilterHorseNames(){
+  if(rcSwFilter==='all') return null; // null = no filter
+  const norm=function(s){return(s||'').toLowerCase().trim();};
+  const today=td();
+  if(rcSwFilter==='bets'){
+    return new Set((D.bets||[]).filter(function(b){return b.bet_date===today||b.betDate===today;}).map(function(b){return norm(b.horse);}));
+  }
+  if(rcSwFilter==='league'){
+    const picks=[];
+    (D.leagues||[]).forEach(function(lg){(lg.picks||[]).forEach(function(p){if(p.date===today||p.pickDate===today)picks.push(norm(p.horse||p.horseName||''));});});
+    return new Set(picks.filter(Boolean));
+  }
+  if(rcSwFilter==='watchlist'){
+    return new Set((D.watchlist||[]).map(function(e){return norm(e.horse);}));
+  }
+  return null;
+}
+
+function _rcRaceMatchesFilter(r){
+  const names=_rcFilterHorseNames();
+  if(!names) return true;
+  const runners=r.runners||r.horses||[];
+  return runners.some(function(h){
+    const n=(h.horse||h.name||h.horseName||'').toLowerCase().trim();
+    return names.has(n);
+  });
 }
 
 function rcSwRenderTime(listEl){
@@ -115,15 +150,18 @@ function rcSwRenderTime(listEl){
   allRaces.sort(function(a,b){
     return timeToMins(a.off||a.off_time||a.time||'') - timeToMins(b.off||b.off_time||b.time||'');
   });
+  const filteredRaces=allRaces.filter(_rcRaceMatchesFilter);
   const nowMins=new Date().getHours()*60+new Date().getMinutes();
   const upcoming=[],past=[];
-  allRaces.forEach(function(r){
+  filteredRaces.forEach(function(r){
     const mins=timeToMins(r.off||r.off_time||r.time||'');
-    // Upcoming = race hasn't started yet, or started within the last 5 minutes
     if(mins===9999||(mins-nowMins)>-5) upcoming.push(r);
     else past.push(r);
   });
-  if(!allRaces.length){ listEl.innerHTML='<div class="rc-empty">No races today.</div>'; return; }
+  if(!filteredRaces.length){
+    const emptyMsg=rcSwFilter==='all'?'No races today.':'No races today matching this filter.';
+    listEl.innerHTML='<div class="rc-empty">'+emptyMsg+'</div>'; return;
+  }
 
   // First upcoming race gets the NEXT badge; mark the closest future race
   const nextIdx=upcoming.findIndex(function(r){
@@ -185,16 +223,21 @@ function rcSwRenderCourse(listEl){
   });
   const sorted=Object.keys(meetings).sort(function(a,b){
     const ca=rcCourseCountry(a),cb=rcCourseCountry(b);
-    // UK (eng/sco/wal) first, then others alphabetically by country, intl last
     const order={eng:0,sco:0,wal:0,ie:1,aus:2,fra:3,ger:4,rsa:5,usa:6,intl:99};
     const oa=order[ca]!=null?order[ca]:50,ob=order[cb]!=null?order[cb]:50;
     if(oa!==ob)return oa-ob;
     return a.localeCompare(b);
   });
-  listEl.innerHTML=sorted.map(function(course){
+  const filteredSorted=rcSwFilter==='all'?sorted:sorted.filter(function(course){
+    return meetings[course].some(_rcRaceMatchesFilter);
+  });
+  if(!filteredSorted.length){
+    listEl.innerHTML='<div class="rc-empty">No races today matching this filter.</div>'; return;
+  }
+  listEl.innerHTML=filteredSorted.map(function(course){
     const races=meetings[course].slice().sort(function(a,b){
       return cmpTime(a.off||a.off_time||a.time||'',b.off||b.off_time||b.time||'');
-    });
+    }).filter(function(r){return rcSwFilter==='all'||_rcRaceMatchesFilter(r);});
     const isOpen=_rcSwOpenCourse===course;
     const flag=rcCountryFlag(rcCourseCountry(course));
     const type=rcMeetingType(races);

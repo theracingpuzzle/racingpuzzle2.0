@@ -1155,7 +1155,7 @@ async function wlAIAssess(){
   const age=(document.getElementById('wlf-age')||{value:''}).value.trim();
   const trainer=(document.getElementById('wlf-trainer')||{value:''}).value.trim();
   const notes=(document.getElementById('wlf-cond-notes')||{value:''}).value.trim();
-  const intel=(document.getElementById('wlf-intel')||{value:''}).value.trim();
+  const intel=(_wlDossier.intel||[]).slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');}).map(function(en){return(en.date?en.date+': ':'')+en.text;}).join('\n\n');
   const reasonNote=(document.getElementById('wlf-reason-note')||{value:''}).value.trim();
   const goingPrefsForm=(_wlDossier.goingPrefs||[]).join(', ');
   const distPrefForm=(_wlDossier.distPrefs||[]).join(', ');
@@ -1463,7 +1463,13 @@ function openWLForm(id,prefill){
   const p=prefill||{};
   _wlDossier={
     obs:e&&e.observations?e.observations.map(function(o){return Object.assign({},o);}):p.observations||[],
-    targets:e&&e.targets?e.targets.map(function(t){return Object.assign({},t);}):p.targets||[]
+    targets:e&&e.targets?e.targets.map(function(t){return Object.assign({},t);}):p.targets||[],
+    intel:(function(){
+      var arr=e?e.intelEntries||[]:[];
+      // migrate legacy string → single entry
+      if(!arr.length&&e&&e.trainerIntel){arr=[{id:gid(),date:td(),text:e.trainerIntel}];}
+      return arr.map(function(x){return Object.assign({},x);});
+    })()
   };
   const modal=document.createElement('div');
   modal.id='wl-modal';modal.className='wlf-modal';if(e&&e.id)modal.dataset.profileId=e.id;
@@ -1679,8 +1685,24 @@ function openWLForm(id,prefill){
         +'</div>'
       +'</div>'
       +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--blu);">Trainer / Connections Intel</span></div>'
-        +'<div class="wlf-sec-body"><div class="fg"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="min-height:64px;">'+(e?e.trainerIntel||'':'')+'</textarea></div></div>'
+        +'<div class="wlf-sec-hdr" style="justify-content:space-between;">'
+          +'<span class="wlf-sec-title" style="color:var(--blu);">Trainer / Connections Intel</span>'
+          +'<button type="button" onclick="wlAddIntelEntry()" style="font-size:11px;font-weight:700;color:var(--blu);background:rgba(56,189,248,.12);border:none;border-radius:6px;padding:3px 9px;cursor:pointer;">+ Add Entry</button>'
+        +'</div>'
+        +'<div class="wlf-sec-body" style="padding-top:0;">'
+          +'<div id="wlf-intel-list"></div>'
+          +'<div id="wlf-intel-new" style="display:none;border-top:1px solid var(--bdr);padding-top:10px;margin-top:6px;display:flex;flex-direction:column;gap:8px;">'
+            +'<div class="g2">'
+              +'<div class="fg"><label>Date</label><input type="date" id="wlf-intel-new-date" value="'+td()+'"></div>'
+              +'<div class="fg" style="flex:2;"><label>Source / Context</label><input type="text" id="wlf-intel-new-src" placeholder="e.g. Post-race interview, Press, Paddock" autocomplete="off"></div>'
+            +'</div>'
+            +'<div class="fg"><label>What they said / What you heard</label><textarea id="wlf-intel-new-text" placeholder="Trainer quote, connections update, paddock observation..." style="min-height:72px;"></textarea></div>'
+            +'<div style="display:flex;gap:8px;justify-content:flex-end;">'
+              +'<button type="button" onclick="wlCancelIntelEntry()" style="font-size:12px;font-weight:600;color:var(--mut);background:none;border:1px solid var(--bdr);border-radius:7px;padding:5px 14px;cursor:pointer;">Cancel</button>'
+              +'<button type="button" onclick="wlSaveIntelEntry()" style="font-size:12px;font-weight:700;color:#fff;background:var(--blu);border:none;border-radius:7px;padding:5px 14px;cursor:pointer;">Save Entry</button>'
+            +'</div>'
+          +'</div>'
+        +'</div>'
       +'</div>'
     +'</div>';
   }());
@@ -1787,8 +1809,24 @@ function openWLForm(id,prefill){
       +'</div>'
       // ── Trainer Intel ──
       +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title" style="color:var(--blu);">Trainer / Connections Intel</span></div>'
-        +'<div class="wlf-sec-body"><div class="fg"><textarea id="wlf-intel" placeholder="Notes from trainer interviews, press, paddock chat..." style="min-height:64px;"></textarea></div></div>'
+        +'<div class="wlf-sec-hdr" style="justify-content:space-between;">'
+          +'<span class="wlf-sec-title" style="color:var(--blu);">Trainer / Connections Intel</span>'
+          +'<button type="button" onclick="wlAddIntelEntry()" style="font-size:11px;font-weight:700;color:var(--blu);background:rgba(56,189,248,.12);border:none;border-radius:6px;padding:3px 9px;cursor:pointer;">+ Add Entry</button>'
+        +'</div>'
+        +'<div class="wlf-sec-body" style="padding-top:0;">'
+          +'<div id="wlf-intel-list"></div>'
+          +'<div id="wlf-intel-new" style="display:none;border-top:1px solid var(--bdr);padding-top:10px;margin-top:6px;display:flex;flex-direction:column;gap:8px;">'
+            +'<div class="g2">'
+              +'<div class="fg"><label>Date</label><input type="date" id="wlf-intel-new-date" value="'+td()+'"></div>'
+              +'<div class="fg" style="flex:2;"><label>Source / Context</label><input type="text" id="wlf-intel-new-src" placeholder="e.g. Post-race interview, Press, Paddock" autocomplete="off"></div>'
+            +'</div>'
+            +'<div class="fg"><label>What they said / What you heard</label><textarea id="wlf-intel-new-text" placeholder="Trainer quote, connections update, paddock observation..." style="min-height:72px;"></textarea></div>'
+            +'<div style="display:flex;gap:8px;justify-content:flex-end;">'
+              +'<button type="button" onclick="wlCancelIntelEntry()" style="font-size:12px;font-weight:600;color:var(--mut);background:none;border:1px solid var(--bdr);border-radius:7px;padding:5px 14px;cursor:pointer;">Cancel</button>'
+              +'<button type="button" onclick="wlSaveIntelEntry()" style="font-size:12px;font-weight:700;color:#fff;background:var(--blu);border:none;border-radius:7px;padding:5px 14px;cursor:pointer;">Save Entry</button>'
+            +'</div>'
+          +'</div>'
+        +'</div>'
       +'</div>'
       // ── First Sighting ──
       +'<div class="wlf-section" style="border:1px solid rgba(56,189,248,.25);border-radius:12px;background:rgba(56,189,248,.04);">'
@@ -1848,7 +1886,7 @@ function openWLForm(id,prefill){
   +'</div>';
 
   document.body.appendChild(modal);
-  _renderObsList();_renderTargetsList();
+  _renderObsList();_renderTargetsList();_wlRenderIntelList();
   if(e)wlSwitchTab(defaultTab);
   setTimeout(function(){
     const f=document.getElementById('wlf-horse');if(f)f.focus();
@@ -1902,6 +1940,53 @@ function wlAddTargetRow(){
 }
 function _wlDelTarget(i){_wlDossier.targets.splice(i,1);_renderTargetsList();}
 
+function _wlRenderIntelList(){
+  const el=document.getElementById('wlf-intel-list');if(!el)return;
+  const entries=_wlDossier.intel||[];
+  if(!entries.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--mut);padding:8px 0 4px;">No entries yet — tap + Add Entry to start the timeline.</div>';
+    return;
+  }
+  el.innerHTML=entries.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');}).map(function(en,_i){
+    const idx=entries.indexOf(en);
+    return'<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr);">'
+      +'<div style="display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;">'
+        +'<div style="width:8px;height:8px;border-radius:50%;background:var(--blu);margin-top:3px;"></div>'
+        +(_i<entries.length-1?'<div style="width:1px;flex:1;background:var(--bdr);margin-top:4px;min-height:24px;"></div>':'')
+      +'</div>'
+      +'<div style="flex:1;min-width:0;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px;">'
+          +'<div>'
+            +'<span style="font-size:11px;font-weight:700;color:var(--blu);">'+(en.date||'')+'</span>'
+            +(en.source?'<span style="font-size:10px;color:var(--mut);margin-left:6px;">'+esc(en.source)+'</span>':'')
+          +'</div>'
+          +'<button onclick="_wlDelIntel('+idx+')" style="font-size:10px;color:var(--mut);background:none;border:none;cursor:pointer;flex-shrink:0;padding:0 2px;">✕</button>'
+        +'</div>'
+        +'<div style="font-size:13px;color:var(--txt);line-height:1.6;white-space:pre-wrap;">'+esc(en.text||'')+'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+function _wlDelIntel(i){if(!confirm('Remove this intel entry?'))return;_wlDossier.intel.splice(i,1);_wlRenderIntelList();}
+function wlAddIntelEntry(){
+  const n=document.getElementById('wlf-intel-new');
+  if(n){n.style.display='flex';const t=document.getElementById('wlf-intel-new-text');if(t)t.focus();}
+}
+function wlCancelIntelEntry(){
+  const n=document.getElementById('wlf-intel-new');if(n)n.style.display='none';
+  const t=document.getElementById('wlf-intel-new-text');if(t)t.value='';
+  const s=document.getElementById('wlf-intel-new-src');if(s)s.value='';
+}
+function wlSaveIntelEntry(){
+  const text=(document.getElementById('wlf-intel-new-text')||{value:''}).value.trim();
+  if(!text)return;
+  const date=(document.getElementById('wlf-intel-new-date')||{value:td()}).value||td();
+  const source=(document.getElementById('wlf-intel-new-src')||{value:''}).value.trim();
+  _wlDossier.intel.push({id:gid(),date,source,text});
+  wlCancelIntelEntry();
+  _wlRenderIntelList();
+}
+
 function wlSelectReason(btn){
   const val=btn.getAttribute('data-reason');
   const hidden=document.getElementById('wlf-reason');
@@ -1947,6 +2032,14 @@ function wlToggleGoing(btn){
   btn.className='wlf-going-btn'+(sel?' on':'');
 }
 
+function wlSightResult(btn){
+  const row=document.getElementById('wlf-sight-result-row');
+  if(!row)return;
+  const isOn=btn.classList.contains('on');
+  row.querySelectorAll('[data-sr]').forEach(function(b){b.classList.remove('on');b.style.background='';b.style.color='';});
+  if(!isOn){btn.classList.add('on');btn.style.background=btn.style.getPropertyValue('--rvw-col')||'rgba(255,255,255,.15)';btn.style.color='#fff';}
+}
+
 function wlSetRunStyle(btn){
   const rs=btn.dataset.rs;
   const isOn=btn.classList.contains('on');
@@ -1990,7 +2083,8 @@ function saveWLEntry(id){
     reason:(document.getElementById('wlf-reason')||{value:'eye-catcher'}).value||'eye-catcher',
     reasonNote:(document.getElementById('wlf-reason-note')||{value:''}).value.trim(),
     unraced:!!(document.getElementById('wlf-unraced')&&document.getElementById('wlf-unraced').checked),
-    trainerIntel:(document.getElementById('wlf-intel').value||'').trim(),
+    intelEntries:(_wlDossier.intel||[]).slice(),
+    trainerIntel:(_wlDossier.intel&&_wlDossier.intel.length)?_wlDossier.intel[_wlDossier.intel.length-1].text:'', // legacy fallback for AI coach read
     observations:old?old.observations||[]:(_wlDossier.obs||[]),
     targets:_wlDossier.targets.filter(function(t){return t.race;}),
     goingPrefs,
@@ -2020,6 +2114,35 @@ function saveWLEntry(id){
   if(!id&&D.ratings){
     const rKey=(horse||'').toLowerCase().trim();
     if(D.ratings[rKey])delete D.ratings[rKey];
+  }
+  // ── First Sighting: auto-create review for new profiles ──────────────────
+  if(!id){
+    const sDate=(document.getElementById('wlf-sight-date')||{value:''}).value;
+    const sCourse=(document.getElementById('wlf-sight-course')||{value:''}).value.trim();
+    const sRace=(document.getElementById('wlf-sight-race')||{value:''}).value.trim();
+    const sDist=(document.getElementById('wlf-sight-dist')||{value:''}).value.trim();
+    const sClass=(document.getElementById('wlf-sight-class')||{value:''}).value.trim();
+    const sGoing=(document.getElementById('wlf-sight-going')||{value:''}).value;
+    const sNotes=(document.getElementById('wlf-sight-notes')||{value:''}).value.trim();
+    const sResultBtn=document.querySelector('#wlf-sight-result-row [data-sr].on');
+    const sResult=sResultBtn?sResultBtn.dataset.sr:'';
+    const hasSighting=sDate||sCourse||sRace||sDist||sGoing||sNotes||sResult;
+    if(hasSighting){
+      const rev={
+        id:gid(),profileId:entry.id,
+        date:sDate||td(),
+        course:sCourse,raceName:sRace,
+        raceDist:sDist,raceClass:sClass,
+        raceGoing:sGoing,
+        result:sResult||'watched',
+        notes:sNotes,
+        source:'first-sighting',
+        createdAt:Date.now()
+      };
+      D.reviews=D.reviews||[];
+      D.reviews.push(rev);
+      _wlInferFromReview(entry.id,rev);
+    }
   }
   save();
   if(removedTargetIds.length) supaDeleteTargetsByIds(removedTargetIds).catch(function(){});
@@ -2884,9 +3007,26 @@ function _wlpBuildHTML(e){
     h+='<div class="wlp-cond-cell"><span class="wlp-cond-icon">'+c.icon+'</span><span class="wlp-cond-label">'+c.label+'</span><span class="wlp-cond-val" style="color:'+(isDash?'#3a3a5c':c.color)+';">'+esc(c.value)+'</span></div>';
   });
   h+='</div>';
-  const intelText=e.trainerIntel||e.conditionsNotes||'';
-  if(intelText){
-    h+='<div class="wlp-intel"><span class="wlp-intel-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><div class="wlp-intel-text">'+esc(intelText)+'</div></div>';
+  const intelEntries=(function(){
+    var arr=e.intelEntries||[];
+    if(!arr.length&&e.trainerIntel)arr=[{id:'legacy',date:'',source:'',text:e.trainerIntel}];
+    return arr.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+  })();
+  if(intelEntries.length){
+    h+='<div style="padding:10px 13px 13px;">';
+    h+=intelEntries.map(function(en,i){
+      return'<div style="display:flex;gap:10px;padding:8px 0;'+(i<intelEntries.length-1?'border-bottom:1px solid var(--bdr);':'')+';">'
+        +'<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">'
+          +'<div style="width:7px;height:7px;border-radius:50%;background:var(--blu);margin-top:4px;"></div>'
+          +(i<intelEntries.length-1?'<div style="width:1px;flex:1;background:var(--bdr);margin-top:3px;min-height:20px;"></div>':'')
+        +'</div>'
+        +'<div style="flex:1;min-width:0;">'
+          +(en.date||en.source?'<div style="font-size:10px;font-weight:700;color:var(--blu);margin-bottom:3px;">'+(en.date||'')+(en.source?'<span style="font-weight:400;color:var(--mut);margin-left:5px;">'+esc(en.source)+'</span>':'')+'</div>':'')
+          +'<div style="font-size:12px;color:var(--txt);line-height:1.6;white-space:pre-wrap;">'+esc(en.text||'')+'</div>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+    h+='</div>';
   }
   h+='</div>';
 

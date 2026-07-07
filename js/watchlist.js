@@ -750,12 +750,14 @@ function openWLEditReview(reviewId){
     const d=document.getElementById('rvw-date');if(d)d.value=r.date||'';
     const c=document.getElementById('rvw-course');if(c)c.value=r.course||'';
     const dist=document.getElementById('rvw-dist');if(dist)dist.value=r.distance||'';
+    const cls=document.getElementById('rvw-class');if(cls)cls.value=r.raceClass||'';
     const pos=document.getElementById('rvw-pos');if(pos)pos.value=r.position||'';
     const beaten=document.getElementById('rvw-beaten');if(beaten)beaten.value=r.beatenDistance||'';
     const odds=document.getElementById('rvw-odds');if(odds)odds.value=r.odds||'';
     const mr=document.getElementById('rvw-mr-adj');if(mr)mr.value=r.mrAdjustment||0;
     const notes=document.getElementById('rvw-notes');if(notes)notes.value=r.notes||'';
     const goingPre=document.getElementById('rvw-going-prefill');if(goingPre)goingPre.value=r.going||'';
+    const groundSel=document.getElementById('rvw-ground');if(groundSel)groundSel.value=r.going||r.groundConditions||'';
     // Pre-select toggle buttons
     ['result','verdict','back'].forEach(function(grp){
       const val={result:r.result,verdict:r.verdict}[grp];
@@ -775,8 +777,9 @@ function openWLEditReview(reviewId){
         r.date=document.getElementById('rvw-date').value||r.date;
         r.course=(document.getElementById('rvw-course').value||'').trim()||r.course;
         r.distance=(document.getElementById('rvw-dist')||{value:''}).value.trim();
-        r.groundConditions=(document.getElementById('rvw-ground')||{value:''}).value.trim()||r.groundConditions;
+        r.groundConditions=(document.getElementById('rvw-ground')||{value:''}).value.trim();
         if(r.groundConditions)r.going=r.groundConditions;
+        r.raceClass=(document.getElementById('rvw-class')||{value:''}).value.trim();
         r.position=(document.getElementById('rvw-pos').value||'').trim();
         r.beatenDistance=(document.getElementById('rvw-beaten').value||'').trim();
         r.odds=(document.getElementById('rvw-odds')||{value:''}).value.trim();
@@ -825,17 +828,13 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'<div class="g2">'
       +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" value="'+(raceDist||'')+'" placeholder="e.g. 1m2f"></div>'
       +'<div class="fg"><label>Class</label>'
-      +(raceClass
-        ?'<div style="padding:9px 11px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px;font-weight:700;">Class '+raceClass+'</div><input type="hidden" id="rvw-class" value="'+raceClass+'">'
-        :'<input type="text" id="rvw-class" placeholder="e.g. 4" value="" style="width:100%;padding:9px 11px;background:var(--inp,var(--sur));border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px;box-sizing:border-box;">'
-      )+'</div>'
+        +'<input type="text" id="rvw-class" placeholder="e.g. 4" value="'+(raceClass||'')+'" style="width:100%;padding:9px 11px;background:var(--inp,var(--sur));border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px;box-sizing:border-box;">'
+      +'</div>'
     +'</div>'
     +'<div class="g2">'
       +'<div class="fg"><label>Ground</label>'
-      +(raceGoing
-        ?'<div style="padding:9px 11px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px;">'+raceGoing+'</div>'
-        :'<select id="rvw-ground" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;"><option value="">— Select —</option><option>Firm</option><option>Good to Firm</option><option>Good</option><option>Good to Soft</option><option>Soft</option><option>Heavy</option><option>Standard</option><option>Standard to Slow</option><option>Slow</option></select>'
-      )+'</div>'
+        +'<select id="rvw-ground" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;"><option value="">— Select —</option><option'+(raceGoing==='Firm'?' selected':'')+'>Firm</option><option'+(raceGoing==='Good to Firm'?' selected':'')+'>Good to Firm</option><option'+(raceGoing==='Good'?' selected':'')+'>Good</option><option'+(raceGoing==='Good to Soft'?' selected':'')+'>Good to Soft</option><option'+(raceGoing==='Soft'?' selected':'')+'>Soft</option><option'+(raceGoing==='Heavy'?' selected':'')+'>Heavy</option><option'+(raceGoing==='Standard'?' selected':'')+'>Standard</option><option'+(raceGoing==='Standard to Slow'?' selected':'')+'>Standard to Slow</option><option'+(raceGoing==='Slow'?' selected':'')+'>Slow</option></select>'
+      +'</div>'
     +'</div>'
     +'<div class="fg"><label>Result</label><div class="rvw-btn-group">'
     +[{k:'win',lbl:'Win'},{k:'place',lbl:'Place'},{k:'unplaced',lbl:'Unplaced'},{k:'nr',lbl:'NR'},{k:'missed',lbl:'Missed Target'}].map(function(r){const cols={win:'var(--grn)',place:'var(--gld)',unplaced:'var(--red)',nr:'var(--mut)',missed:'#a78bfa'};return'<button data-result="'+r.k+'" data-grp="result" class="rvw-btn" style="--rvw-col:'+cols[r.k]+'" onclick="wlRvwToggle(this)">'+r.lbl+'</button>';}).join('')

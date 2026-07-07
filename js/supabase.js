@@ -285,8 +285,9 @@ async function _syncProfiles(){
   // since it last loaded. Deletions are handled explicitly in saveWLEntry/delWLEntry.
   if(obs.length) await _supaUpsert('profile_observations',obs);
   if(targets.length) await _supaUpsert('profile_targets',targets);
-  // Remove profiles explicitly deleted locally (profile IDs are stable across devices)
+  // Remove profiles explicitly deleted locally — delete reviews first to satisfy FK constraint
   if(profileIds.length){
+    await _supa('DELETE','horse_reviews',null,'user_id=eq.'+uid+'&profile_id=not.in.('+profileIds.join(',')+')');
     await _supa('DELETE','horse_profiles',null,'user_id=eq.'+uid+'&id=not.in.('+profileIds.join(',')+')');
   }
 }

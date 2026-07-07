@@ -521,7 +521,7 @@ async function supaLoad(){
         verdict:r.verdict||'',mrAdjustment:r.mr_adjustment||0,
         goingConfirmed:r.going_confirmed||'',backNextTime:r.back_next_time||'',
         notes:r.notes||'',source:r.source||'manual',
-        distance:r.distance||r.race_name||'',going:r.going||'',
+        distance:r.distance||'',going:r.going_confirmed||'',groundConditions:r.going_confirmed||'',
         needsReview:r.needs_review||false,
         createdAt:new Date(r.created_at).getTime()
       };});
@@ -632,7 +632,9 @@ async function _syncReviews(){
     result:r.result||null,position:r.position||null,beaten_distance:r.beatenDistance||null,
     odds:r.odds||null,
     verdict:r.verdict||null,mr_adjustment:r.mrAdjustment||0,
-    going_confirmed:r.goingConfirmed||null,back_next_time:r.backNextTime||null,
+    going_confirmed:r.groundConditions||r.going||r.goingConfirmed||null,
+    distance:r.distance||r.raceDist||null,
+    back_next_time:r.backNextTime||null,
     notes:r.notes||null,source:r.source||'manual',
     created_at:r.createdAt?new Date(r.createdAt).toISOString():new Date().toISOString()
   };});

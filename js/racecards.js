@@ -1456,7 +1456,7 @@ async function rcLoadResults(){
                 +'<div style="font-size:11px;color:var(--mut);">'+jock+'</div>'
               +'</div>'
               +'<span class="rc-sp">'+sp+'</span>'
-              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\',\''+esc2(race.going||'')+'\',\''+esc2(time)+'\',\''+esc2(race.date||td())+'\',\''+esc2(race.distance_f||race.distance_round||race.distance||'')+'\',\''+String(pos)+'\',\''+esc2(String(race.race_class||race.class||''))+'\')" class="rc-watch-btn-sm">W</button>'
+              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\',\''+esc2(race.going||'')+'\',\''+esc2(time)+'\',\''+esc2(race.date||td())+'\',\''+esc2(formatDist(race.distance_f||race.distance_round||race.distance||race.dist||''))+'\',\''+String(pos)+'\',\''+esc2(String(race.race_class||race.class||''))+'\')" class="rc-watch-btn-sm">W</button>'
               +'</div>';
           }).join('')
           +'</div>';
@@ -1471,6 +1471,7 @@ function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, 
   var posNum=parseInt(position)||0;
   var resultVal=posNum===1?'win':posNum>=2&&posNum<=3?'place':posNum>3?'unplaced':'watched';
   var cleanClass=String(raceClass||'').trim().replace(/^class\s*/i,'');
+  var cleanGoing=(going||'').replace(/ To /g,' to ').replace(/ to firm/i,' to Firm').replace(/ to soft/i,' to Soft').replace(/ to slow/i,' to Slow');
   openWLForm(null, {
     horse:         horse,
     trainer:       trainer,
@@ -1480,7 +1481,7 @@ function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, 
       course:  course||'',
       race:    raceName||'',
       dist:    distF||'',
-      going:   going||'',
+      going:   cleanGoing,
       cls:     cleanClass,
       result:  resultVal
     }

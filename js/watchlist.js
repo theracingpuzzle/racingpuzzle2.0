@@ -1231,6 +1231,18 @@ function _wlInferFromReview(profileId, review){
   }
 }
 
+function wlBackfillInference(){
+  const reviews=D.reviews||[];
+  if(!reviews.length)return;
+  // Sort oldest first so most recent going/distance ends up as the primary pref
+  const sorted=reviews.slice().sort(function(a,b){return(a.date||'').localeCompare(b.date||'');});
+  sorted.forEach(function(r){
+    if(r.profileId)_wlInferFromReview(r.profileId,r);
+  });
+  save();
+  console.log('[WL] Backfill inference complete —',reviews.length,'reviews processed');
+}
+
 // ── AI HORSE ASSESSMENT ──
 
 
@@ -2125,6 +2137,8 @@ function delWLEntry(id){
   if(!confirm('Delete this profile permanently?'))return;
   // Explicitly delete observations and targets from DB before removing profile
   supaDeleteProfileObsAndTargets(id).catch(function(){});
+  // Remove reviews locally so _syncReviews doesn't try to upsert them against a deleted profile
+  D.reviews=(D.reviews||[]).filter(function(r){return r.profileId!==id;});
   D.watchlist=(D.watchlist||[]).filter(x=>x.id!==id);save();
   document.getElementById('wl-modal').remove();
   renderWatchlist();

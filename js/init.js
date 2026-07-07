@@ -35,6 +35,7 @@ async function bootApp() {
     try {
       await supaLoad();
       if (dot) { dot.style.background = '#34d399'; dot.title = 'Supabase: synced ✅'; }
+      if(!D._inferenceBackfilled&&typeof wlBackfillInference==='function'){D._inferenceBackfilled=true;wlBackfillInference();}
       if (D.settings && D.settings.racingCreds) {
         const rc = typeof D.settings.racingCreds === 'string' ? JSON.parse(D.settings.racingCreds) : D.settings.racingCreds;
         if (rc.username && rc.password) localStorage.setItem(RACING_CREDS_KEY, JSON.stringify(rc));

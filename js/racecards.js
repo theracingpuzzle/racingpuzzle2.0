@@ -1063,6 +1063,7 @@ async function rcSwLoadResults(){
   try{
     const data = await callRacingAPI('results/today/free', {});
     rcSwResultsData = data.results||data.races||[];
+    if(rcSwResultsData.length){const _s=rcSwResultsData[0];console.log('[Results] first race keys:',Object.keys(_s),'dist fields:',{distance_f:_s.distance_f,distance_round:_s.distance_round,distance:_s.distance,dist:_s.dist,distance_furlongs:_s.distance_furlongs,distance_yards:_s.distance_yards});}
     if(stEl) stEl.style.display = 'none';
     autoMatchBetResults(rcSwResultsData);
     if(!rcSwResultsData.length){
@@ -1118,7 +1119,7 @@ function rcSwRaceCard(race, course){
     + (function(){
         var _raceClass=String(race.race_class||race.class||'').trim().replace(/^class\s*/i,'');
         var _g=race.going||'';
-        var _d=formatDist(race.distance_round||race.distance_f||race.distance||'');
+        var _d=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||'');
         var _p=race.prize||race.total_prize_money||'';
         const items=[
           _g?{lbl:'Going',val:_g}:null,
@@ -1160,7 +1161,7 @@ function rcSwRaceCard(race, course){
         const wlEntry = getWL().find(function(w){return(w.horse||'').toLowerCase().trim()===hn;});
         const _rGoing = esc(race.going||race.going_description||'');
         const _rDate  = esc(race.date||td());
-        const _rDist  = esc(race.distance_f||race.distance_round||race.distance||'');
+        const _rDist  = esc(race.distance_f||race.distance_round||race.distance||race.dist||'');
         const _rPos   = String(pos);
         const _eyeSvg='<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>';
         const watchBtn = wlEntry

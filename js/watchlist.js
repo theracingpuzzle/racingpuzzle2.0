@@ -1165,8 +1165,8 @@ function _wlInferFromReview(profileId, review){
   const result=review.result||'';
   const ranWell=result==='win'||result==='place';
   const ranPoor=result==='unplaced';
-  const going=(review.groundConditions||review.going||'').trim();
-  const dist=(review.distance||'').trim();
+  const going=(review.groundConditions||review.going||review.raceGoing||'').trim();
+  const dist=(review.distance||review.raceDist||'').trim();
   let changed=false;
 
   // ── Going inference ──────────────────────────────────────────────────────────
@@ -1197,6 +1197,33 @@ function _wlInferFromReview(profileId, review){
     // Update primary distancePref to most recent win/place distance
     entry.distancePref=dist;
     changed=true;
+  }
+
+  // ── Surface inference ────────────────────────────────────────────────────────
+  if(!entry.surface){
+    const rn=(review.raceName||'').toLowerCase();
+    const rc=(review.raceClass||review.raceGoing||'').toLowerCase();
+    if(/hurdle|chase|national hunt|n\.h\.|nh\b|bumper|steeplechase/.test(rn)){
+      entry.surface='jumps'; changed=true;
+    } else if(/all.weather|polytrack|tapeta|fibresand|a\.w\.|aw\b/.test(rn)){
+      entry.surface='aw'; changed=true;
+    } else if(/class\s*[1-7]|handicap|maiden|novice|conditions|listed|group|grade|stakes|selling|claimer/.test(rn)||/^[1-7]$/.test((review.raceClass||'').trim())){
+      entry.surface='flat'; changed=true;
+    }
+  }
+
+  // ── Race type inference ───────────────────────────────────────────────────────
+  if(!entry.raceType){
+    const rn=(review.raceName||'').toLowerCase();
+    if(/\bgroup\b|\blisted\b|\bgrade\b/.test(rn)){
+      entry.raceType='group'; changed=true;
+    } else if(/\bhandicap\b|\bhcap\b/.test(rn)){
+      entry.raceType='handicap'; changed=true;
+    } else if(/\bmaiden\b/.test(rn)){
+      entry.raceType='maiden'; changed=true;
+    } else if(/\bclaim(er|ing)?\b/.test(rn)){
+      entry.raceType='claimer'; changed=true;
+    }
   }
 
   if(changed){
@@ -1726,10 +1753,6 @@ function openWLForm(id,prefill){
             +'<div class="fg"><label>Current OR</label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(p.currentRating||'')+'"></div>'
             +'<div class="fg"><label style="color:var(--gld);">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="" class="wlf-mr-input"></div>'
           +'</div>'
-          +'<div class="g2">'
-            +'<div class="fg"><label>Surface</label><select id="wlf-surface"><option value="">— Unknown</option><option value="flat">Flat</option><option value="jumps">Jumps / NH</option><option value="aw">All Weather</option></select></div>'
-            +'<div class="fg"><label>Race Type</label><select id="wlf-race-type"><option value="">— Unknown</option><option value="handicap">Handicapper</option><option value="group">Group / Listed</option><option value="maiden">Maiden</option><option value="claimer">Claimer</option></select></div>'
-          +'</div>'
         +'</div>'
       +'</div>'
       // ── Why Am I Watching ──
@@ -2057,7 +2080,7 @@ function saveWLEntry(id){
         date:sDate||td(),
         course:sCourse,raceName:sRace,
         raceDist:sDist,raceClass:sClass,
-        raceGoing:sGoing,
+        raceGoing:sGoing,going:sGoing,groundConditions:sGoing,
         result:sResult||'watched',
         notes:sNotes,
         source:'first-sighting',
@@ -2899,8 +2922,8 @@ function _wlpBuildHTML(e){
       // Row 2: detail chips (position, going, odds etc.) — only if present
       const chips=[];
       if(r.position)chips.push({l:'Pos',v:r.position});
-      if(r.groundConditions)chips.push({l:'Ground',v:r.groundConditions});
-      if(r.goingConfirmed)chips.push({l:'Going',v:r.goingConfirmed});
+      const _rGoing=r.groundConditions||r.going||r.raceGoing||r.goingConfirmed||'';
+      if(_rGoing)chips.push({l:'Ground',v:_rGoing});
       if(r.beatenDistance)chips.push({l:'Beaten',v:r.beatenDistance});
       if(r.odds)chips.push({l:'SP',v:r.odds});
       if(r.mrAdjustment)chips.push({l:'MR',v:(r.mrAdjustment>0?'+':'')+r.mrAdjustment});

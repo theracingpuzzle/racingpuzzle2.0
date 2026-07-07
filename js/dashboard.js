@@ -919,7 +919,7 @@ function renderCkSignals(set){
               +'<div style="width:'+barW.toFixed(1)+'%;height:100%;background:'+barCol+';border-radius:3px;transition:width .5s;"></div>'
             +'</div>'
             +'<span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:13px;color:'+barCol+';min-width:52px;text-align:right;">'+fmt(r.s.pl)+'</span>'
-            +'<span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:13px;color:'+roiCol+';min-width:52px;text-align:right;">'+r.Math.round(s.roi)+'%</span>'
+            +'<span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:13px;color:'+roiCol+';min-width:52px;text-align:right;">'+Math.round(r.s.roi)+'%</span>'
           +'</div>'
         +'</div>';
       }).join('')

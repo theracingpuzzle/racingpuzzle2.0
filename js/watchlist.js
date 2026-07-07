@@ -322,6 +322,68 @@ const WL_FILTERS=[
 
 function _wlToggleCold(){_wlShowCold=!_wlShowCold;renderWLList();}
 
+function wlShowRatedList(){
+  const existing=document.getElementById('wl-rated-modal');if(existing)existing.remove();
+
+  // Profiles with MR set
+  const profileRows=getWL().filter(function(e){return parseFloat(e.myRating)>0;}).slice().sort(function(a,b){return(parseFloat(b.myRating)||0)-(parseFloat(a.myRating)||0);});
+  // Quick ratings for horses without a profile
+  const profileHorseNames=new Set(getWL().map(function(e){return(e.horse||'').toLowerCase().trim();}));
+  const quickRows=Object.entries(D.ratings||{}).filter(function(kv){return!profileHorseNames.has(kv[0]);}).map(function(kv){return{horse:kv[0],mr:kv[1].mr||''};}).sort(function(a,b){return(parseFloat(b.mr)||0)-(parseFloat(a.mr)||0);});
+
+  const modal=document.createElement('div');
+  modal.id='wl-rated-modal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;';
+
+  let rows='';
+  if(profileRows.length){
+    rows+='<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:10px 16px 6px;">Profiles with MR</div>';
+    rows+=profileRows.map(function(e){
+      const or=e.currentRating?'<span style="font-size:11px;color:var(--mut);margin-left:4px;">OR '+e.currentRating+'</span>':'';
+      const diff=parseFloat(e.myRating)-(parseFloat(e.currentRating)||0);
+      const diffStr=diff>0?'<span style="font-size:10px;color:#4ade80;margin-left:4px;">+'+diff+'</span>':diff<0?'<span style="font-size:10px;color:#f87171;margin-left:4px;">'+diff+'</span>':'';
+      return'<div onclick="document.getElementById(\'wl-rated-modal\').remove();openWLProfile(\''+e.id+'\')" style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--bdr);cursor:pointer;active:background:var(--sur2);">'
+        +'<div>'
+          +'<div style="font-size:14px;font-weight:700;color:var(--txt);">'+e.horse+'</div>'
+          +(e.trainer?'<div style="font-size:11px;color:var(--mut);">'+e.trainer+'</div>':'')
+        +'</div>'
+        +'<div style="display:flex;align-items:center;gap:4px;">'
+          +or+diffStr
+          +'<span style="font-size:16px;font-weight:800;color:#d97706;min-width:36px;text-align:right;">'+e.myRating+'</span>'
+          +'<span style="font-size:10px;font-weight:700;color:var(--mut);">MR</span>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+  }
+  if(quickRows.length){
+    rows+='<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:10px 16px 6px;">Quick Ratings (no profile)</div>';
+    rows+=quickRows.map(function(q){
+      return'<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--bdr);">'
+        +'<div style="font-size:14px;font-weight:700;color:var(--txt);text-transform:capitalize;">'+q.horse+'</div>'
+        +'<div style="display:flex;align-items:center;gap:4px;">'
+          +'<span style="font-size:16px;font-weight:800;color:#d97706;">'+q.mr+'</span>'
+          +'<span style="font-size:10px;font-weight:700;color:var(--mut);">MR</span>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+  }
+  if(!profileRows.length&&!quickRows.length){
+    rows='<div style="text-align:center;padding:40px 20px;font-size:14px;color:var(--mut);">No rated horses yet.<br>Use the MR field on a profile or tap MR on the racecard.</div>';
+  }
+
+  modal.innerHTML=
+    '<div style="width:100%;max-width:480px;max-height:80vh;background:var(--sur);border-radius:16px 16px 0 0;overflow:hidden;display:flex;flex-direction:column;">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;">'
+        +'<div style="font-size:15px;font-weight:800;color:var(--txt);">Rated Horses <span style="font-size:13px;font-weight:400;color:var(--mut);">'+((profileRows.length+quickRows.length))+' total</span></div>'
+        +'<button onclick="document.getElementById(\'wl-rated-modal\').remove()" style="background:none;border:none;font-size:20px;color:var(--mut);cursor:pointer;padding:0 4px;">✕</button>'
+      +'</div>'
+      +'<div style="overflow-y:auto;-webkit-overflow-scrolling:touch;">'+rows+'</div>'
+    +'</div>';
+
+  document.body.appendChild(modal);
+  modal.addEventListener('click',function(ev){if(ev.target===modal)modal.remove();});
+}
+
 function setWLFilter(id){
   _wlFilter=(_wlFilter===id)?null:id; // toggle off if already active
   renderWLList();
@@ -513,7 +575,7 @@ function renderWLList(){
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--gld2);">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:#10b981;">'+readyCount+'</div><div class="wll-stat-l">Ready</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--ora);">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
-    +'<div class="wll-stat"><div class="wll-stat-n" style="color:#d97706;">'+totalMR+'</div><div class="wll-stat-l">Rated</div></div>'
+    +'<div class="wll-stat" onclick="wlShowRatedList()" style="cursor:pointer;" title="View all rated horses"><div class="wll-stat-n" style="color:#d97706;">'+totalMR+'</div><div class="wll-stat-l" style="color:#d97706;">Rated ›</div></div>'
   +'</div>';
   // Cold toggle
   if(coldCount){

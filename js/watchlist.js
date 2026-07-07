@@ -840,7 +840,7 @@ function openWLEditReview(reviewId){
         r.course=(document.getElementById('rvw-course').value||'').trim()||r.course;
         r.distance=(document.getElementById('rvw-dist')||{value:''}).value.trim();
         r.groundConditions=(document.getElementById('rvw-ground')||{value:''}).value.trim();
-        if(r.groundConditions)r.going=r.groundConditions;
+        r.going=r.groundConditions||(document.getElementById('rvw-going-prefill')||{value:''}).value||r.going||'';
         r.raceClass=(document.getElementById('rvw-class')||{value:''}).value.trim();
         r.position=(document.getElementById('rvw-pos').value||'').trim();
         r.beatenDistance=(document.getElementById('rvw-beaten').value||'').trim();
@@ -849,7 +849,6 @@ function openWLEditReview(reviewId){
         r.verdict=_rvwGet('verdict')||r.verdict;
         r.mrAdjustment=parseInt((document.getElementById('rvw-mr-adj')||{value:0}).value)||0;
         r.notes=(document.getElementById('rvw-notes').value||'').trim();
-        r.going=(document.getElementById('rvw-going-prefill')||{value:''}).value;
         r.raceName=(document.getElementById('rvw-racename-prefill')||{value:''}).value.trim()||r.distance||'';
         const idx=(D.reviews||[]).findIndex(function(x){return x.id===reviewId;});
         if(idx>-1)D.reviews[idx]=r;

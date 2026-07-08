@@ -852,7 +852,8 @@ function openWLEditReview(reviewId){
         r.raceName=(document.getElementById('rvw-racename-prefill')||{value:''}).value.trim()||r.distance||'';
         const idx=(D.reviews||[]).findIndex(function(x){return x.id===reviewId;});
         if(idx>-1)D.reviews[idx]=r;
-        save();
+        saveLocal();
+        if(typeof _supaUpsertNow==='function')_supaUpsertNow();else save();
         document.getElementById('wl-review-modal').remove();
         if(document.getElementById('wlp-modal'))openWLProfile(r.profileId);
       };
@@ -887,9 +888,17 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
       +'<div class="fg"><label>Course</label><input type="text" id="rvw-course" value="'+(course||'')+'" placeholder="e.g. Haydock"></div>'
     +'</div>'
     +'<div class="g2">'
-      +'<div class="fg"><label>Distance</label><input type="text" id="rvw-dist" value="'+(raceDist||'')+'" placeholder="e.g. 1m2f"></div>'
+      +'<div class="fg"><label>Distance</label>'
+        +'<select id="rvw-dist" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;">'
+        +'<option value="">— Select —</option>'
+        +['5f','5f110y','6f','6f110y','7f','7f110y','1m','1m1f','1m2f','1m3f','1m4f','1m6f','2m','2m1f','2m2f','2m4f','2m6f','3m','3m2f'].map(function(d){return'<option'+(raceDist===d?' selected':'')+'>'+d+'</option>';}).join('')
+        +'</select>'
+      +'</div>'
       +'<div class="fg"><label>Class</label>'
-        +'<input type="text" id="rvw-class" placeholder="e.g. 4" value="'+(raceClass||'')+'" style="width:100%;padding:9px 11px;background:var(--inp,var(--sur));border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:14px;box-sizing:border-box;">'
+        +'<select id="rvw-class" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;">'
+        +'<option value="">— Select —</option>'
+        +['1','2','3','4','5','6','7','Group 1','Group 2','Group 3','Listed','Novice','Maiden','Handicap','Conditions'].map(function(c){return'<option'+(raceClass===c?' selected':'')+'>'+c+'</option>';}).join('')
+        +'</select>'
       +'</div>'
     +'</div>'
     +'<div class="g2">'

@@ -2819,11 +2819,11 @@ function _wlpBuildHTML(e){
     const idealType=e.raceType?typeMap[e.raceType]||e.raceType:null;
 
     const conds=[
-      {label:'Ground',  value:idealGoing,  col:'#4ade80'},
-      {label:'Distance',value:idealDist,   col:'#38bdf8'},
-      {label:'Class',   value:idealClass,  col:'#f59e0b', note:classNote},
-      {label:'Surface', value:idealSurface,col:'#a78bfa'},
-      {label:'Type',    value:idealType,   col:'#fb7185'},
+      {label:'Ground',  value:idealGoing,  col:'var(--grn)'},
+      {label:'Distance',value:idealDist,   col:'var(--blu)'},
+      {label:'Class',   value:idealClass,  col:'var(--gld)', note:classNote},
+      {label:'Surface', value:idealSurface,col:'var(--pur)'},
+      {label:'Type',    value:idealType,   col:'var(--ora)'},
     ];
     const hasAny=conds.some(function(c){return c.value;});
     h+='<div class="wlp-section">';

@@ -633,13 +633,13 @@ async function checkWatchlistRunners(races){
         const suitsGoing=_goingPrefs.some(function(g){return _normGoing(g)===_normGoing(_raceGoing);});
         const poorCount=_goingPoor[_raceGoing]||_goingPoor[Object.keys(_goingPoor).find(function(k){return _normGoing(k)===_normGoing(_raceGoing);})||'']||0;
         if(suitsGoing){
-          goingChipStyle='background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.4);color:#4ade80;';
+          goingChipStyle='background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);';
           goingIcon='✓ ';
         } else if(poorCount>=2){
-          goingChipStyle='background:rgba(220,38,38,.12);border-color:rgba(220,38,38,.35);color:#f87171;';
+          goingChipStyle='background:rgba(220,38,38,.1);border-color:rgba(220,38,38,.3);color:var(--red);';
           goingIcon='✗ ';
         } else if(poorCount===1){
-          goingChipStyle='background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.3);color:#fb923c;';
+          goingChipStyle='background:rgba(234,88,12,.1);border-color:rgba(234,88,12,.3);color:var(--ora);';
           goingIcon='? ';
         }
       }
@@ -651,7 +651,7 @@ async function checkWatchlistRunners(races){
         const suitsDistPref=_distancePref&&_distMatch(_distancePref,_raceDist);
         const suitsDistWins=_distanceWins.some(function(d){return _distMatch(d,_raceDist);});
         if(suitsDistPref||suitsDistWins){
-          distChipStyle='background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.4);color:#4ade80;';
+          distChipStyle='background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);';
           distIcon='✓ ';
         }
       }
@@ -664,10 +664,10 @@ async function checkWatchlistRunners(races){
         const normClass=function(s){return s.toLowerCase().replace(/\s+/g,'');};
         if(normClass(_classPref)===normClass(raceType)||
            ((_classPref==='Group'||_classPref==='Class 1')&&/group|grade|listed|g[123]|class\s*[12]/i.test(raceType))){
-          classChipStyle='background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.4);color:#4ade80;';
+          classChipStyle='background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);';
           classIcon='✓ ';
         } else if(_classPref){
-          classChipStyle='background:rgba(220,38,38,.12);border-color:rgba(220,38,38,.35);color:#f87171;';
+          classChipStyle='background:rgba(220,38,38,.1);border-color:rgba(220,38,38,.3);color:var(--red);';
           classIcon='✗ ';
         }
       }
@@ -695,14 +695,14 @@ async function checkWatchlistRunners(races){
       const matchBadge=_total>=2?(function(){
         const allGood=_matched===_total;
         const someGood=_matched>0;
-        const bg=allGood?'rgba(22,163,74,.18)':someGood?'rgba(245,158,11,.15)':'rgba(220,38,38,.12)';
-        const col=allGood?'#4ade80':someGood?'#fbbf24':'#f87171';
-        const bdr=allGood?'rgba(22,163,74,.4)':someGood?'rgba(245,158,11,.35)':'rgba(220,38,38,.3)';
+        const bg=allGood?'rgba(22,163,74,.12)':someGood?'rgba(217,119,6,.12)':'rgba(220,38,38,.1)';
+        const col=allGood?'var(--grn)':someGood?'var(--gld)':'var(--red)';
+        const bdr=allGood?'rgba(22,163,74,.35)':someGood?'rgba(217,119,6,.35)':'rgba(220,38,38,.3)';
         return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">'
           +'<span style="font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:'+bg+';color:'+col+';border:1px solid '+bdr+';">'+_matched+'/'+_total+' CONDITIONS MATCHED</span>'
           +'<span style="font-size:11px;font-weight:800;color:'+col+';">'+_pct+'%</span>'
           +'<div style="display:flex;gap:3px;align-items:center;">'
-          +_conditions.map(function(c){return'<span title="'+c.label+'" style="width:7px;height:7px;border-radius:50%;background:'+(c.ok?'#4ade80':'rgba(255,255,255,.18)')+';flex-shrink:0;"></span>';}).join('')
+          +_conditions.map(function(c){return'<span title="'+c.label+'" style="width:7px;height:7px;border-radius:50%;background:'+(c.ok?'var(--grn)':'var(--bdr)')+';flex-shrink:0;"></span>';}).join('')
           +'</div>'
         +'</div>';
       })():'';

@@ -279,15 +279,27 @@ function rcSwRenderCourse(listEl){
 
 // ── Race class chip (shared) ──────────────────────────────────────────────────
 function _rcClassChip(raceName, raceClass){
-  const _n=raceName||'';const _c=String(raceClass||'').trim().replace(/^class\s*/i,'');
-  const isG1=/group\s*1|\bg1\b/i.test(_n)||_c==='1';
-  const isG2=/group\s*2|\bg2\b/i.test(_n)||_c==='2';
-  const isG3=/group\s*3|\bg3\b/i.test(_n)||_c==='3';
-  const isL=/listed/i.test(_n);
-  const lbl=isG1?'G1':isG2?'G2':isG3?'G3':isL?'Listed':(_c?'Class '+_c:'');
-  if(!lbl)return'';
-  const col=isG1||isG2?'#f59e0b':isG3||isL?'#a78bfa':'rgba(255,255,255,.55)';
-  return'<span style="font-size:9px;font-weight:800;letter-spacing:.04em;padding:1px 5px;border-radius:3px;background:'+col+'18;border:1px solid '+col+'40;color:'+col+';flex-shrink:0;">'+lbl+'</span>';
+  const _n=raceName||'';
+  const _c=String(raceClass||'').trim().replace(/^class\s*/i,'');
+  // Detect group/listed from race name only
+  const isG1=/group\s*1|\bg1\b/i.test(_n);
+  const isG2=/group\s*2|\bg2\b/i.test(_n);
+  const isG3=/group\s*3|\bg3\b/i.test(_n);
+  const isL=/\blisted\b/i.test(_n);
+  const chips=[];
+  // Class chip — always show if we have a class number
+  if(_c){
+    chips.push({lbl:'C'+_c,col:'rgba(255,255,255,.55)'});
+  }
+  // Group/Listed chip — from race name
+  if(isG1)chips.push({lbl:'G1',col:'#f59e0b'});
+  else if(isG2)chips.push({lbl:'G2',col:'#f59e0b'});
+  else if(isG3)chips.push({lbl:'G3',col:'#a78bfa'});
+  else if(isL)chips.push({lbl:'Listed',col:'#a78bfa'});
+  if(!chips.length)return'';
+  return chips.map(function(ch){
+    return'<span style="font-size:9px;font-weight:800;letter-spacing:.04em;padding:1px 5px;border-radius:3px;background:'+ch.col+'18;border:1px solid '+ch.col+'40;color:'+ch.col+';flex-shrink:0;">'+ch.lbl+'</span>';
+  }).join(' ');
 }
 
 // ── Course strike-rate badge ───────────────────────────────────────────────────

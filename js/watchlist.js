@@ -2762,9 +2762,92 @@ function _wlpBuildHTML(e){
   // ── SCROLLABLE CONTENT ────────────────────────────────────────────────────
   h+='<div class="wlp-scroll-body">';
   h+='<div class="wlp-sections-grid">';
-  // SECTION 1: WHY LOGGED
+
+  // SECTION 1: IDEAL CONDITIONS
+  (function(){
+    const NUMERIC_CLASSES=['1','2','3','4','5','6','7'];
+    const GOING_ORDER=['Firm','Good to Firm','Good','Good to Soft','Soft','Heavy','Standard','Standard to Slow','Slow'];
+    const wpReviews=horseReviews.filter(function(r){return r.result==='win'||r.result==='place';});
+    const allReviews=horseReviews;
+
+    // ── CLASS: range based on numeric classes in win/place reviews ──────────
+    var idealClass=null,classNote=null;
+    const winClasses=wpReviews.map(function(r){return(r.raceClass||'').trim();}).filter(function(c){return NUMERIC_CLASSES.indexOf(c)>-1;});
+    if(winClasses.length){
+      const nums=winClasses.map(Number).sort(function(a,b){return a-b;});
+      const bestWin=nums[0]; // lowest number = highest quality class won
+      const worstWin=nums[nums.length-1];
+      // Project one step above best win if they've raced at a higher class
+      const allClasses=allReviews.map(function(r){return parseInt(r.raceClass||'');}).filter(function(n){return !isNaN(n);});
+      const higherAttempted=allClasses.some(function(n){return n<bestWin;});
+      const projCeil=higherAttempted&&bestWin>1?bestWin-1:bestWin;
+      idealClass=projCeil===worstWin?'Class '+projCeil:'Class '+projCeil+'–'+worstWin;
+      if(projCeil<bestWin)classNote='Projected – stepped up in class';
+    } else {
+      // Non-numeric class (Group, Listed, Maiden etc) — just list unique win classes
+      const uniq={};wpReviews.forEach(function(r){if(r.raceClass)uniq[r.raceClass]=1;});
+      const keys=Object.keys(uniq);if(keys.length)idealClass=keys.join(', ');
+    }
+
+    // ── DISTANCE: winning distances + adjacent range ─────────────────────────
+    var idealDist=null;
+    const winDists=wpReviews.map(function(r){return(r.distance||'').trim();}).filter(Boolean);
+    if(winDists.length){
+      const uniq={};winDists.forEach(function(d){uniq[d]=(uniq[d]||0)+1;});
+      idealDist=Object.keys(uniq).sort(function(a,b){return uniq[b]-uniq[a];}).join(', ');
+    } else if(e.distancePref){
+      idealDist=e.distancePref;
+    }
+
+    // ── GOING: winning going conditions ─────────────────────────────────────
+    var idealGoing=null;
+    const winGoing=wpReviews.map(function(r){return(r.groundConditions||r.going||'').trim();}).filter(Boolean);
+    if(winGoing.length){
+      // Sort by going order (firmest first) and dedupe
+      const uniq={};winGoing.forEach(function(g){uniq[g]=1;});
+      const sorted=GOING_ORDER.filter(function(g){return uniq[g];});
+      const others=Object.keys(uniq).filter(function(g){return GOING_ORDER.indexOf(g)<0;});
+      idealGoing=[...sorted,...others].join(', ')||null;
+    } else if(e.goingPrefs&&e.goingPrefs.length){
+      idealGoing=e.goingPrefs.slice(0,3).join(', ');
+    }
+
+    // ── SURFACE + TYPE ───────────────────────────────────────────────────────
+    const surfaceMap={flat:'Flat',jumps:'Jumps',aw:'AW'};
+    const idealSurface=e.surface?surfaceMap[e.surface]||e.surface:null;
+    const typeMap={handicap:'Handicap',group:'Group/Listed',maiden:'Maiden',claimer:'Claimer'};
+    const idealType=e.raceType?typeMap[e.raceType]||e.raceType:null;
+
+    const conds=[
+      {label:'Ground',  value:idealGoing,  col:'#4ade80'},
+      {label:'Distance',value:idealDist,   col:'#38bdf8'},
+      {label:'Class',   value:idealClass,  col:'#f59e0b', note:classNote},
+      {label:'Surface', value:idealSurface,col:'#a78bfa'},
+      {label:'Type',    value:idealType,   col:'#fb7185'},
+    ];
+    const hasAny=conds.some(function(c){return c.value;});
+    h+='<div class="wlp-section">';
+    h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">1</div><span class="wlp-section-title">Ideal Conditions</span></div></div>';
+    if(hasAny){
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--bdr);">';
+      conds.forEach(function(c){
+        h+='<div style="background:var(--sur);padding:11px 13px;">'
+          +'<div style="font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);margin-bottom:4px;">'+c.label+'</div>'
+          +'<div style="font-size:13px;font-weight:800;color:'+(c.value?c.col:'var(--mut)')+';">'+(c.value||'—')+'</div>'
+          +(c.note?'<div style="font-size:9px;color:var(--mut);margin-top:2px;">'+c.note+'</div>':'')
+          +'</div>';
+      });
+      h+='</div>';
+      h+='<div style="padding:8px 13px;font-size:10px;color:var(--mut);">Based on '+wpReviews.length+' win'+(wpReviews.length!==1?'s/places':'/place')+' from '+allReviews.length+' race'+(allReviews.length!==1?'s':'')+'</div>';
+    } else {
+      h+='<div style="padding:16px 13px;font-size:12px;color:var(--mut);">Add race reviews with results to build ideal conditions automatically.</div>';
+    }
+    h+='</div>';
+  })();
+
+  // SECTION 2: WHY LOGGED
   h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">1</div><span class="wlp-section-title">Why Logged</span></div>';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">2</div><span class="wlp-section-title">Why Logged</span></div>';
   h+='<span class="wlp-section-action" onclick="'+editFn+'">Edit</span></div>';
   h+='<div class="wlp-why-grid">';
   WHY_ORDER.forEach(function(rid){
@@ -2793,9 +2876,9 @@ function _wlpBuildHTML(e){
   }
   h+='</div>';
 
-  // SECTION 2: RATINGS
+  // SECTION 3: RATINGS
   h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">2</div><span class="wlp-section-title">Ratings</span></div>';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">3</div><span class="wlp-section-title">Ratings</span></div>';
   if((e.orHistory||[]).length>1)h+='<span class="wlp-section-action">History ›</span>';
   h+='</div>';
   h+='<div class="wlp-ratings-row">';
@@ -2813,7 +2896,7 @@ function _wlpBuildHTML(e){
 
   // Section 3: Targets
   h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">3</div><span class="wlp-section-title" style="font-size:11px;">Targets</span></div>';
+  h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">4</div><span class="wlp-section-title" style="font-size:11px;">Targets</span></div>';
   h+='<span class="wlp-section-action" style="font-size:16px;" onclick="'+editFn+'">+</span></div>';
   if(targets.length){
     const todayStr=td();
@@ -2919,7 +3002,7 @@ function _wlpBuildHTML(e){
   const VERDICT_META={upgrade:{col:'#4ade80',label:'Upgrade ↑'},hold:{col:'#60a5fa',label:'Hold →'},downgrade:{col:'#f87171',label:'Downgrade ↓'}};
   const RESULT_COL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'#3a3a5c',missed:'#a78bfa'};
   h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">4</div><span class="wlp-section-title">Race Reviews</span></div>';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Race Reviews</span></div>';
   h+='<span class="wlp-section-action" onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\'\')">Add +</span></div>';
   if(profileReviews.length){
     profileReviews.forEach(function(r){
@@ -2966,38 +3049,6 @@ function _wlpBuildHTML(e){
   h+='</div>';
 
   h+='</div>'; // wlp-sections-grid
-
-  // SECTION 6: CONDITIONS (full width)
-  h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Conditions</span></div><span class="wlp-section-action" onclick="'+editFn+'">Edit</span></div>';
-  h+='<div class="wlp-cond-grid" style="grid-template-columns:repeat('+condItems.length+',1fr);border-bottom:1px solid var(--bdr);">';
-  condItems.forEach(function(c){
-    const isDash=c.value==='—'||c.value==='Any';
-    h+='<div class="wlp-cond-cell"><span class="wlp-cond-icon">'+c.icon+'</span><span class="wlp-cond-label">'+c.label+'</span><span class="wlp-cond-val" style="color:'+(isDash?'#3a3a5c':c.color)+';">'+esc(c.value)+'</span></div>';
-  });
-  h+='</div>';
-  const intelEntries=(function(){
-    var arr=e.intelEntries||[];
-    if(!arr.length&&e.trainerIntel)arr=[{id:'legacy',date:'',source:'',text:e.trainerIntel}];
-    return arr.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
-  })();
-  if(intelEntries.length){
-    h+='<div style="padding:10px 13px 13px;">';
-    h+=intelEntries.map(function(en,i){
-      return'<div style="display:flex;gap:10px;padding:8px 0;'+(i<intelEntries.length-1?'border-bottom:1px solid var(--bdr);':'')+';">'
-        +'<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">'
-          +'<div style="width:7px;height:7px;border-radius:50%;background:var(--blu);margin-top:4px;"></div>'
-          +(i<intelEntries.length-1?'<div style="width:1px;flex:1;background:var(--bdr);margin-top:3px;min-height:20px;"></div>':'')
-        +'</div>'
-        +'<div style="flex:1;min-width:0;">'
-          +(en.date||en.source?'<div style="font-size:10px;font-weight:700;color:var(--blu);margin-bottom:3px;">'+(en.date||'')+(en.source?'<span style="font-weight:400;color:var(--mut);margin-left:5px;">'+esc(en.source)+'</span>':'')+'</div>':'')
-          +'<div style="font-size:12px;color:var(--txt);line-height:1.6;white-space:pre-wrap;">'+esc(en.text||'')+'</div>'
-        +'</div>'
-      +'</div>';
-    }).join('');
-    h+='</div>';
-  }
-  h+='</div>';
 
   // AI ASSESSMENT SECTION
   if(e.aiAssessment){

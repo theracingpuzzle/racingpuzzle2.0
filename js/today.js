@@ -599,20 +599,19 @@ async function checkWatchlistRunners(races){
       // Derive race type from name + explicit class number
       const _rn2=a.raceName||'';
       const _rc=String(a.raceClass||'').trim().replace(/^class\s*/i,'');
+      // Race type — from race name only, never conflated with class number
       let raceType='';
-      let raceClassLabel=''; // the numeric class label shown separately
-      if(/\bGroup\s*1\b|\bGr(ade)?\s*1\b|\bG1\b/i.test(_rn2)||_rc==='1')raceType='G1';
-      else if(/\bGroup\s*2\b|\bGr(ade)?\s*2\b|\bG2\b/i.test(_rn2)||_rc==='2')raceType='G2';
-      else if(/\bGroup\s*3\b|\bGr(ade)?\s*3\b|\bG3\b/i.test(_rn2)||_rc==='3')raceType='G3';
+      if(/\bGroup\s*1\b|\bGr(ade)?\s*1\b|\bG1\b/i.test(_rn2))raceType='G1';
+      else if(/\bGroup\s*2\b|\bGr(ade)?\s*2\b|\bG2\b/i.test(_rn2))raceType='G2';
+      else if(/\bGroup\s*3\b|\bGr(ade)?\s*3\b|\bG3\b/i.test(_rn2))raceType='G3';
       else if(/\bListed\b/i.test(_rn2))raceType='Listed';
       else if(/\bHandicap\b|\bHcap\b|H'cap/i.test(_rn2))raceType='Handicap';
       else if(/\bNovice\b/i.test(_rn2))raceType='Novice';
       else if(/\bMaiden\b/i.test(_rn2))raceType='Maiden';
       else if(/\bChase\b/i.test(_rn2))raceType='Chase';
       else if(/\bHurdle\b/i.test(_rn2))raceType='Hurdle';
-      // Always show class number when available (as separate chip)
-      if(_rc&&!/^[123]$/.test(_rc))raceClassLabel='Class '+_rc;
-      else if(_rc&&!raceType)raceClassLabel='Class '+_rc;
+      // Class number always shown separately when available
+      const raceClassLabel=_rc?'C'+_rc:'';
       // ── Conditions suitability chips ─────────────────────────────────────────
       const _wle=a.wlEntry||{};
       const _goingPrefs=Array.isArray(_wle.goingPrefs)?_wle.goingPrefs:[];
@@ -709,24 +708,34 @@ async function checkWatchlistRunners(races){
       })():'';
 
       const chipBase='font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;border:1px solid var(--bdr);background:rgba(255,255,255,.06);color:var(--mut);';
+      // Icons after the word
       const chipGoing=_raceGoing
-        ?'<span style="'+chipBase+(goingChipStyle||'')+'" title="Going">'+goingIcon+_raceGoing+'</span>'
+        ?'<span style="'+chipBase+(goingChipStyle||'')+'" title="Going">'+_raceGoing+(goingIcon?'<span style="margin-left:3px;">'+goingIcon.trim()+'</span>':'')+'</span>'
         :'';
       const chipDist=_raceDist
-        ?'<span style="'+chipBase+(distChipStyle||'')+'" title="Distance">'+distIcon+_raceDist+'</span>'
+        ?'<span style="'+chipBase+(distChipStyle||'')+'" title="Distance">'+_raceDist+(distIcon?'<span style="margin-left:3px;">'+distIcon.trim()+'</span>':'')+'</span>'
         :'';
       const chipClass=raceType
-        ?'<span style="'+chipBase+(classChipStyle||'')+'">'+classIcon+raceType+'</span>'
+        ?'<span style="'+chipBase+(classChipStyle||'')+'">'+raceType+(classIcon?'<span style="margin-left:3px;">'+classIcon.trim()+'</span>':'')+'</span>'
         :'';
       const chipClassNum=raceClassLabel
         ?'<span style="'+chipBase+'">'+raceClassLabel+'</span>'
         :'';
-      const detailLine=(chipClass||chipClassNum||chipGoing||chipDist)
+      const detailLine=(chipClassNum||chipClass||chipGoing||chipDist)
         ?'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:3px;">'
-          +chipClass+chipClassNum+chipGoing+chipDist
+          +chipClassNum+chipClass+chipGoing+chipDist
           +'</div>'
         :'';
-      const jockeyLine=a.jockey?'<div class="t-muted" style="font-size:13px;margin-top:2px;">J: '+fmtJockey(a.jockey)+'</div>':'';
+      // Ideal conditions summary under jockey
+      const _idealConds=(function(){
+        const parts=[];
+        if(_wle.goingPrefs&&_wle.goingPrefs.length)parts.push('Ground: '+_wle.goingPrefs.slice(0,2).join(', '));
+        const _dp=_wle.distancePref||(_wle.distanceWins&&_wle.distanceWins[0])||'';
+        if(_dp)parts.push('Dist: '+_dp);
+        if(_wle.surface)parts.push(({flat:'Flat',jumps:'Jumps',aw:'AW'}[_wle.surface]||_wle.surface));
+        return parts.length?'<div style="font-size:11px;color:var(--mut);margin-top:2px;">Ideal: '+parts.join(' · ')+'</div>':'';
+      })();
+      const jockeyLine=(a.jockey?'<div class="t-muted" style="font-size:13px;margin-top:2px;">J: '+fmtJockey(a.jockey)+'</div>':'')+_idealConds;
       // Primary action: review (if available/past) or race (if upcoming)
       const primaryBtn=reviewBtn
         ?reviewBtn

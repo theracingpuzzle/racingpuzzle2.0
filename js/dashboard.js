@@ -205,12 +205,48 @@ let _statsCache = null; // { key, html }
 function _statsCacheKey(){
   const scope = window._statsScope||'both';
   const own   = window._ownStudyOnly?'1':'0';
+  const mon   = window._statsMonth||'all';
   const rBets = D.bets||[];
   const vBets = (D.vBank&&D.vBank.bets)||[];
-  // Fast checksum: sum of (returns+stake) values catches result changes on any bet
   const rSum  = rBets.reduce((a,b)=>a+(parseFloat(b.returns)||0)+(parseFloat(b.stake)||0),0).toFixed(2);
   const vSum  = vBets.reduce((a,b)=>a+(parseFloat(b.returns)||0)+(parseFloat(b.stake)||0),0).toFixed(2);
-  return scope+'|'+own+'|'+rBets.length+'|'+vBets.length+'|'+rSum+'|'+vSum;
+  return scope+'|'+own+'|'+mon+'|'+rBets.length+'|'+vBets.length+'|'+rSum+'|'+vSum;
+}
+
+function _buildMonthBar(){
+  const bar=document.getElementById('st-month-bar');
+  if(!bar)return;
+  const scope=window._statsScope||'both';
+  const rBets=D.bets||[];
+  const vBets=(D.vBank&&D.vBank.bets)||[];
+  const allBets=scope==='real'?rBets:scope==='virt'?vBets:[...rBets,...vBets];
+  // Collect unique YYYY-MM values from settled bets
+  const months={};
+  allBets.forEach(function(b){
+    const d=b.date||b.bet_date||'';
+    if(d&&d.length>=7){const m=d.slice(0,7);months[m]=(months[m]||0)+1;}
+  });
+  const sorted=Object.keys(months).sort().reverse();
+  if(!sorted.length){bar.style.display='none';return;}
+  bar.style.display='flex';
+  const cur=window._statsMonth||'all';
+  const btnBase='flex-shrink:0;padding:4px 11px;border-radius:20px;border:1px solid var(--bdr);font-size:11px;font-weight:700;letter-spacing:.04em;cursor:pointer;white-space:nowrap;font-family:var(--font);transition:background .12s;';
+  const activeSt='background:var(--navy);color:#fff;border-color:var(--navy);';
+  const inactiveSt='background:var(--sur2);color:var(--mut);';
+  let html='<button onclick="setStatsMonth(\'all\')" style="'+btnBase+(cur==='all'?activeSt:inactiveSt)+'">All time</button>';
+  sorted.forEach(function(m){
+    const [y,mo]=m.split('-');
+    const lbl=new Date(parseInt(y),parseInt(mo)-1,1).toLocaleDateString('en-GB',{month:'short',year:'2-digit'});
+    html+='<button onclick="setStatsMonth(\''+m+'\')" style="'+btnBase+(cur===m?activeSt:inactiveSt)+'">'+lbl+'</button>';
+  });
+  bar.innerHTML=html;
+}
+
+function setStatsMonth(month){
+  window._statsMonth=month;
+  invalidateStatsCache();
+  _buildMonthBar();
+  renderStats();
 }
 
 function invalidateStatsCache(){ _statsCache=null; }
@@ -253,8 +289,10 @@ function renderStats(){
     return;
   }
   const scope=window._statsScope||'both';
-  const vbBets=getVBank().bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
-  const realBets=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr';});
+  const _monthFilter=window._statsMonth||'all';
+  const _matchMonth=function(b){if(_monthFilter==='all')return true;const d=b.date||b.bet_date||'';return d.slice(0,7)===_monthFilter;};
+  const vbBets=getVBank().bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr'&&_matchMonth(b);});
+  const realBets=D.bets.filter(function(b){return b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr'&&_matchMonth(b);});
   // 'set' = bets used for all breakdowns (source, confidence, track etc.)
   const set=scope==='real'?realBets:scope==='virt'?vbBets:[...realBets,...vbBets.map(function(b){return Object.assign({},b,{_virt:true});})];
   const ownStudyOnly=window._ownStudyOnly||false;
@@ -262,6 +300,7 @@ function renderStats(){
   // Headline metrics use the scope-matched bets, filtered by own study if active
   const _allStatBets=scope==='virt'?vbBets:scope==='real'?realBets:[...realBets,...vbBets];
   const statBets=ownStudyOnly?_allStatBets.filter(b=>OWN_SOURCES.includes(b.source||'')):_allStatBets;
+  _buildMonthBar();
   const disciplineSet=ownStudyOnly?set.filter(b=>OWN_SOURCES.includes(b.source||'')):set;
   const wins=statBets.filter(b=>b.result==='win');
   const places=statBets.filter(b=>b.result==='place'&&(b.betType==='ew'||b.betType==='place'));

@@ -1538,8 +1538,8 @@ function rcQuickRate(event, horse, or_val){
       +'<input id="qr-note" type="text" value="'+(existing.note||'')+'" placeholder="e.g. Underrated by handicapper…" style="width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;">'
     +'</div>'
     +'<div style="display:flex;gap:8px;">'
-      +'<button onclick="rcSaveQuickRate(\''+horse.replace(/'/g,"\\'")+'\',' +(or_val||'\'\'')+ ')" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--gld);color:#000;font-size:14px;font-weight:800;cursor:pointer;">★ Save Rating</button>'
-      +'<button onclick="rcPromoteToProfile(\''+horse.replace(/'/g,"\\'")+'\',' +(or_val||'\'\'')+ ')" style="padding:12px 14px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-size:12px;font-weight:700;cursor:pointer;">Full Profile</button>'
+      +'<button onclick="rcSaveQuickRate(\''+horse.replace(/'/g,"\\'")+'\',\''+String(or_val||'')+'\')" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--gld);color:#000;font-size:14px;font-weight:800;cursor:pointer;">★ Save Rating</button>'
+      +'<button onclick="rcPromoteToProfile(\''+horse.replace(/'/g,"\\'")+'\',\''+String(or_val||'')+'\')" style="padding:12px 14px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-size:12px;font-weight:700;cursor:pointer;">Full Profile</button>'
     +'</div>'
     +'</div>';
   overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});

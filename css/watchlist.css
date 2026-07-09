@@ -22,7 +22,7 @@
 .wll-stats { display:flex; gap:6px; margin-bottom:14px; }
 .wll-stat  { flex:1; background:var(--sur); border:1px solid var(--bdr); border-radius:9px; padding:8px 10px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,.05); }
 .wll-stat-n { font-size:22px; font-weight:800; letter-spacing:.5px; }
-.wll-stat-l { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--mut); margin-top:1px; }
+.wll-stat-l { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--mut); margin-top:1px; }
 
 /* Section header */
 .wll-sec     { display:flex; align-items:center; gap:8px; padding:10px 0 6px; border-bottom:1px solid var(--bdr); margin-bottom:4px; }
@@ -31,18 +31,18 @@
 .wll-sec-cnt { font-size:12px; color:var(--mut); }
 
 /* Horse row */
-.wll-row { display:flex; align-items:center; border-left:3px solid; padding:10px 10px 10px 12px; margin-bottom:6px; background:var(--sur); border-radius:0 10px 10px 0; cursor:pointer; transition:background .12s; box-shadow:0 1px 3px rgba(0,0,0,.05); }
+.wll-row { display:flex; align-items:center; border-left:3px solid; padding:13px 10px 13px 12px; margin-bottom:6px; background:var(--sur); border-radius:0 10px 10px 0; cursor:pointer; transition:background .12s; box-shadow:0 1px 3px rgba(0,0,0,.05); }
 .wll-row:active { background:var(--sur2); }
-.wll-silks { width:32px; height:32px; border-radius:50%; background:var(--sur2); border:1px solid var(--bdr); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-right:10px; }
+.wll-silks { width:36px; height:36px; border-radius:50%; background:var(--sur2); border:1px solid var(--bdr); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-right:12px; }
 .wll-main  { flex:1; min-width:0; }
-.wll-name  { font-size:16px; font-weight:800; letter-spacing:.5px; color:var(--txt); line-height:1; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.wll-sub   { font-size:13px; color:var(--mut); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wll-name  { font-size:19px; font-weight:900; letter-spacing:.2px; color:var(--txt); line-height:1.15; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wll-sub   { font-size:12px; color:var(--mut); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .wll-tag   { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:1px 6px; border-radius:3px; }
 .wll-review-badge { font-size:11px; font-weight:800; letter-spacing:1px; background:var(--clr-watch-a3); color:var(--gld); border:1px solid var(--clr-watch-a4); border-radius:4px; padding:1px 5px; margin-left:6px; vertical-align:middle; }
-.wll-right  { display:flex; gap:5px; align-items:center; flex-shrink:0; margin-left:10px; }
-.wll-rating { display:flex; flex-direction:column; align-items:center; background:var(--sur2); border:1px solid var(--bdr); border-radius:7px; padding:4px 7px; min-width:38px; }
-.wll-rating-lbl { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--mut); }
-.wll-rating-val { font-size:17px; font-weight:800; letter-spacing:.5px; line-height:1.1; }
+.wll-right  { display:flex; gap:6px; align-items:center; flex-shrink:0; margin-left:10px; }
+.wll-rating { display:flex; flex-direction:column; align-items:center; background:var(--sur2); border:1px solid var(--bdr); border-radius:8px; padding:5px 10px; min-width:44px; }
+.wll-rating-lbl { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--mut); }
+.wll-rating-val { font-size:22px; font-weight:900; letter-spacing:.3px; line-height:1.1; }
 .wll-empty  { font-size:15px; color:var(--mut); font-style:italic; text-align:center; padding:40px 20px; }
 
 /* Edge badges in list */

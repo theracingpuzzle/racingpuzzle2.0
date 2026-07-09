@@ -16,11 +16,11 @@
 <title>The Racing Puzzle</title>
 <!-- Supabase JS client — used for auth only (session persistence + auto token refresh) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<link rel="stylesheet" href="css/app.css?v=1783576239">
+<link rel="stylesheet" href="css/app.css?v=1783632393">
 
-<link rel="stylesheet" href="css/racecards.css?v=1783576239">
-<link rel="stylesheet" href="css/today.css?v=1783576239">
-<link rel="stylesheet" href="css/watchlist.css?v=1783576239">
+<link rel="stylesheet" href="css/racecards.css?v=1783632393">
+<link rel="stylesheet" href="css/today.css?v=1783632393">
+<link rel="stylesheet" href="css/watchlist.css?v=1783632393">
 </head>
 <body class="swipe-mode">
 
@@ -328,7 +328,7 @@
 
         <!-- ══ STATS PANE ══ -->
         <div id="cp-stats">
-          <div style="display:flex;flex-wrap:nowrap;gap:8px;margin-bottom:14px;align-items:center;">
+          <div style="display:flex;flex-wrap:nowrap;gap:8px;margin-bottom:10px;align-items:center;">
             <div class="rc-view-tog" style="margin-bottom:0;flex-shrink:0;">
               <button id="st-tog-both" onclick="setStatsScope('both')" class="rc-view-btn on">Both</button>
               <button id="st-tog-real" onclick="setStatsScope('real')" class="rc-view-btn off">Real</button>
@@ -336,6 +336,7 @@
             </div>
             <button id="st-tog-own" onclick="toggleOwnStudy()" class="btn-refresh" style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:11px;">Own Study: Off</button>
           </div>
+          <div id="st-month-bar" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none;-webkit-overflow-scrolling:touch;"></div>
           <div id="st-summary" style="margin-bottom:14px;"></div>
           <div class="blk">
             <div class="bttl" style="display:flex;align-items:center;justify-content:space-between;">
@@ -1044,28 +1045,28 @@
 </div>
 
 <!-- ── JS modules — load order: config → state → utils → supabase → ui → features → init ── -->
-<script src="js/config.js?v=1783576239"></script>
-<script src="js/state.js?v=1783576239"></script>
-<script src="js/utils.js?v=1783576239"></script>
-<script src="js/supabase.js?v=1783576239"></script>
-<script src="js/auth.js?v=1783576239"></script>
-<script src="js/racing-api.js?v=1783576239"></script>
-<script src="js/racecards.js?v=1783576239"></script>
-<script src="js/ui-shell.js?v=1783576239"></script>
-<script src="js/today.js?v=1783576239"></script>
-<script src="js/betting.js?v=1783576239"></script>
-<script src="js/rules.js?v=1783576239"></script>
-<script src="js/dashboard.js?v=1783576239"></script>
-<script src="js/virtual.js?v=1783576239"></script>
-<script src="js/watchlist.js?v=1783576239"></script>
-<script src="js/coach.js?v=1783576239"></script>
-<script src="js/leagues.js?v=1783576239"></script>
+<script src="js/config.js?v=1783632393"></script>
+<script src="js/state.js?v=1783632393"></script>
+<script src="js/utils.js?v=1783632393"></script>
+<script src="js/supabase.js?v=1783632393"></script>
+<script src="js/auth.js?v=1783632393"></script>
+<script src="js/racing-api.js?v=1783632393"></script>
+<script src="js/racecards.js?v=1783632393"></script>
+<script src="js/ui-shell.js?v=1783632393"></script>
+<script src="js/today.js?v=1783632393"></script>
+<script src="js/betting.js?v=1783632393"></script>
+<script src="js/rules.js?v=1783632393"></script>
+<script src="js/dashboard.js?v=1783632393"></script>
+<script src="js/virtual.js?v=1783632393"></script>
+<script src="js/watchlist.js?v=1783632393"></script>
+<script src="js/coach.js?v=1783632393"></script>
+<script src="js/leagues.js?v=1783632393"></script>
 <script src="js/onboarding.js"></script>
 <script src="js/legal.js"></script>
 <script>window._VAPID_PUBLIC_KEY = 'BC7c5IlhQYZj68dgxNJVVYYlllx9gs8-ZuvsehMqSeyN7oi-76c1K_YRFPLBA9G29Askp91wK-LvZgWHqE_RLyU';</script>
 <script src="js/notifications.js"></script>
 <script src="js/install-guide.js"></script>
-<script src="js/init.js?v=1783576239"></script>
+<script src="js/init.js?v=1783632393"></script>
 
 
 <input type="hidden" id="ai-limit-inp" value="10">

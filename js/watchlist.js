@@ -891,13 +891,22 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
       +'<div class="fg"><label>Distance</label>'
         +'<select id="rvw-dist" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;">'
         +'<option value="">— Select —</option>'
-        +['5f','5f110y','6f','6f110y','7f','7f110y','1m','1m1f','1m2f','1m3f','1m4f','1m6f','2m','2m1f','2m2f','2m4f','2m6f','3m','3m2f'].map(function(d){return'<option'+(raceDist===d?' selected':'')+'>'+d+'</option>';}).join('')
+        +(function(){
+          var opts=['5f','6f','7f','1m','1m 1f','1m 2f','1m 3f','1m 4f','1m 6f','2m','2m 1f','2m 2f','2m 4f','2m 6f','3m','3m 2f'];
+          var norm=function(s){return(s||'').toLowerCase().replace(/\s+/g,'');};
+          var normDist=norm(raceDist);
+          return opts.map(function(d){return'<option'+(norm(d)===normDist?' selected':'')+'>'+d+'</option>';}).join('');
+        })()
         +'</select>'
       +'</div>'
       +'<div class="fg"><label>Class</label>'
         +'<select id="rvw-class" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;">'
         +'<option value="">— Select —</option>'
-        +['1','2','3','4','5','6','7','Group 1','Group 2','Group 3','Listed','Novice','Maiden','Handicap','Conditions'].map(function(c){return'<option'+(raceClass===c?' selected':'')+'>'+c+'</option>';}).join('')
+        +(function(){
+          var opts=['1','2','3','4','5','6','7','Group 1','Group 2','Group 3','Listed','Novice','Maiden','Handicap','Conditions'];
+          var normCls=(raceClass||'').replace(/^class\s*/i,'').trim();
+          return opts.map(function(c){return'<option'+(c===normCls?' selected':'')+'>'+c+'</option>';}).join('');
+        })()
         +'</select>'
       +'</div>'
     +'</div>'

@@ -92,11 +92,12 @@
         </div>
 
         <!-- ── TODAY MODE TOGGLE ── -->
-        <div id="t-mode-toggle" style="display:none;margin-top:12px;margin-bottom:-4px;">
+        <div id="t-mode-toggle" style="display:none;margin-top:12px;margin-bottom:-4px;display:none;align-items:center;justify-content:space-between;">
           <div style="display:inline-flex;border-radius:8px;overflow:hidden;border:1px solid var(--bdr);background:var(--sur2);">
             <button id="t-mode-watching" onclick="setTodayMode('watching')" class="rc-view-btn on" style="padding:7px 20px;">Watching</button>
             <button id="t-mode-reviewing" onclick="setTodayMode('reviewing')" class="rc-view-btn off" style="padding:7px 20px;border-left:1px solid var(--bdr);">Reviewing</button>
           </div>
+          <button id="t-select-toggle-btn" onclick="setTodaySelectMode(!_todaySelectMode)" style="background:none;border:none;font-size:14px;font-weight:600;color:var(--mut);cursor:pointer;padding:6px 2px;">Select</button>
         </div>
 
         <!-- ── STAT PILLS ── -->
@@ -1067,7 +1068,7 @@
 <script src="js/racing-api.js?v=1783632393"></script>
 <script src="js/racecards.js?v=1783632393"></script>
 <script src="js/ui-shell.js?v=1783632393"></script>
-<script src="js/today.js?v=1783760001"></script>
+<script src="js/today.js?v=1783770001"></script>
 <script src="js/betting.js?v=1783632393"></script>
 <script src="js/rules.js?v=1783632393"></script>
 <script src="js/dashboard.js?v=1783748221"></script>
@@ -1101,5 +1102,11 @@
 </script>
 <span id="apikey-status" style="display:none;"></span>
 <div id="ai-usage-display" style="display:none;"></div>
+
+<!-- ── TODAY SELECT BAR ── -->
+<div id="t-select-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:1500;background:var(--bg2,#151b27);border-top:1px solid var(--bdr,#2a3347);padding:12px 20px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0));align-items:center;justify-content:space-between;gap:12px;">
+  <span style="font-size:14px;font-weight:600;color:var(--mut);">0 selected</span>
+  <button style="background:#3b82f6;color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;" onclick="_todayShareSelected()">Share 0 selected</button>
+</div>
 </body>
 </html>

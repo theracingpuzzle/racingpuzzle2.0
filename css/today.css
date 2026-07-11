@@ -58,9 +58,13 @@
   display: flex; align-items: center; justify-content: space-between;
 }
 .t-alert-row-pur {
-  padding: 8px 0; border-bottom: 1px solid var(--clr-watch-a2);
+  border-radius: 12px;
+  border: 1px solid var(--bdr);
+  padding: 14px;
+  margin-bottom: 10px;
+  background: var(--sur);
 }
-.t-alert-row-pur:last-child { border-bottom: none; }
+.t-alert-row-pur:last-child { margin-bottom: 0; }
 .t-alert-row-grn:last-child { border-bottom: none; }
 
 /* ── Alert badges / buttons ── */

@@ -85,6 +85,13 @@ function _computeAlertTier(a){
   if(ok>=1)return'interesting';
   return'watching';
 }
+const _TIER_CFG={
+  'watching':    {label:'WATCHING',      text:'#8B93A7', border:'#3A4258', bg:'rgba(27,34,51,0.5)'},
+  'interesting': {label:'INTERESTING',   text:'#5B8DEF', border:'#3A5A9E', bg:'rgba(24,34,54,0.8)'},
+  'on-radar':    {label:'ON RADAR',      text:'#F5A623', border:'rgba(245,166,35,0.6)', bg:'rgba(42,36,24,0.8)'},
+  'ready':       {label:'READY TO BACK', text:'#2FBF8F', border:'rgba(47,191,143,0.6)', bg:'rgba(18,42,36,0.8)'},
+  'cold':        {label:'COLD',          text:'#8B7FE0', border:'#4A4270', bg:'rgba(30,27,48,0.8)'},
+};
 function setTodayMode(m){
   _todayMode=m;
   _todaySelectMode=false;_todaySelected.clear();_todayUpdateSelectBar();
@@ -92,8 +99,8 @@ function setTodayMode(m){
   if(btn){btn.textContent='Select';btn.style.color='var(--mut)';}
   const wBtn=document.getElementById('t-mode-watching');
   const rBtn=document.getElementById('t-mode-reviewing');
-  if(wBtn){wBtn.classList.toggle('on',m==='watching');wBtn.classList.toggle('off',m!=='watching');}
-  if(rBtn){rBtn.classList.toggle('on',m==='reviewing');rBtn.classList.toggle('off',m!=='reviewing');}
+  if(wBtn){wBtn.style.background=m==='watching'?'#F5A623':'transparent';wBtn.style.color=m==='watching'?'#000':'var(--mut)';}
+  if(rBtn){rBtn.style.background=m==='reviewing'?'#F5A623':'transparent';rBtn.style.color=m==='reviewing'?'#000':'var(--mut)';}
   const races=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
   checkWatchlistRunners(races);
 }
@@ -929,7 +936,7 @@ async function checkWatchlistRunners(races){
         if(!_todaySelectMode)return inner;
         return'<div style="display:flex;align-items:flex-start;gap:10px;">'
           +'<div style="padding-top:14px;flex-shrink:0;">'
-            +'<input type="checkbox" id="'+_selId+'" onchange="_todayToggleSelect(\''+_selId+'\')" style="width:20px;height:20px;accent-color:#3b82f6;cursor:pointer;">'
+            +'<input type="checkbox" id="'+_selId+'" onchange="_todayToggleSelect(\''+_selId+'\')" style="width:20px;height:20px;accent-color:#F5A623;cursor:pointer;">'
           +'</div>'
           +'<div style="flex:1;min-width:0;">'+inner+'</div>'
         +'</div>';
@@ -939,28 +946,56 @@ async function checkWatchlistRunners(races){
       // WATCHING MODE — study & racecard focus, sorted by time
       // ════════════════════════════════════════════════════════════════
       if(_todayMode==='watching'){
+        const _tier=_computeAlertTier(a);
+        const _tc=_TIER_CFG[_tier]||_TIER_CFG['watching'];
         const watchingRaceMeta=[a.time,a.course,_raceDist].filter(Boolean).join(' · ');
-        const racecardBtn='<button data-course="'+a.course+'" data-time="'+a.time+'" class="t-wl-race-btn t-race-btn">'
-          +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>'
-          +' Racecard</button>';
-        const watchCard='<div class="t-alert-row-pur">'
+
+        // Bullet-dot condition rows with values
+        const _condRows=(function(){
+          const rows=[];
+          if(_raceGoing){
+            const ok=_goingPrefs.length&&_goingPrefs.some(function(g){return _normGoing(g)===_normGoing(_raceGoing);});
+            rows.push('<div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mut);margin-bottom:4px;"><span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+(ok?'#2FBF8F':'rgba(255,255,255,.2)')+';"></span><span>Going: <span style="color:var(--txt);">'+_raceGoing+'</span></span></div>');
+          }
+          if(_raceDist){
+            const ok=(_distancePref&&_distMatch(_distancePref,_raceDist))||_distanceWins.some(function(d){return _distMatch(d,_raceDist);});
+            rows.push('<div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mut);margin-bottom:4px;"><span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+(ok?'#2FBF8F':'rgba(255,255,255,.2)')+';"></span><span>Distance: <span style="color:var(--txt);">'+_raceDist+'</span></span></div>');
+          }
+          if(raceType){
+            const ok=!!classIcon&&classIcon.trim()==='✓';
+            rows.push('<div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mut);margin-bottom:4px;"><span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+(ok?'#2FBF8F':'rgba(255,255,255,.2)')+';"></span><span>Class: <span style="color:var(--txt);">'+raceType+'</span></span></div>');
+          }
+          if(a.mr&&a.or){
+            const ok=a.edge>0;
+            rows.push('<div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mut);margin-bottom:4px;"><span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+(ok?'#2FBF8F':'#ef4444')+';"></span><span>My Mark: <span style="color:'+(ok?'#2FBF8F':'var(--red)')+';">'+(a.edge>0?'+':'')+a.edge+'</span> vs OR '+a.or+'</span></div>');
+          }
+          return rows.join('');
+        })();
+
+        const watchCard='<div class="t-alert-row-pur" style="border-color:'+_tc.border+';background:'+_tc.bg+';">'
           +'<div class="t-flex-info"'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
-            +matchBadge
-            +(reasonBadge?'<div style="margin-bottom:5px;">'+reasonBadge+'</div>':'')
-            +'<div style="margin-bottom:3px;"><span class="t-horse-name">'+a.horse+'</span></div>'
-            +'<div class="t-muted" style="font-size:13px;margin-top:1px;">'+watchingRaceMeta+'</div>'
-            +detailLine
-            +jockeyLine
-            +((_hasOR||_hasMR)
-              ?'<div style="margin-top:5px;font-size:11px;color:var(--mut);">'
-                +(_hasMR?'MR '+a.mr:'MR —')+' · '+(_hasOR?'OR '+a.or:'OR —')
-                +(a.edge>0?' · <span style="color:var(--grn);font-weight:800;">+'+a.edge+'</span>':'')
+            // Top: horse name left, tier badge right
+            +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">'
+              +'<div>'
+                +(reasonBadge?'<div style="margin-bottom:5px;">'+reasonBadge+'</div>':'')
+                +'<span class="t-horse-name">'+a.horse+'</span>'
+                +'<div class="t-muted" style="font-size:13px;margin-top:2px;">'+watchingRaceMeta+'</div>'
               +'</div>'
-              :'')
-            +(a.orUpdated?'<div style="font-size:12px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
-            +'<div style="display:flex;gap:6px;margin-top:10px;">'
-              +'<button onclick="event.stopPropagation();_todayOpenRacecard(\''+_co+'\',\''+_ti+'\',\''+_hn+'\')" class="t-race-btn" style="flex:1;padding:7px 0;font-size:12px;font-weight:600;">📋 Racecard</button>'
-              +'<button onclick="event.stopPropagation();_todayOpenVirtBet(\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\''+_rn+'\')" style="flex:1;padding:7px 0;font-size:12px;font-weight:600;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">Virtual Bet</button>'
+              +'<span style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:6px;border:1px solid '+_tc.border+';color:'+_tc.text+';white-space:nowrap;flex-shrink:0;margin-top:4px;">'+_tc.label+'</span>'
+            +'</div>'
+            // Match badge
+            +(matchBadge?'<div style="margin-bottom:8px;">'+matchBadge+'</div>':'')
+            // Bullet-dot condition rows
+            +(_condRows?'<div style="margin-bottom:8px;">'+_condRows+'</div>':'')
+            // Jockey
+            +(a.jockey?'<div class="t-muted" style="font-size:12px;margin-bottom:6px;">J: '+fmtJockey(a.jockey)+'</div>':'')
+            // OR update alert
+            +(a.orUpdated?'<div style="font-size:12px;color:var(--gld);margin-bottom:8px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
+            // 3-col action grid
+            +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;">'
+              +'<button onclick="event.stopPropagation();_todayOpenRacecard(\''+_co+'\',\''+_ti+'\',\''+_hn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:rgba(96,165,250,.08);color:var(--blu);border:1px solid rgba(96,165,250,.25);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;line-height:1.2;">📋 Racecard</button>'
+              +'<button onclick="event.stopPropagation();_todayOpenVirtBet(\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\''+_rn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:rgba(124,58,237,.12);color:#a78bfa;border:1px solid rgba(124,58,237,.3);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;line-height:1.2;">💰 Place Bet</button>'
+              +'<button onclick="event.stopPropagation();(function(){_todaySelected.clear();_todaySelected.add(\''+_selId+'\');_todayShareSelected();})()" style="padding:9px 4px;font-size:11px;font-weight:600;background:rgba(245,166,35,.1);color:#F5A623;border:1px solid rgba(245,166,35,.3);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;line-height:1.2;">↗ Share</button>'
             +'</div>'
           +'</div>'
         +'</div>';
@@ -990,7 +1025,9 @@ async function checkWatchlistRunners(races){
             +(ri?'✓ Confirm Review':'Review ✍️')+'</button>'
           :'<div style="font-size:11px;color:var(--mut);text-align:center;padding:5px 0;">Race not yet run</div>';
 
-      const reviewCard='<div class="t-alert-row-pur">'
+      const _revTier=_computeAlertTier(a);
+      const _rtc=_TIER_CFG[_revTier]||_TIER_CFG['watching'];
+      const reviewCard='<div class="t-alert-row-pur" style="border-color:'+_rtc.border+';">'
         +'<div'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
           +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">'
             +'<span class="t-horse-name">'+a.horse+'</span>'

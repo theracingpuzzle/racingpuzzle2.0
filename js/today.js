@@ -6,6 +6,18 @@ function setTracks(t){D.dailyLog=D.dailyLog||[];let l=D.dailyLog.find(d=>d.date=
 function addTrack(){const el=document.getElementById('ttrack');const v=el.value.trim();if(!v)return;const t=getTracks();if(!t.includes(v)){t.push(v);setTracks(t);}el.value='';renderChips();rfrTL();}
 function rmTrack(n){setTracks(getTracks().filter(x=>x!==n));renderChips();rfrTL();}
 
+// ─── TODAY MODE TOGGLE ───
+let _todayMode='watching'; // 'watching' | 'reviewing'
+function setTodayMode(m){
+  _todayMode=m;
+  const wBtn=document.getElementById('t-mode-watching');
+  const rBtn=document.getElementById('t-mode-reviewing');
+  if(wBtn){wBtn.classList.toggle('on',m==='watching');wBtn.classList.toggle('off',m!=='watching');}
+  if(rBtn){rBtn.classList.toggle('on',m==='reviewing');rBtn.classList.toggle('off',m!=='reviewing');}
+  const races=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
+  checkWatchlistRunners(races);
+}
+
 // ─── TODAY DEMO ───
 function runTodayDemo(){
   const btn = document.getElementById('t-demo-btn');
@@ -485,13 +497,28 @@ async function checkWatchlistRunners(races){
   });
 
   if(!alertEl)return;
-  if(!alerts.length){alertEl.style.display='none';window._wlAlerts=[];return;}
+  if(!alerts.length){
+    alertEl.style.display='none';
+    window._wlAlerts=[];
+    const _mt=document.getElementById('t-mode-toggle');
+    if(_mt)_mt.style.display='none';
+    return;
+  }
 
   // Edge horses first (highest edge), then by time
-  alerts.sort(function(a,b){
-    if(b.edge!==a.edge)return b.edge-a.edge;
-    return(a.time||'').localeCompare(b.time||'');
-  });
+  if(_todayMode==='reviewing'){
+    const _todayStr_s=td();
+    alerts.sort(function(a,b){
+      const aRev=(D.reviews||[]).some(function(r){return r.profileId===((a.wlEntry&&a.wlEntry.id)||'')&&r.date===_todayStr_s;});
+      const bRev=(D.reviews||[]).some(function(r){return r.profileId===((b.wlEntry&&b.wlEntry.id)||'')&&r.date===_todayStr_s;});
+      if(aRev!==bRev)return aRev?1:-1;
+      return(a.time||'').localeCompare(b.time||'');
+    });
+  } else {
+    alerts.sort(function(a,b){
+      return(a.time||'').localeCompare(b.time||'');
+    });
+  }
 
   window._wlAlerts=alerts; // stored for PDF generation
 
@@ -536,6 +563,8 @@ async function checkWatchlistRunners(races){
   });
   if(pendingChanged)save();
   alertEl.style.display='block';
+  const modeToggle=document.getElementById('t-mode-toggle');
+  if(modeToggle)modeToggle.style.display='block';
   const todayStr=td();
 
   alertEl.innerHTML='<div class="t-alert-pur">'
@@ -752,28 +781,98 @@ async function checkWatchlistRunners(races){
       const betBtn='<button onclick="event.stopPropagation();openBetFlow(\'real\',\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\'\',\''+_rn+'\')" class="t-wl-bet-btn" title="Log a bet">'
         +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'
         +'</button>';
+
+      // ── Review data attributes (shared by both mode review buttons) ──────────
+      const _reviewDataAttrs=''
+        +' data-wlid="'+wid+'"'
+        +' data-horse="'+a.horse.replace(/"/g,'&quot;')+'"'
+        +' data-course="'+(a.course||'').replace(/"/g,'&quot;')+'"'
+        +' data-time="'+(a.time||'')+'"'
+        +' data-race="'+(a.raceName||'').replace(/"/g,'&quot;')+'"'
+        +' data-dist="'+(_raceDist||'')+'"'
+        +' data-going="'+(a.raceGoing||'')+'"'
+        +' data-class="'+(a.raceClass||'')+'"'
+        +(ri?' data-result="'+ri.result+'" data-pos="'+(ri.position||'')+'"':'');
+
+      // ════════════════════════════════════════════════════════════════
+      // WATCHING MODE — study & racecard focus, sorted by time
+      // ════════════════════════════════════════════════════════════════
+      if(_todayMode==='watching'){
+        const watchingRaceMeta=[a.time,a.course,_raceDist].filter(Boolean).join(' · ');
+        const racecardBtn='<button data-course="'+a.course+'" data-time="'+a.time+'" class="t-wl-race-btn t-race-btn">'
+          +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>'
+          +' Racecard</button>';
+        return'<div class="t-alert-row-pur">'
+          +'<div class="t-row-sb-gap">'
+            +'<div class="t-flex-info"'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
+              +matchBadge
+              +(reasonBadge?'<div style="margin-bottom:5px;">'+reasonBadge+'</div>':'')
+              +'<div style="margin-bottom:3px;"><span class="t-horse-name">'+a.horse+'</span></div>'
+              +'<div class="t-muted" style="font-size:13px;margin-top:1px;">'+watchingRaceMeta+'</div>'
+              +detailLine
+              +jockeyLine
+              +((_hasOR||_hasMR)
+                ?'<div style="margin-top:5px;font-size:11px;color:var(--mut);">'
+                  +(_hasMR?'MR '+a.mr:'MR —')+' · '+(_hasOR?'OR '+a.or:'OR —')
+                  +(a.edge>0?' · <span style="color:var(--grn);font-weight:800;">+'+a.edge+'</span>':'')
+                +'</div>'
+                :'')
+              +(a.orUpdated?'<div style="font-size:12px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
+            +'</div>'
+            +'<div class="t-flex-col-end" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">'
+              +betBtn
+              +racecardBtn
+            +'</div>'
+          +'</div>'
+        +'</div>';
+      }
+
+      // ════════════════════════════════════════════════════════════════
+      // REVIEWING MODE — outcome & review focus, unreviewed first
+      // ════════════════════════════════════════════════════════════════
+      const posNum=ri&&ri.position?parseInt(ri.position)||0:0;
+      const ranWell=posNum>=1&&posNum<=3;
+      let outcomeText='',outcomeCol='var(--mut)';
+      if(ri&&_hasMR&&_hasOR){
+        if(a.edge>0&&ranWell){outcomeText='Value confirmed — ran to the rating';outcomeCol='var(--grn)';}
+        else if(a.edge>0&&!ranWell){outcomeText='Underperformed the rating gap';outcomeCol='var(--red)';}
+        else if(a.edge<=0&&ranWell){outcomeText='Ran above OR — reassess MR upward';outcomeCol='var(--blu)';}
+        else{outcomeText='Ran to OR expectation';outcomeCol='var(--mut)';}
+      } else if(raceMinsPast&&!ri){
+        outcomeText='Awaiting result';outcomeCol='var(--mut)';
+      }
+
+      const reviewingCTA=alreadyReviewed
+        ?'<button'+_reviewDataAttrs+' class="t-wl-review-btn" style="width:100%;padding:7px 0;font-size:12px;font-weight:600;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;text-align:center;">Logged — tap to edit review</button>'
+        :addedToday?''
+        :(ri||raceMinsPast)
+          ?'<button'+_reviewDataAttrs+' class="t-wl-review-btn t-review-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 0;font-size:13px;">'
+            +(ri?'✓ Confirm Review':'Review ✍️')+'</button>'
+          :'<div style="font-size:11px;color:var(--mut);text-align:center;padding:5px 0;">Race not yet run</div>';
+
       return'<div class="t-alert-row-pur">'
-        +'<div class="t-row-sb-gap">'
-          +'<div class="t-flex-info"'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
-            +matchBadge
-            +'<div style="margin-bottom:4px;">'
-              +'<span class="t-horse-name">'+a.horse+'</span>'
-            +'</div>'
-            +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px;">'
-              +reviewedInline
-              +reasonBadge
-              +edgeBadge
-              +finishBadge
-            +'</div>'
-            +'<div class="t-muted" style="font-size:13px;margin-top:1px;">'+raceMeta+'</div>'
-            +detailLine
-            +jockeyLine
-            +(a.orUpdated?'<div style="font-size:12px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
+        +'<div'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
+          +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">'
+            +'<span class="t-horse-name">'+a.horse+'</span>'
+            +(alreadyReviewed?'<span class="t-reviewed-inline">✓ Reviewed</span>':'')
+            +finishBadge
           +'</div>'
-          +'<div class="t-flex-col-end" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">'
-            +betBtn
-            +primaryBtn
+          +'<div class="t-muted" style="font-size:12px;margin-bottom:8px;">'+raceMeta+'</div>'
+          +'<div style="display:flex;align-items:stretch;gap:1px;border-radius:8px;overflow:hidden;border:1px solid var(--bdr);margin-bottom:8px;">'
+            +'<div style="flex:1;background:var(--sur2);padding:8px 12px;">'
+              +'<div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Finished</div>'
+              +'<div style="font-size:22px;font-weight:900;line-height:1;color:var(--txt);">'+(ri&&ri.position?ri.position:'—')+'</div>'
+            +'</div>'
+            +'<div style="width:1px;background:var(--bdr);flex-shrink:0;"></div>'
+            +'<div style="flex:1;background:var(--sur2);padding:8px 12px;text-align:right;">'
+              +'<div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">MR vs OR</div>'
+              +'<div style="font-size:22px;font-weight:900;line-height:1;color:'+(_hasMR&&_hasOR?(a.edge>0?'var(--grn)':a.edge<0?'var(--red)':'var(--txt)'):'var(--mut)')+';">'
+                +((_hasMR&&_hasOR)?(a.edge>0?'+':'')+a.edge:'—')
+              +'</div>'
+            +'</div>'
           +'</div>'
+          +(outcomeText?'<div style="font-size:13px;font-weight:600;color:'+outcomeCol+';margin-bottom:8px;">'+outcomeText+'</div>':'')
+          +reviewingCTA
         +'</div>'
       +'</div>';
     }).join('')

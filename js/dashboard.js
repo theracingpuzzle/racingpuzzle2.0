@@ -50,16 +50,16 @@ function renderCompare(set){
         else insight='Real and virtual performance are closely aligned — your process is consistent.';
       }
       dc.innerHTML='<div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0;border:1px solid var(--bdr);border-radius:9px;overflow:hidden;">'
-        +'<div style="background:var(--sur2);padding:8px 12px;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);border-bottom:1px solid var(--bdr);"></div>'
-        +'<div style="background:rgba(96,165,250,.08);padding:8px 12px;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:12px;font-weight:700;color:var(--blu);text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);">Real</div>'
-        +'<div style="background:rgba(251,146,60,.12);padding:8px 12px;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:12px;font-weight:700;color:#fb923c;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);">Virtual</div>'
+        +'<div style="background:var(--sur2);padding:8px 12px;font-family:var(--font);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);border-bottom:1px solid var(--bdr);"></div>'
+        +'<div style="background:rgba(96,165,250,.08);padding:8px 12px;font-family:var(--font);font-size:12px;font-weight:700;color:var(--blu);text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);">Real</div>'
+        +'<div style="background:rgba(251,146,60,.12);padding:8px 12px;font-family:var(--font);font-size:12px;font-weight:700;color:#fb923c;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);">Virtual</div>'
         +rows.map(function(r){
           const rWin=r.length>3&&r[3]>r[4],vWin=r.length>3&&r[4]>r[3];
-          return'<div style="background:var(--sur2);padding:8px 12px;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:13px;color:var(--mut);border-bottom:1px solid var(--bdr);">'+r[0]+'</div>'
-            +'<div style="padding:8px 12px;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:15px;font-weight:600;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);color:'+(r.length>3?(r[3]>=0?'var(--blu)':'var(--red)'):'var(--txt)')+';">'
+          return'<div style="background:var(--sur2);padding:8px 12px;font-family:var(--font);font-size:13px;color:var(--mut);border-bottom:1px solid var(--bdr);">'+r[0]+'</div>'
+            +'<div style="padding:8px 12px;font-family:var(--font);font-size:15px;font-weight:600;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);color:'+(r.length>3?(r[3]>=0?'var(--blu)':'var(--red)'):'var(--txt)')+';">'
               +r[1]+(rWin?' ◀':'')
             +'</div>'
-            +'<div style="padding:8px 12px;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:15px;font-weight:600;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);color:'+(r.length>3?(r[4]>=0?'#fb923c':'var(--red)'):'var(--txt)')+';">'
+            +'<div style="padding:8px 12px;font-family:var(--font);font-size:15px;font-weight:600;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);color:'+(r.length>3?(r[4]>=0?'#fb923c':'var(--red)'):'var(--txt)')+';">'
               +r[2]+(vWin?' ◀':'')
             +'</div>';
         }).join('')
@@ -102,9 +102,9 @@ function renderVirtHist(){
       var pos=pb.oddsDisplay||(pb.odds||'—');
       pHtml+='<div class="mb pending" data-id="'+pb.id+'" data-virt="1" style="cursor:pointer;border-left-color:#fb923c;">'
         +'<div class="mbl"><div class="mh">'+pb.horse+'</div>'
-        +'<div class="mm">'+fdate(pb.date)+' · '+(pb.track||'—')+' · <span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;">'+pos+'</span> · '+fp(pb.stake)+'</div></div>'
+        +'<div class="mm">'+fdate(pb.date)+' · '+(pb.track||'—')+' · <span style="font-family:var(--font);">'+pos+'</span> · '+fp(pb.stake)+'</div></div>'
         +'<div class="mbr"><span class="bdg bpend">pending</span>'
-        +'<div style="font-size:12px;color:var(--mut);margin-top:3px;font-family:Barlow Condensed,Arial Narrow,sans-serif;">tap to update</div></div></div>';
+        +'<div style="font-size:12px;color:var(--mut);margin-top:3px;font-family:var(--font);">tap to update</div></div></div>';
     }
     pEl.innerHTML=pHtml;
     pEl.querySelectorAll('[data-id]').forEach(function(el){el.addEventListener('click',function(){openVEM(el.getAttribute('data-id'));});});
@@ -122,9 +122,9 @@ function renderVirtHist(){
       ?'<div class="es">No virtual bets match your filters.</div>'
       :'<div style="text-align:center;padding:32px 16px;">'
         +'<div style="font-size:36px;margin-bottom:12px;">🧪</div>'
-        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:18px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">No virtual bets yet</div>'
+        +'<div style="font-family:var(--font);font-size:18px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">No virtual bets yet</div>'
         +'<div style="font-size:15px;color:var(--mut);line-height:1.65;margin-bottom:18px;">Use the Virtual card to paper-trade selections without risking real money. Great for testing new approaches.</div>'
-        +'<button onclick="navTo(\'today\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Log a Virtual Bet →</button>'
+        +'<button onclick="navTo(\'today\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Log a Virtual Bet →</button>'
         +'</div>';
     return;
   }
@@ -136,7 +136,7 @@ function renderVirtHist(){
     var os=b.oddsDisplay||(b.odds||'—');
     html+='<div class="mb '+(b.result||'pending')+'" data-id="'+b.id+'" data-virt="1" style="cursor:pointer;border-left-color:#fb923c;">'
       +'<div class="mbl"><div class="mh">'+b.horse+'</div>'
-      +'<div class="mm">'+fdate(b.date)+' · '+(b.track||'—')+' · <span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;">'+os+'</span></div>'
+      +'<div class="mm">'+fdate(b.date)+' · '+(b.track||'—')+' · <span style="font-family:var(--font);">'+os+'</span></div>'
       +'<div class="mm" style="margin-top:2px;">'+fp(b.stake)+' · '+(b.betType||'win').toUpperCase()+(b.source?' · '+b.source.split(' ')[0]:'')+'</div></div>'
       +'<div class="mbr"><span class="bdg '+(bg[b.result]||'bpend')+'">'+(b.result||'pend')+'</span>'
       +'<div class="mp '+(p2===null?'':p2>=0?'pos':'neg')+'" style="margin-top:3px;">'+(p2===null?'—':fmt(p2))+'</div></div></div>';
@@ -156,8 +156,8 @@ function renderHist(){
     pendingEl.innerHTML=pending.length?pending.map(b=>{
       const os=b.oddsDisplay||(b.odds||'—');
       return'<div class="mb pending" onclick="openEM(\''+b.id+'\')" style="cursor:pointer;">'
-        +'<div class="mbl"><div class="mh">'+b.horse+'</div><div class="mm">'+fdate(b.date)+' · '+b.track+' · <span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;">'+os+'</span> · '+fp(b.stake)+'</div></div>'
-        +'<div class="mbr"><span class="bdg bpend">pending</span><div style="font-size:12px;color:var(--mut);margin-top:3px;font-family:Barlow Condensed,Arial Narrow,sans-serif;">tap to update</div></div></div>';
+        +'<div class="mbl"><div class="mh">'+b.horse+'</div><div class="mm">'+fdate(b.date)+' · '+b.track+' · <span style="font-family:var(--font);">'+os+'</span> · '+fp(b.stake)+'</div></div>'
+        +'<div class="mbr"><span class="bdg bpend">pending</span><div style="font-size:12px;color:var(--mut);margin-top:3px;font-family:var(--font);">tap to update</div></div></div>';
     }).join(''):'';
   }
   // Filtered list
@@ -176,9 +176,9 @@ function renderHist(){
       ?'<div class="es">No bets match your filters.</div>'
       :'<div style="text-align:center;padding:32px 16px;">'
         +'<div style="font-size:36px;margin-bottom:12px;">📋</div>'
-        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:18px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">No bets logged yet</div>'
+        +'<div style="font-family:var(--font);font-size:18px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">No bets logged yet</div>'
         +'<div style="font-size:15px;color:var(--mut);line-height:1.65;margin-bottom:18px;">Head to Today to log your first real bet. Every bet you log appears here so you can review and settle results.</div>'
-        +'<button onclick="navTo(\'today\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Log a Bet →</button>'
+        +'<button onclick="navTo(\'today\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Log a Bet →</button>'
         +'</div>';
     return;
   }
@@ -188,7 +188,7 @@ function renderHist(){
     return'<div class="mb '+(b.result||'pending')+'" onclick="openEM(\''+b.id+'\')" style="cursor:pointer;">'
       +'<div class="mbl">'
         +'<div class="mh">'+b.horse+'</div>'
-        +'<div class="mm">'+fdate(b.date)+' · '+b.track+' · <span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;">'+os+'</span></div>'
+        +'<div class="mm">'+fdate(b.date)+' · '+b.track+' · <span style="font-family:var(--font);">'+os+'</span></div>'
         +'<div class="mm" style="margin-top:2px;">'+fp(b.stake)+' · '+(b.betType||'win').toUpperCase()+(b.source?' · '+b.source.split(' ')[0]:'')+'</div>'
       +'</div>'
       +'<div class="mbr">'
@@ -314,9 +314,9 @@ function renderStats(){
   if(!set.length){
     const statsEmpty='<div style="text-align:center;padding:32px 16px;">'
       +'<div style="font-size:36px;margin-bottom:12px;">📊</div>'
-      +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:18px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">No settled bets yet</div>'
+      +'<div style="font-family:var(--font);font-size:18px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">No settled bets yet</div>'
       +'<div style="font-size:15px;color:var(--mut);line-height:1.65;margin-bottom:18px;">Log your first bet on the Today card and mark it as a win, place or loss to see your stats here.</div>'
-      +'<button onclick="navTo(\'today\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Go to Today →</button>'
+      +'<button onclick="navTo(\'today\')" style="padding:10px 22px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Go to Today →</button>'
       +'</div>';
     const sumEl=document.getElementById('st-summary');if(sumEl)sumEl.innerHTML='';
     ['st-insights-body','st-src-table','st-conf-table','st-type-table','st-monthly','st-trk','st-ck-impact','st-ck-signals','st-ck-table','st-ck-tip','st-jockey','st-trainer'].forEach(id=>{
@@ -349,8 +349,8 @@ function renderStats(){
 
     const metric=function(label,value,sub,col){
       return'<div style="flex:1;min-width:0;padding:14px 8px;text-align:center;border-right:1px solid var(--bdr);last-child:border-right:none;">'
-        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:700;letter-spacing:-.5px;color:'+(col||'var(--txt)')+';">'+value+'</div>'
-        +'<div style="font-size:11px;font-family:\'Barlow Condensed\',sans-serif;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-top:2px;">'+label+'</div>'
+        +'<div style="font-family:var(--font);font-size:26px;font-weight:700;letter-spacing:-.5px;color:'+(col||'var(--txt)')+';">'+value+'</div>'
+        +'<div style="font-size:11px;font-family:var(--font);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-top:2px;">'+label+'</div>'
         +(sub?'<div style="font-size:11px;color:var(--mut);margin-top:1px;">'+sub+'</div>':'')
       +'</div>';
     };
@@ -384,11 +384,11 @@ function renderStats(){
     })();
 
     const perfCard=function(label,item,valueKey){
-      if(!item)return'<div style="flex:1;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);opacity:.35;text-align:center;"><div style="font-size:12px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">'+label+'</div><div style="font-size:13px;color:var(--mut);">No data</div></div>';
+      if(!item)return'<div style="flex:1;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);opacity:.35;text-align:center;"><div style="font-size:12px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">'+label+'</div><div style="font-size:13px;color:var(--mut);">No data</div></div>';
       const val=valueKey==='p'?fmt(item.p):(item.roi>=0?'+':'')+Math.round(item.roi)+'%';
       const col=((valueKey==='p'?item.p:item.roi)>=0)?'#10b981':'#f87171';
       return'<div style="flex:1;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);overflow:hidden;">'
-        +'<div style="font-size:11px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">'+label+'</div>'
+        +'<div style="font-size:11px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">'+label+'</div>'
         +'<div style="font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;" title="'+item.k+'">'+item.k+'</div>'
         +'<div style="font-size:13px;font-weight:800;color:'+col+';">'+val+'</div>'
         +'<div style="font-size:11px;color:var(--mut);">'+item.n+' bets · '+item.sr.toFixed(0)+'% SR</div>'
@@ -410,7 +410,7 @@ function renderStats(){
       +'</div>'
       // Row 3 — best performers header
       +'<div style="padding:8px 12px 6px;border-bottom:1px solid var(--bdr);">'
-        +'<div style="font-size:11px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.08em;text-transform:uppercase;">Best Performers (min. 2 bets, by ROI)</div>'
+        +'<div style="font-size:11px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.08em;text-transform:uppercase;">Best Performers (min. 2 bets, by ROI)</div>'
       +'</div>'
       // Row 4 — best jockey / trainer / source / track
       +'<div style="display:flex;">'
@@ -418,11 +418,11 @@ function renderStats(){
         +perfCard('Trainer',bestTrainer,'roi')
         +(!ownStudyOnly?perfCard('Source',bestSource,'roi'):'')
         +(bestTrack?'<div style="flex:1;min-width:0;padding:11px 10px;overflow:hidden;">'
-          +'<div style="font-size:11px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">Racecourse</div>'
+          +'<div style="font-size:11px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">Racecourse</div>'
           +'<div style="font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;" title="'+bestTrack.k+'">'+bestTrack.k+'</div>'
           +'<div style="font-size:13px;font-weight:800;color:'+(bestTrack.p>=0?'#10b981':'#f87171')+';">'+fmt(bestTrack.p)+'</div>'
           +'<div style="font-size:11px;color:var(--mut);">'+bestTrack.n+' bets</div>'
-        +'</div>':'<div style="flex:1;min-width:0;padding:11px 10px;opacity:.35;text-align:center;"><div style="font-size:11px;font-weight:700;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">Racecourse</div><div style="font-size:13px;color:var(--mut);">No data</div></div>')
+        +'</div>':'<div style="flex:1;min-width:0;padding:11px 10px;opacity:.35;text-align:center;"><div style="font-size:11px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">Racecourse</div><div style="font-size:13px;color:var(--mut);">No data</div></div>')
       +'</div>'
     +'</div>';
   }
@@ -499,18 +499,18 @@ function renderStats(){
     if(!rows.length){srcEl.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:15px;">Not enough data.</div>';}
     else{srcEl.style.maxHeight='220px';srcEl.style.overflowY='auto';srcEl.innerHTML='<table style="width:100%;font-size:15px;border-collapse:collapse;">'
       +'<thead><tr>'
-      +'<th style="text-align:left;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">Source</th>'
-      +'<th style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">Bets</th>'
-      +'<th style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">SR%</th>'
-      +'<th style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">P&L</th>'
-      +'<th style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">ROI</th>'
+      +'<th style="text-align:left;font-family:var(--font);font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">Source</th>'
+      +'<th style="font-family:var(--font);font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">Bets</th>'
+      +'<th style="font-family:var(--font);font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">SR%</th>'
+      +'<th style="font-family:var(--font);font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">P&L</th>'
+      +'<th style="font-family:var(--font);font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);text-align:right;">ROI</th>'
       +'</tr></thead><tbody>'
       +rows.map(r=>'<tr>'
         +'<td style="padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'+r.k+'</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:var(--mut);">'+r.n+'</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'+r.sr.toFixed(0)+'%</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+Math.round(r.roi)+'%</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:var(--mut);">'+r.n+'</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'+r.sr.toFixed(0)+'%</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+Math.round(r.roi)+'%</td>'
         +'</tr>').join('')
       +'</tbody></table>';}
   }
@@ -536,20 +536,20 @@ function renderStats(){
         const roiCol=s.roi>=0?'var(--grn)':'var(--red)';
         const dot=isGood===true?'<span style="color:var(--grn);margin-right:4px;">●</span>':isGood===false?'<span style="color:var(--red);margin-right:4px;">●</span>':'';
         return'<tr><td style="padding:6px 0;border-bottom:1px solid var(--bdr);font-size:14px;">'+dot+label+'</td>'
-          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);color:var(--mut);font-size:13px;">'+s.n+'</td>'
-          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:13px;">'+s.sr.toFixed(0)+'%</td>'
-          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);color:'+roiCol+';font-size:13px;">'+Math.round(s.roi)+'%</td>'
+          +'<td style="font-family:var(--font);text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);color:var(--mut);font-size:13px;">'+s.n+'</td>'
+          +'<td style="font-family:var(--font);text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:13px;">'+s.sr.toFixed(0)+'%</td>'
+          +'<td style="font-family:var(--font);text-align:right;padding:6px 0;border-bottom:1px solid var(--bdr);color:'+roiCol+';font-size:13px;">'+Math.round(s.roi)+'%</td>'
           +'</tr>';
       }
       const thead='<table style="width:100%;font-size:14px;border-collapse:collapse;margin-bottom:16px;">'
         +'<thead><tr>'
-        +'<th style="text-align:left;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);"></th>'
-        +'<th style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);text-align:right;">Bets</th>'
-        +'<th style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);text-align:right;">SR%</th>'
-        +'<th style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);text-align:right;">ROI</th>'
+        +'<th style="text-align:left;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);"></th>'
+        +'<th style="font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);text-align:right;">Bets</th>'
+        +'<th style="font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);text-align:right;">SR%</th>'
+        +'<th style="font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 6px;border-bottom:1px solid var(--bdr);text-align:right;">ROI</th>'
         +'</tr></thead><tbody>';
       function ckSection(title,rows){
-        return'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:14px 0 4px;">'+title+'</div>'
+        return'<div style="font-family:var(--font);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:14px 0 4px;">'+title+'</div>'
           +thead+rows+'</tbody></table>';
       }
       let html='';
@@ -631,18 +631,18 @@ function renderStats(){
     }
     confEl.innerHTML=confRows.length?'<table style="width:100%;font-size:15px;border-collapse:collapse;">'
       +'<thead><tr>'
-      +'<th style="text-align:left;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">Level</th>'
-      +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">Bets</th>'
-      +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">SR%</th>'
-      +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">P&L</th>'
-      +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">ROI</th>'
+      +'<th style="text-align:left;font-family:var(--font);font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">Level</th>'
+      +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">Bets</th>'
+      +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">SR%</th>'
+      +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">P&L</th>'
+      +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);letter-spacing:.08em;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--bdr);">ROI</th>'
       +'</tr></thead><tbody>'
       +confRows.map(r=>'<tr><td style="padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'
-        +'<span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:13px;color:var(--gld);">'+r.c+'</span> '+r.lbl+'</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:var(--mut);">'+r.n+'</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'+r.sr.toFixed(0)+'%</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+Math.round(r.roi)+'%</td></tr>').join('')
+        +'<span style="font-family:var(--font);font-size:13px;color:var(--gld);">'+r.c+'</span> '+r.lbl+'</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:var(--mut);">'+r.n+'</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);">'+r.sr.toFixed(0)+'%</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:8px 0;border-bottom:1px solid rgba(28,50,80,.5);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+Math.round(r.roi)+'%</td></tr>').join('')
       +'</tbody></table>'
       :'<div style="color:var(--mut);font-style:italic;font-size:15px;">Not enough data.</div>';
   }
@@ -656,7 +656,7 @@ function renderStats(){
       const tp=tb.reduce((a,b)=>a+(pnl(b)||0),0);
       const ts=tb.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
       const roi=ts>0?(tp/ts*100):0;
-      return'<div class="srow"><span class="srl">'+typeLabels[t]+'<span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:12px;color:var(--mut);margin-left:6px;">x'+tb.length+'</span></span>'
+      return'<div class="srow"><span class="srl">'+typeLabels[t]+'<span style="font-family:var(--font);font-size:12px;color:var(--mut);margin-left:6px;">x'+tb.length+'</span></span>'
         +'<span class="srv" style="display:flex;gap:12px;align-items:center;">'
         +'<span style="color:var(--mut);font-size:13px;">ROI '+Math.round(roi)+'%</span>'
         +'<span style="color:'+(tp>=0?'var(--grn)':'var(--red)')+';">'+fmt(tp)+'</span></span></div>';
@@ -680,7 +680,7 @@ function renderStats(){
       .map(function([k,v]){return{k,n:v.n,wins:v.wins,places:v.places,p:v.p,staked:v.staked,sr:v.n>0?((v.wins+v.places)/v.n*100):0};})
       .sort(function(a,b){return b.n-a.n;});
     if(!rows.length){el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:15px;">Not enough data.</div>';return;}
-    const TH='text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);';
+    const TH='text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);';
     el.style.maxHeight='280px';el.style.overflowY='auto';
     el.innerHTML='<table style="width:100%;font-size:14px;border-collapse:collapse;">'
       +'<thead><tr>'
@@ -696,11 +696,11 @@ function renderStats(){
         const srCol=r.sr>=20?'var(--grn)':r.sr>=10?'var(--gld)':r.n>=4?'var(--red)':'var(--mut)';
         return'<tr>'
           +'<td style="'+bd+'max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+r.k+'">'+r.k+'</td>'
-          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;'+bd+'color:var(--mut);">'+r.n+'</td>'
-          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;'+bd+'color:#4ade80;font-weight:700;">'+r.wins+'</td>'
-          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;'+bd+'color:#fbbf24;font-weight:700;">'+r.places+'</td>'
-          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;'+bd+'color:'+srCol+';font-weight:700;">'+r.sr.toFixed(0)+'%</td>'
-          +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;'+bd+'color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
+          +'<td style="font-family:var(--font);text-align:right;'+bd+'color:var(--mut);">'+r.n+'</td>'
+          +'<td style="font-family:var(--font);text-align:right;'+bd+'color:#4ade80;font-weight:700;">'+r.wins+'</td>'
+          +'<td style="font-family:var(--font);text-align:right;'+bd+'color:#fbbf24;font-weight:700;">'+r.places+'</td>'
+          +'<td style="font-family:var(--font);text-align:right;'+bd+'color:'+srCol+';font-weight:700;">'+r.sr.toFixed(0)+'%</td>'
+          +'<td style="font-family:var(--font);text-align:right;'+bd+'color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
         +'</tr>';
       }).join('')
       +'</tbody></table>';
@@ -727,18 +727,18 @@ function renderStats(){
     el.style.maxHeight='220px';el.style.overflowY='auto';
     el.innerHTML='<table style="width:100%;font-size:14px;border-collapse:collapse;">'
       +'<thead><tr>'
-      +'<th style="text-align:left;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Name</th>'
-      +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Bets</th>'
-      +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">SR%</th>'
-      +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">P&L</th>'
-      +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">ROI</th>'
+      +'<th style="text-align:left;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Name</th>'
+      +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Bets</th>'
+      +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">SR%</th>'
+      +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">P&L</th>'
+      +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">ROI</th>'
       +'</tr></thead><tbody>'
       +rows.map(r=>'<tr>'
         +'<td style="padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+r.k+'</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:var(--mut);">'+r.n+'</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);">'+r.sr.toFixed(0)+'%</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
-        +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+Math.round(r.roi)+'%</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:var(--mut);">'+r.n+'</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);">'+r.sr.toFixed(0)+'%</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'
+        +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:'+(r.roi>=0?'var(--grn)':'var(--red)')+';">'+Math.round(r.roi)+'%</td>'
         +'</tr>').join('')
       +'</tbody></table>';
   }
@@ -757,9 +757,9 @@ function renderStats(){
           const isPos=v>=0;
           const valLabel=fmt(v).replace('+','');
           return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:default;height:100%;" title="'+m+': '+fmt(v)+'">'
-            +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:8px;font-weight:700;color:'+(isPos?'var(--grn)':'var(--red)')+';margin-bottom:3px;white-space:nowrap;text-align:center;">'+(isPos?'+':'')+valLabel+'</div>'
+            +'<div style="font-family:var(--font);font-size:8px;font-weight:700;color:'+(isPos?'var(--grn)':'var(--red)')+';margin-bottom:3px;white-space:nowrap;text-align:center;">'+(isPos?'+':'')+valLabel+'</div>'
             +'<div style="width:100%;height:'+h+'px;background:'+(isPos?'var(--grn)':'var(--red)')+';border-radius:3px 3px 0 0;min-width:8px;"></div>'
-            +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:8px;color:var(--mut);transform:rotate(-45deg);white-space:nowrap;margin-top:5px;">'+m.slice(5)+'</div>'
+            +'<div style="font-family:var(--font);font-size:8px;color:var(--mut);transform:rotate(-45deg);white-space:nowrap;margin-top:5px;">'+m.slice(5)+'</div>'
           +'</div>';
         }).join('')
       +'</div>';
@@ -808,8 +808,8 @@ function renderCkImpact(set){
   const compCol=compliancePct>=80?'var(--grn)':compliancePct>=50?'var(--gld)':'var(--red)';
   let html='<div style="display:flex;gap:10px;margin-bottom:16px;">'
     +'<div style="flex:1;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;text-align:center;">'
-      +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:24px;font-weight:700;color:'+compCol+';">'+compliancePct+'%</div>'
-      +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-top:3px;">Checklist Used</div>'
+      +'<div style="font-family:var(--font);font-size:24px;font-weight:700;color:'+compCol+';">'+compliancePct+'%</div>'
+      +'<div style="font-family:var(--font);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-top:3px;">Checklist Used</div>'
     +'</div>';
 
   // Average score for checklist bets
@@ -817,8 +817,8 @@ function renderCkImpact(set){
     const avgScore=Math.round(allBetsWithCk.reduce(function(a,b){return a+(b.checklistScore||0);},0)/ckBets);
     const scoreCol=avgScore>=75?'var(--grn)':avgScore>=50?'var(--gld)':'var(--red)';
     html+='<div style="flex:1;background:var(--sur2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;text-align:center;">'
-      +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:24px;font-weight:700;color:'+scoreCol+';">'+avgScore+'</div>'
-      +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-top:3px;">Avg Score</div>'
+      +'<div style="font-family:var(--font);font-size:24px;font-weight:700;color:'+scoreCol+';">'+avgScore+'</div>'
+      +'<div style="font-family:var(--font);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-top:3px;">Avg Score</div>'
     +'</div>';
   }
   html+='</div>';
@@ -852,7 +852,7 @@ function renderCkImpact(set){
     el.innerHTML=html;return;
   }
 
-  html+='<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">Score Band Performance</div>';
+  html+='<div style="font-family:var(--font);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:8px;">Score Band Performance</div>';
   html+=bandData.map(function(b){
     if(!b.n)return'';
     const barW=Math.abs(b.pl)/maxAbs*100;
@@ -860,9 +860,9 @@ function renderCkImpact(set){
     return'<div style="margin-bottom:12px;">'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">'
         +'<span style="font-size:14px;font-weight:700;color:'+b.col+';">'+b.label+'</span>'
-        +'<span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:12px;color:var(--mut);">'+b.min+'–'+b.max+' score · '+b.n+' bet'+(b.n!==1?'s':'')+'</span>'
+        +'<span style="font-family:var(--font);font-size:12px;color:var(--mut);">'+b.min+'–'+b.max+' score · '+b.n+' bet'+(b.n!==1?'s':'')+'</span>'
       +'</div>'
-      +'<div style="display:grid;grid-template-columns:70px 1fr 60px 60px;gap:0;align-items:center;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:13px;margin-bottom:3px;">'
+      +'<div style="display:grid;grid-template-columns:70px 1fr 60px 60px;gap:0;align-items:center;font-family:var(--font);font-size:13px;margin-bottom:3px;">'
         +'<div style="color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">P&amp;L</div>'
         +'<div style="background:var(--sur2);border-radius:3px;height:8px;overflow:hidden;">'
           +'<div style="width:'+barW.toFixed(1)+'%;height:100%;background:'+barCol+';border-radius:3px;transition:width .4s;"></div>'
@@ -885,16 +885,16 @@ function renderCkImpact(set){
   const mArr=Object.entries(monthScores).sort(function(a,b){return a[0].localeCompare(b[0]);}).slice(-6);
   if(mArr.length>=2){
     const maxScore=100;
-    html+='<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:16px 0 8px;">Avg Discipline Score by Month</div>';
+    html+='<div style="font-family:var(--font);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:16px 0 8px;">Avg Discipline Score by Month</div>';
     html+='<div style="display:flex;align-items:flex-end;gap:6px;height:60px;padding-bottom:20px;">';
     html+=mArr.map(function(e){
       const avg=Math.round(e[1].total/e[1].n);
       const h=Math.max(4,(avg/maxScore*50));
       const col=avg>=75?'#22c55e':avg>=50?'#84cc16':'#f97316';
       return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;" title="'+e[0]+': avg '+avg+'">'
-        +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:8px;color:var(--mut);">'+avg+'</div>'
+        +'<div style="font-family:var(--font);font-size:8px;color:var(--mut);">'+avg+'</div>'
         +'<div style="width:100%;height:'+h+'px;background:'+col+';border-radius:3px 3px 0 0;min-width:8px;"></div>'
-        +'<div style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:8px;color:var(--mut);transform:rotate(-45deg);white-space:nowrap;margin-top:4px;">'+e[0].slice(5)+'</div>'
+        +'<div style="font-family:var(--font);font-size:8px;color:var(--mut);transform:rotate(-45deg);white-space:nowrap;margin-top:4px;">'+e[0].slice(5)+'</div>'
       +'</div>';
     }).join('');
     html+='</div>';
@@ -942,7 +942,7 @@ function renderCkSignals(set){
     return'<div style="background:var(--sur2);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:12px;">'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">'
         +'<span style="font-size:18px;">'+icon+'</span>'
-        +'<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);">'+title+'</span>'
+        +'<span style="font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);">'+title+'</span>'
       +'</div>'
       +stats.map(function(r){
         const barW=Math.abs(r.s.pl)/maxAbs*100;
@@ -951,14 +951,14 @@ function renderCkSignals(set){
         return'<div style="margin-bottom:10px;">'
           +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">'
             +'<span style="font-size:14px;font-weight:700;color:'+r.col+';">'+r.label+'</span>'
-            +'<span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:12px;color:var(--mut);">'+r.s.n+' bet'+(r.s.n!==1?'s':'')+' · SR '+r.s.sr.toFixed(0)+'%</span>'
+            +'<span style="font-family:var(--font);font-size:12px;color:var(--mut);">'+r.s.n+' bet'+(r.s.n!==1?'s':'')+' · SR '+r.s.sr.toFixed(0)+'%</span>'
           +'</div>'
           +'<div style="display:flex;align-items:center;gap:8px;">'
             +'<div style="flex:1;background:var(--sur);border-radius:3px;height:7px;overflow:hidden;">'
               +'<div style="width:'+barW.toFixed(1)+'%;height:100%;background:'+barCol+';border-radius:3px;transition:width .5s;"></div>'
             +'</div>'
-            +'<span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:13px;color:'+barCol+';min-width:52px;text-align:right;">'+fmt(r.s.pl)+'</span>'
-            +'<span style="font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:13px;color:'+roiCol+';min-width:52px;text-align:right;">'+Math.round(r.s.roi)+'%</span>'
+            +'<span style="font-family:var(--font);font-size:13px;color:'+barCol+';min-width:52px;text-align:right;">'+fmt(r.s.pl)+'</span>'
+            +'<span style="font-family:var(--font);font-size:13px;color:'+roiCol+';min-width:52px;text-align:right;">'+Math.round(r.s.roi)+'%</span>'
           +'</div>'
         +'</div>';
       }).join('')
@@ -1064,11 +1064,11 @@ function renderCkTip(){
 
   const thead='<table style="width:100%;font-size:14px;border-collapse:collapse;">'
     +'<thead><tr>'
-    +'<th style="text-align:left;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Check</th>'
-    +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Yes</th>'
-    +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">SR%</th>'
-    +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">ROI</th>'
-    +'<th style="text-align:right;font-family:Barlow Condensed,Arial Narrow,sans-serif;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">No ROI</th>'
+    +'<th style="text-align:left;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Check</th>'
+    +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">Yes</th>'
+    +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">SR%</th>'
+    +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">ROI</th>'
+    +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">No ROI</th>'
     +'</tr></thead><tbody>';
 
   const rows=tipQuestions.map(function(q){
@@ -1079,10 +1079,10 @@ function renderCkTip(){
     const ys=tipStats(yes),ns=tipStats(no);
     return'<tr>'
       +'<td style="padding:7px 0 7px;border-bottom:1px solid var(--bdr);font-size:13px;max-width:130px;line-height:1.3;">'+q.label+'</td>'
-      +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:var(--mut);">'+(ys?ys.n:'—')+'</td>'
-      +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);">'+(ys?ys.sr.toFixed(0)+'%':'—')+'</td>'
-      +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:'+(ys?(ys.roi>=0?'var(--grn)':'var(--red)'):'var(--mut)')+';">'+(ys?yMath.round(s.roi)+'%':'—')+'</td>'
-      +'<td style="font-family:Barlow Condensed,Arial Narrow,sans-serif;text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:'+(ns?(ns.roi>=0?'var(--grn)':'var(--red)'):'var(--mut)')+';">'+(ns?nMath.round(s.roi)+'%':'—')+'</td>'
+      +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:var(--mut);">'+(ys?ys.n:'—')+'</td>'
+      +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);">'+(ys?ys.sr.toFixed(0)+'%':'—')+'</td>'
+      +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:'+(ys?(ys.roi>=0?'var(--grn)':'var(--red)'):'var(--mut)')+';">'+(ys?yMath.round(s.roi)+'%':'—')+'</td>'
+      +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid var(--bdr);color:'+(ns?(ns.roi>=0?'var(--grn)':'var(--red)'):'var(--mut)')+';">'+(ns?nMath.round(s.roi)+'%':'—')+'</td>'
     +'</tr>';
   }).join('');
 

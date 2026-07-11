@@ -63,7 +63,7 @@ function showSupaBanner(msg, type){
   if(!el){
     el=document.createElement('div');
     el.id='_supa-toast';
-    el.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:20px;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.06em;z-index:9000;pointer-events:none;transition:opacity .3s;white-space:nowrap;';
+    el.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:20px;font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:.06em;z-index:9000;pointer-events:none;transition:opacity .3s;white-space:nowrap;';
     document.body.appendChild(el);
   }
   el.style.background=col;

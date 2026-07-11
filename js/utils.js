@@ -184,7 +184,7 @@ function renderBetLimit(){
   // Single slim strip: dots · legend · spacer · bets today
   el.innerHTML=
     '<div style="display:flex;align-items:center;gap:5px;padding:5px 2px;">'
-      +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);">Last 5</span>'
+      +'<span style="font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);">Last 5</span>'
       +dots
       +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#3b82f6;margin-left:6px;"></span>'
       +'<span style="font-size:9px;color:var(--mut);">Real</span>'

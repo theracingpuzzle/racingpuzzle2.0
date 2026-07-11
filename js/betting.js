@@ -381,7 +381,7 @@ function openBetFlow(mode,horse,course,time,jockey,trainer,raceName){
       +`<div style="padding:14px 18px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;">`
         +`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">`
           +`<div style="min-width:0;">`
-            +`<div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:20px;font-weight:900;letter-spacing:.03em;text-transform:uppercase;color:var(--txt);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${horse}</div>`
+            +`<div style="font-family:var(--font-display);font-size:20px;font-weight:400;letter-spacing:.03em;text-transform:uppercase;color:var(--txt);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${horse}</div>`
             +`<div style="font-size:11px;color:var(--mut);margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;">`
               +`<span>${time}</span><span style="opacity:.4;">·</span><span>${course}</span>`
               +(raceName?`<span style="opacity:.4;">·</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px;">${raceName}</span>`:'')
@@ -402,13 +402,13 @@ function openBetFlow(mode,horse,course,time,jockey,trainer,raceName){
 }
 
 function _betFlowSourceHtml(){
-  const BF_LBL='font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;';
+  const BF_LBL='font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:14px;';
   return `<div style="padding:20px 18px 8px;">`
     +`<div style="${BF_LBL}">How did you find this selection?</div>`
     +`<button onclick="_betFlowSelectSource('own')" style="width:100%;text-align:left;padding:16px;border-radius:14px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);cursor:pointer;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-sizing:border-box;transition:border-color .15s,background .15s;" onmouseenter="this.style.borderColor='#60a5fa'" onmouseleave="this.style.borderColor='var(--bdr)'">`
       +`<div style="width:40px;height:40px;border-radius:10px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔍</div>`
       +`<div style="min-width:0;">`
-        +`<div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);">My Own Selection</div>`
+        +`<div style="font-family:var(--font);font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);">My Own Selection</div>`
         +`<div style="font-size:12px;color:var(--mut);margin-top:2px;">I researched this myself</div>`
       +`</div>`
       +`<div style="margin-left:auto;color:var(--mut);font-size:18px;flex-shrink:0;">›</div>`
@@ -416,7 +416,7 @@ function _betFlowSourceHtml(){
     +`<button onclick="_betFlowSelectSource('tip')" style="width:100%;text-align:left;padding:16px;border-radius:14px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);cursor:pointer;display:flex;align-items:center;gap:14px;box-sizing:border-box;transition:border-color .15s;" onmouseenter="this.style.borderColor='#e879f9'" onmouseleave="this.style.borderColor='var(--bdr)'">`
       +`<div style="width:40px;height:40px;border-radius:10px;background:rgba(232,121,249,.1);border:1px solid rgba(232,121,249,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">💬</div>`
       +`<div style="min-width:0;">`
-        +`<div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);">Tip / Source</div>`
+        +`<div style="font-family:var(--font);font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);">Tip / Source</div>`
         +`<div style="font-size:12px;color:var(--mut);margin-top:2px;">Someone else's selection</div>`
       +`</div>`
       +`<div style="margin-left:auto;color:var(--mut);font-size:18px;flex-shrink:0;">›</div>`
@@ -429,7 +429,7 @@ function _ckEnabled(){return!(D.settings&&D.settings.checklistEnabled===false);}
 function _betFlowShowModeSelect(){
   const content=document.getElementById('_bflow-content');
   if(!content)return;
-  const BF_LBL='font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:16px;';
+  const BF_LBL='font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:16px;';
   content.innerHTML=`<div style="padding:24px 18px 24px;">`
     +`<div style="${BF_LBL}">Log as real or virtual?</div>`
     +`<div style="display:flex;flex-direction:column;gap:10px;">`
@@ -437,13 +437,13 @@ function _betFlowShowModeSelect(){
         +`<div style="width:40px;height:40px;border-radius:10px;background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">`
           +`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`
         +`</div>`
-        +`<div><div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#60a5fa;">Real Bet</div><div style="font-size:12px;color:var(--mut);margin-top:2px;">Count against my real bank</div></div>`
+        +`<div><div style="font-family:var(--font);font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#60a5fa;">Real Bet</div><div style="font-size:12px;color:var(--mut);margin-top:2px;">Count against my real bank</div></div>`
       +`</button>`
       +`<button onclick="_betFlowSkipProceed('virt')" style="width:100%;text-align:left;padding:16px;border-radius:14px;border:1px solid rgba(251,146,60,.3);background:rgba(251,146,60,.08);color:var(--txt);cursor:pointer;display:flex;align-items:center;gap:14px;box-sizing:border-box;">`
         +`<div style="width:40px;height:40px;border-radius:10px;background:rgba(251,146,60,.15);border:1px solid rgba(251,146,60,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">`
           +`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`
         +`</div>`
-        +`<div><div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fb923c;">Virtual Bet</div><div style="font-size:12px;color:var(--mut);margin-top:2px;">Paper trade against virtual bank</div></div>`
+        +`<div><div style="font-family:var(--font);font-size:16px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fb923c;">Virtual Bet</div><div style="font-size:12px;color:var(--mut);margin-top:2px;">Paper trade against virtual bank</div></div>`
       +`</button>`
     +`</div>`
   +`</div>`;
@@ -467,22 +467,22 @@ function _betFlowSelectSource(source){
   } else {
     // Show saved sources list + option to type a new one
     const sources=(D.settings&&D.settings.sources&&D.settings.sources.length)?D.settings.sources:[];
-    const BF_LBL2='font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:12px;';
+    const BF_LBL2='font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:12px;';
     let html='<div style="padding:20px 18px 8px;">'
       +'<div style="'+BF_LBL2+'">Who is the tip from?</div>';
     sources.forEach(function(src,si){
       const label=typeof src==='object'?src.label:src;
       html+='<button data-tip-idx="'+si+'" style="width:100%;text-align:left;padding:13px 16px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);cursor:pointer;margin-bottom:8px;box-sizing:border-box;display:flex;align-items:center;gap:12px;transition:border-color .12s;">'
         +'<span style="font-size:16px;">💬</span>'
-        +'<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;">'+label+'</span>'
+        +'<span style="font-family:var(--font);font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;">'+label+'</span>'
         +'<span style="margin-left:auto;color:var(--mut);font-size:16px;">›</span>'
         +'</button>';
     });
     html+='<div style="'+BF_LBL2+'margin-top:16px;">Or type a new source</div>'
       +'<input id="_bflow-tip-src" type="text" placeholder="e.g. Racing Post, Tipster…" autocomplete="off"'
-      +' style="width:100%;box-sizing:border-box;background:var(--sur2);border:1px solid var(--bdr);border-radius:12px;padding:13px 14px;font-size:15px;color:var(--txt);outline:none;margin-bottom:10px;font-family:\'Barlow Condensed\',sans-serif;font-weight:600;">'
-      +'<button id="_bflow-tip-go" style="width:100%;padding:14px;border-radius:12px;border:none;background:#e879f9;color:#141414;font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;margin-bottom:8px;">Continue →</button>'
-      +'<button id="_bflow-tip-cancel" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">Cancel</button>'
+      +' style="width:100%;box-sizing:border-box;background:var(--sur2);border:1px solid var(--bdr);border-radius:12px;padding:13px 14px;font-size:15px;color:var(--txt);outline:none;margin-bottom:10px;font-family:var(--font);font-weight:600;">'
+      +'<button id="_bflow-tip-go" style="width:100%;padding:14px;border-radius:12px;border:none;background:#e879f9;color:#141414;font-family:var(--font);font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;margin-bottom:8px;">Continue →</button>'
+      +'<button id="_bflow-tip-cancel" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">Cancel</button>'
       +'</div>';
     content.innerHTML=html;
     // Wire up listeners after render (no inline onclick = no quote issues)
@@ -537,10 +537,10 @@ function _betFlowShowChecklist(){
     `<div style="padding:14px 18px 0;flex-shrink:0;">`
       +`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">`
         +`<div>`
-          +`<div style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:${accentCol};margin-bottom:2px;">${isOwn?'MY SELECTION':'TIP · '+s.tipSource.toUpperCase()}</div>`
-          +`<div id="_bflow-score-lbl" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;font-weight:700;color:var(--mut);">0 of ${_flowActiveCKS.length} checks</div>`
+          +`<div style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:${accentCol};margin-bottom:2px;">${isOwn?'MY SELECTION':'TIP · '+s.tipSource.toUpperCase()}</div>`
+          +`<div id="_bflow-score-lbl" style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--mut);">0 of ${_flowActiveCKS.length} checks</div>`
         +`</div>`
-        +`<button onclick="_betFlowShowInfo()" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">ℹ How scored</button>`
+        +`<button onclick="_betFlowShowInfo()" style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">ℹ How scored</button>`
       +`</div>`
       +`<div style="height:5px;border-radius:3px;background:var(--bdr);overflow:hidden;margin-bottom:14px;">`
         +`<div id="_bflow-bar" style="height:100%;border-radius:3px;background:${accentCol};width:0%;transition:width .3s cubic-bezier(.4,0,.2,1);"></div>`
@@ -560,10 +560,10 @@ function _betFlowShowChecklist(){
     +`</div>`
     // Sticky bottom action bar
     +`<div style="position:sticky;bottom:0;background:var(--sur);border-top:1px solid var(--bdr);padding:12px 18px env(safe-area-inset-bottom,16px);flex-shrink:0;">`
-      +`<div id="_bflow-rec" style="font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:12px;font-weight:700;color:var(--mut);margin-bottom:10px;min-height:18px;letter-spacing:.03em;"></div>`
+      +`<div id="_bflow-rec" style="font-family:var(--font);font-size:12px;font-weight:700;color:var(--mut);margin-bottom:10px;min-height:18px;letter-spacing:.03em;"></div>`
       +`<div style="display:flex;gap:8px;">`
-        +`<button id="_bflow-btn-real" onclick="_betFlowProceed('real')" style="flex:1;padding:15px 10px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;">Real Bet</button>`
-        +`<button id="_bflow-btn-virt" onclick="_betFlowProceed('virt')" style="flex:1;padding:15px 10px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;">Virtual</button>`
+        +`<button id="_bflow-btn-real" onclick="_betFlowProceed('real')" style="flex:1;padding:15px 10px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:var(--font);font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;">Real Bet</button>`
+        +`<button id="_bflow-btn-virt" onclick="_betFlowProceed('virt')" style="flex:1;padding:15px 10px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:var(--font);font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s;">Virtual</button>`
       +`</div>`
     +`</div>`;
 }
@@ -573,8 +573,8 @@ function _betFlowItemHtml(c,i){
   const base='display:flex;flex-direction:column;gap:9px;padding:14px;border-radius:12px;border:1px solid var(--bdr);background:var(--sur2);margin-bottom:9px;transition:border-color .15s,background .15s;';
   const QT=`font-size:14px;font-weight:600;line-height:1.4;color:var(--txt);`;
   const QS=`font-size:11px;color:var(--mut);line-height:1.4;margin-top:-2px;`;
-  const YNBTN=`flex:1;padding:10px 8px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur);color:var(--mut);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;`;
-  const MOBTN=`flex:1;padding:9px 6px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur);color:var(--mut);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:center;`;
+  const YNBTN=`flex:1;padding:10px 8px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur);color:var(--mut);font-family:var(--font);font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;`;
+  const MOBTN=`flex:1;padding:9px 6px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur);color:var(--mut);font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:center;`;
 
   if(type==='yes-no'){
     return `<div id="_bflow-item-${i}" style="${base}">`
@@ -597,9 +597,9 @@ function _betFlowItemHtml(c,i){
   if(type==='scale'){
     return `<div id="_bflow-item-${i}" style="${base}">`
       +`<div style="${QT}">${c.t}</div>`
-      +`<div style="display:flex;align-items:center;justify-content:space-between;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;"><span>${c.scaleMin||'Low'}</span><span>${c.scaleMax||'High'}</span></div>`
+      +`<div style="display:flex;align-items:center;justify-content:space-between;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;"><span>${c.scaleMin||'Low'}</span><span>${c.scaleMax||'High'}</span></div>`
       +`<input id="_bflow-scale-${i}" type="range" min="0" max="100" value="0" oninput="_betFlowScale(${i},this.value)" style="width:100%;accent-color:#60a5fa;">`
-      +`<div id="_bflow-scale-lbl-${i}" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;color:var(--mut);text-align:center;">Not set</div>`
+      +`<div id="_bflow-scale-lbl-${i}" style="font-family:var(--font);font-size:12px;font-weight:700;color:var(--mut);text-align:center;">Not set</div>`
     +`</div>`;
   }
   if(type==='auto'){
@@ -607,7 +607,7 @@ function _betFlowItemHtml(c,i){
     return `<div id="_bflow-item-${i}" style="${base}opacity:.75;">`
       +`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">`
         +`<div style="${QT};flex:1;">${c.t}</div>`
-        +`<div id="_bflow-auto-lbl-${i}" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);white-space:nowrap;">Detecting…</div>`
+        +`<div id="_bflow-auto-lbl-${i}" style="font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);white-space:nowrap;">Detecting…</div>`
       +`</div>`
       +`<div style="${QS}">${c.s}</div>`
     +`</div>`;

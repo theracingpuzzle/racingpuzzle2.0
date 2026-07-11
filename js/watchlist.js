@@ -470,24 +470,24 @@ function _injectAlbumCSS(){
     .wll-wrap{padding:0 0 24px;}
     .wll-stats{display:flex;gap:6px;margin:0 0 14px;}
     .wll-stat{flex:1;background:var(--sur2);border:1px solid var(--bdr);border-radius:9px;padding:8px 10px;text-align:center;}
-    .wll-stat-n{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:20px;font-weight:800;letter-spacing:.5px;color:var(--txt);}
-    .wll-stat-l{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);margin-top:1px;}
+    .wll-stat-n{font-family:var(--font);font-size:20px;font-weight:800;letter-spacing:.5px;color:var(--txt);}
+    .wll-stat-l{font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);margin-top:1px;}
     .wll-sec{display:flex;align-items:center;gap:8px;padding:10px 0 6px;border-bottom:1px solid var(--bdr);margin-bottom:4px;}
     .wll-sec-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-    .wll-sec-lbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;flex:1;}
-    .wll-sec-cnt{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;color:var(--mut);}
+    .wll-sec-lbl{font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;flex:1;}
+    .wll-sec-cnt{font-family:var(--font);font-size:10px;color:var(--mut);}
     .wll-row{display:flex;align-items:center;border-left:3px solid;padding:10px 10px 10px 12px;margin-bottom:6px;background:var(--sur2);border-radius:0 9px 9px 0;cursor:pointer;transition:background .12s;}
     .wll-row:active{background:var(--dim);}
     .wll-silks{width:30px;height:30px;border-radius:50%;background:var(--sur);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;}
     .wll-main{flex:1;min-width:0;}
-    .wll-name{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:16px;font-weight:600;letter-spacing:.2px;color:var(--txt);line-height:1;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .wll-name{font-family:var(--font);font-size:16px;font-weight:600;letter-spacing:.2px;color:var(--txt);line-height:1;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .wll-sub{font-size:11px;color:var(--mut);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .wll-tag{display:inline-flex;align-items:center;gap:3px;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;}
+    .wll-tag{display:inline-flex;align-items:center;gap:3px;font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;}
     .wll-right{display:flex;gap:5px;align-items:center;flex-shrink:0;margin-left:10px;}
     .wll-rating{display:flex;flex-direction:column;align-items:center;background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:4px 7px;min-width:38px;}
-    .wll-rating-lbl{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);}
-    .wll-rating-val{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:15px;font-weight:800;letter-spacing:.5px;line-height:1.1;}
-    .wll-empty{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:13px;color:var(--mut);font-style:italic;text-align:center;padding:40px 20px;}
+    .wll-rating-lbl{font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);}
+    .wll-rating-val{font-family:var(--font);font-size:15px;font-weight:800;letter-spacing:.5px;line-height:1.1;}
+    .wll-empty{font-family:var(--font);font-size:13px;color:var(--mut);font-style:italic;text-align:center;padding:40px 20px;}
   `;
   document.head.appendChild(s);
 }
@@ -528,10 +528,10 @@ function renderWLList(){
     } else {
       el.innerHTML='<div style="text-align:center;padding:36px 20px;">'
         +'<div style="font-size:40px;margin-bottom:14px;">🐴</div>'
-        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:17px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">Your Profiler is empty</div>'
+        +'<div style="font-family:var(--font);font-size:17px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">Your Profiler is empty</div>'
         +'<div style="font-size:13px;color:var(--mut);line-height:1.65;margin-bottom:6px;">Build private profiles for every horse you follow — track ratings, going preferences, trainer intel, and race targets.</div>'
         +'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:20px;">When they\'re declared to run, they\'ll appear on your Today card automatically.</div>'
-        +'<button onclick="wlNew()" style="padding:11px 24px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">+ Add First Horse</button>'
+        +'<button onclick="wlNew()" style="padding:11px 24px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">+ Add First Horse</button>'
         +'</div>';
     }
     return;
@@ -870,7 +870,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
   modal.className='wlr-modal';
   modal._rvwEntry=entry||{};
   const F='width:100%;padding:9px 11px;background:#0a0a14;border:1px solid #1c1c30;border-radius:8px;color:#d4d8e8;font-size:14px;font-family:\'Segoe UI\',sans-serif;outline:none;box-sizing:border-box;';
-  const L='display:block;font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;';
+  const L='display:block;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#4a4a6a;margin-bottom:5px;';
   modal.innerHTML=
     '<div class="wlr-sheet">'
     +'<div class="wlr-handle"><div class="wlr-handle-bar"></div></div>'
@@ -889,7 +889,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'</div>'
     +'<div class="g2">'
       +'<div class="fg"><label>Distance</label>'
-        +'<select id="rvw-dist" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;">'
+        +'<select id="rvw-dist" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:var(--font);font-size:14px;">'
         +'<option value="">— Select —</option>'
         +(function(){
           var opts=['5f','6f','7f','1m','1m 1f','1m 2f','1m 3f','1m 4f','1m 6f','2m','2m 1f','2m 2f','2m 4f','2m 6f','3m','3m 2f'];
@@ -900,7 +900,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
         +'</select>'
       +'</div>'
       +'<div class="fg"><label>Class</label>'
-        +'<select id="rvw-class" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;">'
+        +'<select id="rvw-class" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:var(--font);font-size:14px;">'
         +'<option value="">— Select —</option>'
         +(function(){
           var opts=['1','2','3','4','5','6','7','Group 1','Group 2','Group 3','Listed','Novice','Maiden','Handicap','Conditions'];
@@ -912,7 +912,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'</div>'
     +'<div class="g2">'
       +'<div class="fg"><label>Ground</label>'
-        +'<select id="rvw-ground" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:\'Barlow Condensed\',sans-serif;font-size:14px;"><option value="">— Select —</option><option'+(raceGoing==='Firm'?' selected':'')+'>Firm</option><option'+(raceGoing==='Good to Firm'?' selected':'')+'>Good to Firm</option><option'+(raceGoing==='Good'?' selected':'')+'>Good</option><option'+(raceGoing==='Good to Soft'?' selected':'')+'>Good to Soft</option><option'+(raceGoing==='Soft'?' selected':'')+'>Soft</option><option'+(raceGoing==='Heavy'?' selected':'')+'>Heavy</option><option'+(raceGoing==='Standard'?' selected':'')+'>Standard</option><option'+(raceGoing==='Standard to Slow'?' selected':'')+'>Standard to Slow</option><option'+(raceGoing==='Slow'?' selected':'')+'>Slow</option></select>'
+        +'<select id="rvw-ground" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:var(--font);font-size:14px;"><option value="">— Select —</option><option'+(raceGoing==='Firm'?' selected':'')+'>Firm</option><option'+(raceGoing==='Good to Firm'?' selected':'')+'>Good to Firm</option><option'+(raceGoing==='Good'?' selected':'')+'>Good</option><option'+(raceGoing==='Good to Soft'?' selected':'')+'>Good to Soft</option><option'+(raceGoing==='Soft'?' selected':'')+'>Soft</option><option'+(raceGoing==='Heavy'?' selected':'')+'>Heavy</option><option'+(raceGoing==='Standard'?' selected':'')+'>Standard</option><option'+(raceGoing==='Standard to Slow'?' selected':'')+'>Standard to Slow</option><option'+(raceGoing==='Slow'?' selected':'')+'>Slow</option></select>'
       +'</div>'
     +'</div>'
     +'<div class="fg"><label>Result</label><div class="rvw-btn-group">'
@@ -1110,7 +1110,7 @@ function _rvwUpdateSignals(){
   let html='<div style="background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;margin-bottom:4px;">';
   html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
     +'<span style="font-size:20px;letter-spacing:3px;color:'+starCol+';">'+'★'.repeat(starScore)+'☆'.repeat(5-starScore)+'</span>'
-    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:'+starCol+';">'+starLabel+'</span>'
+    +'<span style="font-family:var(--font);font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:'+starCol+';">'+starLabel+'</span>'
     +'</div>';
   pos.forEach(function(s){html+='<div style="font-size:13px;color:#10b981;margin-bottom:5px;display:flex;gap:6px;"><span>✓</span><span>'+s.label+'</span></div>';});
   neg.forEach(function(s){html+='<div style="font-size:13px;color:#f87171;margin-bottom:5px;display:flex;gap:6px;"><span>✗</span><span>'+s.label+'</span></div>';});
@@ -2236,12 +2236,12 @@ const WLP_CSS = `
   border: 1px solid var(--bdr);
   padding: 0 12px;
   cursor: pointer; font-size: 14px; color: #fff;
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-weight: 700; letter-spacing: .5px;
   white-space: nowrap;
 }
 .wlp-brand {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 14px; font-weight: 800;
   letter-spacing: 2px; text-transform: uppercase;
   color: #fff;
@@ -2249,7 +2249,7 @@ const WLP_CSS = `
 }
 .wlp-brand-accent { color: var(--gld2); }
 .wlp-edit-btn {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 12px; font-weight: 700;
   letter-spacing: 1px; text-transform: uppercase;
   color: var(--gld2);
@@ -2291,7 +2291,7 @@ const WLP_CSS = `
 }
 .wlp-reason-badge {
   display: inline-flex; align-items: center; gap: 4px;
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 10px; font-weight: 800;
   letter-spacing: 1.5px; text-transform: uppercase;
   padding: 3px 8px; border-radius: 5px; margin-top: 4px;
@@ -2302,7 +2302,7 @@ const WLP_CSS = `
   border-radius: 10px; padding: 7px 13px; text-align: center;
 }
 .wlp-or-label {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 9px; font-weight: 800; letter-spacing: 2px;
   text-transform: uppercase; color: var(--mut); display: block; margin-bottom: 1px;
 }
@@ -2310,7 +2310,7 @@ const WLP_CSS = `
   font-size: 32px; letter-spacing: 1px; color: #fff; line-height: 1;
 }
 .wlp-or-na {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 13px; font-weight: 700; color: var(--mut);
 }
 /* META STRIP */
@@ -2324,12 +2324,12 @@ const WLP_CSS = `
 }
 .wlp-meta-cell:last-child { border-right: none; }
 .wlp-meta-label {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
   text-transform: uppercase; color: var(--mut); display: block; margin-bottom: 3px;
 }
 .wlp-meta-val {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 13px; font-weight: 700; color: #fff;
 }
 /* HERO BODY */
@@ -2350,7 +2350,7 @@ const WLP_CSS = `
 }
 .wlp-stat-row:last-child { border-bottom: none; }
 .wlp-stat-left {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 12px; font-weight: 600; color: var(--mut);
   display: flex; align-items: center; gap: 6px;
 }
@@ -2359,7 +2359,7 @@ const WLP_CSS = `
   font-size: 20px; letter-spacing: 1px; line-height: 1;
 }
 .wlp-stat-sm {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 12px; font-weight: 700; color: #fff;
 }
 .wlp-edge-badge {
@@ -2384,16 +2384,16 @@ const WLP_CSS = `
   width: 24px; height: 24px; background: var(--navy);
   border: 1px solid var(--bdr); border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 12px; font-weight: 800; color: var(--mut);
 }
 .wlp-section-title {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 12px; font-weight: 800; letter-spacing: 2px;
   text-transform: uppercase; color: var(--txt);
 }
 .wlp-section-action {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 11px; font-weight: 700; letter-spacing: 1px;
   text-transform: uppercase; color: var(--gld2); cursor: pointer;
 }
@@ -2416,7 +2416,7 @@ const WLP_CSS = `
 }
 .wlp-why-icon { font-size: 14px; }
 .wlp-why-label {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 9px; font-weight: 700; letter-spacing: .4px;
   text-align: center; line-height: 1.2; color: var(--txt);
 }
@@ -2436,7 +2436,7 @@ const WLP_CSS = `
 }
 .wlp-rating-col:last-child { border-right: none; }
 .wlp-rating-key {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
   text-transform: uppercase; color: var(--mut); margin-bottom: 5px; text-align: center;
 }
@@ -2445,7 +2445,7 @@ const WLP_CSS = `
   font-size: 28px; letter-spacing: 1px; line-height: 1; text-align: center;
 }
 .wlp-rating-na {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 14px; font-weight: 700; color: var(--mut);
 }
 .wlp-rating-bar { height: 2px; border-radius: 1px; margin-top: 5px; width: 80%; }
@@ -2454,12 +2454,12 @@ const WLP_CSS = `
   flex-wrap: wrap; align-items: center;
 }
 .wlp-hist-label {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
   text-transform: uppercase; color: var(--mut);
 }
 .wlp-hist-pill {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 5px;
   background: CLR_WATCH_A3; border: 1px solid CLR_WATCH_A6;
   color: var(--gld2); display: flex; align-items: center; gap: 4px;
@@ -2473,7 +2473,7 @@ const WLP_CSS = `
   background: #f5f0d8; border-radius: 0 0 10px 10px; padding: 11px 13px 13px;
 }
 .wlp-notepad-meta {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #8a8060;
   margin-bottom: 7px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
 }
@@ -2487,13 +2487,13 @@ const WLP_CSS = `
   line-height: 1.7; color: #2a2510; white-space: pre-line;
 }
 .wlp-notepad-empty {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 11px; color: #8a8060; font-style: italic;
   padding: 14px 13px; text-align: center; line-height: 1.6;
 }
 .wlp-obs-count {
   border-top: 1px solid var(--bdr); padding: 9px;
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 10px; font-weight: 700; letter-spacing: 1px;
   text-transform: uppercase; color: var(--gld2); text-align: center; cursor: pointer;
 }
@@ -2505,25 +2505,25 @@ const WLP_CSS = `
 .wlp-target-item:last-child { border-bottom: none; }
 .wlp-target-icon { font-size: 14px; margin-top: 1px; flex-shrink: 0; opacity: .4; }
 .wlp-target-race {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 13px; font-weight: 800; color: #fff; letter-spacing: .3px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .wlp-target-meta {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 10px; font-weight: 600; color: var(--mut); letter-spacing: .3px; margin-top: 2px;
 }
 .wlp-target-date {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 11px; font-weight: 700; color: var(--clr-watch); letter-spacing: .5px;
 }
 .wlp-target-cond {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 9px; font-weight: 600; color: var(--mut);
   text-align: right; max-width: 70px; line-height: 1.2; margin-top: 2px;
 }
 .wlp-target-empty {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 11px; color: var(--mut); padding: 14px 13px;
   text-align: center; font-style: italic;
 }
@@ -2536,12 +2536,12 @@ const WLP_CSS = `
 .wlp-cond-cell:last-child { border-right: none; }
 .wlp-cond-icon { display:flex; align-items:center; justify-content:center; width:20px; height:20px; opacity:.7; }
 .wlp-cond-label {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 8px; font-weight: 700; letter-spacing: 1px;
   text-transform: uppercase; color: var(--mut); text-align: center;
 }
 .wlp-cond-val {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 10px; font-weight: 800; text-align: center; line-height: 1.2;
 }
 /* INTEL */
@@ -2930,7 +2930,7 @@ function _wlpBuildHTML(e){
           +(alreadyReviewed?' · <span style="color:#4ade80;">✓ Reviewed</span>':isPast?' · <span style="color:#f59e0b;">Awaiting review</span>':'')
         +'</div>';
         // Line 2: race name
-        h+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:'+(isPast&&!alreadyReviewed?'var(--mut)':'var(--txt)')+';">'+esc(t.race||'—')+'</div>';
+        h+='<div style="font-family:var(--font);font-size:14px;font-weight:800;color:'+(isPast&&!alreadyReviewed?'var(--mut)':'var(--txt)')+';">'+esc(t.race||'—')+'</div>';
         // Line 3: condition note if set
         if(t.condition)h+='<div style="font-size:11px;color:var(--mut);margin-top:2px;font-style:italic;">'+esc(t.condition)+'</div>';
         // Line 4: actions — plain text, unobtrusive
@@ -2992,7 +2992,7 @@ function _wlpBuildHTML(e){
       h+='<div style="padding:11px 13px;border-top:1px solid rgba(245,158,11,.15);">'
         +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">'
           +'<div style="flex:1;min-width:0;">'
-            +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;color:var(--txt);">'+(item.raceName||item.course||'Race')+'</div>'
+            +'<div style="font-family:var(--font);font-size:13px;font-weight:800;color:var(--txt);">'+(item.raceName||item.course||'Race')+'</div>'
             +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'
               +[item.date?_wlpFmt(item.date):'',item.course,item.raceDist,item.raceGoing].filter(Boolean).join(' · ')
             +'</div>'
@@ -3000,10 +3000,10 @@ function _wlpBuildHTML(e){
             +(label?'<div style="font-size:10px;color:#f59e0b;margin-top:3px;font-style:italic;">'+label+'</div>':'')
           +'</div>'
           +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'
-            +(rc?'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+item.result+'</span>':'')
+            +(rc?'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+item.result+'</span>':'')
             +(item._type==='pending'
-              ?'<button onclick="wlCompletePendingReview(\''+item.id+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>'
-              :'<button onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\''+esc(item.raceName||'')+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>')
+              ?'<button onclick="wlCompletePendingReview(\''+item.id+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>'
+              :'<button onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\''+esc(item.raceName||'')+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>')
           +'</div>'
         +'</div>'
       +'</div>';
@@ -3030,12 +3030,12 @@ function _wlpBuildHTML(e){
           // Date + course — always consistent, always first
           h+='<div style="font-size:10px;font-weight:700;color:var(--mut);letter-spacing:.04em;margin-bottom:3px;">'+[r.date?_wlpFmt(r.date):'',r.course||''].filter(Boolean).join(' · ')+'</div>';
           // Race name — primary label
-          h+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:14px;font-weight:800;color:'+(isObs?'var(--mut)':'var(--txt)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(isObs?'Initial Sighting':(r.raceName||'Race'))+'</div>';
+          h+='<div style="font-family:var(--font);font-size:14px;font-weight:800;color:'+(isObs?'var(--mut)':'var(--txt)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(isObs?'Initial Sighting':(r.raceName||'Race'))+'</div>';
         h+='</div>';
         // Result badge right-aligned
         h+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">';
-          if(r.result)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>';
-          if(vm)h+='<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+vm.col+'15;border:1px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';
+          if(r.result)h+='<span style="font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>';
+          if(vm)h+='<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+vm.col+'15;border:1px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';
         h+='</div>';
       h+='</div>';
       // Row 2: detail chips (position, going, odds etc.) — only if present

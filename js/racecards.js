@@ -886,7 +886,7 @@ function _lboCalcStake(){
 
   let html='<div style="display:flex;justify-content:space-between;align-items:center;">'
     +'<div>'
-      +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Suggested Stake</div>'
+      +'<div style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Suggested Stake</div>'
       +'<div style="font-family:monospace;font-size:20px;font-weight:700;color:'+accentCol+';">£'+suggested.toFixed(2)+'</div>'
       +'<div style="font-size:10px;color:var(--mut);margin-top:1px;">'+pts+'pt × £'+pv.toFixed(2)+'/pt'+(isEW?' · EW (£'+(suggested/2).toFixed(2)+' each leg)':'')+'</div>'
     +'</div>'
@@ -1097,7 +1097,7 @@ function rcSwRenderResultsUI(){
   const btnBase = 'font-family:var(--font-ui);font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 18px;border:none;cursor:pointer;font-weight:700;transition:all .12s;';
 
   filterEl.style.display = 'block';
-  const _rsb='font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;';
+  const _rsb='font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;';
   filterEl.innerHTML =
     '<div class="rc-view-tog">'
     + '<button class="rc-view-btn '+(onT?'on':'off')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
@@ -1804,11 +1804,11 @@ function rcSlRenderCard(){
 
   const _slBackFn=_rcSlReturnCourse?'rcSlBackToRace()':'rcSwView=\'course\';rcSwRenderUI();';
   const toggleHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
-    +'<button onclick="'+_slBackFn+'" style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:4px 0;text-transform:uppercase;">'
+    +'<button onclick="'+_slBackFn+'" style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:4px 0;text-transform:uppercase;">'
       +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
       +'Back'
     +'</button>'
-    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);">Shortlist</span>'
+    +'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);">Shortlist</span>'
     +'<div style="width:48px;"></div>'
   +'</div>';
 
@@ -1896,12 +1896,12 @@ function rcSlRenderCard(){
         // OR chip top-right
         +(rpr?'<span class="rc-or" style="position:absolute;top:12px;right:12px;font-size:13px;padding:4px 10px;">'+rpr+'</span>':'')
         // Draw chip top-left
-        +(draw?'<span style="position:absolute;top:12px;left:12px;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.25);color:#fff;padding:3px 8px;border-radius:6px;">Draw '+draw+'</span>':'')
+        +(draw?'<span style="position:absolute;top:12px;left:12px;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.25);color:#fff;padding:3px 8px;border-radius:6px;">Draw '+draw+'</span>':'')
         // Silk
         +silkSVG
         // Horse name below silk
         +'<div style="text-align:center;">'
-          +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:900;color:#fff;letter-spacing:.3px;line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.4);">'+name+'</div>'
+          +'<div style="font-family:var(--font);font-size:26px;font-weight:900;color:#fff;letter-spacing:.3px;line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.4);">'+name+'</div>'
           +(age||wt?'<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:4px;">'+[age,wt].filter(Boolean).join(' · ')+'</div>':'')
         +'</div>'
       +'</div>'
@@ -1909,19 +1909,19 @@ function rcSlRenderCard(){
       // Stats grid — Top Trumps style rows
       +'<div style="display:grid;grid-template-columns:1fr 1fr;border-top:2px solid '+_slkC.body+';">'
         +(sp?'<div style="padding:10px 14px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">'
-          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Price</div>'
-          +'<div style="font-size:18px;font-weight:900;font-family:\'Barlow Condensed\',sans-serif;color:var(--gld);">'+sp+'</div>'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Price</div>'
+          +'<div style="font-size:18px;font-weight:900;font-family:var(--font);color:var(--gld);">'+sp+'</div>'
         +'</div>':'<div style="border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);"></div>')
         +(form?'<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">'
-          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Form</div>'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Form</div>'
           +'<div style="font-size:15px;font-weight:800;letter-spacing:3px;color:var(--txt);font-family:var(--font-ui);">'+form+'</div>'
         +'</div>':'<div style="border-bottom:1px solid var(--bdr);"></div>')
         +(jock?'<div style="padding:10px 14px;border-right:1px solid var(--bdr);'+(trainer?'border-bottom:1px solid var(--bdr);':'')+'">'
-          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Jockey</div>'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Jockey</div>'
           +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+jock+'</div>'
         +'</div>':'<div style="border-right:1px solid var(--bdr);'+(trainer?'border-bottom:1px solid var(--bdr);':'')+'""></div>')
         +(trainer?'<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">'
-          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Trainer</div>'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Trainer</div>'
           +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+trainer+'</div>'
         +'</div>':'')
       +'</div>'
@@ -2029,11 +2029,11 @@ function rcSlRenderSummary(){
 
   const _slBackFn2=_rcSlReturnCourse?'rcSlBackToRace()':'rcSwView=\'course\';rcSwRenderUI();';
   const toggleHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
-    +'<button onclick="'+_slBackFn2+'" style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:4px 0;text-transform:uppercase;">'
+    +'<button onclick="'+_slBackFn2+'" style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:4px 0;text-transform:uppercase;">'
       +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
       +'Back'
     +'</button>'
-    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);">Shortlist</span>'
+    +'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);">Shortlist</span>'
     +'<div style="width:48px;"></div>'
   +'</div>';
 

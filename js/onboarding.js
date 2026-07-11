@@ -77,10 +77,10 @@ function obRender() {
 
 // ── Step styles (shared) ─────────────────────────────────────────
 const _OB_CARD  = 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:24px 20px;margin-bottom:24px;';
-const _OB_LBL   = 'display:block;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:7px;';
-const _OB_INPUT = 'width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:"Barlow Condensed",sans-serif;font-size:16px;outline:none;';
-const _OB_BTN   = 'width:100%;padding:15px;border-radius:10px;border:none;background:var(--gld2);color:#fff;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:14px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;';
-const _OB_BTN_S = 'width:100%;padding:13px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.45);font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;margin-top:10px;';
+const _OB_LBL   = 'display:block;font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:7px;';
+const _OB_INPUT = 'width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:var(--font);font-size:16px;outline:none;';
+const _OB_BTN   = 'width:100%;padding:15px;border-radius:10px;border:none;background:var(--gld2);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;';
+const _OB_BTN_S = 'width:100%;padding:13px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.45);font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;margin-top:10px;';
 
 // ─────────────────────────────────────────────────────────────────
 // STEP 1 — Welcome
@@ -88,7 +88,7 @@ const _OB_BTN_S = 'width:100%;padding:13px;border-radius:10px;border:1px solid r
 function obStepWelcome() {
   return '<div style="text-align:center;margin-bottom:32px;">'
     + '<div style="font-size:48px;margin-bottom:16px;">🏇</div>'
-    + '<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:30px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff;line-height:1.1;margin-bottom:10px;">'
+    + '<div style="font-family:var(--font);font-size:30px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff;line-height:1.1;margin-bottom:10px;">'
     +   'Your betting,<br><span style="color:var(--gld2);">your edge.</span>'
     + '</div>'
     + '<div style="font-size:14px;color:rgba(255,255,255,.55);line-height:1.65;margin-top:14px;">'
@@ -120,7 +120,7 @@ function _obFeatureRow(emoji, title, desc) {
 // ─────────────────────────────────────────────────────────────────
 function obStepBank() {
   return '<div style="margin-bottom:24px;">'
-    + '<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff;margin-bottom:8px;">Set your bank</div>'
+    + '<div style="font-family:var(--font);font-size:26px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff;margin-bottom:8px;">Set your bank</div>'
     + '<div style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;">This is your starting bankroll. The app uses this to track your P&L and ROI over time. You can change it any time in Settings.</div>'
     + '</div>'
 
@@ -171,29 +171,29 @@ const OB_SOURCE_SUGGESTIONS = [
 
 function obStepSources() {
   return '<div style="margin-bottom:24px;">'
-    + '<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:26px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff;margin-bottom:8px;">Your sources</div>'
+    + '<div style="font-family:var(--font);font-size:26px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff;margin-bottom:8px;">Your sources</div>'
     + '<div style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;">Where do your bets come from? Add your sources so you can track which ones are profitable. You can add more any time in Settings.</div>'
     + '</div>'
 
     + '<div style="' + _OB_CARD + '">'
 
     // Quick-add suggestion chips
-    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:10px;">Quick add</div>'
+    + '<div style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:10px;">Quick add</div>'
     + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;" id="ob-suggestions">'
     + OB_SOURCE_SUGGESTIONS.map(function(s) {
         return '<button onclick="obAddSuggestion(\'' + s.replace(/'/g, "\\'") + '\')" '
-          + 'style="padding:6px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.6);font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">+ ' + s + '</button>';
+          + 'style="padding:6px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.6);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;">+ ' + s + '</button>';
       }).join('')
     + '</div>'
 
     // Custom input
-    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">Or type your own</div>'
+    + '<div style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">Or type your own</div>'
     + '<div style="display:flex;gap:8px;">'
     +   '<input id="ob-src-input" type="text" placeholder="e.g. My Trainer Contact" maxlength="40" '
     +     'style="flex:1;' + _OB_INPUT + 'font-size:14px;" '
     +     'onkeydown="if(event.key===\'Enter\')obAddCustomSource()">'
     +   '<button onclick="obAddCustomSource()" '
-    +     'style="padding:12px 16px;border-radius:10px;border:none;background:var(--gld2);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;">Add</button>'
+    +     'style="padding:12px 16px;border-radius:10px;border:none;background:var(--gld2);color:#fff;font-family:var(--font);font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;">Add</button>'
     + '</div>'
 
     // Added sources list
@@ -242,7 +242,7 @@ function _obRenderSourceList() {
   if (!el) return;
   const sources = (D.settings && D.settings.sources) || [];
   if (!sources.length) { el.innerHTML = ''; return; }
-  el.innerHTML = '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">Added</div>'
+  el.innerHTML = '<div style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:8px;">Added</div>'
     + sources.map(function(s, i) {
         const label = typeof s === 'object' ? s.label : s;
         return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);">'

@@ -14,8 +14,8 @@ function _tosRenderTab(tab) {
   const tabTos   = document.getElementById('tos-tab-tos');
   const tabPriv  = document.getElementById('tos-tab-priv');
 
-  const activeStyle   = 'flex:1;padding:9px;border:1px solid var(--bdr);background:var(--navy);color:#fff;font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;';
-  const inactiveStyle = 'flex:1;padding:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;';
+  const activeStyle   = 'flex:1;padding:9px;border:1px solid var(--bdr);background:var(--navy);color:#fff;font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;';
+  const inactiveStyle = 'flex:1;padding:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;';
 
   if (tab === 'tos') {
     if (tabTos)  { tabTos.style.cssText  = activeStyle   + 'border-radius:8px 0 0 8px;'; }
@@ -31,7 +31,7 @@ function _tosRenderTab(tab) {
 }
 
 function _h(text) {
-  return '<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:14px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--txt);margin:20px 0 6px;">' + text + '</div>';
+  return '<div style="font-family:var(--font);font-size:14px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--txt);margin:20px 0 6px;">' + text + '</div>';
 }
 function _p(text) {
   return '<p style="margin:0 0 12px;color:var(--mut);">' + text + '</p>';

@@ -127,7 +127,7 @@ function _showTodayDemo(){
   const bl = document.getElementById('tbetlimit');
   if(bl) bl.innerHTML =
     '<div style="display:flex;align-items:center;gap:5px;padding:5px 2px;">'
-    +'<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);">Last 5</span>'
+    +'<span style="font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);">Last 5</span>'
     +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#3b82f6;"></span>'
     +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#3b82f6;"></span>'
     +'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#ea580c;"></span>'
@@ -147,7 +147,7 @@ function _showTodayDemo(){
     '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:9px;">'
     +'<span style="font-size:16px;flex-shrink:0;">🙂</span>'
     +'<div style="flex:1;min-width:0;">'
-      +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#4ade80;">Good mindset</div>'
+      +'<div style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#4ade80;">Good mindset</div>'
       +'<div style="font-size:12px;color:var(--txt);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Watching the Gosden runners — looks a strong day at Ascot</div>'
     +'</div>'
     +'</div>';
@@ -202,7 +202,7 @@ function _showTodayDemo(){
           +'</div>'
         +'</div>'
         +'<div style="text-align:right;flex-shrink:0;">'
-          +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:20px;font-weight:900;line-height:1.1;color:#f87171;">8m</div>'
+          +'<div style="font-family:var(--font-display);font-size:20px;font-weight:400;line-height:1.1;color:#f87171;">8m</div>'
           +'<div style="font-size:10px;opacity:.6;letter-spacing:.05em;text-transform:uppercase;">away</div>'
           +'<div class="t-next-cta">Racecards →</div>'
         +'</div>'
@@ -385,7 +385,7 @@ function renderNextRace(){
         +'</div>'
       +'</div>'
       +'<div class="t-next-count" style="color:'+urgency+';text-align:right;flex-shrink:0;">'
-        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:20px;font-weight:900;line-height:1.1;">'+countdown+'</div>'
+        +'<div style="font-family:var(--font-display);font-size:20px;font-weight:400;line-height:1.1;">'+countdown+'</div>'
         +(countdownSub?'<div style="font-size:10px;opacity:.6;letter-spacing:.05em;text-transform:uppercase;">'+countdownSub+'</div>':'')
         +'<div class="t-next-cta">Racecards →</div>'
       +'</div>'
@@ -508,9 +508,9 @@ async function checkWatchlistRunners(races){
       alertEl.style.display='block';
       alertEl.innerHTML='<div class="t-alert-pur" style="text-align:center;padding:20px 16px;">'
         +'<div style="font-size:28px;margin-bottom:10px;">⭐</div>'
-        +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No horses on your Profiler</div>'
+        +'<div style="font-family:var(--font);font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No horses on your Profiler</div>'
         +'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:14px;">Add horses to your Puzzle Profiler and they\'ll appear here when they\'re declared to run today.</div>'
-        +'<button onclick="navTo(\'watch\')" style="padding:9px 18px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Open Profiler →</button>'
+        +'<button onclick="navTo(\'watch\')" style="padding:9px 18px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Open Profiler →</button>'
         +'</div>';
     }
     return;
@@ -662,15 +662,15 @@ async function checkWatchlistRunners(races){
     headlineEl.innerHTML=''
       +'<div style="display:flex;gap:6px;">'
         +'<div style="'+_ps+'border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.08);">'
-          +'<div style="font-size:20px;font-weight:900;line-height:1;color:var(--grn);">'+_conv+'</div>'
+          +'<div class="t-display-num" style="color:var(--grn);">'+_conv+'</div>'
           +'<div style="font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--grn);margin-top:3px;">High Conviction</div>'
         +'</div>'
         +'<div style="'+_ps+'border-color:rgba(217,119,6,.35);background:rgba(217,119,6,.08);">'
-          +'<div style="font-size:20px;font-weight:900;line-height:1;color:var(--gld);">'+_int+'</div>'
+          +'<div class="t-display-num" style="color:var(--gld);">'+_int+'</div>'
           +'<div style="font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gld);margin-top:3px;">Interest</div>'
         +'</div>'
         +'<div style="'+_ps+'border-color:var(--bdr);background:var(--sur2);">'
-          +'<div style="font-size:20px;font-weight:900;line-height:1;color:var(--mut);">'+_pass+'</div>'
+          +'<div class="t-display-num" style="color:var(--mut);">'+_pass+'</div>'
           +'<div style="font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-top:3px;">Pass</div>'
         +'</div>'
       +'</div>';
@@ -1001,12 +1001,12 @@ async function checkWatchlistRunners(races){
           +'<div style="display:flex;align-items:stretch;gap:1px;border-radius:8px;overflow:hidden;border:1px solid var(--bdr);margin-bottom:8px;">'
             +'<div style="flex:1;background:var(--sur2);padding:8px 12px;">'
               +'<div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Finished</div>'
-              +'<div style="font-size:22px;font-weight:900;line-height:1;color:var(--txt);">'+(ri&&ri.position?ri.position:'—')+'</div>'
+              +'<div class="t-display-num" style="color:var(--txt);">'+(ri&&ri.position?ri.position:'—')+'</div>'
             +'</div>'
             +'<div style="width:1px;background:var(--bdr);flex-shrink:0;"></div>'
             +'<div style="flex:1;background:var(--sur2);padding:8px 12px;text-align:right;">'
               +'<div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">MR vs OR</div>'
-              +'<div style="font-size:22px;font-weight:900;line-height:1;color:'+(_hasMR&&_hasOR?(a.edge>0?'var(--grn)':a.edge<0?'var(--red)':'var(--txt)'):'var(--mut)')+';">'
+              +'<div class="t-display-num" style="color:'+(_hasMR&&_hasOR?(a.edge>0?'var(--grn)':a.edge<0?'var(--red)':'var(--txt)'):'var(--mut)')+';">'
                 +((_hasMR&&_hasOR)?(a.edge>0?'+':'')+a.edge:'—')
               +'</div>'
             +'</div>'
@@ -1517,7 +1517,7 @@ function renderCheckIn(){
       '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:9px;">'
         +'<span style="font-size:16px;flex-shrink:0;">'+moodEmoji+'</span>'
         +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:'+moodCol+';">'+moodLabel+'</div>'
+          +'<div style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:'+moodCol+';">'+moodLabel+'</div>'
           +(log.focus
             ?'<div style="font-size:12px;color:var(--txt);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+log.focus+'</div>'
             :'<div style="font-size:11px;color:var(--mut);font-style:italic;">No focus set for today</div>'
@@ -1593,7 +1593,7 @@ function undoCheckIn(){
   if(ci){
     ci.innerHTML=
       '<div id="tmood-btns" style="display:flex;align-items:center;gap:5px;padding:6px 10px;background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:9px;">'
-        +'<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);flex-shrink:0;margin-right:2px;">Mood</span>'
+        +'<span style="font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);flex-shrink:0;margin-right:2px;">Mood</span>'
         +'<button class="mood-btn-sm" onclick="setMood(\'poor\')" id="mood-poor" title="Poor" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;border:1px solid var(--bdr);background:transparent;cursor:pointer;padding:0;color:var(--mut);transition:all .12s;">'
           +'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>'
         +'</button>'
@@ -1610,7 +1610,7 @@ function undoCheckIn(){
           +' style="flex:1;min-width:0;background:transparent;border:none;outline:none;font-size:12px;color:var(--txt);padding:0 6px;"'
           +' onblur="saveFocus(this.value)">'
         +'<button onclick="doCheckIn()" id="t-checkin-btn"'
-          +' style="flex-shrink:0;padding:4px 10px;border-radius:6px;border:none;background:rgba(22,163,74,.2);color:#4ade80;font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:800;letter-spacing:.08em;cursor:pointer;">✓</button>'
+          +' style="flex-shrink:0;padding:4px 10px;border-radius:6px;border:none;background:rgba(22,163,74,.2);color:#4ade80;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.08em;cursor:pointer;">✓</button>'
       +'</div>';
     // Pre-fill saved values
     if(log){
@@ -1630,7 +1630,7 @@ function renderTodayBets(tb, vtb){
   if(!allBets.length){
     le.innerHTML='<div style="text-align:center;padding:28px 16px;">'
       +'<div style="font-size:32px;margin-bottom:10px;">🎯</div>'
-      +'<div style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No bets today</div>'
+      +'<div style="font-family:var(--font);font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No bets today</div>'
       +'<div style="font-size:12px;color:var(--mut);line-height:1.6;">Use the form above to log your first bet of the day.</div>'
       +'</div>';
     return;

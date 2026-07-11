@@ -104,7 +104,13 @@
 
 /* ── WL horse entry ── */
 .t-horse-name {
-  font-size: 15px; font-weight: 800; letter-spacing: .5px; color: var(--txt);
+  font-family: var(--font-display); font-size: 26px; font-weight: 400;
+  letter-spacing: 0.5px; line-height: 1; color: var(--txt);
+}
+
+/* Display numbers — Bebas Neue for Finished / MR vs OR / stat pills */
+.t-display-num {
+  font-family: var(--font-display); font-size: 22px; font-weight: 400; line-height: 1;
 }
 .t-jockey { font-size: 13px; color: var(--mut); }
 .t-flex-col-end { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; align-items: flex-end; }
@@ -193,7 +199,7 @@
 
 .tp-label {
   flex-shrink: 0;
-  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-family: var(--font-display);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: .2em;
@@ -264,7 +270,7 @@
   color: var(--navy);
 }
 .t-league-title {
-  font-family: 'Barlow Condensed', sans-serif; font-size: 13px;
+  font-family: var(--font); font-size: 13px;
   font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
   color: var(--navy);
 }
@@ -282,7 +288,7 @@ body.dark .cT .t-league-arrow { color: rgba(255,255,255,.6); }
 
 /* ── Section label (base — works in both modes) ── */
 .t-section-lbl {
-  font-family: 'Barlow Condensed','Arial Narrow',sans-serif;
+  font-family: var(--font);
   font-size: 9px; font-weight: 800; letter-spacing: .18em;
   text-transform: uppercase; color: var(--mut);
   margin-bottom: 7px;
@@ -381,7 +387,7 @@ body.dark .cT .t-week-day   { color: rgba(255,255,255,.45); }
 }
 .t-pnl-label {
   display: block;
-  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-family: var(--font);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: .14em;
@@ -391,9 +397,9 @@ body.dark .cT .t-week-day   { color: rgba(255,255,255,.45); }
 }
 .t-pnl-value {
   display: block;
-  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(22px, 6vw, 30px);
-  font-weight: 900;
+  font-weight: 400;
   line-height: 1;
   letter-spacing: .5px;
   margin-bottom: 4px;

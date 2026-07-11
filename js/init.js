@@ -53,7 +53,7 @@ async function bootApp() {
     const btn = document.getElementById('hdr-profile-btn');
     if (btn) {
       const initial = window._rpUserEmail.charAt(0).toUpperCase();
-      btn.innerHTML = '<span style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:14px;font-weight:900;color:var(--gld2);">' + initial + '</span>';
+      btn.innerHTML = '<span style="font-family:var(--font);font-size:14px;font-weight:900;color:var(--gld2);">' + initial + '</span>';
     }
   }
 

@@ -57,7 +57,7 @@ function _igContent(platform) {
 
   const step = function(num, icon, text) {
     return '<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bdr);">'
-      + '<div style="width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">' + num + '</div>'
+      + '<div style="width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-family:var(--font);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">' + num + '</div>'
       + '<div style="flex:1;">'
         + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">'
           + '<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:var(--sur2);border:1px solid var(--bdr);color:var(--navy);flex-shrink:0;">' + icon + '</span>'
@@ -179,7 +179,7 @@ function igShow() {
       // Header
       + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px 0;">'
         + '<div>'
-          + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:900;letter-spacing:.02em;color:var(--navy);">' + cfg.emoji + ' Add to Home Screen</div>'
+          + '<div style="font-family:var(--font);font-size:20px;font-weight:900;letter-spacing:.02em;color:var(--navy);">' + cfg.emoji + ' Add to Home Screen</div>'
           + '<div style="font-size:11px;color:var(--mut);margin-top:2px;">' + cfg.label + '</div>'
         + '</div>'
         + '<button onclick="igClose()" style="background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer;padding:4px;line-height:1;">×</button>'
@@ -195,7 +195,7 @@ function igShow() {
 
       // Native install button (Chrome/Edge/Android only — shown when browser fires beforeinstallprompt)
       + '<div id="ig-native-btn" style="display:' + (hasNative ? 'flex' : 'none') + ';margin:0 20px 12px;gap:10px;">'
-        + '<button onclick="igNativeInstall()" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">Install Now</button>'
+        + '<button onclick="igNativeInstall()" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">Install Now</button>'
       + '</div>'
 
       // Platform switcher
@@ -205,15 +205,15 @@ function igShow() {
           + ['ios-safari','android-chrome','desktop-chrome','desktop-safari'].map(function(p) {
               const labels = {'ios-safari':'iPhone/iPad','android-chrome':'Android','desktop-chrome':'Chrome PC','desktop-safari':'Mac Safari'};
               const active = p === platform;
-              return '<button onclick="igSwitchPlatform(\'' + p + '\')" style="padding:4px 10px;border-radius:6px;border:1px solid '+(active?'var(--navy)':'var(--bdr)')+';background:'+(active?'var(--navy)':'transparent')+';color:'+(active?'#fff':'var(--mut)')+';font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:700;cursor:pointer;">' + labels[p] + '</button>';
+              return '<button onclick="igSwitchPlatform(\'' + p + '\')" style="padding:4px 10px;border-radius:6px;border:1px solid '+(active?'var(--navy)':'var(--bdr)')+';background:'+(active?'var(--navy)':'transparent')+';color:'+(active?'#fff':'var(--mut)')+';font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;">' + labels[p] + '</button>';
             }).join('')
         + '</div>'
       + '</div>'
 
       // Dismiss
       + '<div style="padding:8px 20px 16px;border-top:1px solid var(--bdr);display:flex;gap:8px;">'
-        + '<button onclick="igDismiss()" style="flex:1;padding:11px;border-radius:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Maybe Later</button>'
-        + '<button onclick="igDismissPermanent()" style="padding:11px 16px;border-radius:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Don\'t Show Again</button>'
+        + '<button onclick="igDismiss()" style="flex:1;padding:11px;border-radius:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Maybe Later</button>'
+        + '<button onclick="igDismissPermanent()" style="padding:11px 16px;border-radius:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Don\'t Show Again</button>'
       + '</div>'
 
     + '</div>';

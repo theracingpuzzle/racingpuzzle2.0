@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
    THE RACING PUZZLE — app.css
-   Light theme · Barlow Condensed · Navy header
+   Light theme · Outfit body / Bebas Neue display · Navy header
 ═══════════════════════════════════════════════════════════ */
 
 :root {
@@ -45,8 +45,9 @@
   --clr-watch-a7: rgba(245,158,11,.4);
   --clr-watch-a8: rgba(245,158,11,.5);
 
-  /* ── Font ── */
-  --font:  'Barlow Condensed', 'Arial Narrow', sans-serif;
+  /* ── Fonts ── */
+  --font:         'Outfit', sans-serif;
+  --font-display: 'Bebas Neue', sans-serif;
 
   /* ── Misc ── */
   --card-r: 14px;
@@ -176,7 +177,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
 /* Card label + title */
 .clbl  { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--mut); margin-bottom: 4px; }
-.cttl  { font-size: 26px; font-weight: 900; margin-bottom: 16px; letter-spacing: -.01em; }
+.cttl  { font-family: var(--font-display); font-size: 26px; font-weight: 400; margin-bottom: 16px; letter-spacing: .03em; }
 .cT  .cttl { color: #ef4444; }
 .cP  .cttl { color: var(--grn); }
 .cL  .cttl { color: var(--blu); }
@@ -222,7 +223,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .bnav-item svg { width: 22px; height: 22px; }
 .bnav-lbl {
-  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-family: var(--font);
   font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
 }
 /* keep snav hidden but in DOM (JS references it) */
@@ -255,7 +256,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 ═══════════════════════════════════════════════════════════ */
 
 /* Page title / subtitle */
-.ptitle { font-size: 24px; font-weight: 900; margin-bottom: 3px; letter-spacing: -.01em; color: var(--navy); }
+.ptitle { font-family: var(--font-display); font-size: 24px; font-weight: 400; margin-bottom: 3px; letter-spacing: .03em; color: var(--navy); }
 .psub   { font-size: 14px; font-weight: 400; font-style: italic; color: var(--mut); margin-bottom: 16px; }
 
 /* Block / panel */
@@ -269,10 +270,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .sc2.pc::before { background: var(--grn); opacity: 1; }
 .sc2.nc::before { background: var(--red);  opacity: 1; }
 
-.sv     { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+.sv     { font-family: var(--font-display); font-size: 22px; font-weight: 400; margin-bottom: 2px; line-height: 1; }
 .sv.pos { color: var(--grn); } .sv.neg { color: var(--red); } .sv.gld { color: var(--gld); }
 .sl     { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--mut); }
-.sbig   { font-size: 32px; font-weight: 800; letter-spacing: -.02em; }
+.sbig   { font-family: var(--font-display); font-size: 32px; font-weight: 400; letter-spacing: .02em; line-height: 1; }
 .pos    { color: var(--grn); } .neg { color: var(--red); } .gld { color: var(--gld); }
 
 /* Section divider */
@@ -501,7 +502,7 @@ tr:hover td { background: var(--sur2); }
 .g3        { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
 /* Purple beta/tag pill */
-.pill-pur  { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--navy); border: 1px solid var(--navy); padding: 5px 16px; border-radius: 20px; margin-bottom: 10px; }
+.pill-pur  { font-family: var(--font); font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--navy); border: 1px solid var(--navy); padding: 5px 16px; border-radius: 20px; margin-bottom: 10px; }
 .pill-lbl  { font-family: monospace; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--mut); display: block; margin-bottom: 5px; }
 
 /* Body copy */
@@ -595,7 +596,7 @@ tr:hover td { background: var(--sur2); }
     flex-shrink: 0;
   }
   .bnav-logo-lbl {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: var(--font-display);
     font-size: 13px;
     font-weight: 800;
     letter-spacing: .06em;
@@ -708,7 +709,7 @@ tr:hover td { background: var(--sur2); }
   border: 1px solid var(--bdr);
   background: var(--sur2);
   color: var(--mut);
-  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-family: var(--font);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: .06em;

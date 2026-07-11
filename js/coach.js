@@ -110,7 +110,7 @@ function renderCoachCard(){
   const qEl = document.getElementById('coach-quick');
   if(qEl && !qEl.children.length){
     qEl.innerHTML = QUICK_PROMPTS.map((p,i)=>
-      '<button onclick="sendQuick('+i+')" style="font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:5px 11px;border-radius:16px;border:1px solid var(--bdr);background:var(--sur);color:var(--navy);cursor:pointer;white-space:nowrap;">'+p.lbl+'</button>'
+      '<button onclick="sendQuick('+i+')" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:5px 11px;border-radius:16px;border:1px solid var(--bdr);background:var(--sur);color:var(--navy);cursor:pointer;white-space:nowrap;">'+p.lbl+'</button>'
     ).join('');
   }
 
@@ -121,7 +121,7 @@ function renderCoachCard(){
       const msgsEl2 = document.getElementById('coach-msgs');
       if(msgsEl2) msgsEl2.innerHTML = '<div style="background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:14px;font-size:14px;line-height:1.7;color:var(--txt);">'
         +'<strong style="color:var(--navy);">Good '+( new Date().getHours()<12?'morning':'afternoon')+'. Coach ready.</strong><br><br>'
-        +'<button onclick="autoMorningBrief()" style="margin-top:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--bdr);background:var(--navy);color:#fff;font-family:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;">📋 Get Daily Briefing</button>'
+        +'<button onclick="autoMorningBrief()" style="margin-top:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--bdr);background:var(--navy);color:#fff;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;">📋 Get Daily Briefing</button>'
         +'<div style="margin-top:8px;font-size:11px;color:var(--mut);">Uses 1 AI call (~1,300 tokens)</div>'
         +'</div>';
       return;

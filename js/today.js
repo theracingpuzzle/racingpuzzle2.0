@@ -13,11 +13,18 @@ let _todayMode='watching'; // 'watching' | 'reviewing'
 let _todaySelectMode=false;
 let _todaySelected=new Set();
 
+const _SVG_SQUARE='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A5570" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>';
+const _SVG_CHECK_SQUARE='<svg width="20" height="20" viewBox="0 0 24 24" fill="#F5A623" stroke="#F5A623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="m9 12 2 2 4-4" stroke="#000" stroke-width="2.5"/></svg>';
+
 function setTodaySelectMode(on){
   _todaySelectMode=!!on;
   _todaySelected.clear();
   const btn=document.getElementById('t-select-toggle-btn');
-  if(btn){btn.textContent=_todaySelectMode?'Cancel':'Select';btn.style.color=_todaySelectMode?'var(--red,#ef4444)':'var(--mut)';}
+  if(btn){
+    const svgLC='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11"/><path d="M10 12h11"/><path d="M10 18h11"/><path d="m3 6 2 2 4-4"/><path d="m3 12 2 2 4-4"/><path d="m3 18 2 2 4-4"/></svg>';
+    btn.innerHTML=svgLC+(_todaySelectMode?'Cancel':'Select');
+    btn.style.color=_todaySelectMode?'#F5A623':'var(--mut)';
+  }
   _todayUpdateSelectBar();
   const races=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
   checkWatchlistRunners(races);
@@ -26,6 +33,16 @@ function setTodaySelectMode(on){
 function _todayToggleSelect(id){
   if(_todaySelected.has(id))_todaySelected.delete(id);
   else _todaySelected.add(id);
+  const isNow=_todaySelected.has(id);
+  // Swap icon without re-render
+  const cbBtn=document.getElementById(id);
+  if(cbBtn)cbBtn.innerHTML=isNow?_SVG_CHECK_SQUARE:_SVG_SQUARE;
+  // Update card border colour
+  const card=document.getElementById('tcard_'+id);
+  if(card){
+    const tierBorder=card.getAttribute('data-tier-border')||'var(--bdr)';
+    card.style.borderColor=isNow?'#F5A623':tierBorder;
+  }
   _todayUpdateSelectBar();
 }
 
@@ -44,8 +61,10 @@ function _todayUpdateSelectBar(){
 
 function _todayRestoreCheckboxes(){
   _todaySelected.forEach(function(id){
-    const cb=document.getElementById(id);
-    if(cb)cb.checked=true;
+    const cbBtn=document.getElementById(id);
+    if(cbBtn)cbBtn.innerHTML=_SVG_CHECK_SQUARE;
+    const card=document.getElementById('tcard_'+id);
+    if(card)card.style.borderColor='#F5A623';
   });
 }
 
@@ -987,17 +1006,11 @@ async function checkWatchlistRunners(races){
         +' data-class="'+(a.raceClass||'')+'"'
         +(ri?' data-result="'+ri.result+'" data-pos="'+(ri.position||'')+'"':'');
 
-      // ── Select checkbox wrapper ──────────────────────────────────────
       const _selId='tsel_'+(a.horse+a.time).replace(/[^a-zA-Z0-9]/g,'_');
-      function _selWrap(inner){
-        if(!_todaySelectMode)return inner;
-        return'<div style="display:flex;align-items:flex-start;gap:10px;">'
-          +'<div style="padding-top:14px;flex-shrink:0;">'
-            +'<input type="checkbox" id="'+_selId+'" onchange="_todayToggleSelect(\''+_selId+'\')" style="width:20px;height:20px;accent-color:#F5A623;cursor:pointer;">'
-          +'</div>'
-          +'<div style="flex:1;min-width:0;">'+inner+'</div>'
-        +'</div>';
-      }
+      const _isSelected=_todaySelected.has(_selId);
+      const _cbBtn=_todaySelectMode
+        ?'<button id="'+_selId+'" onclick="event.stopPropagation();_todayToggleSelect(\''+_selId+'\')" style="background:none;border:none;cursor:pointer;padding:0;flex-shrink:0;line-height:0;margin-top:3px;">'+(_isSelected?_SVG_CHECK_SQUARE:_SVG_SQUARE)+'</button>'
+        :'';
 
       // ════════════════════════════════════════════════════════════════
       // WATCHING MODE — study & racecard focus, sorted by time
@@ -1029,11 +1042,12 @@ async function checkWatchlistRunners(races){
           return rows.join('');
         })();
 
-        const watchCard='<div class="t-alert-row-pur" style="border-color:'+_tc.border+';background:'+_tc.bg+';">'
+        const watchCard='<div id="tcard_'+_selId+'" data-tier-border="'+_tc.border+'" class="t-alert-row-pur" style="border-color:'+(_isSelected?'#F5A623':_tc.border)+';background:'+_tc.bg+';">'
           +'<div class="t-flex-info"'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
-            // Top: horse name left, tier badge right
+            // Top: checkbox (if select mode) + horse name + tier badge
             +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">'
-              +'<div>'
+              +_cbBtn
+              +'<div style="flex:1;min-width:0;">'
                 +(reasonBadge?'<div style="margin-bottom:5px;">'+reasonBadge+'</div>':'')
                 +'<span class="t-horse-name">'+a.horse+'</span>'
                 +'<div class="t-muted" style="font-size:13px;margin-top:2px;">'+watchingRaceMeta+'</div>'
@@ -1056,7 +1070,7 @@ async function checkWatchlistRunners(races){
             +'</div>'
           +'</div>'
         +'</div>';
-        return _selWrap(watchCard);
+        return watchCard;
       }
 
       // ════════════════════════════════════════════════════════════════
@@ -1084,12 +1098,15 @@ async function checkWatchlistRunners(races){
 
       const _revTier=_computeAlertTier(a);
       const _rtc=_TIER_CFG[_revTier]||_TIER_CFG['watching'];
-      const reviewCard='<div class="t-alert-row-pur" style="border-color:'+_rtc.border+';">'
+      const reviewCard='<div id="tcard_'+_selId+'" data-tier-border="'+_rtc.border+'" class="t-alert-row-pur" style="border-color:'+(_isSelected?'#F5A623':_rtc.border)+';">'
         +'<div'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
-          +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">'
-            +'<span class="t-horse-name">'+a.horse+'</span>'
-            +(alreadyReviewed?'<span class="t-reviewed-inline">✓ Reviewed</span>':'')
-            +finishBadge
+          +'<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:3px;">'
+            +_cbBtn
+            +'<div style="flex:1;min-width:0;display:flex;align-items:center;gap:7px;flex-wrap:wrap;">'
+              +'<span class="t-horse-name">'+a.horse+'</span>'
+              +(alreadyReviewed?'<span class="t-reviewed-inline">✓ Reviewed</span>':'')
+              +finishBadge
+            +'</div>'
           +'</div>'
           +'<div class="t-muted" style="font-size:12px;margin-bottom:8px;">'+raceMeta+'</div>'
           +'<div style="display:flex;align-items:stretch;gap:1px;border-radius:8px;overflow:hidden;border:1px solid var(--bdr);margin-bottom:8px;">'
@@ -1109,7 +1126,7 @@ async function checkWatchlistRunners(races){
           +reviewingCTA
         +'</div>'
       +'</div>';
-      return _selWrap(reviewCard);
+      return reviewCard;
     }).join('')
   +'</div>';
 

@@ -162,6 +162,16 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .cRC::before { background: var(--blu); }
 .cRS::before { background: var(--ora); }
 
+/* Today card — full bleed, no floating card chrome */
+#c0 {
+  top: 0; bottom: 0;
+  left: 0; width: 100%;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+#c0::before { display: none; }
+
 /* Card backgrounds — subtle tint from accent */
 .cT  { background: #fff; }
 .cRC { background: #fff; }

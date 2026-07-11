@@ -1171,7 +1171,12 @@ function saveWLReview(profileId,horse,course){
 
   save();
   document.getElementById('wl-review-modal').remove();
-  if(typeof checkWatchlistRunners==='function'&&window._cachedRaces)checkWatchlistRunners(window._cachedRaces);
+  if(typeof checkWatchlistRunners==='function'){
+    const _rr=(typeof _mergeRacecardsAndResults==='function'?_mergeRacecardsAndResults():null)
+      ||(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))
+      ||window._cachedRaces||[];
+    if(_rr.length)checkWatchlistRunners(_rr);
+  }
   if(document.getElementById('wlp-modal'))openWLProfile(profileId);
 }
 

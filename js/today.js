@@ -8,6 +8,38 @@ function rmTrack(n){setTracks(getTracks().filter(x=>x!==n));renderChips();rfrTL(
 
 // ─── TODAY MODE TOGGLE ───
 let _todayMode='watching'; // 'watching' | 'reviewing'
+
+// Derive a bet-readiness tier from a running-today alert object.
+// IDs match BR_STAGES in watchlist.js: 'ready' | 'on-radar' | 'interesting' | 'watching' | 'cold'
+function _computeAlertTier(a){
+  const w=a.wlEntry||{};
+  // Manual override from Bet Readiness buttons in the review form wins over computed value
+  const manual=w.betReadiness||'';
+  if(manual&&manual!=='watching')return manual;
+  const gPrefs=Array.isArray(w.goingPrefs)?w.goingPrefs:[];
+  const gPoor=w._goingPoor||{};
+  const dWins=Array.isArray(w.distanceWins)?w.distanceWins:[];
+  const dPref=(w.distancePref||'').trim();
+  const rg=(a.raceGoing||'').trim();
+  const rd=(a.raceDist||'').trim();
+  function _ng(g){return(g||'').toLowerCase().replace(/\s+/g,' ').trim();}
+  function _dm(x,y){return(x||'').toLowerCase().replace(/\s/g,'')===(y||'').toLowerCase().replace(/\s/g,'');}
+  const poorKey=rg?Object.keys(gPoor).find(function(k){return _ng(k)===_ng(rg);})||'':'';
+  const poorCount=rg?(gPoor[rg]||gPoor[poorKey]||0):0;
+  if(poorCount>=2||(a.mr&&a.or&&a.edge<=-8))return'cold';
+  const pts=[
+    rg&&gPrefs.length?gPrefs.some(function(g){return _ng(g)===_ng(rg);}):null,
+    rd&&(dPref||dWins.length)?(dPref&&_dm(dPref,rd))||dWins.some(function(d){return _dm(d,rd);}):null,
+    (a.mr&&a.or)?a.edge>0:null,
+  ].filter(function(v){return v!==null;});
+  const ok=pts.filter(Boolean).length;
+  const total=pts.length;
+  if(!total)return'watching';
+  if(ok>=total&&total>=2&&a.edge>0)return'ready';
+  if(ok===total)return'on-radar';
+  if(ok>=1)return'interesting';
+  return'watching';
+}
 function setTodayMode(m){
   _todayMode=m;
   const wBtn=document.getElementById('t-mode-watching');
@@ -500,8 +532,9 @@ async function checkWatchlistRunners(races){
   if(!alerts.length){
     alertEl.style.display='none';
     window._wlAlerts=[];
-    const _mt=document.getElementById('t-mode-toggle');
-    if(_mt)_mt.style.display='none';
+    ['t-mode-toggle','t-today-headline','t-today-runner-ticker'].forEach(function(id){
+      const el=document.getElementById(id);if(el)el.style.display='none';
+    });
     return;
   }
 
@@ -565,6 +598,58 @@ async function checkWatchlistRunners(races){
   alertEl.style.display='block';
   const modeToggle=document.getElementById('t-mode-toggle');
   if(modeToggle)modeToggle.style.display='block';
+
+  // ── 1. Stat pills ─────────────────────────────────────────────────────────
+  const headlineEl=document.getElementById('t-today-headline');
+  if(headlineEl){
+    let _conv=0,_int=0,_pass=0;
+    alerts.forEach(function(a){
+      const t=_computeAlertTier(a);
+      if(t==='ready')_conv++;
+      else if(t==='on-radar'||t==='interesting')_int++;
+      else _pass++;
+    });
+    const _ps='flex:1;border-radius:9px;border:1px solid;padding:8px 4px;text-align:center;';
+    headlineEl.style.display='block';
+    headlineEl.innerHTML=''
+      +'<div style="display:flex;gap:6px;">'
+        +'<div style="'+_ps+'border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.08);">'
+          +'<div style="font-size:20px;font-weight:900;line-height:1;color:var(--grn);">'+_conv+'</div>'
+          +'<div style="font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--grn);margin-top:3px;">High Conviction</div>'
+        +'</div>'
+        +'<div style="'+_ps+'border-color:rgba(217,119,6,.35);background:rgba(217,119,6,.08);">'
+          +'<div style="font-size:20px;font-weight:900;line-height:1;color:var(--gld);">'+_int+'</div>'
+          +'<div style="font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gld);margin-top:3px;">Interest</div>'
+        +'</div>'
+        +'<div style="'+_ps+'border-color:var(--bdr);background:var(--sur2);">'
+          +'<div style="font-size:20px;font-weight:900;line-height:1;color:var(--mut);">'+_pass+'</div>'
+          +'<div style="font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-top:3px;">Pass</div>'
+        +'</div>'
+      +'</div>';
+  }
+
+  // ── 2. Runner ticker ──────────────────────────────────────────────────────
+  const tickerEl=document.getElementById('t-today-runner-ticker');
+  if(tickerEl){
+    const tickerItems=[...alerts].sort(function(a,b){return(a.time||'').localeCompare(b.time||'');});
+    const _tc=tickerItems.map(function(a){
+      return'<span class="tp-item"><span class="tp-item-highlight">'+a.time+'</span>'
+        +(a.course?' '+a.course:'')
+        +' — <span class="tp-item-highlight">'+a.horse+'</span></span>'
+        +'<span class="tp-sep">·</span>';
+    }).join('');
+    tickerEl.style.display='block';
+    tickerEl.innerHTML=''
+      +'<div class="tp-bar" style="margin-top:0;">'
+        +'<div class="tp-label">'
+          +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
+            +'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
+          +'</svg>'
+        +'</div>'
+        +'<div class="tp-track-wrap"><div class="tp-track">'+_tc+_tc+'</div></div>'
+      +'</div>';
+  }
+
   const todayStr=td();
 
   alertEl.innerHTML='<div class="t-alert-pur">'
@@ -803,25 +888,23 @@ async function checkWatchlistRunners(races){
           +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>'
           +' Racecard</button>';
         return'<div class="t-alert-row-pur">'
-          +'<div class="t-row-sb-gap">'
-            +'<div class="t-flex-info"'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
-              +matchBadge
-              +(reasonBadge?'<div style="margin-bottom:5px;">'+reasonBadge+'</div>':'')
-              +'<div style="margin-bottom:3px;"><span class="t-horse-name">'+a.horse+'</span></div>'
-              +'<div class="t-muted" style="font-size:13px;margin-top:1px;">'+watchingRaceMeta+'</div>'
-              +detailLine
-              +jockeyLine
-              +((_hasOR||_hasMR)
-                ?'<div style="margin-top:5px;font-size:11px;color:var(--mut);">'
-                  +(_hasMR?'MR '+a.mr:'MR —')+' · '+(_hasOR?'OR '+a.or:'OR —')
-                  +(a.edge>0?' · <span style="color:var(--grn);font-weight:800;">+'+a.edge+'</span>':'')
-                +'</div>'
-                :'')
-              +(a.orUpdated?'<div style="font-size:12px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
-            +'</div>'
-            +'<div class="t-flex-col-end" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">'
-              +betBtn
-              +racecardBtn
+          +'<div class="t-flex-info"'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'
+            +matchBadge
+            +(reasonBadge?'<div style="margin-bottom:5px;">'+reasonBadge+'</div>':'')
+            +'<div style="margin-bottom:3px;"><span class="t-horse-name">'+a.horse+'</span></div>'
+            +'<div class="t-muted" style="font-size:13px;margin-top:1px;">'+watchingRaceMeta+'</div>'
+            +detailLine
+            +jockeyLine
+            +((_hasOR||_hasMR)
+              ?'<div style="margin-top:5px;font-size:11px;color:var(--mut);">'
+                +(_hasMR?'MR '+a.mr:'MR —')+' · '+(_hasOR?'OR '+a.or:'OR —')
+                +(a.edge>0?' · <span style="color:var(--grn);font-weight:800;">+'+a.edge+'</span>':'')
+              +'</div>'
+              :'')
+            +(a.orUpdated?'<div style="font-size:12px;color:var(--gld);margin-top:2px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
+            +'<div style="display:flex;gap:6px;margin-top:10px;">'
+              +'<button onclick="event.stopPropagation();_todayOpenRacecard(\''+_co+'\',\''+_ti+'\',\''+_hn+'\')" class="t-race-btn" style="flex:1;padding:7px 0;font-size:12px;font-weight:600;">📋 Racecard</button>'
+              +'<button onclick="event.stopPropagation();_todayOpenVirtBet(\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\''+_rn+'\')" style="flex:1;padding:7px 0;font-size:12px;font-weight:600;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;">Virtual Bet</button>'
             +'</div>'
           +'</div>'
         +'</div>';
@@ -908,7 +991,7 @@ async function checkWatchlistRunners(races){
     alertEl.querySelectorAll('.t-wl-race-btn').forEach(function(btn){
       btn.addEventListener('click',function(ev){
         ev.stopPropagation();
-        _rcGoToRace(btn.getAttribute('data-course'),btn.getAttribute('data-time')||'');
+        _todayOpenRacecard(btn.getAttribute('data-course'),btn.getAttribute('data-time')||'',btn.getAttribute('data-horse')||'');
       });
     });
   },0);
@@ -2039,4 +2122,163 @@ function syncBetResults(results){
     if(typeof renderStats==='function')renderStats();
     if(typeof renderToday==='function')renderToday();
   }
+}
+
+// ── TODAY RACECARD SHEET ──────────────────────────────────────────────────────
+function _todayOpenRacecard(course,time,trackedHorse){
+  const norm=function(s){return(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');};
+  const races=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
+  const race=races.find(function(r){return norm(r.course||r.track||r.venue||'')==norm(course)&&(r.off||r.time||r.race_time||'')==time;});
+  const runners=(race&&(race.runners||race.horses||[]))||[];
+
+  const ov=document.getElementById('t-racecard-sheet');
+  if(!ov){
+    const el=document.createElement('div');
+    el.id='t-racecard-sheet';
+    el.style.cssText='position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;justify-content:flex-end;';
+    document.body.appendChild(el);
+  }
+  const sheet=document.getElementById('t-racecard-sheet');
+
+  let rows='';
+  if(runners.length){
+    const trackHn=norm(trackedHorse);
+    runners.filter(function(r){return String(r.jockey||'').toUpperCase()!=='NON-RUNNER'&&String(r.number||'').toUpperCase()!=='NR';}).forEach(function(r){
+      const hn=r.horse||r.name||'';
+      const isTracked=norm(hn)==trackHn;
+      const no=r.number||r.cloth||'';
+      const jk=r.jockey||r.jockey_name||'';
+      const or=r.ofr||r['or']||r.official_rating||r.rpr||'';
+      rows+='<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;margin-bottom:4px;'
+        +(isTracked?'background:rgba(245,158,11,0.15);border:1.5px solid var(--gld,#f59e0b);':'background:var(--card,#1e2433);')
+        +'">'
+        +'<span style="min-width:22px;font-size:12px;color:var(--mut);font-weight:700;">'+(no||'·')+'</span>'
+        +'<span style="flex:1;font-size:14px;font-weight:'+(isTracked?'800':'600')+';color:'+(isTracked?'var(--gld,#f59e0b)':'var(--txt,#f1f5f9)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+hn+(isTracked?' ★':'')+'</span>'
+        +'<span style="font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;">'+jk+'</span>'
+        +(or?'<span style="min-width:30px;text-align:right;font-size:12px;color:var(--mut);">OR '+or+'</span>':'')
+        +'</div>';
+    });
+  } else {
+    rows='<div style="text-align:center;padding:20px;color:var(--mut);font-size:13px;">No runner data in cache — check Racecards tab</div>';
+  }
+
+  const raceMeta=[time,course].filter(Boolean).join(' · ')+(race&&race.distance?' · '+(race.distance||race.dist||''):'');
+  sheet.innerHTML=''
+    +'<div onclick="_todayCloseRacecard()" style="flex:1;background:rgba(0,0,0,0.55);"></div>'
+    +'<div style="background:var(--bg2,#151b27);border-radius:20px 20px 0 0;max-height:70vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,0);">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;">'
+        +'<div>'
+          +'<div style="font-size:15px;font-weight:700;color:var(--txt,#f1f5f9);">'+course+'</div>'
+          +'<div style="font-size:12px;color:var(--mut);">'+raceMeta+'</div>'
+        +'</div>'
+        +'<button onclick="_todayCloseRacecard()" style="background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer;padding:4px;">✕</button>'
+      +'</div>'
+      +'<div style="padding:0 12px 16px;">'
+        +rows
+      +'</div>'
+    +'</div>';
+  sheet.style.display='flex';
+  document.body.style.overflow='hidden';
+}
+
+function _todayCloseRacecard(){
+  const s=document.getElementById('t-racecard-sheet');
+  if(s)s.style.display='none';
+  document.body.style.overflow='';
+}
+
+// ── TODAY VIRTUAL BET SHEET ───────────────────────────────────────────────────
+function _todayOpenVirtBet(horse,course,time,jockey,raceName){
+  const ov=document.getElementById('t-vbet-sheet');
+  if(!ov){
+    const el=document.createElement('div');
+    el.id='t-vbet-sheet';
+    el.style.cssText='position:fixed;inset:0;z-index:2001;display:flex;flex-direction:column;justify-content:flex-end;';
+    document.body.appendChild(el);
+  }
+  const sheet=document.getElementById('t-vbet-sheet');
+  const pv=getPointValue();
+
+  sheet.innerHTML=''
+    +'<div onclick="_todayCloseVirtBet()" style="flex:1;background:rgba(0,0,0,0.55);"></div>'
+    +'<div style="background:var(--bg2,#151b27);border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0));">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'
+        +'<div>'
+          +'<div style="font-size:15px;font-weight:700;color:#a78bfa;">Virtual Bet</div>'
+          +'<div style="font-size:13px;font-weight:600;color:var(--txt,#f1f5f9);">'+horse+'</div>'
+          +'<div style="font-size:12px;color:var(--mut);">'+(raceName||([time,course].filter(Boolean).join(' · ')))+'</div>'
+        +'</div>'
+        +'<button onclick="_todayCloseVirtBet()" style="background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer;padding:4px;">✕</button>'
+      +'</div>'
+      +'<div style="margin-bottom:14px;">'
+        +'<div style="font-size:12px;color:var(--mut);margin-bottom:8px;font-weight:600;">BET TYPE</div>'
+        +'<div style="display:flex;gap:8px;" id="tvb-type-row">'
+          +['win','place','ew'].map(function(t){return'<button onclick="_tvbSetType(\''+t+'\')" id="tvb-t-'+t+'" style="flex:1;padding:9px 0;font-size:13px;font-weight:600;border-radius:8px;border:2px solid '+(t==='win'?'#7c3aed':'var(--bdr,#2a3347)')+';background:'+(t==='win'?'rgba(124,58,237,0.15)':'none')+';color:'+(t==='win'?'#a78bfa':'var(--mut)')+';cursor:pointer;">'+t.toUpperCase()+'</button>';}).join('')
+        +'</div>'
+      +'</div>'
+      +'<div style="margin-bottom:18px;">'
+        +'<div style="font-size:12px;color:var(--mut);margin-bottom:8px;font-weight:600;">STAKE (£)</div>'
+        +'<input id="tvb-stake" type="number" min="0.5" step="0.5" value="'+pv+'" style="width:100%;box-sizing:border-box;padding:11px 12px;font-size:16px;background:var(--card,#1e2433);border:2px solid var(--bdr,#2a3347);border-radius:10px;color:var(--txt,#f1f5f9);outline:none;">'
+        +'<div style="font-size:11px;color:var(--mut);margin-top:5px;">Point value: £'+pv+' — EW doubles stake outlay</div>'
+      +'</div>'
+      +'<button onclick="_tvbSave(\''+horse.replace(/'/g,"\\'")+'\','
+        +'\''+course.replace(/'/g,"\\'")+'\','
+        +'\''+time+'\','
+        +'\''+jockey.replace(/'/g,"\\'")+'\','
+        +'\''+raceName.replace(/'/g,"\\'")+'\''
+        +')" style="width:100%;padding:13px 0;font-size:15px;font-weight:700;background:#7c3aed;color:#fff;border:none;border-radius:10px;cursor:pointer;">Save Virtual Bet</button>'
+    +'</div>';
+  sheet._vbType='win';
+  sheet.style.display='flex';
+  document.body.style.overflow='hidden';
+}
+
+function _tvbSetType(t){
+  const sheet=document.getElementById('t-vbet-sheet');
+  if(!sheet)return;
+  sheet._vbType=t;
+  ['win','place','ew'].forEach(function(x){
+    const b=document.getElementById('tvb-t-'+x);
+    if(!b)return;
+    const on=x===t;
+    b.style.borderColor=on?'#7c3aed':'var(--bdr,#2a3347)';
+    b.style.background=on?'rgba(124,58,237,0.15)':'none';
+    b.style.color=on?'#a78bfa':'var(--mut)';
+  });
+}
+
+function _tvbSave(horse,course,time,jockey,raceName){
+  const sheet=document.getElementById('t-vbet-sheet');
+  const stakeEl=document.getElementById('tvb-stake');
+  if(!sheet||!stakeEl)return;
+  const stake=parseFloat(stakeEl.value)||getPointValue();
+  const betType=sheet._vbType||'win';
+  const vb=getVBank();
+  vb.bets=vb.bets||[];
+  const bet={
+    id:gid(),
+    date:td(),
+    horse:horse,
+    course:course,
+    time:time,
+    jockey:jockey,
+    raceName:raceName||'',
+    betType:betType,
+    stake:betType==='ew'?stake*2:stake,
+    isVirtual:true,
+    result:'pending',
+    returns:0,
+    createdAt:Date.now()
+  };
+  vb.bets.push(bet);
+  save();
+  _todayCloseVirtBet();
+  if(typeof renderToday==='function')renderToday();
+  if(typeof updHdr==='function')updHdr();
+}
+
+function _todayCloseVirtBet(){
+  const s=document.getElementById('t-vbet-sheet');
+  if(s)s.style.display='none';
+  document.body.style.overflow='';
 }

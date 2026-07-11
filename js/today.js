@@ -50,8 +50,65 @@ function _todayRestoreCheckboxes(){
 }
 
 function _todayShareSelected(){
-  // Share logic TBD — awaiting decision on format (text summary, image, or link)
-  console.log('Share requested for',_todaySelected.size,'horses',Array.from(_todaySelected));
+  const alerts=window._wlAlerts||[];
+  const lines=[];
+  _todaySelected.forEach(function(selId){
+    const a=alerts.find(function(al){
+      return('tsel_'+(al.horse+(al.time||'')).replace(/[^a-zA-Z0-9]/g,'_'))===selId;
+    });
+    if(!a)return;
+    const tier=_computeAlertTier(a);
+    const tc=_TIER_CFG[tier]||_TIER_CFG['watching'];
+    const meta=[a.time,a.course,a.raceDist].filter(Boolean).join(' · ');
+    const condParts=[];
+    const w=a.wlEntry||{};
+    const gPrefs=Array.isArray(w.goingPrefs)?w.goingPrefs:[];
+    if(a.raceGoing){
+      const ok=gPrefs.length&&gPrefs.some(function(g){return(g||'').toLowerCase().trim()===(a.raceGoing||'').toLowerCase().trim();});
+      condParts.push((ok?'✓':'✗')+' Going: '+a.raceGoing);
+    }
+    if(a.raceDist){
+      const dPref=(w.distancePref||'').trim();
+      const dWins=Array.isArray(w.distanceWins)?w.distanceWins:[];
+      function _dm(x,y){return(x||'').toLowerCase().replace(/\s/g,'')===(y||'').toLowerCase().replace(/\s/g,'');}
+      const ok=(_dm(dPref,a.raceDist))||dWins.some(function(d){return _dm(d,a.raceDist);});
+      condParts.push((ok?'✓':'✗')+' Distance: '+a.raceDist);
+    }
+    if(a.mr&&a.or){
+      condParts.push((a.edge>0?'✓':'✗')+' My Mark: '+(a.edge>0?'+':'')+a.edge+' vs OR '+a.or);
+    }
+    lines.push(
+      a.horse.toUpperCase()
+      +'\n   '+meta
+      +'\n   '+tc.label
+      +(condParts.length?'\n   '+condParts.join('\n   '):'')
+    );
+  });
+  if(!lines.length)return;
+  const text='🏇 Racing Puzzle — Today\'s Selections\n\n'+lines.join('\n\n');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      _todayShowToast('Copied to clipboard');
+    }).catch(function(){
+      prompt('Copy this text:',text);
+    });
+  } else {
+    prompt('Copy this text:',text);
+  }
+}
+
+function _todayShowToast(msg){
+  let t=document.getElementById('t-share-toast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='t-share-toast';
+    t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#F5A623;color:#000;font-size:13px;font-weight:700;padding:10px 20px;border-radius:20px;z-index:3000;transition:opacity .3s;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;
+  t.style.opacity='1';
+  clearTimeout(t._to);
+  t._to=setTimeout(function(){t.style.opacity='0';},2000);
 }
 
 // Derive a bet-readiness tier from a running-today alert object.
@@ -991,11 +1048,11 @@ async function checkWatchlistRunners(races){
             +(a.jockey?'<div class="t-muted" style="font-size:12px;margin-bottom:6px;">J: '+fmtJockey(a.jockey)+'</div>':'')
             // OR update alert
             +(a.orUpdated?'<div style="font-size:12px;color:var(--gld);margin-bottom:8px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
-            // 3-col action grid
+            // 3-col action grid (stacked icon + label, matching JSX)
             +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;">'
-              +'<button onclick="event.stopPropagation();_todayOpenRacecard(\''+_co+'\',\''+_ti+'\',\''+_hn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:rgba(96,165,250,.08);color:var(--blu);border:1px solid rgba(96,165,250,.25);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;line-height:1.2;">📋 Racecard</button>'
-              +'<button onclick="event.stopPropagation();_todayOpenVirtBet(\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\''+_rn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:rgba(124,58,237,.12);color:#a78bfa;border:1px solid rgba(124,58,237,.3);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;line-height:1.2;">💰 Place Bet</button>'
-              +'<button onclick="event.stopPropagation();(function(){_todaySelected.clear();_todaySelected.add(\''+_selId+'\');_todayShareSelected();})()" style="padding:9px 4px;font-size:11px;font-weight:600;background:rgba(245,166,35,.1);color:#F5A623;border:1px solid rgba(245,166,35,.3);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;line-height:1.2;">↗ Share</button>'
+              +'<button onclick="event.stopPropagation();_todayOpenRacecard(\''+_co+'\',\''+_ti+'\',\''+_hn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:#1A2138;color:#C7CEDD;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Racecard</button>'
+              +'<button onclick="event.stopPropagation();_todayOpenVirtBet(\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\''+_rn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:#1A2138;color:#C7CEDD;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>Place Bet</button>'
+              +'<button onclick="event.stopPropagation();(function(){_todaySelected.clear();_todaySelected.add(\''+_selId+'\');_todayShareSelected();})()" style="padding:9px 4px;font-size:11px;font-weight:600;background:#1F2A44;color:#F5A623;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>'
             +'</div>'
           +'</div>'
         +'</div>';

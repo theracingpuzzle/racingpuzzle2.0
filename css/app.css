@@ -173,10 +173,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 #c0::before, #c1::before, #c2::before, #c3::before,
 #c4::before, #c5::before, #c6::before { display: none; }
 
-/* Card backgrounds — subtle tint from accent */
-.cT  { background: #fff; }
-.cRC { background: #fff; }
-.cRS { background: #fff; }
+/* Card backgrounds — use theme surface */
+.cT  { background: var(--sur); }
+.cRC { background: var(--sur); }
+.cRS { background: var(--sur); }
 .cC  { background: #fff; }
 .cB  { background: #fff; }
 .cW  { background: #fff; }

@@ -325,7 +325,7 @@ function _wlAttentionCount(entries){
   const today=td();
   const ids=new Set();
   entries.forEach(function(e){
-    if(!e.unraced&&!(e.observations&&e.observations.length))ids.add(e.id);
+    if(!e.unraced&&!(D.reviews||[]).some(function(r){return r.profileId===e.id;}))ids.add(e.id);
     if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;}))ids.add(e.id);
     if((e.targets||[]).some(function(t){return t.race&&!t.date;}))ids.add(e.id);
     const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
@@ -408,12 +408,12 @@ function _applyWLFilter(entries){
   const today=td();
   if(_wlFilter==='needs-attention'){
     return entries.filter(function(e){
-      const noObs=!e.unraced&&!(e.observations&&e.observations.length);
+      const noReviews=!e.unraced&&!(D.reviews||[]).some(function(r){return r.profileId===e.id;});
       const pastTarget=(e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;});
       const noDateTarget=(e.targets||[]).some(function(t){return t.race&&!t.date;});
       const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
       const incompleteReview=rvws.length&&rvws.some(_rvwIncomplete);
-      return noObs||pastTarget||noDateTarget||incompleteReview;
+      return noReviews||pastTarget||noDateTarget||incompleteReview;
     });
   }
   if(_wlFilter==='running-today'){
@@ -694,8 +694,8 @@ function renderWLList(){
         if(_wlFilter!=='needs-attention')return'';
         const today=td();
         const reasons=[];
-        if(!e.unraced&&!(e.observations&&e.observations.length))
-          reasons.push('No observations');
+        if(!e.unraced&&!(D.reviews||[]).some(function(r){return r.profileId===e.id;}))
+          reasons.push('No reviews yet');
         if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;}))
           reasons.push('Past target');
         if((e.targets||[]).some(function(t){return t.race&&!t.date;}))
@@ -3114,15 +3114,18 @@ function _wlpBuildHTML(e){
           if(vm)h+='<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+vm.col+'15;border:1px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';
         h+='</div>';
       h+='</div>';
-      // Row 2: detail chips (position, going, odds etc.) — only if present
-      const chips=[];
-      if(r.position)chips.push({l:'Pos',v:r.position});
+      // Row 2: detail chips — always show all stats, dash if missing
       const _rGoing=r.groundConditions||r.going||r.raceGoing||r.goingConfirmed||'';
-      if(_rGoing)chips.push({l:'Ground',v:_rGoing});
-      if(r.beatenDistance)chips.push({l:'Beaten',v:r.beatenDistance});
-      if(r.odds)chips.push({l:'SP',v:r.odds});
+      const chips=[
+        {l:'Pos',   v:r.position||'—'},
+        {l:'Dist',  v:r.distance||'—'},
+        {l:'Class', v:r.raceClass||'—'},
+        {l:'Ground',v:_rGoing||'—'},
+        {l:'Beaten',v:r.beatenDistance||'—'},
+        {l:'SP',    v:r.odds||'—'},
+      ];
       if(r.mrAdjustment)chips.push({l:'MR',v:(r.mrAdjustment>0?'+':'')+r.mrAdjustment});
-      if(chips.length)h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">'+chips.map(function(c){return'<div style="font-size:10px;color:var(--txt);"><span style="color:var(--mut);font-weight:600;">'+c.l+'</span> <span style="font-weight:700;">'+esc(c.v)+'</span></div>';}).join('<span style="color:var(--bdr);margin:0 1px;">·</span>')+'</div>';
+      h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">'+chips.map(function(c){return'<div style="font-size:10px;color:var(--txt);"><span style="color:var(--mut);font-weight:600;">'+c.l+'</span> <span style="font-weight:700;">'+esc(c.v)+'</span></div>';}).join('<span style="color:var(--bdr);margin:0 1px;">·</span>')+'</div>';
       // Row 3: notes
       if(r.notes)h+='<div style="font-size:12px;color:var(--mut);line-height:1.55;margin-bottom:6px;">'+esc(r.notes)+'</div>';
       // Row 4: actions — small and subtle

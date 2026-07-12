@@ -326,7 +326,7 @@ async function loadTodayMeetings(){
   if(stEl)stEl.textContent='Loading…';
   // Credentials are server-side (Cloudflare Worker) — no client check needed
   try{
-    if(!window._todayMeetingsCache) window._todayMeetingsCache=await callRacingAPI('racecards/free',{});
+    if(!window._todayMeetingsCache||window._todayMeetingsCacheDate!==td()){window._todayMeetingsCache=await callRacingAPI('racecards/free',{});window._todayMeetingsCacheDate=td();}
     const data=window._todayMeetingsCache;
     const races=data.racecards||data.races||[];
     const courses=[...new Set(races.map(r=>r.course||r.venue||'').filter(Boolean))].sort();

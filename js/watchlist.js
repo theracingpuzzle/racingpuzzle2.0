@@ -315,6 +315,11 @@ const WL_FILTERS=[
     svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><polyline points="6 10 9 13 14 7"/></svg>'},
 ];
 
+// True if a review is missing distance, class or ground
+function _rvwIncomplete(r){
+  return !r.distance||!r.raceClass||!(r.going||r.groundConditions);
+}
+
 // Count horses that need admin attention (union of all admin task conditions)
 function _wlAttentionCount(entries){
   const today=td();
@@ -323,6 +328,8 @@ function _wlAttentionCount(entries){
     if(!e.unraced&&!(e.observations&&e.observations.length))ids.add(e.id);
     if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;}))ids.add(e.id);
     if((e.targets||[]).some(function(t){return t.race&&!t.date;}))ids.add(e.id);
+    const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
+    if(rvws.length&&rvws.some(_rvwIncomplete))ids.add(e.id);
   });
   return ids.size;
 }
@@ -404,7 +411,9 @@ function _applyWLFilter(entries){
       const noObs=!e.unraced&&!(e.observations&&e.observations.length);
       const pastTarget=(e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;});
       const noDateTarget=(e.targets||[]).some(function(t){return t.race&&!t.date;});
-      return noObs||pastTarget||noDateTarget;
+      const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
+      const incompleteReview=rvws.length&&rvws.some(_rvwIncomplete);
+      return noObs||pastTarget||noDateTarget||incompleteReview;
     });
   }
   if(_wlFilter==='running-today'){
@@ -680,12 +689,41 @@ function renderWLList(){
         }).length;
         return ov+pv;
       })();
+      // Attention reasons — shown when needs-attention filter is active
+      const _attnTags=(function(){
+        if(_wlFilter!=='needs-attention')return'';
+        const today=td();
+        const reasons=[];
+        if(!e.unraced&&!(e.observations&&e.observations.length))
+          reasons.push('No observations');
+        if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;}))
+          reasons.push('Past target');
+        if((e.targets||[]).some(function(t){return t.race&&!t.date;}))
+          reasons.push('Undated target');
+        const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
+        if(rvws.length&&rvws.some(_rvwIncomplete)){
+          const missing=[];
+          if(rvws.some(function(r){return!r.distance;}))missing.push('distance');
+          if(rvws.some(function(r){return!r.raceClass;}))missing.push('class');
+          if(rvws.some(function(r){return!(r.going||r.groundConditions);}))missing.push('ground');
+          reasons.push('Reviews missing '+missing.join(' / '));
+        }
+        return reasons.length
+          ?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">'
+            +reasons.map(function(label){
+              return'<span style="font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);color:#f59e0b;">⚠ '+label+'</span>';
+            }).join('')
+          +'</div>'
+          :'';
+      })();
+
       html+='<div style="position:relative;border-bottom:1px solid var(--bdr);" data-wl-id="'+e.id+'">'
         +'<div class="wll-row" style="border-left:none;border-bottom:none;">'
           +'<div class="wll-silks">'+_silkSVG(e.horse||'?',18)+'</div>'
           +'<div class="wll-main">'
             +'<div class="wll-name">'+_cmdBRDot+(e.horse||'Unknown')+_cmdPuzzleBadge+(_cmdAwaitingCount?'<span style="font-size:9px;font-weight:800;margin-left:6px;padding:1px 6px;border-radius:8px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#f59e0b;vertical-align:middle;">'+_cmdAwaitingCount+' due</span>':'')+(e.needsReview?'<span class="wll-review-badge">REVIEW</span>':'')+'</div>'
             +'<div class="wll-sub">'+subParts.join(' · ')+'</div>'
+            +_attnTags
             +'<div class="wll-tag" style="background:'+rm.col+'14;border:1px solid '+rm.col+'28;color:'+rm.col+';">'+(REASON_SVG[r]?REASON_SVG[r]+' ':'')+rm.label+'</div>'
           +'</div>'
           +'<div class="wll-right">'

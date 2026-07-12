@@ -280,7 +280,7 @@ function setStatsScope(scope){
   renderStats();
 }
 
-const _STATS_ELS=['st-summary','st-insights-body','st-src-table','st-conf-table','st-type-table','st-monthly','st-trk','st-ck-impact','st-ck-signals','st-ck-table','st-ck-tip','st-jockey','st-trainer','dc-compare'];
+const _STATS_ELS=['st-summary','st-insights-body','st-src-table','st-conf-table','st-type-table','st-monthly','st-trk','st-ck-impact','st-ck-signals','st-ck-table','st-ck-tip','st-jockey','st-trainer','dc-compare','st-profiler-perf'];
 
 function renderStats(){
   const ck=_statsCacheKey();
@@ -785,10 +785,154 @@ function renderStats(){
   renderCkSignals(disciplineSet);
   renderCkTip();
 
+  // Profiler performance
+  _renderProfilerStats();
+
   // Store rendered output in cache
   const cacheEls={};
   _STATS_ELS.forEach(id=>{const el=document.getElementById(id);if(el)cacheEls[id]=el.innerHTML;});
   _statsCache={key:_statsCacheKey(),els:cacheEls};
+}
+
+// ─── PROFILER PERFORMANCE ───────────────────────────────────────────────────
+function _stInfoToggle(btnEl,text){
+  let tip=btnEl.nextElementSibling;
+  if(tip&&tip.classList.contains('st-perf-tip')){
+    tip.style.display=tip.style.display==='none'?'block':'none';
+    return;
+  }
+  tip=document.createElement('div');
+  tip.className='st-perf-tip';
+  tip.style.cssText='font-size:11px;color:var(--mut);background:var(--sur2);border:1px solid var(--bdr);border-radius:6px;padding:6px 9px;margin-top:5px;line-height:1.5;';
+  tip.textContent=text;
+  btnEl.parentNode.insertBefore(tip,btnEl.nextSibling);
+}
+
+function _renderProfilerStats(){
+  const el=document.getElementById('st-profiler-perf');
+  if(!el)return;
+
+  const reviews=D.reviews||[];
+  const profiles=getWL?getWL():(D.watchlist||[]);
+
+  const settled=reviews.filter(r=>r.result&&r.result!=='nr'&&r.result!=='missed'&&r.result!=='pending');
+  if(!settled.length){
+    el.innerHTML='<div style="color:var(--mut);font-style:italic;font-size:13px;padding:4px 0;">Add race reviews to your horse profiles to see performance stats here.</div>';
+    return;
+  }
+
+  const total=settled.length;
+  const wins=settled.filter(r=>r.result==='win');
+  const places=settled.filter(r=>r.result==='place'||r.result==='placed');
+  const strikeRate=wins.length/total*100;
+  const placeRate=(wins.length+places.length)/total*100;
+
+  // Level stakes P&L (only reviews with odds)
+  function toDecimal(odds){
+    if(!odds)return null;
+    const s=String(odds).trim();
+    if(s.includes('/')){const[n,d]=[parseFloat(s),parseFloat(s.split('/')[1])];const a=parseFloat(s.split('/')[0]);if(isNaN(a)||isNaN(d)||d===0)return null;return a/d+1;}
+    const f=parseFloat(s);return isNaN(f)?null:f;
+  }
+  const withOdds=settled.filter(r=>r.odds);
+  const lsStaked=withOdds.length;
+  const lsReturns=wins.filter(r=>r.odds).reduce((sum,r)=>{const d=toDecimal(r.odds);return d?sum+d:sum;},0);
+  const lsPnL=lsStaked>0?lsReturns-lsStaked:null;
+  const lsROI=lsStaked>0?(lsPnL/lsStaked*100):null;
+
+  // Edge accuracy — MR vs OR from current profile (best approximation)
+  const edgeRuns=[],noEdgeRuns=[];
+  settled.forEach(r=>{
+    const p=profiles.find(x=>x.id===r.profileId||(x.horse&&r.horse&&x.horse.toLowerCase()===r.horse.toLowerCase()));
+    if(!p)return;
+    const mr=parseFloat(p.myRating),or=parseFloat(p.currentRating);
+    if(isNaN(mr)||isNaN(or))return;
+    (mr>or?edgeRuns:noEdgeRuns).push(r);
+  });
+  const edgeWR=edgeRuns.length>0?(edgeRuns.filter(r=>r.result==='win').length/edgeRuns.length*100):null;
+  const noEdgeWR=noEdgeRuns.length>0?(noEdgeRuns.filter(r=>r.result==='win').length/noEdgeRuns.length*100):null;
+
+  // Average MR edge on winners
+  const winEdges=[];
+  wins.forEach(r=>{
+    const p=profiles.find(x=>x.id===r.profileId||(x.horse&&r.horse&&x.horse.toLowerCase()===r.horse.toLowerCase()));
+    if(!p)return;
+    const mr=parseFloat(p.myRating),or=parseFloat(p.currentRating);
+    if(!isNaN(mr)&&!isNaN(or))winEdges.push(mr-or);
+  });
+  const avgWinEdge=winEdges.length>0?(winEdges.reduce((a,b)=>a+b,0)/winEdges.length):null;
+
+  // Verdict tracking — Upgrade verdicts and improvement on next run
+  const upgradeRvws=reviews.filter(r=>r.verdict&&r.verdict.toLowerCase().includes('upgrade'));
+  let upgradeImproved=0;
+  upgradeRvws.forEach(r=>{
+    const adj=parseInt(r.mrAdjustment)||0;
+    if(adj>0)upgradeImproved++;
+  });
+  const upgradeAcc=upgradeRvws.length>0?(upgradeImproved/upgradeRvws.length*100):null;
+
+  function pct(v,dec){return v===null?'—':v.toFixed(dec!==undefined?dec:1)+'%';}
+  function num(v,pre,dec){return v===null?'—':(pre||'')+(v>=0?'+':'')+v.toFixed(dec!==undefined?dec:2);}
+
+  function infoBtn(id,text){
+    return'<button onclick="event.stopPropagation();_stInfoToggle(this,'+JSON.stringify(text)+')" style="background:none;border:none;color:var(--mut);cursor:pointer;font-size:12px;padding:0 0 0 4px;vertical-align:middle;line-height:1;opacity:.7;">ⓘ</button>';
+  }
+
+  function statRow(label,value,info,col){
+    return'<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bdr);">'
+      +'<div style="font-size:13px;color:var(--mut);">'+label+infoBtn('',info)+'</div>'
+      +'<div style="font-size:15px;font-weight:700;color:'+(col||'var(--txt)')+';">'+value+'</div>'
+    +'</div>';
+  }
+
+  function subLabel(text){
+    return'<div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:14px 0 2px;">'+text+'</div>';
+  }
+
+  const pnlCol=lsPnL===null?'var(--txt)':lsPnL>=0?'var(--grn)':'var(--red)';
+  const roiCol=lsROI===null?'var(--txt)':lsROI>=0?'var(--grn)':'var(--red)';
+
+  let html='<div style="font-size:12px;color:var(--mut);margin-bottom:10px;">Based on '+total+' settled race reviews across your profiles.</div>';
+
+  html+=subLabel('Overall');
+  html+=statRow('Strike Rate',pct(strikeRate),
+    'Win rate across all settled race reviews. Excludes NR / missed runs. A typical well-selected profile list sits at 15–25%.','var(--gld)');
+  html+=statRow('Place Rate',pct(placeRate),
+    'Win + place results as a percentage of settled runs. Useful to see how often you are at least in the frame.');
+
+  html+=subLabel('Level Stakes (£1 per run)');
+  if(lsStaked===0){
+    html+='<div style="color:var(--mut);font-size:12px;font-style:italic;padding:6px 0;">Log SP odds on race reviews to see level stakes P&L.</div>';
+  } else {
+    html+=statRow('P&L ('+lsStaked+' runs)',num(lsPnL,'£'),
+      'Simulated profit/loss if you had backed every reviewed horse at £1 to win at the SP logged on each review. Positive = the field selection generates value.',pnlCol);
+    html+=statRow('ROI',pct(lsROI),
+      'Return on investment = P&L ÷ total staked × 100. Anything above 0% means your selections beat the market.',roiCol);
+  }
+
+  html+=subLabel('Handicapping Accuracy');
+  if(edgeRuns.length===0&&noEdgeRuns.length===0){
+    html+='<div style="color:var(--mut);font-size:12px;font-style:italic;padding:6px 0;">Set My Rating and Current OR on profiles to see edge accuracy.</div>';
+  } else {
+    if(edgeRuns.length>0)html+=statRow(
+      'Win rate — MR > OR ('+edgeRuns.length+' runs)',pct(edgeWR),
+      'Horses where your My Rating exceeded the official OR. A higher win rate here vs "no edge" confirms your handicapping is adding signal.','var(--grn)');
+    if(noEdgeRuns.length>0)html+=statRow(
+      'Win rate — MR ≤ OR ('+noEdgeRuns.length+' runs)',pct(noEdgeWR),
+      'Horses where you gave the official rating or less. Ideally this win rate is lower than the "MR > OR" rate above, confirming your edge is real.');
+    if(avgWinEdge!==null)html+=statRow(
+      'Avg MR edge on winners',avgWinEdge>=0?'+'+avgWinEdge.toFixed(1):avgWinEdge.toFixed(1)+' pts',
+      'Average difference between your My Rating and the official OR on races that resulted in a win. Positive means your winners tend to be ones where you rated them above the market.');
+  }
+
+  if(upgradeRvws.length>0){
+    html+=subLabel('Verdict Tracking');
+    html+=statRow(
+      'Upgrade verdicts → +MR adj ('+upgradeRvws.length+')',pct(upgradeAcc),
+      'Of races where you marked the verdict as an Upgrade, how many also had a positive MR adjustment? Tracks whether your upgrade calls align with a genuine step up in your rating.');
+  }
+
+  el.innerHTML=html;
 }
 
 // ─── CHECKLIST IMPACT (score bands + compliance + trend) ───

@@ -162,15 +162,16 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .cRC::before { background: var(--blu); }
 .cRS::before { background: var(--ora); }
 
-/* Today + Profiler cards — full bleed, no floating card chrome */
-#c0, #c3 {
+/* All pages — full bleed, no floating card chrome */
+#c0, #c1, #c2, #c3, #c4, #c5, #c6 {
   top: 0; bottom: 0;
   left: 0; width: 100%;
   border-radius: 0;
   border: none;
   box-shadow: none;
 }
-#c0::before, #c3::before { display: none; }
+#c0::before, #c1::before, #c2::before, #c3::before,
+#c4::before, #c5::before, #c6::before { display: none; }
 
 /* Card backgrounds — subtle tint from accent */
 .cT  { background: #fff; }

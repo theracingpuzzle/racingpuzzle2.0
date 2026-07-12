@@ -305,20 +305,27 @@ const _WL_GROUPBY_ORDER={
   age:         ['2yo','3yo','4yo+','unknown'],
 };
 
+// Insight filters only — admin tasks handled by the "Needs Attention" button
 const WL_FILTERS=[
-  {id:'running-today',  label:'Running Today',   title:'Horses from your profiler confirmed in today\'s racecards',
+  {id:'running-today', label:'Running Today', title:'Horses from your profiler confirmed in today\'s racecards',
     svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v14M5 3l10 3.5L5 10"/></svg>'},
-  {id:'no-obs',         label:'No Observations', title:'Profiles with no observations logged yet',
-    svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><line x1="3" y1="3" x2="17" y2="17"/></svg>'},
-  {id:'past-target',    label:'Past Target',     title:'Target race dates that have passed — mark if they ran',
-    svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v2M13 2v2M7 12l2 2 4-4"/></svg>'},
-  {id:'no-date-target', label:'Undated Target',  title:'Profiles with a target race that has no date set yet',
-    svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v2M13 2v2M10 12v.5M10 15v.1"/></svg>'},
-  {id:'edge',           label:'Edge',            title:'Your rating is above the official rating — potential value',
+  {id:'edge',          label:'Edge',          title:'Your rating is above the official rating — potential value',
     svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 14 7 9 11 12 17 5"/><polyline points="14 5 17 5 17 8"/></svg>'},
-  {id:'ready',          label:'Ready to Back',   title:'Horses you have marked as ready to back',
+  {id:'ready',         label:'Ready to Back', title:'Horses you have marked as ready to back',
     svg:'<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><polyline points="6 10 9 13 14 7"/></svg>'},
 ];
+
+// Count horses that need admin attention (union of all admin task conditions)
+function _wlAttentionCount(entries){
+  const today=td();
+  const ids=new Set();
+  entries.forEach(function(e){
+    if(!e.unraced&&!(e.observations&&e.observations.length))ids.add(e.id);
+    if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;}))ids.add(e.id);
+    if((e.targets||[]).some(function(t){return t.race&&!t.date;}))ids.add(e.id);
+  });
+  return ids.size;
+}
 
 function _wlToggleCold(){_wlShowCold=!_wlShowCold;renderWLList();}
 
@@ -392,12 +399,12 @@ function setWLFilter(id){
 function _applyWLFilter(entries){
   if(!_wlFilter) return entries;
   const today=td();
-  if(_wlFilter==='no-obs'){
-    return entries.filter(function(e){return!e.unraced&&!(e.observations&&e.observations.length);});
-  }
-  if(_wlFilter==='past-target'){
+  if(_wlFilter==='needs-attention'){
     return entries.filter(function(e){
-      return (e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;});
+      const noObs=!e.unraced&&!(e.observations&&e.observations.length);
+      const pastTarget=(e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;});
+      const noDateTarget=(e.targets||[]).some(function(t){return t.race&&!t.date;});
+      return noObs||pastTarget||noDateTarget;
     });
   }
   if(_wlFilter==='running-today'){
@@ -412,11 +419,6 @@ function _applyWLFilter(entries){
     });
     return entries.filter(function(e){
       return runningNames.has((e.horse||'').toLowerCase().trim());
-    });
-  }
-  if(_wlFilter==='no-date-target'){
-    return entries.filter(function(e){
-      return (e.targets||[]).some(function(t){return t.race&&!t.date;});
     });
   }
   if(_wlFilter==='edge'){
@@ -502,7 +504,9 @@ function renderWLList(){
   const el=document.getElementById('wl-list');if(!el)return;
   const filterBar=document.getElementById('wl-filter-bar');
   if(filterBar){
+    filterBar.style.cssText='display:flex;gap:6px;flex-wrap:nowrap;align-items:center;padding:10px 0 6px;';
     filterBar.innerHTML='';
+    // Insight pills
     WL_FILTERS.forEach(function(f){
       const on=_wlFilter===f.id;
       const btn=document.createElement('button');
@@ -514,6 +518,19 @@ function renderWLList(){
       btn.addEventListener('click',function(){setWLFilter(f.id);});
       filterBar.appendChild(btn);
     });
+    // Needs attention button — pushed to the right
+    const allEntries=getWL();
+    const attnCount=_wlAttentionCount(allEntries);
+    if(attnCount>0){
+      const on=_wlFilter==='needs-attention';
+      const attnBtn=document.createElement('button');
+      attnBtn.style.cssText='margin-left:auto;flex-shrink:0;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:14px;cursor:pointer;white-space:nowrap;transition:all .12s;display:flex;align-items:center;gap:5px;'
+        +(on?'background:#92400e;color:#fbbf24;border:1px solid #b45309;':'background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.35);');
+      attnBtn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+        +attnCount+' need attention';
+      attnBtn.addEventListener('click',function(){setWLFilter('needs-attention');});
+      filterBar.appendChild(attnBtn);
+    }
   }
 
   // Apply active filter
@@ -521,7 +538,7 @@ function renderWLList(){
 
   if(!entries.length){
     if(_wlFilter){
-      const filterLabel=WL_FILTERS.find(function(f){return f.id===_wlFilter;}).label;
+      const filterLabel=_wlFilter==='needs-attention'?'Needs Attention':(WL_FILTERS.find(function(f){return f.id===_wlFilter;})||{label:_wlFilter}).label;
       el.innerHTML='<div class="wll-empty">No profiles match the <strong>'+filterLabel+'</strong> filter.</div>';
     } else if(search){
       el.innerHTML='<div class="wll-empty">No profiles match "'+search+'".</div>';
@@ -1743,10 +1760,31 @@ function openWLForm(id,prefill){
         +'</div>'
         +'<div class="wlf-sec-body">'
           +(rvws.length
-            ?rvws.map(function(r){const rc=RCOL[r.result||'']||'var(--mut)';return'<div class="wlf-rvw-row">'
-                +'<div class="wlf-rvw-meta"><span>'+r.date+'</span>'+(r.raceName?'<span class="wlf-rvw-dot">·</span><span>'+r.raceName+'</span>':'')+(r.odds?'<span class="wlf-rvw-dot">·</span><span style="color:var(--gld);font-weight:700;">'+r.odds+'</span>':'')+'<span class="wlf-rvw-badge" style="color:'+rc+';">'+(r.result||'').toUpperCase()+'</span></div>'
-                +(r.notes?'<div class="wlf-rvw-notes">'+r.notes+'</div>':'')
-              +'</div>';}).join('')
+            ?rvws.map(function(r){
+                const rc=RCOL[r.result||'']||'var(--mut)';
+                const stats=[
+                  {lbl:'Pos',    val:r.position||'—'},
+                  {lbl:'Dist',   val:r.distance||'—'},
+                  {lbl:'Class',  val:r.raceClass||'—'},
+                  {lbl:'Ground', val:r.going||r.groundConditions||'—'},
+                  {lbl:'Beaten', val:r.beatenDistance||'—'},
+                  {lbl:'SP',     val:r.odds||'—', color:r.odds?'var(--gld)':undefined},
+                ];
+                const statsRow=stats.length
+                  ?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;">'
+                    +stats.map(function(s){
+                      return'<span style="font-size:11px;background:var(--sur2);border:1px solid var(--bdr);border-radius:5px;padding:2px 7px;color:'+(s.color||'var(--txt)')+';">'
+                        +'<span style="color:var(--mut);margin-right:3px;">'+s.lbl+'</span>'+s.val
+                      +'</span>';
+                    }).join('')
+                  +'</div>'
+                  :'';
+                return'<div class="wlf-rvw-row">'
+                  +'<div class="wlf-rvw-meta"><span>'+r.date+'</span>'+(r.raceName?'<span class="wlf-rvw-dot">·</span><span>'+r.raceName+'</span>':'')+(r.course?'<span class="wlf-rvw-dot">·</span><span>'+r.course+'</span>':'')+'<span class="wlf-rvw-badge" style="color:'+rc+';">'+(r.result||'').toUpperCase()+'</span></div>'
+                  +statsRow
+                  +(r.notes?'<div class="wlf-rvw-notes" style="margin-top:5px;">'+r.notes+'</div>':'')
+                +'</div>';
+              }).join('')
             :'<div style="font-size:12px;color:var(--mut);padding:8px 0;font-style:italic;">No race reviews yet — tap Add Review or use the Review button on Today after a run.</div>')
         +'</div>'
       +'</div>'

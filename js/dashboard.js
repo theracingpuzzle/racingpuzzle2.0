@@ -780,10 +780,13 @@ function renderStats(){
     if(srcParent) srcParent.style.display=ownStudyOnly?'none':'block';
   }
 
-  // Checklist analysis
-  renderCkImpact(disciplineSet);
-  renderCkSignals(disciplineSet);
-  renderCkTip();
+  // Checklist analysis — hide all four blocks if no bets have checklist data
+  const _hasCk=disciplineSet.some(function(b){return b.checklistAnswers&&Object.keys(b.checklistAnswers).length>0;});
+  ['st-ck-impact','st-ck-signals','st-ck-table','st-ck-tip'].forEach(function(id){
+    const blk=document.getElementById(id);
+    if(blk&&blk.closest('.blk'))blk.closest('.blk').style.display=_hasCk?'block':'none';
+  });
+  if(_hasCk){renderCkImpact(disciplineSet);renderCkSignals(disciplineSet);renderCkTip();}
 
   // Profiler performance
   _renderProfilerStats();
@@ -795,7 +798,9 @@ function renderStats(){
 }
 
 // ─── PROFILER PERFORMANCE ───────────────────────────────────────────────────
-function _stInfoToggle(btnEl,text){
+window._stInfoTexts=[];
+function _stInfoToggle(btnEl,idx){
+  const text=window._stInfoTexts[idx]||'';
   let tip=btnEl.nextElementSibling;
   if(tip&&tip.classList.contains('st-perf-tip')){
     tip.style.display=tip.style.display==='none'?'block':'none';
@@ -811,6 +816,7 @@ function _stInfoToggle(btnEl,text){
 function _renderProfilerStats(){
   const el=document.getElementById('st-profiler-perf');
   if(!el)return;
+  window._stInfoTexts=[];
 
   const reviews=D.reviews||[];
   const profiles=getWL?getWL():(D.watchlist||[]);
@@ -875,7 +881,8 @@ function _renderProfilerStats(){
   function num(v,pre,dec){return v===null?'—':(pre||'')+(v>=0?'+':'')+v.toFixed(dec!==undefined?dec:2);}
 
   function infoBtn(id,text){
-    return'<button onclick="event.stopPropagation();_stInfoToggle(this,'+JSON.stringify(text)+')" style="background:none;border:none;color:var(--mut);cursor:pointer;font-size:12px;padding:0 0 0 4px;vertical-align:middle;line-height:1;opacity:.7;">ⓘ</button>';
+    const idx=window._stInfoTexts.push(text)-1;
+    return'<button onclick="event.stopPropagation();_stInfoToggle(this,'+idx+')" style="background:none;border:none;color:var(--mut);cursor:pointer;font-size:12px;padding:0 0 0 4px;vertical-align:middle;line-height:1;opacity:.7;">ⓘ</button>';
   }
 
   function statRow(label,value,info,col){

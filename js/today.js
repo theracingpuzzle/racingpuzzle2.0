@@ -161,13 +161,22 @@ function _computeAlertTier(a){
   if(ok>=1)return'interesting';
   return'watching';
 }
-const _TIER_CFG={
-  'watching':    {label:'WATCHING',      text:'#8B93A7', border:'#3A4258', bg:'rgba(27,34,51,0.5)'},
-  'interesting': {label:'INTERESTING',   text:'#5B8DEF', border:'#3A5A9E', bg:'rgba(24,34,54,0.8)'},
-  'on-radar':    {label:'ON RADAR',      text:'#F5A623', border:'rgba(245,166,35,0.6)', bg:'rgba(42,36,24,0.8)'},
-  'ready':       {label:'READY TO BACK', text:'#2FBF8F', border:'rgba(47,191,143,0.6)', bg:'rgba(18,42,36,0.8)'},
-  'cold':        {label:'COLD',          text:'#8B7FE0', border:'#4A4270', bg:'rgba(30,27,48,0.8)'},
+const _TIER_CFG_DARK={
+  'watching':    {label:'WATCHING',      text:'#8B93A7', border:'#3A4258',             bg:'rgba(27,34,51,0.5)'},
+  'interesting': {label:'INTERESTING',   text:'#5B8DEF', border:'#3A5A9E',             bg:'rgba(24,34,54,0.8)'},
+  'on-radar':    {label:'ON RADAR',      text:'#F5A623', border:'rgba(245,166,35,0.6)',bg:'rgba(42,36,24,0.8)'},
+  'ready':       {label:'READY TO BACK', text:'#2FBF8F', border:'rgba(47,191,143,0.6)',bg:'rgba(18,42,36,0.8)'},
+  'cold':        {label:'COLD',          text:'#8B7FE0', border:'#4A4270',             bg:'rgba(30,27,48,0.8)'},
 };
+const _TIER_CFG_LIGHT={
+  'watching':    {label:'WATCHING',      text:'#4B5563', border:'rgba(107,114,128,0.35)',bg:'rgba(107,114,128,0.06)'},
+  'interesting': {label:'INTERESTING',   text:'#1d4ed8', border:'rgba(37,99,235,0.4)',  bg:'rgba(37,99,235,0.06)'},
+  'on-radar':    {label:'ON RADAR',      text:'#b45309', border:'rgba(217,119,6,0.5)',  bg:'rgba(217,119,6,0.07)'},
+  'ready':       {label:'READY TO BACK', text:'#15803d', border:'rgba(22,163,74,0.45)', bg:'rgba(22,163,74,0.07)'},
+  'cold':        {label:'COLD',          text:'#6d28d9', border:'rgba(124,58,237,0.4)', bg:'rgba(124,58,237,0.06)'},
+};
+function _getTierCfg(){return document.body.classList.contains('dark')?_TIER_CFG_DARK:_TIER_CFG_LIGHT;}
+const _TIER_CFG=new Proxy({},{get:function(_,k){return _getTierCfg()[k];}});
 function setTodayMode(m){
   _todayMode=m;
   _todaySelectMode=false;_todaySelected.clear();_todayUpdateSelectBar();

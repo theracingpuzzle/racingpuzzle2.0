@@ -120,6 +120,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 /* Profile icon button */
 .hdr-profile-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: rgba(255,255,255,.8); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s; -webkit-tap-highlight-color: transparent; }
 .hdr-profile-btn:active { background: rgba(255,255,255,.18); }
+.coach-hdr-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(168,85,247,.4); background: rgba(168,85,247,.15); color: #a855f7; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s; -webkit-tap-highlight-color: transparent; }
+.coach-hdr-btn:active { background: rgba(168,85,247,.3); }
+#coach-drawer { transform: translateY(100%); }
 
 /* Header pills & balance */
 .spill  { font-size: 12px; font-weight: 700; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); border-radius: 20px; padding: 4px 10px; color: #fff; letter-spacing: .04em; }

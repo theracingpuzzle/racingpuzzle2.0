@@ -1,4 +1,29 @@
-// ─── COACH ─── AI coach card, API key, usage tracking
+// ─── COACH ─── AI coach floating drawer
+
+function coachDrawerOpen(){
+  const drawer=document.getElementById('coach-drawer');
+  const overlay=document.getElementById('coach-drawer-overlay');
+  if(!drawer||!overlay)return;
+  overlay.style.display='block';
+  drawer.style.display='flex';
+  requestAnimationFrame(function(){
+    drawer.style.transition='transform .3s cubic-bezier(.32,0,.67,0)';
+    drawer.style.transform='translateY(0)';
+  });
+  renderCoachCard();
+  // Focus input after animation
+  setTimeout(function(){const inp=document.getElementById('coach-inp');if(inp)inp.focus();},320);
+}
+
+function coachDrawerClose(){
+  const drawer=document.getElementById('coach-drawer');
+  const overlay=document.getElementById('coach-drawer-overlay');
+  if(!drawer||!overlay)return;
+  drawer.style.transition='transform .25s cubic-bezier(.32,0,.67,0)';
+  drawer.style.transform='translateY(100%)';
+  overlay.style.display='none';
+  setTimeout(function(){drawer.style.display='none';},260);
+}
 
 // ─── AI USAGE TRACKING ───
 const AI_USAGE_KEY='racing-puzzle-ai-usage';
@@ -54,43 +79,98 @@ let coachHistory = [];
 function getApiKey(){ return ''; } // key is now server-side in the Cloudflare Worker
 
 function buildCoachContext(){
-  const settled = D.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr');
-  const staked = settled.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
-  const returns = settled.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
-  const pnlTotal = returns - staked;
-  const roi = staked>0?(pnlTotal/staked*100):0;
-  const wins = settled.filter(b=>b.result==='win').length;
-  const sr = settled.length>0?(wins/settled.length*100):0;
-  const todayBets = D.bets.filter(b=>b.date===td());
-  const todayPnl = todayBets.filter(b=>b.result&&b.result!=='pending').reduce((a,b)=>a+(pnl(b)||0),0);
-  const recent = [...D.bets].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,5);
-  const recentStr = recent.map(b=>`${b.horse} @ ${b.oddsDisplay||b.odds} (${b.result||'pending'}${b.result!=='pending'?' '+fmt(pnl(b)||0):''})`).join(', ');
-  const consecutiveLosses = (()=>{
+  const today=td();
+
+  // ── Betting record ──
+  const settled=D.bets.filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr');
+  const staked=settled.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
+  const returns=settled.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
+  const pnlTotal=returns-staked;
+  const roi=staked>0?(pnlTotal/staked*100):0;
+  const wins=settled.filter(b=>b.result==='win').length;
+  const sr=settled.length>0?(wins/settled.length*100):0;
+  const todayBets=D.bets.filter(b=>b.date===today);
+  const todayPending=todayBets.filter(b=>!b.result||b.result==='pending');
+  const todayPnl=todayBets.filter(b=>b.result&&b.result!=='pending').reduce((a,b)=>a+(pnl(b)||0),0);
+  const recent=[...D.bets].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,5);
+  const recentStr=recent.map(b=>`${b.horse} @ ${b.oddsDisplay||b.odds} (${b.result||'pending'}${b.result&&b.result!=='pending'?' '+fmt(pnl(b)||0):''})`).join(', ');
+  const consecutiveLosses=(()=>{
     const s=[...D.bets].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
     let n=0;for(const b of s){if(b.result==='loss')n++;else if(b.result&&b.result!=='pending')break;}return n;
   })();
-  const rules = (D.rules||[]).slice(0,5).join(' | ');
-  return `You are a strict but fair professional horse racing betting coach. Your job is to keep the punter disciplined, profitable, and honest with themselves.
 
-PUNTER'S CURRENT DATA:
-- Bank: starting £${D.bank.start||0}, current £${D.bank.current||0} (${D.bank.start?((((D.bank.current||0)/(D.bank.start||1))*100)-100).toFixed(1)+'%':'not set'})
-- All-time P&L: ${fmt(pnlTotal)} from ${settled.length} settled bets
-- ROI: ${roi.toFixed(1)}%, Strike rate: ${sr.toFixed(0)}%
-- Today: ${todayBets.length} bets, P&L ${fmt(todayPnl)}
+  // ── Virtual bank ──
+  const vb=getVBank?getVBank():(D.vBank||{});
+  const vbSettled=(vb.bets||[]).filter(b=>b.result&&b.result!=='pending'&&b.result!=='void'&&b.result!=='nr');
+  const vbPnl=vbSettled.reduce((a,b)=>a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0),0);
+  const vbSr=vbSettled.length>0?(vbSettled.filter(b=>b.result==='win').length/vbSettled.length*100):0;
+
+  // ── Rules ──
+  const rules=(D.rules||[]).slice(0,8).join(' | ');
+
+  // ── Profiler — watchlist horses ──
+  const wl=getWL?getWL():(D.watchlist||[]);
+  const readyHorses=wl.filter(e=>e.betReadiness==='ready'||e.betReadiness==='watch-closely');
+  const readyStr=readyHorses.slice(0,8).map(e=>{
+    const edge=parseFloat(e.myRating)&&parseFloat(e.currentRating)?parseFloat(e.myRating)-parseFloat(e.currentRating):null;
+    return `${e.horse} (${e.trainer||'?'}, MR:${e.myRating||'?'} OR:${e.currentRating||'?'}${edge!==null?' edge:'+(edge>0?'+':'')+edge:''}, going pref: ${(e.goingPrefs||[]).join('/')||'any'})`;
+  }).join('; ');
+
+  // ── Profiler — horses running today (from alert cache) ──
+  const alerts=window._wlAlerts||[];
+  const runningToday=alerts.map(a=>{
+    const tier=typeof _computeAlertTier==='function'?_computeAlertTier(a):'';
+    return `${a.horse} @ ${a.time||'?'} ${a.course||''} — ${a.raceName||''} (${a.raceDist||''}, going:${a.raceGoing||'?'}, class:${a.raceClass||'?'}, tier:${tier})`;
+  }).join('; ');
+
+  // ── Today's meetings from racecard cache ──
+  const meetings=window._todayMeetingsCache;
+  const races=meetings?(meetings.racecards||meetings.races||[]):[];
+  const coursesStr=[...new Set(races.map(r=>r.course||r.venue||'').filter(Boolean))].join(', ');
+  const goingByVenue=[...new Set(races.map(r=>(r.course||r.venue||'')+(r.going?' ('+r.going+')':'')).filter(Boolean))].slice(0,10).join(', ');
+
+  // ── Today's results so far ──
+  const results=typeof rcSwResultsData!=='undefined'?rcSwResultsData:[];
+  const resultsStr=results.slice(0,10).map(r=>{
+    const winner=(r.runners||r.horses||[]).find(h=>h.position==1||h.position==='1');
+    return `${r.course||''} ${r.off_time||r.time||''} ${r.race_name||r.name||''}: winner ${winner?winner.horse||winner.name:'unknown'}`;
+  }).join('; ');
+
+  // ── Recent profiler reviews ──
+  const reviews=(D.reviews||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,6);
+  const reviewsStr=reviews.map(r=>`${r.horse} (${r.date||'?'}): ${r.result||'?'}, pos ${r.position||'?'}, dist ${r.distance||'?'}, class ${r.raceClass||'?'}, going ${r.going||r.groundConditions||'?'}, MR adj ${r.mrAdjustment>0?'+':''}${r.mrAdjustment||0}, verdict: ${r.verdict||'none'}`).join('; ');
+
+  return `You are a strict but fair professional horse racing betting coach. Your job is to keep the punter disciplined, profitable, and honest with themselves. Today is ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}.
+
+PUNTER'S BETTING RECORD:
+- Real bank: starting £${D.bank.start||0}, current £${D.bank.current||0} (${D.bank.start?((((D.bank.current||0)/(D.bank.start||1))*100)-100).toFixed(1)+'%':'not set'})
+- All-time P&L: ${fmt(pnlTotal)} from ${settled.length} settled bets | ROI: ${roi.toFixed(1)}% | Strike rate: ${sr.toFixed(0)}%
+- Virtual bank: starting £${vb.start||0}, current £${vb.current||0} | P&L: ${fmt(vbPnl)} from ${vbSettled.length} bets | SR: ${vbSr.toFixed(0)}%
+- Today: ${todayBets.length} bets (${todayPending.length} pending), P&L so far: ${fmt(todayPnl)}
 - Consecutive losses: ${consecutiveLosses}
 - Recent bets: ${recentStr||'none'}
-- Their rules: ${rules||'none set'}
 - Daily bet limit: ${D.settings&&D.settings.dailyLimit?D.settings.dailyLimit:5}
+- Their rules: ${rules||'none set'}
+
+TODAY'S RACING:
+- Meetings: ${coursesStr||'not loaded'}
+- Going: ${goingByVenue||'unknown'}
+- Results so far: ${resultsStr||'none yet'}
+
+PROFILER — HORSES BEING TRACKED:
+- Ready to back / watch closely: ${readyStr||'none'}
+- Running today from watchlist: ${runningToday||'none detected'}
+- Recent race reviews: ${reviewsStr||'none'}
 
 YOUR COACHING STYLE:
 - Be direct, honest and firm. Don't sugarcoat bad patterns.
 - If they're chasing losses, call it out plainly.
 - If they're doing well, acknowledge it but keep them grounded.
-- Reference their actual data when relevant (bank, recent bets, P&L).
+- Reference their actual data when relevant — bank, recent bets, profiler horses, today's going.
 - Keep responses concise — 2-4 sentences max unless they ask for detail.
 - You know horse racing well: form study, handicaps, value betting, staking discipline.
 - Never encourage reckless betting. Always steer toward process over outcome.
-- If they ask about a specific horse or race, help them think through the decision logically.
+- If they ask about a specific horse or race, cross-reference the profiler data and today's going.
 - Sign off occasionally as "The Coach" but don't overdo it.`;
 }
 

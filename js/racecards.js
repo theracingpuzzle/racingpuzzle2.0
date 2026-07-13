@@ -1040,7 +1040,7 @@ function _lboBackToChecklist(){
 }
 
 
-let rcSwResultsData = [], rcSwResultsView = 'time', rcSwResultsOpenCourse = '';
+let rcSwResultsData = [], rcSwResultsView = 'time', rcSwResultsOpenCourse = '', rcSwResultsYesterday = false;
 const _rcResTimeOpen = {}; // tracks which time-view result races are expanded
 
 function rcSwToggleResTime(idx){

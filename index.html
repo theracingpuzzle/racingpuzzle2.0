@@ -44,6 +44,9 @@
           <span id="hvbank-wrap" class="hdr-bal-val" style="color:#fb923c;">£<span id="hvbank">0.00</span><span id="hvbank-arrow" class="hdr-bal-arrow"></span></span>
         </div>
       </div>
+      <button class="coach-hdr-btn" id="coach-hdr-btn" onclick="coachDrawerOpen()" title="The Coach">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 1 5 5c0 2.05-1.23 3.81-3 4.58V13a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-1.42C8.23 10.81 7 9.05 7 7a5 5 0 0 1 5-5z"/><path d="M9 17h6"/><path d="M10 20h4"/></svg>
+      </button>
       <button class="dark-toggle" id="dark-toggle-btn" onclick="toggleDarkMode()" title="Toggle dark mode"></button>
       <button class="hdr-profile-btn" id="hdr-profile-btn" onclick="profileOpen()" title="Account &amp; Profile">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -621,6 +624,25 @@
   </div>
 
   <div class="snav" id="snav" style="display:none;"></div>
+</div>
+
+<!-- COACH DRAWER -->
+<div id="coach-drawer-overlay" onclick="coachDrawerClose()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;backdrop-filter:blur(2px);"></div>
+<div id="coach-drawer" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:901;background:var(--sur);border-radius:20px 20px 0 0;border-top:1px solid var(--bdr);max-height:85vh;display:none;flex-direction:column;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--bdr);flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 1 5 5c0 2.05-1.23 3.81-3 4.58V13a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-1.42C8.23 10.81 7 9.05 7 7a5 5 0 0 1 5-5z"/><path d="M9 17h6"/><path d="M10 20h4"/></svg>
+      <span style="font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.04em;color:var(--txt);">THE COACH</span>
+    </div>
+    <button onclick="coachDrawerClose()" style="background:none;border:none;color:var(--mut);cursor:pointer;font-size:20px;line-height:1;padding:0 4px;">×</button>
+  </div>
+  <div id="coach-quick" style="display:flex;gap:6px;overflow-x:auto;padding:10px 14px;scrollbar-width:none;flex-shrink:0;border-bottom:1px solid var(--bdr);"></div>
+  <div id="coach-msgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;"></div>
+  <div id="coach-key-warn" style="display:none;padding:8px 14px;background:rgba(239,68,68,.08);border-top:1px solid rgba(239,68,68,.2);font-size:12px;color:#ef4444;flex-shrink:0;">No AI API key set — add it in Settings.</div>
+  <div style="display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--bdr);padding-bottom:max(10px,env(safe-area-inset-bottom));flex-shrink:0;">
+    <input id="coach-inp" type="text" placeholder="Ask the coach…" style="flex:1;padding:10px 14px;border-radius:22px;border:1px solid var(--bdr);background:var(--sur2);color:var(--txt);font-family:var(--font);font-size:14px;outline:none;" onkeydown="if(event.key==='Enter')sendCoach()">
+    <button onclick="sendCoach()" style="padding:10px 16px;border-radius:22px;border:none;background:#a855f7;color:#fff;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Send</button>
+  </div>
 </div>
 
 <!-- RESPONSIBLE GAMBLING FOOTER -->

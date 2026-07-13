@@ -56,6 +56,7 @@ async function testRacingAPI(){
     {label:'racecards/free (today)',endpoint:'racecards/free',params:{}},
     {label:'racecards/tomorrow/free',endpoint:'racecards/tomorrow/free',params:{}},
     {label:'results/today/free',endpoint:'results/today/free',params:{}},
+    {label:'results/yesterday/free',endpoint:'results/yesterday/free',params:{}},
   ];
   for(const t of tests){
     try{

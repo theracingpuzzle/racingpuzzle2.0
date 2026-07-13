@@ -251,12 +251,13 @@ async function autoMorningBrief(){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         type:'coach',
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-6',
         max_tokens:300,
         system: buildCoachContext(),
         messages: coachHistory
       })
     });
+    if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||'API error '+res.status);}
     const data = await res.json();
     const reply = data.content?.[0]?.text || '(no response)';
     if(typing) typing.remove();
@@ -290,7 +291,7 @@ async function sendCoach(){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         type:'coach',
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-6',
         max_tokens:1000,
         system: buildCoachContext(),
         messages: coachHistory

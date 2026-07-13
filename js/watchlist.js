@@ -3019,7 +3019,7 @@ function _wlpBuildHTML(e){
         if(t.condition)h+='<div style="font-size:11px;color:var(--mut);margin-top:2px;font-style:italic;">'+esc(t.condition)+'</div>';
         // Line 4: actions — plain text, unobtrusive
         h+='<div style="display:flex;gap:8px;margin-top:6px;align-items:center;">';
-          if(!alreadyReviewed)h+='<button onclick="'+rv+'" style="font-size:10px;font-weight:700;color:'+(isPast?'#f59e0b':'var(--mut)');+';background:none;border:none;padding:0;cursor:pointer;">Write review</button><span style="color:var(--bdr);">·</span>';
+          if(!alreadyReviewed)h+='<button onclick="'+rv+'" style="font-size:10px;font-weight:700;color:'+(isPast?'#f59e0b':'var(--mut)')+';background:none;border:none;padding:0;cursor:pointer;">Write review</button><span style="color:var(--bdr);">·</span>';
           h+='<button onclick="wlDeleteTarget(\''+e.id+'\',\''+esc(t.id||t.race)+'\')" style="font-size:10px;font-weight:700;color:var(--mut);background:none;border:none;padding:0;cursor:pointer;">Remove</button>';
         h+='</div>';
       h+='</div>';
@@ -3034,16 +3034,19 @@ function _wlpBuildHTML(e){
   // Overdue targets: date has passed, no review exists within 7 days of target date
   const today=td();
   const profileReviewDates=(D.reviews||[]).filter(function(r){return r.profileId===e.id;}).map(function(r){return r.date||'';});
-  function _dateReviewed(targetDate){
-    // Consider reviewed if any review date falls within 7 days either side of target date
-    const tMs=new Date(targetDate+'T00:00:00').getTime();
-    return profileReviewDates.some(function(d){
-      const dMs=new Date(d+'T00:00:00').getTime();
-      return Math.abs(dMs-tMs)<=7*24*60*60*1000;
+  function _targetAlreadyReviewed(t){
+    const raceLower=(t.race||'').toLowerCase().trim();
+    const tMs=t.date?new Date(t.date+'T00:00:00').getTime():null;
+    return(D.reviews||[]).some(function(r){
+      if(r.profileId!==e.id)return false;
+      const rn=(r.raceName||'').toLowerCase().trim();
+      if(raceLower&&(rn===raceLower||rn.includes(raceLower)||raceLower.includes(rn)))return true;
+      if(tMs&&r.date){const dMs=new Date(r.date+'T00:00:00').getTime();if(Math.abs(dMs-tMs)<=7*24*60*60*1000)return true;}
+      return false;
     });
   }
   const overdueTargets=(e.targets||[])
-    .filter(function(t){return t.date&&t.date<today&&!_dateReviewed(t.date);})
+    .filter(function(t){return t.date&&t.date<today&&!_targetAlreadyReviewed(t);})
     .map(function(t){return{_type:'target',id:t.id,date:t.date,raceName:t.race||'',course:t.track||''};})
     .sort(function(a,b){return b.date.localeCompare(a.date);});
 

@@ -1,4 +1,5 @@
 // ─── WATCHLIST / PUZZLE PROFILER ───
+function esc(s){return(s==null?'':s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 let wlView='list', wlCalDate=new Date();
 // ── OR Edge helpers ──
@@ -317,6 +318,7 @@ const WL_FILTERS=[
 
 // True if a review is missing distance, class or ground
 function _rvwIncomplete(r){
+  if(r.result==='nr'||r.result==='missed')return false;
   return !r.distance||!r.raceClass||!(r.going||r.groundConditions);
 }
 

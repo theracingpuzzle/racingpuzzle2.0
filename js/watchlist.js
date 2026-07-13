@@ -321,12 +321,20 @@ function _rvwIncomplete(r){
 }
 
 // Count horses that need admin attention (union of all admin task conditions)
+function _targetReviewed(profileId,targetDate){
+  const tMs=new Date(targetDate+'T00:00:00').getTime();
+  return(D.reviews||[]).some(function(r){
+    if(r.profileId!==profileId)return false;
+    const dMs=new Date((r.date||'')+'T00:00:00').getTime();
+    return Math.abs(dMs-tMs)<=7*24*60*60*1000;
+  });
+}
 function _wlAttentionCount(entries){
   const today=td();
   const ids=new Set();
   entries.forEach(function(e){
     if(!e.unraced&&!(D.reviews||[]).some(function(r){return r.profileId===e.id;}))ids.add(e.id);
-    if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;}))ids.add(e.id);
+    if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!_targetReviewed(e.id,t.date);}))ids.add(e.id);
     if((e.targets||[]).some(function(t){return t.race&&!t.date;}))ids.add(e.id);
     const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
     if(rvws.length&&rvws.some(_rvwIncomplete))ids.add(e.id);
@@ -409,7 +417,7 @@ function _applyWLFilter(entries){
   if(_wlFilter==='needs-attention'){
     return entries.filter(function(e){
       const noReviews=!e.unraced&&!(D.reviews||[]).some(function(r){return r.profileId===e.id;});
-      const pastTarget=(e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;});
+      const pastTarget=(e.targets||[]).some(function(t){return t.date&&t.date<today&&!_targetReviewed(e.id,t.date);});
       const noDateTarget=(e.targets||[]).some(function(t){return t.race&&!t.date;});
       const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
       const incompleteReview=rvws.length&&rvws.some(_rvwIncomplete);
@@ -513,7 +521,7 @@ function renderWLList(){
   const el=document.getElementById('wl-list');if(!el)return;
   const filterBar=document.getElementById('wl-filter-bar');
   if(filterBar){
-    filterBar.style.cssText='display:flex;gap:6px;flex-wrap:nowrap;align-items:center;padding:10px 0 6px;';
+    filterBar.style.cssText='display:flex;gap:6px;flex-wrap:nowrap;align-items:center;padding:10px 0 6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;';
     filterBar.innerHTML='';
     // Insight pills
     WL_FILTERS.forEach(function(f){
@@ -533,7 +541,7 @@ function renderWLList(){
     if(attnCount>0){
       const on=_wlFilter==='needs-attention';
       const attnBtn=document.createElement('button');
-      attnBtn.style.cssText='margin-left:auto;flex-shrink:0;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:14px;cursor:pointer;white-space:nowrap;transition:all .12s;display:flex;align-items:center;gap:5px;'
+      attnBtn.style.cssText='flex-shrink:0;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:14px;cursor:pointer;white-space:nowrap;transition:all .12s;display:flex;align-items:center;gap:5px;'
         +(on?'background:#92400e;color:#fbbf24;border:1px solid #b45309;':'background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.35);');
       attnBtn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
         +attnCount+' need attention';
@@ -696,7 +704,7 @@ function renderWLList(){
         const reasons=[];
         if(!e.unraced&&!(D.reviews||[]).some(function(r){return r.profileId===e.id;}))
           reasons.push('No reviews yet');
-        if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!t.ran;}))
+        if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!_targetReviewed(e.id,t.date);}))
           reasons.push('Past target');
         if((e.targets||[]).some(function(t){return t.race&&!t.date;}))
           reasons.push('Undated target');
@@ -1805,7 +1813,7 @@ function openWLForm(id,prefill){
                   {lbl:'Dist',   val:r.distance||'—'},
                   {lbl:'Class',  val:r.raceClass||'—'},
                   {lbl:'Ground', val:r.going||r.groundConditions||'—'},
-                  {lbl:'Beaten', val:r.beatenDistance||'—'},
+                  ...(r.result==='win'&&!r.beatenDistance?[]:[{lbl:'Beaten',val:r.beatenDistance||'—'}]),
                   {lbl:'SP',     val:r.odds||'—', color:r.odds?'var(--gld)':undefined},
                 ];
                 const statsRow=stats.length
@@ -3121,7 +3129,7 @@ function _wlpBuildHTML(e){
         {l:'Dist',  v:r.distance||'—'},
         {l:'Class', v:r.raceClass||'—'},
         {l:'Ground',v:_rGoing||'—'},
-        {l:'Beaten',v:r.beatenDistance||'—'},
+        ...(r.result==='win'&&!r.beatenDistance?[]:[{l:'Beaten',v:r.beatenDistance||'—'}]),
         {l:'SP',    v:r.odds||'—'},
       ];
       if(r.mrAdjustment)chips.push({l:'MR',v:(r.mrAdjustment>0?'+':'')+r.mrAdjustment});

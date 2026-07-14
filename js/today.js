@@ -1097,7 +1097,7 @@ async function checkWatchlistRunners(races){
               const _stepCeil=!_higher&&_best>1?_best-1:_ceil;
               _idealClassLabel='Class '+_stepCeil+(_stepCeil<_worst?'–'+_worst:'+')+(_stepCeil<_best?' ↑':'');
               // Match: today's race class within projected range
-              const _todayNum=parseInt((raceType||'').replace(/[^0-9]/g,''));
+              const _todayNum=parseInt(_rc)||parseInt((raceType||'').replace(/[^0-9]/g,''));
               if(!isNaN(_todayNum)){
                 _classOk=_todayNum>=_stepCeil&&_todayNum<=_worst+1;
                 _stepUp=_todayNum<_best;
@@ -1106,7 +1106,8 @@ async function checkWatchlistRunners(races){
               _idealClassLabel=_classPref;
               _classOk=!!classIcon&&classIcon.trim()==='✓';
             }
-            const _classRow=_mkRow('Class',raceType||'—',_idealClassLabel,_classOk);
+            const _classToday=(_rc?'C'+_rc+(raceType?' · '+raceType:''):raceType)||'—';
+            const _classRow=_mkRow('Class',_classToday,_idealClassLabel,_classOk);
             rows.push(_stepUp?_classRow.replace('</div>','<div style="font-size:9px;color:var(--gld);margin-top:1px;">Step up ↑</div></div>'):_classRow);
           }
           if(a.mr&&a.or){
@@ -1681,6 +1682,9 @@ function renderToday(){
     const races=window._todayMeetingsCache.racecards||window._todayMeetingsCache.races||[];
     checkWatchlistRunners(races);
     renderNextRace();
+  } else {
+    // Cache not yet loaded — fetch now so alerts get race data (going, distance, class)
+    loadTodayMeetings();
   }
 
   // ── Streak ──

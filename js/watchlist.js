@@ -1020,7 +1020,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'<div id="rvw-signals" style="margin:4px 0 2px;"></div>'
     +'<div class="fg"><label>Notes</label><textarea id="rvw-notes" placeholder="What you saw, sectionals, paddock notes…" style="min-height:64px;"></textarea></div>'
     +'<div style="display:flex;gap:8px;margin-top:4px;">'
-    +'<button onclick="saveWLReview(\''+profileId+'\',\''+horse+'\',\''+course+'\')" class="btn bgld" style="flex:1;">Save Review</button>'
+    +'<button onclick="saveWLReview(\''+profileId+'\',\''+horse.replace(/'/g,"\\'")+'\',\''+course.replace(/'/g,"\\'")+'\''+'\')" class="btn bgld" style="flex:1;">Save Review</button>'
     +'<button onclick="document.getElementById(\'wl-review-modal\').remove()" class="btn bout">Cancel</button>'
     +'</div>'
     +'</div></div>';

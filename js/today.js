@@ -1011,7 +1011,10 @@ async function checkWatchlistRunners(races){
         // Condition comparison table: Race vs Horse ideal
         const _condRows=(function(){
           const rows=[];
+          var _met=0,_total=0;
           const _mkRow=function(label,raceVal,idealVal,ok){
+            _total++;
+            if(ok===true)_met++;
             const dot='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block;background:'+(ok===true?'var(--grn)':ok===false?'var(--red)':'var(--bdr)')+';margin-top:1px;"></span>';
             return'<div style="display:grid;grid-template-columns:52px 1fr 1fr 10px;gap:6px;align-items:start;padding:4px 0;border-bottom:1px solid var(--bdr);">'
               +'<span style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding-top:1px;">'+label+'</span>'
@@ -1020,8 +1023,8 @@ async function checkWatchlistRunners(races){
               +dot
             +'</div>';
           };
-          if(_raceGoing||_goingPrefs.length){
-            // Going spectrum — adjacent conditions are usually fine
+          // ── Going (always shown) ──────────────────────────────────────────────
+          {
             const _GOING_SCALE=['Firm','Good to Firm','Good','Good to Soft','Soft','Heavy'];
             const _normG=function(g){return(g||'').toLowerCase().replace(/\s+/g,' ').trim();};
             const _goingIdx=function(g){return _GOING_SCALE.findIndex(function(s){return _normG(s)===_normG(g);});};
@@ -1031,7 +1034,6 @@ async function checkWatchlistRunners(races){
               if(_prefIdxs.length){
                 const _minI=Math.min.apply(null,_prefIdxs);
                 const _maxI=Math.max.apply(null,_prefIdxs);
-                // Allow one step softer than softest pref (horses usually handle slightly softer)
                 const _softI=Math.min(_maxI+1,_GOING_SCALE.length-1);
                 const _range=[...new Set([..._prefIdxs.map(function(i){return _GOING_SCALE[i];})])];
                 _goingLabel=_range.slice(0,2).join(', ')+(_softI>_maxI?' ('+_GOING_SCALE[_softI]+' OK)':'');
@@ -1041,13 +1043,13 @@ async function checkWatchlistRunners(races){
                 }
               } else {
                 _goingLabel=_goingPrefs.slice(0,2).join(', ');
-                _goingOk=_goingPrefs.some(function(g){return _normG(g)===_normG(_raceGoing);});
+                if(_raceGoing)_goingOk=_goingPrefs.some(function(g){return _normG(g)===_normG(_raceGoing);});
               }
             }
             rows.push(_mkRow('Going',_raceGoing,_goingLabel,_goingOk));
           }
-          if(_raceDist||_distancePref||_distanceWins.length){
-            // Distance — derive range from wins and project ±1 furlong either side
+          // ── Distance (always shown) ───────────────────────────────────────────
+          {
             const _distToF=function(d){
               if(!d)return null;
               const s=d.replace(/\s/g,'').toLowerCase();
@@ -1066,8 +1068,8 @@ async function checkWatchlistRunners(races){
             const _srcDists=[_distancePref,..._distanceWins].filter(Boolean);
             const _srcFs=_srcDists.map(_distToF).filter(Boolean);
             if(_srcFs.length){
-              const _minF=Math.min.apply(null,_srcFs)-1; // 1f shorter tolerance
-              const _maxF=Math.max.apply(null,_srcFs)+2; // 2f longer (horses often stay on)
+              const _minF=Math.min.apply(null,_srcFs)-1;
+              const _maxF=Math.max.apply(null,_srcFs)+2;
               _distLabel=_fToStr(Math.max(_minF,1))+'–'+_fToStr(_maxF);
               if(_raceDist){
                 const _todayF=_distToF(_raceDist);
@@ -1075,12 +1077,12 @@ async function checkWatchlistRunners(races){
               }
             } else if(_distancePref){
               _distLabel=_distancePref;
-              _distOk=_distMatch(_distancePref,_raceDist)||null;
+              if(_raceDist)_distOk=_distMatch(_distancePref,_raceDist);
             }
             rows.push(_mkRow('Dist',_raceDist,_distLabel,_distOk));
           }
-          if(raceType||_classPref){
-            // Build smart class label from reviews (same logic as profile card)
+          // ── Class (always shown) ──────────────────────────────────────────────
+          {
             const _NC=['1','2','3','4','5','6','7'];
             const _hReviews=(D.reviews||[]).filter(function(r){return r.profileId===wid;});
             const _wpR=_hReviews.filter(function(r){return r.result==='win'||r.result==='place';});
@@ -1093,10 +1095,8 @@ async function checkWatchlistRunners(races){
               const _allC=_hReviews.map(function(r){return parseInt(r.raceClass||'');}).filter(function(n){return !isNaN(n);});
               const _higher=_allC.some(function(n){return n<_best;});
               const _ceil=_higher&&_best>1?_best-1:_best;
-              // Can also step up one class from best win if not already attempted
               const _stepCeil=!_higher&&_best>1?_best-1:_ceil;
               _idealClassLabel='Class '+_stepCeil+(_stepCeil<_worst?'–'+_worst:'+')+(_stepCeil<_best?' ↑':'');
-              // Match: today's race class within projected range
               const _todayNum=parseInt(_rc)||parseInt((raceType||'').replace(/[^0-9]/g,''));
               if(!isNaN(_todayNum)){
                 _classOk=_todayNum>=_stepCeil&&_todayNum<=_worst+1;
@@ -1110,17 +1110,22 @@ async function checkWatchlistRunners(races){
             const _classRow=_mkRow('Class',_classToday,_idealClassLabel,_classOk);
             rows.push(_stepUp?_classRow.replace('</div>','<div style="font-size:9px;color:var(--gld);margin-top:1px;">Step up ↑</div></div>'):_classRow);
           }
+          // ── Mark (optional — only when MR+OR both set) ───────────────────────
           if(a.mr&&a.or){
             const ok=a.edge>0;
             rows.push(_mkRow('Mark',(a.edge>0?'+':'')+a.edge+' edge','My '+a.mr+' vs OR '+a.or,ok));
           }
-          if(!rows.length)return'';
+          const _scoreCol=_met===_total?'var(--grn)':_met===0?'var(--red)':'var(--ora)';
+          const _scoreLabel=_met+' / '+_total+' conditions';
           return'<div style="margin-bottom:8px;">'
-            +'<div style="display:grid;grid-template-columns:52px 1fr 1fr 10px;gap:6px;margin-bottom:2px;">'
-              +'<span></span>'
-              +'<span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Today</span>'
-              +'<span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Horse Wants</span>'
-              +'<span></span>'
+            +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'
+              +'<div style="display:grid;grid-template-columns:52px 1fr 1fr 10px;gap:6px;flex:1;">'
+                +'<span></span>'
+                +'<span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Today</span>'
+                +'<span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Horse Wants</span>'
+                +'<span></span>'
+              +'</div>'
+              +'<span style="font-size:10px;font-weight:700;color:'+_scoreCol+';white-space:nowrap;padding-left:8px;">'+_scoreLabel+'</span>'
             +'</div>'
             +rows.join('')
           +'</div>';

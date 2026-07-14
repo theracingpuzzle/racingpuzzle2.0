@@ -780,8 +780,9 @@ function renderStats(){
     if(srcParent) srcParent.style.display=ownStudyOnly?'none':'block';
   }
 
-  // Checklist analysis — hide all four blocks if no bets have checklist data
-  const _hasCk=disciplineSet.some(function(b){return b.checklistAnswers&&Object.keys(b.checklistAnswers).length>0;});
+  // Checklist analysis — hide all four blocks if checklist is disabled or no data
+  const _ckOn=!(D.settings&&D.settings.checklistEnabled===false);
+  const _hasCk=_ckOn&&disciplineSet.some(function(b){return b.checklistAnswers&&Object.keys(b.checklistAnswers).length>0;});
   ['st-ck-impact','st-ck-signals','st-ck-table','st-ck-tip'].forEach(function(id){
     const blk=document.getElementById(id);
     if(blk&&blk.closest('.blk'))blk.closest('.blk').style.display=_hasCk?'block':'none';

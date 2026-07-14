@@ -1,5 +1,7 @@
 // ─── WATCHLIST / PUZZLE PROFILER ───
 function esc(s){return(s==null?'':s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// Escape for use inside single-quoted JS strings within onclick attributes
+function jsq(s){return(s==null?'':s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 
 function _wlCondInfo(btn,msg){
   const existing=document.getElementById('_wl-cond-tip');
@@ -3136,7 +3138,7 @@ function _wlpBuildHTML(e){
             +(rc?'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+item.result+'</span>':'')
             +(item._type==='pending'
               ?'<button onclick="wlCompletePendingReview(\''+item.id+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>'
-              :'<button onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\''+esc(item.raceName||'')+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>')
+              :'<button onclick="openWLPostRaceReview(\''+e.id+'\',\''+jsq(e.horse)+'\',\'\',\'\',\''+jsq(item.raceName||'')+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>')
           +'</div>'
         +'</div>'
       +'</div>';
@@ -3150,7 +3152,7 @@ function _wlpBuildHTML(e){
   const RESULT_COL={win:'#4ade80',place:CLR_WATCH,unplaced:'#f87171',nr:'#3a3a5c',missed:'#a78bfa'};
   h+='<div class="wlp-section">';
   h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Race Reviews</span></div>';
-  h+='<span class="wlp-section-action" onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\'\')">Add +</span></div>';
+  h+='<span class="wlp-section-action" onclick="openWLPostRaceReview(\''+e.id+'\',\''+jsq(e.horse)+'\',\'\',\'\',\'\')">Add +</span></div>';
   if(profileReviews.length){
     profileReviews.forEach(function(r){
       const isObs=r.source==='observation';
@@ -3223,7 +3225,7 @@ function _wlpBuildHTML(e){
   // ── QUICK ACTION BAR — always visible at bottom ───────────────────────────
   h+='<div class="wlp-quick-bar">'
     +'<button class="wlp-quick-btn" onclick="wlToggleBRPicker(\''+e.id+'\')">⬤ Readiness</button>'
-    +'<button class="wlp-quick-btn" onclick="openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\'\',\'\',\'\')">+ Review</button>'
+    +'<button class="wlp-quick-btn" onclick="openWLPostRaceReview(\''+e.id+'\',\''+jsq(e.horse)+'\',\'\',\'\',\'\')">+ Review</button>'
     +'<button class="wlp-quick-btn wlp-quick-btn-primary" onclick="'+editFn+'">✏ Edit</button>'
   +'</div>';
 

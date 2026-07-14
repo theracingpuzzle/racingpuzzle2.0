@@ -329,7 +329,7 @@ function lgRenderDetail(el){
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
       +'<div>'
         +'<div style="font-family:var(--font);font-size:22px;font-weight:900;letter-spacing:.02em;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
-        +'<div style="font-size:13px;color:var(--mut);margin-top:3px;">'+(l.scoring==='wins'?'Win count scoring':'£1 level stakes scoring')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+'</div>'
+        +'<div style="font-size:13px;color:var(--mut);margin-top:3px;">'+(l.scoring==='wins'?'Win count scoring':'£1 level stakes scoring')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+(l.pick_days?(' · '+_lgFmtPickDays(l.pick_days)):'')+'</div>'
         +(function(){var admin=members.find(function(m){return m.user_id===l.created_by;});return admin?'<div style="margin-top:6px;display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--mut);">'+SVG_ADMIN_KEY+'<span>League Admin: <strong style="color:var(--txt);">'+_lgEsc(admin.display_name||'Unknown')+'</strong></span></div>':'';})()
         +(_lgIsEnded(l)?'<div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#f87171;">Competition Ended</div>':'')
       +'</div>'
@@ -509,7 +509,7 @@ function lgRenderDetail(el){
               +'<span style="font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+resBg+';border:1px solid '+(res==='win'?'rgba(22,163,74,.25)':res==='loss'?'rgba(248,113,113,.25)':'var(--bdr)')+';color:'+resCol+';">'+res+'</span>'
             +'</div>'
           +'</div>'
-          +'<div id="lg-react-'+p.id+'" style="display:flex;gap:5px;padding:4px 0 2px 2px;">'+_lgReactionBar(p.id,l.id)+'</div>';
+          +(((Date.now()-new Date(p.pick_date).getTime())<2*24*60*60*1000)?'<div id="lg-react-'+p.id+'" style="display:flex;gap:5px;padding:4px 0 2px 2px;">'+_lgReactionBar(p.id,l.id)+'</div>':'');
         });
         h+='</div></div>';
       });
@@ -572,10 +572,28 @@ function _lgCloseModal(){
 }
 
 function lgShowCreate(){
+  const dayBtnStyle='flex:1;padding:8px 2px;border-radius:8px;border:1px solid var(--bdr);background:var(--bg);color:var(--mut);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;';
   _lgOpenModal('Create League',
     '<div class="fg"><label>League Name</label><input id="lg-new-name" type="text" placeholder="e.g. Friday Night Punters" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
     +'<div class="fg"><label>Your Display Name</label><input id="lg-new-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;box-sizing:border-box;"></div>'
     +'<div class="fg"><label>End Date <span style="color:var(--mut);font-weight:400;">(optional)</span></label><input id="lg-new-end" type="date" style="width:100%;box-sizing:border-box;"></div>'
+    +'<div class="fg"><label>Pick Days <span style="color:var(--mut);font-weight:400;">— which days are picks expected?</span></label>'
+      +'<div style="display:flex;gap:5px;margin-top:6px;">'
+        +'<button id="lgd-mon" onclick="lgToggleDay(\'mon\')" style="'+dayBtnStyle+'">Mon</button>'
+        +'<button id="lgd-tue" onclick="lgToggleDay(\'tue\')" style="'+dayBtnStyle+'">Tue</button>'
+        +'<button id="lgd-wed" onclick="lgToggleDay(\'wed\')" style="'+dayBtnStyle+'">Wed</button>'
+        +'<button id="lgd-thu" onclick="lgToggleDay(\'thu\')" style="'+dayBtnStyle+'">Thu</button>'
+        +'<button id="lgd-fri" onclick="lgToggleDay(\'fri\')" style="'+dayBtnStyle+'">Fri</button>'
+        +'<button id="lgd-sat" onclick="lgToggleDay(\'sat\')" style="'+dayBtnStyle+'">Sat</button>'
+        +'<button id="lgd-sun" onclick="lgToggleDay(\'sun\')" style="'+dayBtnStyle+'">Sun</button>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;margin-top:8px;">'
+        +'<button onclick="lgPresetDays(\'all\')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);background:var(--bg);color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;">All Week</button>'
+        +'<button onclick="lgPresetDays(\'weekend\')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);background:var(--bg);color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;">Weekend</button>'
+        +'<button onclick="lgPresetDays(\'sat\')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);background:var(--bg);color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;">Sat Only</button>'
+        +'<button onclick="lgPresetDays(\'none\')" style="padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);background:var(--bg);color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;">Clear</button>'
+      +'</div>'
+    +'</div>'
     +'<div class="fg"><label>Scoring Method</label>'
       +'<div class="rc-view-tog" style="width:100%;margin-top:4px;">'
         +'<button id="lg-sc-stakes" onclick="lgPickScoring(\'stakes\')" class="rc-view-btn on" style="flex:1;">£1 Stakes</button>'
@@ -586,8 +604,35 @@ function lgShowCreate(){
     +'<button id="lg-create-btn" onclick="lgCreateSubmit()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:8px;">Create League</button>'
     +'<div id="lg-create-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
   );
+  // Default to all days selected
+  lgPresetDays('all');
 }
 function lgRenderCreate(el){}
+
+const _LG_ALL_DAYS=['mon','tue','wed','thu','fri','sat','sun'];
+let _lgPickDays=new Set(_LG_ALL_DAYS);
+
+function lgToggleDay(day){
+  if(_lgPickDays.has(day))_lgPickDays.delete(day);else _lgPickDays.add(day);
+  _lgRefreshDayBtns();
+}
+function lgPresetDays(preset){
+  if(preset==='all')_lgPickDays=new Set(_LG_ALL_DAYS);
+  else if(preset==='weekend')_lgPickDays=new Set(['sat','sun']);
+  else if(preset==='sat')_lgPickDays=new Set(['sat']);
+  else _lgPickDays=new Set();
+  _lgRefreshDayBtns();
+}
+function _lgRefreshDayBtns(){
+  _LG_ALL_DAYS.forEach(function(d){
+    const btn=document.getElementById('lgd-'+d);
+    if(!btn)return;
+    const on=_lgPickDays.has(d);
+    btn.style.background=on?'var(--navy)':'var(--bg)';
+    btn.style.color=on?'#fff':'var(--mut)';
+    btn.style.borderColor=on?'var(--navy)':'var(--bdr)';
+  });
+}
 
 let _lgScoring='stakes';
 function lgPickScoring(s){
@@ -629,7 +674,8 @@ async function lgCreateSubmit(){
   const leagueId=_lgGid();
   const code=_lgCode();
   try{
-    await _lgFetch('leagues',{method:'POST',body:JSON.stringify({id:leagueId,name,created_by:uid,invite_code:code,scoring:_lgScoring,end_date:endDate})});
+    const pickDays=_lgPickDays.size?_LG_ALL_DAYS.filter(function(d){return _lgPickDays.has(d);}).join(','):null;
+    await _lgFetch('leagues',{method:'POST',body:JSON.stringify({id:leagueId,name,created_by:uid,invite_code:code,scoring:_lgScoring,end_date:endDate,pick_days:pickDays})});
     await _lgFetch('league_members',{method:'POST',body:JSON.stringify({id:_lgGid(),league_id:leagueId,user_id:uid,display_name:dname})});
     await lgLoad();
     const l=_lgMyLeagues.find(function(x){return x.id===leagueId;});
@@ -1066,6 +1112,17 @@ function lgHandleJoinLink(){
 
 function _lgEsc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function _lgFmtDate(d){if(!d)return'';try{const p=d.slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0];}catch(e){return d;}}
+function _lgFmtPickDays(s){
+  if(!s)return'';
+  const days=s.split(',');
+  const all=['mon','tue','wed','thu','fri','sat','sun'];
+  if(days.length===7)return'All week';
+  if(days.length===2&&days.includes('sat')&&days.includes('sun'))return'Weekends';
+  if(days.length===1&&days[0]==='sat')return'Saturdays only';
+  if(days.length===1&&days[0]==='sun')return'Sundays only';
+  const labels={mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',fri:'Fri',sat:'Sat',sun:'Sun'};
+  return days.map(function(d){return labels[d]||d;}).join(', ')+' only';
+}
 function _lgIsEnded(l){if(!l||!l.end_date)return false;return _lgToday()>l.end_date;}
 
 // ─── Result sync (called from results fetch) ──────────────────────────────────
@@ -1179,7 +1236,8 @@ async function lgLoadActivity(leagueId){
 }
 
 function lgRenderFeed(leagueId){
-  const items=_lgActivityLeague===leagueId?_lgActivity:[];
+  const _cutoff=Date.now()-7*24*60*60*1000;
+  const items=(_lgActivityLeague===leagueId?_lgActivity:[]).filter(function(a){return new Date(a.created_at).getTime()>=_cutoff;});
   if(!items.length) return '<div style="font-size:13px;color:var(--mut);text-align:center;padding:20px 0;">No activity yet — make the first pick!</div>';
 
   function timeAgo(ts){

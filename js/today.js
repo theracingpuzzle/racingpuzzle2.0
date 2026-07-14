@@ -672,7 +672,7 @@ async function checkWatchlistRunners(races){
   if(!alerts.length){
     alertEl.style.display='none';
     window._wlAlerts=[];
-    ['t-mode-toggle','t-today-headline','t-today-runner-ticker'].forEach(function(id){
+    ['t-mode-toggle','t-today-headline'].forEach(function(id){
       const el=document.getElementById(id);if(el)el.style.display='none';
     });
     return;
@@ -765,28 +765,6 @@ async function checkWatchlistRunners(races){
           +'<div class="t-display-num" style="color:var(--mut);">'+_pass+'</div>'
           +'<div style="font-size:8px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-top:3px;">Pass</div>'
         +'</div>'
-      +'</div>';
-  }
-
-  // ── 2. Runner ticker ──────────────────────────────────────────────────────
-  const tickerEl=document.getElementById('t-today-runner-ticker');
-  if(tickerEl){
-    const tickerItems=[...alerts].sort(function(a,b){return(a.time||'').localeCompare(b.time||'');});
-    const _tc=tickerItems.map(function(a){
-      return'<span class="tp-item"><span class="tp-item-highlight">'+a.time+'</span>'
-        +(a.course?' '+a.course:'')
-        +' — <span class="tp-item-highlight">'+a.horse+'</span></span>'
-        +'<span class="tp-sep">·</span>';
-    }).join('');
-    tickerEl.style.display='block';
-    tickerEl.innerHTML=''
-      +'<div class="tp-bar" style="margin-top:0;">'
-        +'<div class="tp-label">'
-          +'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
-            +'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
-          +'</svg>'
-        +'</div>'
-        +'<div class="tp-track-wrap"><div class="tp-track">'+_tc+_tc+'</div></div>'
       +'</div>';
   }
 
@@ -993,7 +971,7 @@ async function checkWatchlistRunners(races){
       // Primary action: review (if available/past) or race (if upcoming)
       const primaryBtn=reviewBtn
         ?reviewBtn
-        :'<button data-course="'+a.course+'" data-time="'+a.time+'" class="t-wl-race-btn t-race-btn">'
+        :'<button data-course="'+a.course+'" data-time="'+a.time+'" data-horse="'+a.horse+'" class="t-wl-race-btn t-race-btn">'
           +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M17 11c.34 1.76.52 3.51.52 5.26 0 .79-.04 1.57-.11 2.35"/><path d="M3.52 16.26A14.26 14.26 0 0 1 3 11"/><path d="M13 3c-2.76 0-5.52.84-7 2.52"/><path d="M13 3c2.76 0 5.52.84 7 2.52"/><path d="M7 16.95a10 10 0 0 0 6 0"/><circle cx="13" cy="9" r="2"/></svg>'
           +' Racecard'
         +'</button>';
@@ -1074,7 +1052,7 @@ async function checkWatchlistRunners(races){
             // 3-col action grid (stacked icon + label, matching JSX)
             +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;">'
               +'<button onclick="event.stopPropagation();_todayOpenRacecard(\''+_co+'\',\''+_ti+'\',\''+_hn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:#1A2138;color:#C7CEDD;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Racecard</button>'
-              +'<button onclick="event.stopPropagation();_todayOpenVirtBet(\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\''+_rn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:#1A2138;color:#C7CEDD;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>Place Bet</button>'
+              +'<button onclick="event.stopPropagation();openBetFlow(null,\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\'\',\''+_rn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:#1A2138;color:#C7CEDD;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>Place Bet</button>'
               +'<button onclick="event.stopPropagation();(function(){_todaySelected.clear();_todaySelected.add(\''+_selId+'\');_todayShareSelected();})()" style="padding:9px 4px;font-size:11px;font-weight:600;background:#1F2A44;color:#F5A623;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>'
             +'</div>'
           +'</div>'
@@ -1782,7 +1760,13 @@ function renderLeagueReminder(){
   const active=_lgMyLeagues.filter(function(l){return !_lgIsEnded(l);});
   if(!active.length){el.style.display='none';return;}
   const uid=typeof _lgUid==='function'?_lgUid():null;
+  const todayDow=['sun','mon','tue','wed','thu','fri','sat'][new Date().getDay()];
   const missing=active.filter(function(l){
+    // If the league has pick_days set, only alert on those days
+    if(l.pick_days){
+      const allowed=l.pick_days.split(',');
+      if(!allowed.includes(todayDow))return false;
+    }
     const picks=(_lgPicks[l.id]||[]);
     const todayPick=picks.find(function(p){return p.user_id===uid&&p.pick_date===today;});
     return !todayPick;
@@ -2306,8 +2290,18 @@ function syncBetResults(results){
 // ── TODAY RACECARD SHEET ──────────────────────────────────────────────────────
 function _todayOpenRacecard(course,time,trackedHorse){
   const norm=function(s){return(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');};
-  const races=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
-  const race=races.find(function(r){return norm(r.course||r.track||r.venue||'')==norm(course)&&(r.off||r.time||r.race_time||'')==time;});
+  const raw=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
+  // Flatten meetings → individual races (meetings may have nested .races array)
+  const flat=[];
+  raw.forEach(function(m){
+    const mc=m.course||m.venue||'';
+    if(m.runners){flat.push({race:m,course:mc});}
+    else{(m.races||[]).forEach(function(r){flat.push({race:r,course:mc});});}
+  });
+  const found=flat.find(function(item){
+    return norm(item.course)==norm(course)&&(item.race.off||item.race.off_time||item.race.time||item.race.race_time||'')==time;
+  });
+  const race=found&&found.race;
   const runners=(race&&(race.runners||race.horses||[]))||[];
 
   const ov=document.getElementById('t-racecard-sheet');

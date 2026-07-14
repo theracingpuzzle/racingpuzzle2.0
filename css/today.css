@@ -226,7 +226,7 @@
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  animation: tp-scroll 55s linear infinite;
+  animation: tp-scroll 80s linear infinite;
 }
 
 .tp-item {

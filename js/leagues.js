@@ -930,7 +930,19 @@ async function lgSaveOdds(pickId){
   }
 }
 
+function _lgPickDayAllowed(league){
+  if(!league||!league.pick_days)return true;
+  const todayDow=['sun','mon','tue','wed','thu','fri','sat'][new Date().getDay()];
+  return league.pick_days.split(',').includes(todayDow);
+}
+
 async function lgAddPickFromCard(leagueId, horse, course, time, odds){
+  const _leagueObj=_lgMyLeagues.find(function(l){return l.id===leagueId;});
+  if(!_lgPickDayAllowed(_leagueObj)){
+    const _days=(_leagueObj&&_leagueObj.pick_days)?_lgFmtPickDays(_leagueObj.pick_days):'certain days';
+    alert('Picks for "'+(_leagueObj?_leagueObj.name:'this league')+'" are only allowed on '+_days+'.');
+    return;
+  }
   const uid=_lgUid();
   const pick={id:_lgGid(),league_id:leagueId,user_id:uid,pick_date:_lgToday(),horse,course,race_time:time,odds:odds||null,result:'pending',returns:0};
   try{
@@ -953,15 +965,22 @@ async function lgAddPickFromCard(leagueId, horse, course, time, odds){
 // Called from racecard runner row (external entry point)
 async function lgPickFromRacecard(horse, course, time, odds){
   if(!_lgMyLeagues.length){alert('You\'re not in any leagues yet.');return;}
-  // Filter to active leagues only
   const active=_lgMyLeagues.filter(function(l){return !_lgIsEnded(l);});
   if(!active.length){_lgToast('All your leagues have ended.');return;}
-  if(active.length===1){
-    await lgAddPickFromCard(active[0].id,horse,course,time,odds);
-    _lgToast('Picked '+horse+' for '+active[0].name);
+  // Separate into allowed and restricted by pick_days
+  const allowed=active.filter(function(l){return _lgPickDayAllowed(l);});
+  const restricted=active.filter(function(l){return !_lgPickDayAllowed(l);});
+  if(!allowed.length){
+    const dayLabel=_lgFmtPickDays(restricted[0].pick_days);
+    _lgToast('No leagues accept picks today — '+dayLabel+'.');
     return;
   }
-  // Multiple active leagues — show bottom sheet selector
+  if(allowed.length===1&&!restricted.length){
+    await lgAddPickFromCard(allowed[0].id,horse,course,time,odds);
+    _lgToast('Picked '+horse+' for '+allowed[0].name);
+    return;
+  }
+  // Show picker with all leagues, restricted ones greyed out
   _lgShowLeaguePicker(horse, course, time, odds, active);
 }
 
@@ -986,15 +1005,18 @@ function _lgShowLeaguePicker(horse, course, time, odds, leagues){
   leagues.forEach(function(l){
     const myPicks=(_lgMyPicks[l.id]||[]).filter(function(p){return p.pick_date===_lgToday();});
     const alreadyPicked=myPicks.some(function(p){return(p.horse||'').toLowerCase().trim()===(horse||'').toLowerCase().trim();});
-    h+='<div onclick="'+( alreadyPicked ? '' : '_lgPickerSelect(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+odds+'\')')+'" '
-      +'style="display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:'+(alreadyPicked?'default':'pointer')+';'+(alreadyPicked?'opacity:.5;':'')+'border-top:1px solid var(--bdr);">'
+    const dayBlocked=!_lgPickDayAllowed(l);
+    const disabled=alreadyPicked||dayBlocked;
+    h+='<div onclick="'+(disabled?'':'_lgPickerSelect(\''+l.id+'\',\''+horse.replace(/'/g,"\\'")+'\''+',\''+course.replace(/'/g,"\\'")+'\',\''+time+'\',\''+odds+'\')')+'" '
+      +'style="display:flex;align-items:center;gap:12px;padding:13px 18px;cursor:'+(disabled?'default':'pointer')+';'+(disabled?'opacity:.45;':'')+'border-top:1px solid var(--bdr);">'
       +'<div style="width:32px;height:32px;border-radius:8px;background:rgba(30,58,95,.08);border:1px solid rgba(30,58,95,.15);display:flex;align-items:center;justify-content:center;color:var(--navy);flex-shrink:0;">'+SVG_TROPHY+'</div>'
       +'<div style="flex:1;">'
         +'<div style="font-family:var(--font);font-size:14px;font-weight:800;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
-        +'<div style="font-size:10px;color:var(--mut);">'+(l.scoring==='wins'?'Win count':'Stakes P&L')+' · '+(l.end_date?'Ends '+_lgFmtDate(l.end_date)+' · ':'')+myPicks.length+' pick'+(myPicks.length!==1?'s':'')+' today</div>'
+        +'<div style="font-size:10px;color:var(--mut);">'+(dayBlocked?'Picks allowed: '+_lgFmtPickDays(l.pick_days):(l.scoring==='wins'?'Win count':'Stakes P&L')+' · '+(l.end_date?'Ends '+_lgFmtDate(l.end_date)+' · ':'')+myPicks.length+' pick'+(myPicks.length!==1?'s':'')+' today')+'</div>'
       +'</div>'
       +(alreadyPicked
         ?'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:rgba(30,58,95,.08);border:1px solid rgba(30,58,95,.25);color:var(--navy);">Picked ✓</span>'
+        :dayBlocked?'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.25);color:var(--red);">Not today</span>'
         :'<span style="color:var(--mut);font-size:18px;">›</span>'
       )
     +'</div>';

@@ -181,7 +181,7 @@ function setTodayMode(m){
   _todayMode=m;
   _todaySelectMode=false;_todaySelected.clear();_todayUpdateSelectBar();
   const btn=document.getElementById('t-select-toggle-btn');
-  if(btn){btn.textContent='Select';btn.style.color='var(--mut)';}
+  if(btn){btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11"/><path d="M10 12h11"/><path d="M10 18h11"/><path d="m3 6 2 2 4-4"/><path d="m3 12 2 2 4-4"/><path d="m3 18 2 2 4-4"/></svg>Select';btn.style.color='var(--mut)';}
   const wBtn=document.getElementById('t-mode-watching');
   const rBtn=document.getElementById('t-mode-reviewing');
   if(wBtn){wBtn.style.background=m==='watching'?'#F5A623':'transparent';wBtn.style.color=m==='watching'?'#000':'var(--mut)';}
@@ -655,7 +655,7 @@ async function checkWatchlistRunners(races){
             const resultInfo=_wlFindResult(r.horse||r.name,course);
             alerts.push({
               horse:r.horse||r.name,course,time,raceName,
-              jockey:r.jockey||'',raceDist,raceGoing,raceClass,
+              jockey:r.jockey||'',trainer:r.trainer||'',raceDist,raceGoing,raceClass,
               wlEntry:w,
               orUpdated:orChanged?racecardOR:null,
               orPrev:orChanged?storedOR:null,
@@ -980,6 +980,7 @@ async function checkWatchlistRunners(races){
       const _co=(a.course||'').replace(/'/g,"\\'");
       const _ti=a.time||'';
       const _jk=(a.jockey||'').replace(/'/g,"\\'");
+      const _tr=(a.trainer||'').replace(/'/g,"\\'");
       const _rn=(a.raceName||'').replace(/'/g,"\\'");
       // ── Review data attributes (shared by both mode review buttons) ──────────
       const _reviewDataAttrs=''
@@ -1051,8 +1052,8 @@ async function checkWatchlistRunners(races){
             +(a.orUpdated?'<div style="font-size:12px;color:var(--gld);margin-bottom:8px;">OR updated: '+(a.orPrev?a.orPrev+' → ':'')+a.orUpdated+'</div>':'')
             // 3-col action grid (stacked icon + label, matching JSX)
             +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;">'
-              +'<button onclick="event.stopPropagation();_todayOpenRacecard(\''+_co+'\',\''+_ti+'\',\''+_hn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:#1A2138;color:#C7CEDD;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Racecard</button>'
-              +'<button onclick="event.stopPropagation();openBetFlow(null,\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\'\',\''+_rn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:#1A2138;color:#C7CEDD;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>Place Bet</button>'
+              +'<button onclick="event.stopPropagation();_todayOpenRacecard(\''+_co+'\',\''+_ti+'\',\''+_hn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:var(--sur2);color:var(--txt);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Racecard</button>'
+              +'<button onclick="event.stopPropagation();openBetFlow(null,\''+_hn+'\',\''+_co+'\',\''+_ti+'\',\''+_jk+'\',\''+_tr+'\',\''+_rn+'\')" style="padding:9px 4px;font-size:11px;font-weight:600;background:var(--sur2);color:var(--txt);border:1px solid var(--bdr);border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>Place Bet</button>'
               +'<button onclick="event.stopPropagation();(function(){_todaySelected.clear();_todaySelected.add(\''+_selId+'\');_todayShareSelected();})()" style="padding:9px 4px;font-size:11px;font-weight:600;background:#1F2A44;color:#F5A623;border:none;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;line-height:1.2;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>'
             +'</div>'
           +'</div>'
@@ -2323,7 +2324,7 @@ function _todayOpenRacecard(course,time,trackedHorse){
       const jk=r.jockey||r.jockey_name||'';
       const or=r.ofr||r['or']||r.official_rating||r.rpr||'';
       rows+='<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;margin-bottom:4px;'
-        +(isTracked?'background:rgba(245,158,11,0.15);border:1.5px solid var(--gld,#f59e0b);':'background:var(--card,#1e2433);')
+        +(isTracked?'background:rgba(245,158,11,0.12);border:1.5px solid var(--gld,#f59e0b);':'background:var(--sur2);border:1px solid var(--bdr);')
         +'">'
         +'<span style="min-width:22px;font-size:12px;color:var(--mut);font-weight:700;">'+(no||'·')+'</span>'
         +'<span style="flex:1;font-size:14px;font-weight:'+(isTracked?'800':'600')+';color:'+(isTracked?'var(--gld,#f59e0b)':'var(--txt,#f1f5f9)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+hn+(isTracked?' ★':'')+'</span>'
@@ -2338,7 +2339,7 @@ function _todayOpenRacecard(course,time,trackedHorse){
   const raceMeta=[time,course].filter(Boolean).join(' · ')+(race&&race.distance?' · '+(race.distance||race.dist||''):'');
   sheet.innerHTML=''
     +'<div onclick="_todayCloseRacecard()" style="flex:1;background:rgba(0,0,0,0.55);"></div>'
-    +'<div style="background:var(--bg2,#151b27);border-radius:20px 20px 0 0;max-height:70vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,0);">'
+    +'<div style="background:var(--sur);border-radius:20px 20px 0 0;max-height:70vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,0);">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;">'
         +'<div>'
           +'<div style="font-size:15px;font-weight:700;color:var(--txt,#f1f5f9);">'+course+'</div>'

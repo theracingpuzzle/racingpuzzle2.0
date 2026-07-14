@@ -1,6 +1,28 @@
 // ─── WATCHLIST / PUZZLE PROFILER ───
 function esc(s){return(s==null?'':s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+function _wlCondInfo(btn,msg){
+  const existing=document.getElementById('_wl-cond-tip');
+  if(existing){existing.remove();if(existing._srcBtn===btn)return;}
+  const tip=document.createElement('div');
+  tip._srcBtn=btn;
+  tip.id='_wl-cond-tip';
+  tip.innerHTML='<div style="font-size:11px;line-height:1.5;color:var(--txt);">'+msg+'</div>'
+    +'<button onclick="document.getElementById(\'_wl-cond-tip\').remove()" style="margin-top:8px;font-size:10px;font-weight:700;color:var(--mut);background:none;border:none;cursor:pointer;padding:0;">Dismiss</button>';
+  tip.style.cssText='position:fixed;z-index:3000;background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;max-width:240px;box-shadow:0 4px 20px rgba(0,0,0,.18);';
+  document.body.appendChild(tip);
+  const r=btn.getBoundingClientRect();
+  const tw=240,th=80;
+  let left=r.left+r.width/2-tw/2;
+  if(left<8)left=8;
+  if(left+tw>window.innerWidth-8)left=window.innerWidth-8-tw;
+  let top=r.bottom+8;
+  if(top+th>window.innerHeight-8)top=r.top-th-8;
+  tip.style.left=left+'px';
+  tip.style.top=top+'px';
+  document.addEventListener('click',function _close(e){if(!tip.contains(e.target)&&e.target!==btn){tip.remove();document.removeEventListener('click',_close);}},{once:false,capture:true});
+}
+
 let wlView='list', wlCalDate=new Date();
 // ── OR Edge helpers ──
 function orEdge(entry){
@@ -2918,12 +2940,19 @@ function _wlpBuildHTML(e){
     const typeMap={handicap:'Handicap',group:'Group/Listed',maiden:'Maiden',claimer:'Claimer'};
     const idealType=e.raceType?typeMap[e.raceType]||e.raceType:null;
 
+    const _iInfo={
+      'Ground':  'Derived from the going conditions in your win &amp; place reviews, ranked by frequency. Set manually via Going Prefs if no reviews yet.',
+      'Distance':'Based on distances where this horse has won or placed. Set manually via Distance Pref if not enough data.',
+      'Class':   'Range of class levels from win &amp; place reviews. Shows best class won up to highest class placed — ±1 tolerance applied.',
+      'Surface': 'Flat / Jumps / AW — set manually on the profile. Not auto-inferred from reviews.',
+      'Type':    'Race type preference (Handicap, Maiden etc.) — set manually on the profile.',
+    };
     const conds=[
-      {label:'Ground',  value:idealGoing,  col:'var(--grn)'},
-      {label:'Distance',value:idealDist,   col:'var(--blu)'},
-      {label:'Class',   value:idealClass,  col:'var(--gld)', note:classNote},
-      {label:'Surface', value:idealSurface,col:'var(--pur)'},
-      {label:'Type',    value:idealType,   col:'var(--ora)'},
+      {label:'Ground',  value:idealGoing,  note:classNote},
+      {label:'Distance',value:idealDist},
+      {label:'Class',   value:idealClass,  note:classNote},
+      {label:'Surface', value:idealSurface},
+      {label:'Type',    value:idealType},
     ];
     const hasAny=conds.some(function(c){return c.value;});
     h+='<div class="wlp-section">';
@@ -2931,9 +2960,13 @@ function _wlpBuildHTML(e){
     if(hasAny){
       h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--bdr);">';
       conds.forEach(function(c){
+        const infoTip=_iInfo[c.label]||'';
         h+='<div style="background:var(--sur);padding:11px 13px;">'
-          +'<div style="font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);margin-bottom:4px;">'+c.label+'</div>'
-          +'<div style="font-size:13px;font-weight:800;color:'+(c.value?c.col:'var(--mut)')+';">'+(c.value||'—')+'</div>'
+          +'<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">'
+            +'<div style="font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);">'+c.label+'</div>'
+            +'<button onclick="event.stopPropagation();_wlCondInfo(this,\''+infoTip+'\')" style="display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-size:8px;font-weight:700;cursor:pointer;flex-shrink:0;line-height:1;padding:0;">i</button>'
+          +'</div>'
+          +'<div style="font-size:13px;font-weight:800;color:'+(c.value?'var(--txt)':'var(--mut)')+';">'+(c.value||'—')+'</div>'
           +(c.note?'<div style="font-size:9px;color:var(--mut);margin-top:2px;">'+c.note+'</div>':'')
           +'</div>';
       });

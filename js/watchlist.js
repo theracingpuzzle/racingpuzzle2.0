@@ -345,12 +345,17 @@ function _rvwIncomplete(r){
 }
 
 // Count horses that need admin attention (union of all admin task conditions)
-function _targetReviewed(profileId,targetDate){
-  const tMs=new Date(targetDate+'T00:00:00').getTime();
+function _targetReviewed(profileId,targetDate,raceName){
+  const tMs=targetDate?new Date(targetDate+'T00:00:00').getTime():null;
+  const rn=(raceName||'').toLowerCase().trim();
   return(D.reviews||[]).some(function(r){
     if(r.profileId!==profileId)return false;
-    const dMs=new Date((r.date||'')+'T00:00:00').getTime();
-    return Math.abs(dMs-tMs)<=7*24*60*60*1000;
+    // Match by race name (if both sides have one)
+    const rrn=(r.raceName||'').toLowerCase().trim();
+    if(rn&&rrn&&(rrn===rn||rrn.includes(rn)||rn.includes(rrn)))return true;
+    // Match by date within 7 days
+    if(tMs&&r.date){const dMs=new Date(r.date+'T00:00:00').getTime();if(Math.abs(dMs-tMs)<=7*24*60*60*1000)return true;}
+    return false;
   });
 }
 function _wlAttentionCount(entries){
@@ -358,7 +363,7 @@ function _wlAttentionCount(entries){
   const ids=new Set();
   entries.forEach(function(e){
     if(!e.unraced&&!(D.reviews||[]).some(function(r){return r.profileId===e.id;}))ids.add(e.id);
-    if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!_targetReviewed(e.id,t.date);}))ids.add(e.id);
+    if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!_targetReviewed(e.id,t.date,t.race);}))ids.add(e.id);
     if((e.targets||[]).some(function(t){return t.race&&!t.date;}))ids.add(e.id);
     const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
     if(rvws.length&&rvws.some(_rvwIncomplete))ids.add(e.id);
@@ -441,7 +446,7 @@ function _applyWLFilter(entries){
   if(_wlFilter==='needs-attention'){
     return entries.filter(function(e){
       const noReviews=!e.unraced&&!(D.reviews||[]).some(function(r){return r.profileId===e.id;});
-      const pastTarget=(e.targets||[]).some(function(t){return t.date&&t.date<today&&!_targetReviewed(e.id,t.date);});
+      const pastTarget=(e.targets||[]).some(function(t){return t.date&&t.date<today&&!_targetReviewed(e.id,t.date,t.race);});
       const noDateTarget=(e.targets||[]).some(function(t){return t.race&&!t.date;});
       const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
       const incompleteReview=rvws.length&&rvws.some(_rvwIncomplete);
@@ -717,7 +722,7 @@ function renderWLList(){
         }).length;
         const pv=(D.pendingReviews||[]).filter(function(p){
           if(p.profileId!==e.id)return false;
-          return!(D.reviews||[]).some(function(rv){return rv.profileId===e.id&&rv.date===p.date;});
+          return!_targetReviewed(e.id,p.date,p.raceName||p.race||'');
         }).length;
         return ov+pv;
       })();
@@ -728,7 +733,7 @@ function renderWLList(){
         const reasons=[];
         if(!e.unraced&&!(D.reviews||[]).some(function(r){return r.profileId===e.id;}))
           reasons.push('No reviews yet');
-        if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!_targetReviewed(e.id,t.date);}))
+        if((e.targets||[]).some(function(t){return t.date&&t.date<today&&!_targetReviewed(e.id,t.date,t.race);}))
           reasons.push('Past target');
         if((e.targets||[]).some(function(t){return t.race&&!t.date;}))
           reasons.push('Undated target');
@@ -992,6 +997,12 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
         +(function(){
           var opts=['1','2','3','4','5','6','7','Group 1','Group 2','Group 3','Listed','Novice','Maiden','Handicap','Conditions'];
           var normCls=(raceClass||'').replace(/^class\s*/i,'').trim();
+          // If the race name indicates a pattern race, override the numeric class
+          var rn=raceName||'';
+          if(/\bGroup\s*1\b|\bGr(ade)?\s*1\b|\bG1\b/i.test(rn))normCls='Group 1';
+          else if(/\bGroup\s*2\b|\bGr(ade)?\s*2\b|\bG2\b/i.test(rn))normCls='Group 2';
+          else if(/\bGroup\s*3\b|\bGr(ade)?\s*3\b|\bG3\b/i.test(rn))normCls='Group 3';
+          else if(/\bListed\b/i.test(rn))normCls='Listed';
           return opts.map(function(c){return'<option'+(c===normCls?' selected':'')+'>'+c+'</option>';}).join('');
         })()
         +'</select>'
@@ -999,7 +1010,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'</div>'
     +'<div class="g2">'
       +'<div class="fg"><label>Ground</label>'
-        +'<select id="rvw-ground" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:var(--font);font-size:14px;"><option value="">— Select —</option><option'+(raceGoing==='Firm'?' selected':'')+'>Firm</option><option'+(raceGoing==='Good to Firm'?' selected':'')+'>Good to Firm</option><option'+(raceGoing==='Good'?' selected':'')+'>Good</option><option'+(raceGoing==='Good to Soft'?' selected':'')+'>Good to Soft</option><option'+(raceGoing==='Soft'?' selected':'')+'>Soft</option><option'+(raceGoing==='Heavy'?' selected':'')+'>Heavy</option><option'+(raceGoing==='Standard'?' selected':'')+'>Standard</option><option'+(raceGoing==='Standard to Slow'?' selected':'')+'>Standard to Slow</option><option'+(raceGoing==='Slow'?' selected':'')+'>Slow</option></select>'
+        +'<select id="rvw-ground" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:var(--font);font-size:14px;">'+(['','Firm','Good to Firm','Good','Good to Soft','Soft','Heavy','Standard','Standard to Slow','Slow'].map(function(g){var sel=g&&g.toLowerCase()===( raceGoing||'').toLowerCase().trim()?'selected':'';return'<option value="'+g+'"'+(sel?' selected':'')+'>'+( g||'— Select —')+'</option>';}).join(''))+' </select>'
       +'</div>'
     +'</div>'
     +'<div class="fg"><label>Result</label><div class="rvw-btn-group">'

@@ -959,15 +959,7 @@ async function checkWatchlistRunners(races){
           +'</div>'
         :'';
       // Ideal conditions summary under jockey
-      const _idealConds=(function(){
-        const parts=[];
-        if(_wle.goingPrefs&&_wle.goingPrefs.length)parts.push('Ground: '+_wle.goingPrefs.slice(0,2).join(', '));
-        const _dp=_wle.distancePref||(_wle.distanceWins&&_wle.distanceWins[0])||'';
-        if(_dp)parts.push('Dist: '+_dp);
-        if(_wle.surface)parts.push(({flat:'Flat',jumps:'Jumps',aw:'AW'}[_wle.surface]||_wle.surface));
-        return parts.length?'<div style="font-size:11px;color:var(--mut);margin-top:2px;">Ideal: '+parts.join(' · ')+'</div>':'';
-      })();
-      const jockeyLine=((a.jockey||a.trainer)?'<div class="t-muted" style="font-size:13px;margin-top:2px;">'+(a.jockey?'J: '+fmtJockey(a.jockey):'')+((a.jockey&&a.trainer)?' · ':'')+( a.trainer?'T: '+a.trainer:'')+'</div>':'')+_idealConds;
+      const jockeyLine=(a.jockey||a.trainer)?'<div class="t-muted" style="font-size:13px;margin-top:2px;">'+(a.jockey?'J: '+fmtJockey(a.jockey):'')+((a.jockey&&a.trainer)?' · ':'')+( a.trainer?'T: '+a.trainer:'')+'</div>':'';
       // Primary action: review (if available/past) or race (if upcoming)
       const primaryBtn=reviewBtn
         ?reviewBtn

@@ -881,10 +881,9 @@ function wlCompletePendingReview(pendingId){
       const posEl=document.getElementById('rvw-pos');if(posEl)posEl.value=p.position;
     }
     // Override save to also clear the pending entry when saved
-    const saveBtn=document.querySelector('#wl-review-modal .btn.bgld');
+    const saveBtn=document.getElementById('rvw-save-btn');
     if(saveBtn){
-      const origOnclick=saveBtn.getAttribute('onclick');
-      saveBtn.setAttribute('onclick', 'wlDismissPending(\''+pendingId+'\');'+origOnclick);
+      saveBtn.addEventListener('click',function(){wlDismissPending(pendingId);},{once:true});
     }
   },50);
 }
@@ -1033,12 +1032,13 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
     +'<div id="rvw-signals" style="margin:4px 0 2px;"></div>'
     +'<div class="fg"><label>Notes</label><textarea id="rvw-notes" placeholder="What you saw, sectionals, paddock notes…" style="min-height:64px;"></textarea></div>'
     +'<div style="display:flex;gap:8px;margin-top:4px;">'
-    +'<button onclick="saveWLReview(\''+profileId+'\',\''+horse.replace(/'/g,"\\'")+'\',\''+course.replace(/'/g,"\\'")+'\''+'\')" class="btn bgld" style="flex:1;">Save Review</button>'
+    +'<button id="rvw-save-btn" class="btn bgld" style="flex:1;">Save Review</button>'
     +'<button onclick="document.getElementById(\'wl-review-modal\').remove()" class="btn bout">Cancel</button>'
     +'</div>'
     +'</div></div>';
   document.body.appendChild(modal);
   modal.addEventListener('click',function(ev){if(ev.target===modal)modal.remove();});
+  document.getElementById('rvw-save-btn').addEventListener('click',function(){saveWLReview(profileId,horse,course);});
 
   // Auto-populate from a known race result (already fetched for Track Pulse / results tab).
   // NOTE: results/today/free does not return beaten distance or SP, so only result + position

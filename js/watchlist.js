@@ -200,9 +200,15 @@ function wlSelectDay(dateStr){
     html+=dayReviews.map(function(d){
       const r=d.review;
       const rc=RCOL[r.result]||'var(--mut)';
+      // First review = no other review for this horse has an earlier date
+      const allProfileReviews=(D.reviews||[]).filter(function(x){return x.profileId===d.horseId;});
+      const isFirstReview=allProfileReviews.length===1||(allProfileReviews.every(function(x){return(x.date||'')>=(r.date||'');}));
       return'<div data-wl-id="'+d.horseId+'" class="wl-day-obs" style="border-left:3px solid #60a5fa33;">'
         +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
-          +'<div class="wl-day-obs-horse" style="margin:0;">'+d.horse+'</div>'
+          +'<div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;">'
+            +'<div class="wl-day-obs-horse" style="margin:0;">'+d.horse+'</div>'
+            +(isFirstReview?'<span style="font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#ef4444;flex-shrink:0;">NEW</span>':'')
+          +'</div>'
           +(r.result?'<span style="font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>':'')
         +'</div>'
         +(r.raceName||r.course?'<div class="wll-sub" style="margin-top:3px;">'+(r.raceName||'')+(r.course&&r.raceName?' · ':''+(r.course||''))+'</div>':'')

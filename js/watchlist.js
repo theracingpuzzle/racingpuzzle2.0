@@ -926,9 +926,12 @@ function openWLEditReview(reviewId){
       if(beatenRow)beatenRow.style.display='none';
     }
     // Override save to update existing record instead of creating new
-    const saveBtn=document.querySelector('#wl-review-modal .btn.bgld');
-    if(saveBtn){
-      saveBtn.onclick=function(){
+    const _origSaveBtn=document.getElementById('rvw-save-btn');
+    if(_origSaveBtn){
+      // Clone to strip the new-record event listener added by openWLPostRaceReview
+      const saveBtn=_origSaveBtn.cloneNode(true);
+      _origSaveBtn.parentNode.replaceChild(saveBtn,_origSaveBtn);
+      saveBtn.addEventListener('click',function(){
         r.date=document.getElementById('rvw-date').value||r.date;
         r.course=(document.getElementById('rvw-course').value||'').trim()||r.course;
         r.distance=(document.getElementById('rvw-dist')||{value:''}).value.trim();
@@ -949,7 +952,7 @@ function openWLEditReview(reviewId){
         if(typeof _supaUpsertNow==='function')_supaUpsertNow();else save();
         document.getElementById('wl-review-modal').remove();
         if(document.getElementById('wlp-modal'))openWLProfile(r.profileId);
-      };
+      });
     }
   },50);
 }
@@ -1248,13 +1251,20 @@ function saveWLReview(profileId,horse,course){
   if(!D.reviews)D.reviews=[];
   D.reviews.push(review);
 
-  // Apply MR adjustment
+  // Apply MR adjustment and log to mrHistory
   if(mrAdj){
     const idx=D.watchlist.findIndex(function(x){return x.id===profileId;});
     if(idx>-1){
       const cur=parseFloat(D.watchlist[idx].myRating)||0;
-      D.watchlist[idx].myRating=String(cur+mrAdj);
+      const newMR=cur+mrAdj;
+      D.watchlist[idx].myRating=String(newMR);
       D.watchlist[idx].updatedAt=Date.now();
+      if(!D.watchlist[idx].mrHistory)D.watchlist[idx].mrHistory=[];
+      // Only log if the value actually changed
+      const mH=D.watchlist[idx].mrHistory;
+      if(!mH.length||parseFloat(mH[mH.length-1].mr)!==newMR){
+        mH.push({mr:String(newMR),date:review.date||td(),source:'review-adj',adj:mrAdj,race:review.raceName||''});
+      }
     }
   }
   // Update bet readiness and clear needsReview flag
@@ -1940,17 +1950,30 @@ function openWLForm(id,prefill){
             +'</div>'
             +'<div class="g2">'
               +'<div class="fg"><label>Race Name</label><input type="text" id="wlf-sight-race" placeholder="e.g. Betfair Handicap" value="'+(fs.race||'')+'" autocomplete="off"></div>'
-              +'<div class="fg"><label>Distance</label><input type="text" id="wlf-sight-dist" placeholder="e.g. 1m2f" value="'+(fs.dist||'')+'" autocomplete="off"></div>'
+              +'<div class="fg"><label>Distance</label>'
+                +'<select id="wlf-sight-dist" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:var(--font);font-size:14px;">'
+                +'<option value="">— Select —</option>'
+                +(function(){var opts=['5f','6f','7f','1m','1m 1f','1m 2f','1m 3f','1m 4f','1m 6f','2m','2m 1f','2m 2f','2m 4f','2m 6f','3m','3m 2f'];var norm=function(s){return(s||'').toLowerCase().replace(/\s+/g,'');};var nd=norm(fs.dist||'');return opts.map(function(d){return'<option'+(norm(d)===nd?' selected':'')+'>'+d+'</option>';}).join('');})()
+                +'</select>'
+              +'</div>'
             +'</div>'
             +'<div class="g2">'
-              +'<div class="fg"><label>Going</label><select id="wlf-sight-going" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;"><option value="">— Select —</option>'
-              +goingOpts.map(function(g){return'<option'+(fs.going===g?' selected':'')+'>'+g+'</option>';}).join('')
-              +'</select></div>'
-              +'<div class="fg"><label>Class</label><input type="text" id="wlf-sight-class" placeholder="e.g. 4" value="'+(fs.cls||'')+'" autocomplete="off"></div>'
+              +'<div class="fg"><label>Going</label>'
+                +(function(){var sel=function(g){return g.toLowerCase()===(fs.going||'').toLowerCase().trim()?'selected':'';};return'<select id="wlf-sight-going" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-size:14px;">'+(['','Firm','Good to Firm','Good','Good to Soft','Soft','Heavy','Standard','Standard to Slow','Slow'].map(function(g){return'<option value="'+g+'"'+(g&&sel(g)?' selected':'')+'>'+(g||'— Select —')+'</option>';}).join(''))+'</select>';})()
+              +'</div>'
+              +'<div class="fg"><label>Class</label>'
+                +'<select id="wlf-sight-class" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp,var(--sur));color:var(--txt);font-family:var(--font);font-size:14px;">'
+                +'<option value="">— Select —</option>'
+                +(function(){var opts=['1','2','3','4','5','6','7','Group 1','Group 2','Group 3','Listed','Novice','Maiden','Handicap','Conditions'];var rn=fs.race||'';var normCls=(fs.cls||'');if(/\bGroup\s*1\b|\bGr(ade)?\s*1\b|\bG1\b/i.test(rn))normCls='Group 1';else if(/\bGroup\s*2\b|\bGr(ade)?\s*2\b|\bG2\b/i.test(rn))normCls='Group 2';else if(/\bGroup\s*3\b|\bGr(ade)?\s*3\b|\bG3\b/i.test(rn))normCls='Group 3';else if(/\bListed\b/i.test(rn))normCls='Listed';return opts.map(function(c){return'<option'+(c===normCls?' selected':'')+'>'+c+'</option>';}).join('');})()
+                +'</select>'
+              +'</div>'
             +'</div>'
             +'<div class="fg"><label>Result</label><div class="rvw-btn-group" id="wlf-sight-result-row">'
             +resultBtns.map(function(r){const on=fs.result===r.k;return'<button type="button" data-sr="'+r.k+'" onclick="wlSightResult(this)" class="rvw-btn'+(on?' on':'')+'" style="--rvw-col:'+r.col+';'+(on?'background:'+r.col+';color:#fff;border-color:'+r.col+';':'')+'"  >'+r.lbl+'</button>';}).join('')
             +'</div></div>'
+            +'<div class="g2" id="wlf-sight-pos-row" style="display:'+(fs.result==='win'||fs.result==='place'?'grid':'none')+';">'
+              +'<div class="fg"><label>Finishing Position</label><input type="text" id="wlf-sight-pos" placeholder="e.g. 2" value="'+(fs.position||'')+'" autocomplete="off"></div>'
+            +'</div>'
             +'<div class="fg"><label>What did you see?</label><textarea id="wlf-sight-notes" placeholder="What caught your eye — running style, finish, unlucky in running, potential..." style="min-height:72px;"></textarea></div>'
           +'</div>'
         +'</div>';
@@ -2139,7 +2162,10 @@ function wlSightResult(btn){
   if(!row)return;
   const isOn=btn.classList.contains('on');
   row.querySelectorAll('[data-sr]').forEach(function(b){b.classList.remove('on');b.style.background='';b.style.color='';});
+  const selected=isOn?null:btn.dataset.sr;
   if(!isOn){btn.classList.add('on');btn.style.background=btn.style.getPropertyValue('--rvw-col')||'rgba(255,255,255,.15)';btn.style.color='#fff';}
+  const posRow=document.getElementById('wlf-sight-pos-row');
+  if(posRow)posRow.style.display=(selected==='win'||selected==='place')?'grid':'none';
 }
 
 function wlSetRunStyle(btn){
@@ -2228,15 +2254,17 @@ function saveWLEntry(id){
     const sNotes=(document.getElementById('wlf-sight-notes')||{value:''}).value.trim();
     const sResultBtn=document.querySelector('#wlf-sight-result-row [data-sr].on');
     const sResult=sResultBtn?sResultBtn.dataset.sr:'';
+    const sPos=(document.getElementById('wlf-sight-pos')||{value:''}).value.trim();
     const hasSighting=sDate||sCourse||sRace||sDist||sGoing||sNotes||sResult;
     if(hasSighting){
       const rev={
         id:gid(),profileId:entry.id,
         date:sDate||td(),
         course:sCourse,raceName:sRace,
-        raceDist:sDist,raceClass:sClass,
+        distance:sDist,raceClass:sClass,
         raceGoing:sGoing,going:sGoing,groundConditions:sGoing,
         result:sResult||'watched',
+        position:sPos,
         notes:sNotes,
         source:'first-sighting',
         createdAt:Date.now()
@@ -3138,6 +3166,7 @@ function _wlpBuildHTML(e){
             +(rc?'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+item.result+'</span>':'')
             +(item._type==='pending'
               ?'<button onclick="wlCompletePendingReview(\''+item.id+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>'
+              +'<button onclick="wlDismissPending(\''+item.id+'\');openWLProfile(\''+e.id+'\')" style="display:inline-flex;align-items:center;gap:3px;padding:5px 10px;border-radius:7px;border:1px solid var(--bdr);background:none;color:var(--mut);font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;">✕ Dismiss</button>'
               :'<button onclick="openWLPostRaceReview(\''+e.id+'\',\''+jsq(e.horse)+'\',\'\',\'\',\''+jsq(item.raceName||'')+'\')" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:7px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:#f59e0b;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Write Up</button>')
           +'</div>'
         +'</div>'

@@ -77,70 +77,66 @@ function renderWLCal(){
   const monthEl=document.getElementById('wl-cal-month');
   if(monthEl)monthEl.textContent=new Date(y,m,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
   const grid=document.getElementById('wl-cal-grid');if(!grid)return;
-  const firstDay=new Date(y,m,1).getDay(); // 0=Sun
+  // Monday-first: convert Sun=0…Sat=6 → Mon=0…Sun=6
+  const rawFirst=new Date(y,m,1).getDay();
+  const firstDay=(rawFirst+6)%7;
   const daysInMonth=new Date(y,m+1,0).getDate();
   const today=td();
-  // Build a map of date→{entries, targets}
-  // entries = whole watchlist entries whose raceDate falls on that day
-  // targets = {horse, target} pairs for target races on that day
+  // Build a map of date→{entries, targets, obs, reviews}
   const dateMap={};
+  const _ensureDay=function(d){if(!dateMap[d])dateMap[d]={entries:[],targets:[],obs:[],reviews:[]};};
   wl.forEach(function(e){
-    if(e.raceDate){
-      if(!dateMap[e.raceDate])dateMap[e.raceDate]={entries:[],targets:[],obs:[]};
-      dateMap[e.raceDate].entries.push(e);
-    }
+    if(e.raceDate){_ensureDay(e.raceDate);dateMap[e.raceDate].entries.push(e);}
     (e.targets||[]).forEach(function(t){
-      if(t.date){
-        if(!dateMap[t.date])dateMap[t.date]={entries:[],targets:[],obs:[]};
-        dateMap[t.date].targets.push({horse:e.horse,trainer:e.trainer||'',currentRating:e.currentRating||'',horseId:e.id,target:t});
-      }
+      if(t.date){_ensureDay(t.date);dateMap[t.date].targets.push({horse:e.horse,trainer:e.trainer||'',currentRating:e.currentRating||'',horseId:e.id,target:t});}
     });
     (e.observations||[]).forEach(function(o){
-      if(o.date){
-        if(!dateMap[o.date])dateMap[o.date]={entries:[],targets:[],obs:[]};
-        dateMap[o.date].obs.push({horse:e.horse,horseId:e.id,obs:o});
-      }
+      if(o.date){_ensureDay(o.date);dateMap[o.date].obs.push({horse:e.horse,horseId:e.id,obs:o});}
     });
   });
-  // Day headers
-  const dayNames=['S','M','T','W','T','F','S'];
-  let html=dayNames.map(d=>'<div class="wl-cal-day-hdr">'+d+'</div>').join('');
-  // Empty cells before first day
-  const start=firstDay; // Sun=0
-  for(let i=0;i<start;i++)html+='<div></div>';
+  // Add reviews to date map
+  (D.reviews||[]).forEach(function(r){
+    const d=r.date;if(!d)return;
+    _ensureDay(d);
+    const entry=wl.find(function(e){return e.id===r.profileId;});
+    dateMap[d].reviews.push({horse:entry?entry.horse:r.raceName||'',horseId:r.profileId,review:r});
+  });
+  // Day headers — Mon first
+  const dayNames=['M','T','W','T','F','S','S'];
+  let html=dayNames.map(function(d){return'<div class="wl-cal-day-hdr">'+d+'</div>';}).join('');
+  for(let i=0;i<firstDay;i++)html+='<div></div>';
   for(let d=1;d<=daysInMonth;d++){
     const dateStr=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const dayData=dateMap[dateStr]||{entries:[],targets:[],obs:[]};
-    const entries=dayData.entries;
-    const dayTargets=dayData.targets;
-    const dayObs=dayData.obs;
+    const dayData=dateMap[dateStr]||{entries:[],targets:[],obs:[],reviews:[]};
+    const {entries,targets:dayTargets,obs:dayObs,reviews:dayReviews}=dayData;
     const isToday=dateStr===today;
-    const hasBet=entries.length>0||dayTargets.length>0||dayObs.length>0;
+    const isPast=dateStr<today;
+    const hasAny=entries.length||dayTargets.length||dayObs.length||dayReviews.length;
     const fixtures=getFixtureForDate(dateStr);
-    const hasFixture=fixtures.length>0;
-    const dotCol=dayTargets.length&&!entries.length&&!dayObs.length?'#fb923c':dayObs.length&&!entries.length&&!dayTargets.length?'#4ade80':CLR_WATCH;
-    const fixtureBar=hasFixture?'<div class="wl-cal-fixture-bar" style="background:'+fixtures[0].colour+';" title="'+fixtures[0].name+'"></div>':'';
-    // Show up to 3 coloured dots for different event types
+    const fixtureBar=fixtures.length?'<div class="wl-cal-fixture-bar" style="background:'+fixtures[0].colour+';" title="'+fixtures[0].name+'"></div>':'';
+    // Past targets with no review get a warning indicator
+    const hasUnreviewed=isPast&&dayTargets.some(function(dt){return!_targetReviewed(dt.horseId,dateStr,dt.target.race||'');});
     const dots=[];
     if(entries.length)dots.push('<div class="wl-cal-dot" style="background:var(--gld2);"></div>');
-    if(dayTargets.length)dots.push('<div class="wl-cal-dot" style="background:var(--ora);"></div>');
+    if(dayTargets.length)dots.push('<div class="wl-cal-dot" style="background:'+(hasUnreviewed?'var(--red)':'var(--ora)')+';" title="'+(hasUnreviewed?'Needs review':'Target')+'"></div>');
     if(dayObs.length)dots.push('<div class="wl-cal-dot" style="background:var(--grn);"></div>');
+    if(dayReviews.length)dots.push('<div class="wl-cal-dot" style="background:#60a5fa;"></div>');
     html+='<div onclick="wlSelectDay(\''+dateStr+'\')" class="wl-cal-cell'+(isToday?' wl-cal-cell-today':'')+'">'
-      +'<div class="wl-cal-num '+(isToday?'wl-cal-num-today':hasBet?'wl-cal-num-active':'wl-cal-num-empty')+'">'+d+'</div>'
-      +(hasBet?'<div class="wl-cal-dots">'+dots.join('')+'</div>':'<div style="height:7px;"></div>')+fixtureBar
+      +'<div class="wl-cal-num '+(isToday?'wl-cal-num-today':hasAny?'wl-cal-num-active':'wl-cal-num-empty')+'">'+d+'</div>'
+      +(hasAny?'<div class="wl-cal-dots">'+dots.join('')+'</div>':'<div style="height:7px;"></div>')+fixtureBar
     +'</div>';
   }
   grid.innerHTML=html;
-  // Show today's or selected day entries
-  const selDay=document.getElementById('wl-cal-day-entries');
-  if(selDay)selDay.innerHTML='';
+  // Auto-select today (or first event day in the month if today is another month)
+  const autoDay=dateMap[today]?today:null;
+  if(autoDay)wlSelectDay(autoDay);else{const selDay=document.getElementById('wl-cal-day-entries');if(selDay)selDay.innerHTML='';}
 }
 
 function wlSelectDay(dateStr){
   const wl=getWL();
-  const entries=wl.filter(e=>e.raceDate===dateStr);
-  const dayTargets=[];
-  const dayObs=[];
+  const entries=wl.filter(function(e){return e.raceDate===dateStr;});
+  const dayTargets=[],dayObs=[],dayReviews=[];
+  const isPast=dateStr<td();
   wl.forEach(function(e){
     (e.targets||[]).forEach(function(t){
       if(t.date===dateStr)dayTargets.push({horse:e.horse,trainer:e.trainer||'',currentRating:e.currentRating||'',horseId:e.id,target:t});
@@ -149,9 +145,14 @@ function wlSelectDay(dateStr){
       if(o.date===dateStr)dayObs.push({horse:e.horse,horseId:e.id,obs:o});
     });
   });
+  (D.reviews||[]).forEach(function(r){
+    if(r.date!==dateStr)return;
+    const entry=wl.find(function(e){return e.id===r.profileId;});
+    dayReviews.push({horse:entry?entry.horse:r.raceName||'',horseId:r.profileId,review:r});
+  });
   const el=document.getElementById('wl-cal-day-entries');if(!el)return;
   const dayFixtures=getFixtureForDate(dateStr);
-  const fixtureBanner=dayFixtures.map(f=>'<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;background:rgba(0,0,0,.2);border-left:3px solid '+f.colour+';margin-bottom:8px;"><span>'+f.emoji+'</span><div><div style="font-weight:700;font-size:13px;color:'+f.colour+';">'+f.name+'</div><div style="font-size:11px;color:var(--mut);">'+f.course+'</div></div></div>').join('');
+  const fixtureBanner=dayFixtures.map(function(f){return'<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;background:rgba(0,0,0,.2);border-left:3px solid '+f.colour+';margin-bottom:8px;"><span>'+f.emoji+'</span><div><div style="font-weight:700;font-size:13px;color:'+f.colour+';">'+f.name+'</div><div style="font-size:11px;color:var(--mut);">'+f.course+'</div></div></div>';}).join('');
   const dayLabel='<div class="wl-day-lbl">'+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})+'</div>';
   let html=fixtureBanner+dayLabel;
   // Target race cards
@@ -159,12 +160,19 @@ function wlSelectDay(dateStr){
     html+='<div class="wl-day-sec-lbl wl-day-sec-lbl-ora" style="display:flex;align-items:center;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Target Races</div>';
     html+=dayTargets.map(function(d){
       const t=d.target;
-      return'<div data-wl-id="'+d.horseId+'" class="wl-day-target">'
-        +'<div class="wl-day-target-horse">'+d.horse+'</div>'
-        +orSummaryLine(d)
-        +(d.trainer?'<div class="wll-sub">'+d.trainer+'</div>':'')
-        +'<div class="wl-day-target-race">'+t.race+(t.track?' · '+t.track:'')+'</div>'
-        +(t.condition?'<div class="wl-day-target-cond">'+t.condition+'</div>':'')
+      const reviewed=_targetReviewed(d.horseId,dateStr,t.race||'');
+      const needsReview=isPast&&!reviewed;
+      return'<div data-wl-id="'+d.horseId+'" class="wl-day-target" style="'+(needsReview?'border-left:3px solid var(--red);':'')+'">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">'
+          +'<div style="flex:1;min-width:0;">'
+            +'<div class="wl-day-target-horse">'+d.horse+'</div>'
+            +orSummaryLine(d)
+            +(d.trainer?'<div class="wll-sub">'+d.trainer+'</div>':'')
+            +'<div class="wl-day-target-race">'+t.race+(t.track?' · '+t.track:'')+'</div>'
+            +(t.condition?'<div class="wl-day-target-cond">'+t.condition+'</div>':'')
+          +'</div>'
+          +(needsReview?'<button onclick="event.stopPropagation();openWLPostRaceReview(\''+d.horseId+'\',\''+jsq(d.horse)+'\',\'\',\'\',\''+jsq(t.race||'')+'\')" style="flex-shrink:0;padding:4px 8px;border-radius:6px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.1);color:var(--red);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Review</button>':'')
+        +'</div>'
       +'</div>';
     }).join('');
   }
@@ -184,13 +192,36 @@ function wlSelectDay(dateStr){
       +'</div>';
     }).join('');
   }
-  // Regular watchlist entries
+  // Reviews
+  if(dayReviews.length){
+    const RCOL={win:'#4ade80',place:'#f59e0b',unplaced:'#f87171',nr:'var(--mut)',missed:'#a78bfa',watched:'#60a5fa'};
+    html+='<div class="wl-day-sec-lbl" style="display:flex;align-items:center;gap:5px;color:#60a5fa;'+(dayTargets.length||dayObs.length?'margin-top:10px;':'')+'">'
+      +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Reviews</div>';
+    html+=dayReviews.map(function(d){
+      const r=d.review;
+      const rc=RCOL[r.result]||'var(--mut)';
+      return'<div data-wl-id="'+d.horseId+'" class="wl-day-obs" style="border-left:3px solid #60a5fa33;">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+          +'<div class="wl-day-obs-horse" style="margin:0;">'+d.horse+'</div>'
+          +(r.result?'<span style="font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>':'')
+        +'</div>'
+        +(r.raceName||r.course?'<div class="wll-sub" style="margin-top:3px;">'+(r.raceName||'')+(r.course&&r.raceName?' · ':''+(r.course||''))+'</div>':'')
+        +((r.distance||r.going||r.raceClass)?'<div class="wl-day-obs-chips" style="margin-top:4px;">'
+          +(r.distance?'<span class="wl-day-obs-going">'+r.distance+'</span>':'')
+          +(r.going?'<span class="wl-day-obs-going">'+r.going+'</span>':'')
+          +(r.raceClass?'<span class="wl-day-obs-going">C'+r.raceClass+'</span>':'')
+        +'</div>':'')
+        +(r.notes?'<div class="wl-day-obs-notes" style="margin-top:4px;">'+r.notes+'</div>':'')
+      +'</div>';
+    }).join('');
+  }
+  // Profiler entries
   if(entries.length){
-    if(dayTargets.length||dayObs.length)html+='<div class="wl-day-sec-lbl wl-day-sec-lbl-pur" style="margin-top:10px;">Puzzle Profiler</div>';
+    if(dayTargets.length||dayObs.length||dayReviews.length)html+='<div class="wl-day-sec-lbl wl-day-sec-lbl-pur" style="margin-top:10px;">Puzzle Profiler</div>';
     html+=entries.map(function(e){return renderWLEntry(e);}).join('');
   }
-  if(!entries.length&&!dayTargets.length&&!dayObs.length){
-    html+='<div class="wl-day-empty">No targets on '+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'.<br><span style="font-size:12px;">Tap + to add one.</span></div>';
+  if(!entries.length&&!dayTargets.length&&!dayObs.length&&!dayReviews.length){
+    html+='<div class="wl-day-empty">No activity on '+new Date(dateStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+'.</div>';
   }
   el.innerHTML=html;
   el.querySelectorAll('[data-wl-id]').forEach(function(el2){el2.addEventListener('click',function(){openWLProfile(el2.getAttribute('data-wl-id'));});});

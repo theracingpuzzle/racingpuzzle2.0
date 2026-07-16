@@ -109,38 +109,59 @@ function notifCancelAll() {
   });
 }
 
+// ── In-app banner fallback (shown when app is in foreground) ─────────────────
+function _notifInAppBanner(alerts) {
+  if (!alerts.length) return;
+  const existing = document.getElementById('rp-notif-banner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.id = 'rp-notif-banner';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--navy,#1a2236);border-bottom:2px solid var(--gld,#F5A623);padding:10px 14px;display:flex;align-items:flex-start;gap:10px;';
+  const lines = alerts.map(function(a) {
+    return '<div style="font-size:13px;font-weight:700;color:var(--txt);">🏇 '+a.horse
+      +'<span style="font-size:11px;font-weight:400;color:var(--mut);margin-left:8px;">'+a.time+' · '+a.course+(a.edge>0?' · +'+a.edge+' edge':'')+'</span></div>';
+  }).join('');
+  banner.innerHTML = '<div style="flex:1;">'+lines+'</div>'
+    + '<button onclick="document.getElementById(\'rp-notif-banner\').remove()" style="background:none;border:none;color:var(--mut);font-size:18px;line-height:1;cursor:pointer;padding:0;flex-shrink:0;">×</button>';
+  document.body.appendChild(banner);
+  // Auto-dismiss after 8s
+  setTimeout(function() { if (banner.parentNode) banner.remove(); }, 8000);
+}
+
 // ── Main: schedule notifications from today's meetings ───────────────────────
-// Called from today.js after loadTodayMeetings resolves.
+// Called from today.js after checkWatchlistRunners resolves.
 function notifScheduleToday(races, watchlistAlerts) {
   if (!notifSupported() || notifPermission() !== 'granted') return;
+  if (localStorage.getItem('rp-notif-disabled') === '1') return;
+  if (localStorage.getItem('rp-notif-paused') === '1') return;
 
   notifCancelAll();
 
   const todayKey = NOTIF_FIRED_KEY + (typeof td === 'function' ? td() : new Date().toISOString().slice(0, 10));
   const fired = JSON.parse(localStorage.getItem(todayKey) || '[]');
+  const newAlerts = [];
 
-  // 1. "Running Today" — fire immediately when we detect a Profiler horse is running
+  // 1. "Running Today" — fire when we detect a Profiler horse is running
   (watchlistAlerts || []).forEach(function(alert) {
     const tag = 'rp-running-' + alert.horse.replace(/\s+/g, '-').toLowerCase();
-    if (fired.includes(tag)) return;  // already fired today
-
+    if (fired.includes(tag)) return;
     const body = alert.time + ' · ' + alert.course
       + (alert.edge > 0 ? ' · ⭐ MR edge +' + alert.edge + ' pts' : '');
-
     notifFire('🏇 Running Today — ' + alert.horse, body, tag);
     fired.push(tag);
+    newAlerts.push(alert);
     localStorage.setItem(todayKey, JSON.stringify(fired));
   });
 
-  // 2. "Race in 30 minutes" — scheduled alerts for Profiler horses
+  // Show in-app banner for new alerts (system notification is suppressed in foreground)
+  if (newAlerts.length) _notifInAppBanner(newAlerts);
+
+  // 2. "Race in 30 minutes" — scheduled via setTimeout (requires app to stay open)
   (watchlistAlerts || []).forEach(function(alert) {
     const tag = 'rp-30min-' + alert.horse.replace(/\s+/g, '-').toLowerCase();
     if (fired.includes(tag)) return;
-
-    // Parse race time to a Date
     const fireAt = _notifParseRaceTime(alert.time, -30);
-    if (!fireAt) return;
-
+    if (!fireAt || fireAt < Date.now()) return; // already passed
     const tid = notifSchedule(
       '⏰ Race in 30 mins — ' + alert.horse,
       alert.time + ' · ' + alert.course,
@@ -167,6 +188,7 @@ function _notifParseRaceTime(timeStr, minutesBefore) {
 
 // ── Settings UI ──────────────────────────────────────────────────────────────
 function renderNotifSettings() {
+  _notifUpdateDot();
   const el = document.getElementById('notif-settings-block');
   if (!el) return;
 
@@ -204,7 +226,7 @@ function renderNotifSettings() {
       + '</div>'
       + '</div>'
       + '<div style="font-size:11px;color:var(--mut);margin-top:8px;line-height:1.6;">'
-      + (paused ? 'Alerts are paused — the Worker will skip your pushes until you resume.' : 'Background alerts enabled — you\'ll get a push 30 minutes before any Profiler horse runs, even if the app is closed.')
+      + (paused ? 'Alerts are paused — tap Resume to start receiving them again.' : 'Alerts enabled — you\'ll get a notification when a Profiler horse is running today, and 30 mins before race time. The app needs to be open or running in a background tab.')
       + '</div>';
   } else if (perm === 'denied') {
     el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
@@ -277,7 +299,33 @@ async function notifTest() {
   );
 }
 
+// ── Header bell button ────────────────────────────────────────────────────────
+function notifHdrClick() {
+  const perm = notifPermission();
+  if (perm === 'granted') {
+    // Scroll to notifications settings panel
+    navTo('settings');
+    setTimeout(function() {
+      const el = document.getElementById('notif-settings-block');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  } else {
+    notifRequestPermission();
+  }
+}
+
+function _notifUpdateDot() {
+  const dot = document.getElementById('hdr-notif-dot');
+  if (!dot) return;
+  const perm = notifPermission();
+  const disabled = localStorage.getItem('rp-notif-disabled') === '1';
+  const paused = localStorage.getItem('rp-notif-paused') === '1';
+  // Red dot = enabled & active. No dot = off/denied/paused.
+  dot.style.display = (perm === 'granted' && !disabled && !paused) ? '' : 'none';
+}
+
 // ── Auto-init: render settings block on load ──────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   renderNotifSettings();
+  _notifUpdateDot();
 });

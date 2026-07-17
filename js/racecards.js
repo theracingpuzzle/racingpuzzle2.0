@@ -639,6 +639,7 @@ function rcSwRenderRunners(idx, course, el){
     const age=r.age?r.age+'yo':'';
     const form=r.form||'';
     const rpr=r.ofr||r.rpr||r.official_rating||r.officialRating||r.or||'';
+    const wt=r.weight||r.lbs||r.stone_lbs||r.weight_lbs||'';
     const isNR=!!(r.non_runner||r.isNonRunner||(''+r.number).toUpperCase()==='NR'||r.status==='non_runner'||(''+r.status).toLowerCase()==='nr'||(''+r.jockey).toUpperCase()==='NON-RUNNER');
     const _bh=isNR?'':getBetHighlight(name,course,time);
     const _wl2=getWL();const _nl2=(name||'').toLowerCase().trim();
@@ -697,6 +698,7 @@ function rcSwRenderRunners(idx, course, el){
         }())
         +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
         +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
+        +(wt?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Weight</span><span class="rc-runner-jt">'+wt+'</span></div>':'')
       +'</div>'
       +'<div class="rc-runner-actions">'
         +(isNR?''

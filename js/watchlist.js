@@ -682,7 +682,15 @@ function renderWLList(){
   // ── Running Today — pinned section ───────────────────────────────────────
   const _todayRaces=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
   const _runningSet=new Set();
-  _todayRaces.forEach(function(race){(race.runners||[]).forEach(function(runner){if(runner.horse)_runningSet.add((runner.horse||'').toLowerCase().trim());});});
+  _todayRaces.forEach(function(race){
+    (race.runners||[]).forEach(function(runner){
+      if(runner.non_runner||runner.isNonRunner)return;
+      if(String(runner.status||'').toLowerCase()==='nr')return;
+      if(String(runner.jockey||'').toUpperCase()==='NON-RUNNER'||String(runner.jockey||'').toUpperCase()==='NR')return;
+      if(String(runner.number||'').toUpperCase()==='NR')return;
+      if(runner.horse)_runningSet.add((runner.horse||'').toLowerCase().trim());
+    });
+  });
   const _runningEntries=entries.filter(function(e){return _runningSet.has((e.horse||'').toLowerCase().trim());});
   if(_runningEntries.length){
     html+='<div style="border:1px solid #10b98140;background:#10b98108;border-radius:10px;margin-bottom:10px;overflow:hidden;">'

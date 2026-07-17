@@ -1864,12 +1864,6 @@ function openWLForm(id,prefill){
           +'</div>'
         +'</div>'
       +'</div>'
-      +'<div class="wlf-section">'
-        +'<div class="wlf-sec-body" style="padding-top:12px;">'
-          +'<button type="button" id="wlf-ai-btn" onclick="wlAIAssess()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid rgba(168,85,247,.4);background:rgba(168,85,247,.07);color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/></svg>Generate Puzzle Report</button>'
-          +'<div id="wlf-ai-result" style="display:none;margin-top:10px;border-radius:9px;border:1px solid rgba(168,85,247,.25);background:rgba(168,85,247,.06);padding:12px 13px;"></div>'
-        +'</div>'
-      +'</div>'
     +'</div>';
   }());
 
@@ -1902,26 +1896,6 @@ function openWLForm(id,prefill){
             +['Front Runner','Prominent','Hold Up','Flexible'].map(function(rs){const sel=e&&e.runStyle===rs;return'<button type="button" onclick="wlSetRunStyle(this)" data-rs="'+rs+'" class="wlf-going-btn'+(sel?' on':'')+'" style="'+(sel?'--wlg-col:var(--grn);':'')+'">'+rs+'</button>';}).join('')
           +'</div></div>'
           +'<div class="fg"><label>Track Type</label><input type="text" id="wlf-track" placeholder="e.g. Straight, Galloping, Sharp" value="'+(e?e.trackPref||'':'')+'"></div>'
-        +'</div>'
-      +'</div>'
-      +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr" style="justify-content:space-between;">'
-          +'<span class="wlf-sec-title" style="color:var(--blu);">Trainer / Connections Intel</span>'
-          +'<button type="button" onclick="wlAddIntelEntry()" style="font-size:11px;font-weight:700;color:var(--blu);background:rgba(56,189,248,.12);border:none;border-radius:6px;padding:3px 9px;cursor:pointer;">+ Add Entry</button>'
-        +'</div>'
-        +'<div class="wlf-sec-body" style="padding-top:0;">'
-          +'<div id="wlf-intel-list"></div>'
-          +'<div id="wlf-intel-new" style="display:none;border-top:1px solid var(--bdr);padding-top:10px;margin-top:6px;flex-direction:column;gap:8px;">'
-            +'<div class="g2">'
-              +'<div class="fg"><label>Date</label><input type="date" id="wlf-intel-new-date" value="'+td()+'"></div>'
-              +'<div class="fg" style="flex:2;"><label>Source / Context</label><input type="text" id="wlf-intel-new-src" placeholder="e.g. Post-race interview, Press, Paddock" autocomplete="off"></div>'
-            +'</div>'
-            +'<div class="fg"><label>What they said / What you heard</label><textarea id="wlf-intel-new-text" placeholder="Trainer quote, connections update, paddock observation..." style="min-height:72px;"></textarea></div>'
-            +'<div style="display:flex;gap:8px;justify-content:flex-end;">'
-              +'<button type="button" onclick="wlCancelIntelEntry()" style="font-size:12px;font-weight:600;color:var(--mut);background:none;border:1px solid var(--bdr);border-radius:7px;padding:5px 14px;cursor:pointer;">Cancel</button>'
-              +'<button type="button" onclick="wlSaveIntelEntry()" style="font-size:12px;font-weight:700;color:#fff;background:var(--blu);border:none;border-radius:7px;padding:5px 14px;cursor:pointer;">Save Entry</button>'
-            +'</div>'
-          +'</div>'
         +'</div>'
       +'</div>'
     +'</div>';
@@ -1977,8 +1951,56 @@ function openWLForm(id,prefill){
     +'</div>';
   }());
 
+  // ── Tab 4: Intel ──────────────────────────────────────────────────────────
+  const intelTabHtml=(function(){
+    if(!e) return'';
+    return'<div id="wlft-intel" class="wlf-tab-panel" style="display:none;">'
+      // Trainer / Connections Intel
+      +'<div class="wlf-section">'
+        +'<div class="wlf-sec-hdr" style="justify-content:space-between;">'
+          +'<span class="wlf-sec-title" style="color:#38bdf8;">Trainer / Connections Intel</span>'
+          +'<button type="button" onclick="wlAddIntelEntry()" style="font-size:11px;font-weight:700;color:#38bdf8;background:rgba(56,189,248,.12);border:none;border-radius:6px;padding:3px 9px;cursor:pointer;">+ Add Entry</button>'
+        +'</div>'
+        +'<div class="wlf-sec-body" style="padding-top:0;">'
+          +'<div id="wlf-intel-list"></div>'
+          +'<div id="wlf-intel-new" style="display:none;border-top:1px solid var(--bdr);padding-top:10px;margin-top:6px;flex-direction:column;gap:8px;">'
+            +'<div class="g2">'
+              +'<div class="fg"><label>Date</label><input type="date" id="wlf-intel-new-date" value="'+td()+'"></div>'
+              +'<div class="fg" style="flex:2;"><label>Source / Context</label><input type="text" id="wlf-intel-new-src" placeholder="e.g. Post-race interview, Press, Paddock" autocomplete="off"></div>'
+            +'</div>'
+            +'<div class="fg"><label>What they said / What you heard</label><textarea id="wlf-intel-new-text" placeholder="Trainer quote, connections update, paddock observation..." style="min-height:80px;"></textarea></div>'
+            +'<div style="display:flex;gap:8px;justify-content:flex-end;">'
+              +'<button type="button" onclick="wlCancelIntelEntry()" style="font-size:12px;font-weight:600;color:var(--mut);background:none;border:1px solid var(--bdr);border-radius:7px;padding:5px 14px;cursor:pointer;">Cancel</button>'
+              +'<button type="button" onclick="wlSaveIntelEntry()" style="font-size:12px;font-weight:700;color:#fff;background:#38bdf8;border:none;border-radius:7px;padding:5px 14px;cursor:pointer;">Save Entry</button>'
+            +'</div>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+      // Puzzle Report
+      +'<div class="wlf-section" style="border:1px solid rgba(168,85,247,.2);border-radius:12px;background:rgba(168,85,247,.03);">'
+        +'<div class="wlf-sec-hdr" style="border-color:rgba(168,85,247,.15);">'
+          +'<span class="wlf-sec-title" style="color:#a855f7;">Puzzle Report</span>'
+          +(e.aiAssessment?'<span style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:rgba(168,85,247,.12);color:#a855f7;">Generated</span>':'')
+        +'</div>'
+        +'<div class="wlf-sec-body" style="padding-top:4px;">'
+          +(e.aiAssessment?(function(){
+              const ai=e.aiAssessment;
+              return'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">'
+                +(ai.level?'<div style="background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:3px;">Level</div><div style="font-size:13px;font-weight:800;color:#60a5fa;">'+ai.level+'</div></div>':'')
+                +(ai.sweet_spot?'<div style="background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;"><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:3px;">Sweet Spot</div><div style="font-size:13px;font-weight:800;color:#f59e0b;">'+ai.sweet_spot+'</div></div>':'')
+                +(ai.projection?'<div style="background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;grid-column:1/-1;"><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:3px;">Projection</div><div style="font-size:13px;font-weight:700;color:#34d399;">'+ai.projection+'</div></div>':'')
+                +(ai.verdict?'<div style="background:var(--sur2);border:1px solid rgba(168,85,247,.2);border-radius:8px;padding:8px 10px;grid-column:1/-1;"><div style="font-size:12px;color:var(--txt);line-height:1.6;font-style:italic;">'+ai.verdict+'</div></div>':'')
+              +'</div>';
+            })():'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:10px;">Generate an AI assessment of this horse\'s form, ideal conditions and race targets.</div>')
+          +'<button type="button" id="wlf-ai-btn" onclick="wlAIAssess()" style="width:100%;padding:10px;border-radius:9px;border:1.5px solid rgba(168,85,247,.4);background:rgba(168,85,247,.07);color:#a855f7;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 11h-1V7a2 2 0 0 0-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4.5A1.5 1.5 0 0 0 3 6.5v3.05A2.5 2.5 0 0 1 3 14v3.5A1.5 1.5 0 0 0 4.5 19H8v1.5a2.5 2.5 0 0 0 5 0V19h4.5a2 2 0 0 0 2-2v-4h1a1.5 1.5 0 0 0 0-3z" fill="#a855f7"/></svg>'+(e.aiAssessment?'Regenerate Puzzle Report':'Generate Puzzle Report')+'</button>'
+          +'<div id="wlf-ai-result" style="display:none;margin-top:10px;border-radius:9px;border:1px solid rgba(168,85,247,.25);background:rgba(168,85,247,.06);padding:12px 13px;"></div>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }());
+
   // ── Tab bar (existing profiles only) ──────────────────────────────────────
-  const TABS=e?[{id:'horse',label:'Horse'},{id:'conditions',label:'Conditions'},{id:'races',label:'Races'}]:[];
+  const TABS=e?[{id:'horse',label:'Profile'},{id:'conditions',label:'Conditions'},{id:'races',label:'Races'},{id:'intel',label:'Intel'}]:[];
   const tabBarHtml=e?('<div class="wlf-tab-bar" style="display:flex;border-bottom:2px solid var(--bdr);background:var(--sur2);padding:0 8px;gap:0;">'
     +TABS.map(function(t){
       const on=t.id===defaultTab;
@@ -2089,7 +2111,7 @@ function openWLForm(id,prefill){
   +'</div>'
   +tabBarHtml
   +(e
-    ?('<div class="wlf-body">'+horseTabHtml+conditionsTabHtml+racesHtml+'</div>')
+    ?('<div class="wlf-body">'+horseTabHtml+conditionsTabHtml+racesHtml+intelTabHtml+'</div>')
     :newProfileBodyHtml)
   +'<div class="wlf-actions">'
     +'<button class="wlf-save-btn" onclick="saveWLEntry(\''+(e?e.id:'')+'\')">'+( e?'Save Profile':'Create Profile')+'</button>'
@@ -3196,7 +3218,35 @@ function _wlpBuildHTML(e){
   h+=_wlRatingsChart(e);
   h+='</div>';
 
-  // Section 3: Targets
+  // SECTION 4: TRAINER / CONNECTIONS INTEL
+  (function(){
+    const intelList=(e.intelEntries||[]).slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+    h+='<div class="wlp-section" data-wlp-tab="intel">';
+    h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">4</div><span class="wlp-section-title">Trainer / Connections Intel</span></div>';
+    h+='<span class="wlp-section-action" onclick="'+editFn+'">+ Add</span></div>';
+    if(intelList.length){
+      intelList.forEach(function(en,i){
+        const isLast=i===intelList.length-1;
+        h+='<div style="padding:11px 13px;'+(isLast?'':'border-bottom:1px solid var(--bdr);')+'">';
+        if(en.date||en.source){
+          h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">';
+          if(en.date)h+='<span style="font-size:10px;font-weight:700;color:var(--mut);">'+en.date+'</span>';
+          if(en.source)h+='<span style="font-size:9px;padding:1px 6px;border-radius:4px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25);color:#38bdf8;">'+esc(en.source)+'</span>';
+          h+='</div>';
+        }
+        h+='<div style="font-size:13px;color:var(--txt);line-height:1.6;">'+esc(en.text||'')+'</div>';
+        h+='</div>';
+      });
+    } else {
+      h+='<div style="padding:14px 13px;">';
+      h+='<div style="font-size:12px;color:var(--mut);margin-bottom:10px;">No trainer or connections intel logged yet.</div>';
+      h+='<button onclick="'+editFn+'" style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:8px;border:1px solid rgba(56,189,248,.35);background:rgba(56,189,248,.08);color:#38bdf8;cursor:pointer;">+ Add Intel Entry</button>';
+      h+='</div>';
+    }
+    h+='</div>';
+  })();
+
+  // Section 4: Targets (renumbered to 5)
   h+='<div class="wlp-section" data-wlp-tab="targets">';
   h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">4</div><span class="wlp-section-title" style="font-size:11px;">Targets</span></div>';
   h+='<span class="wlp-section-action" style="font-size:16px;" onclick="'+editFn+'">+</span></div>';

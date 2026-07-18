@@ -9,6 +9,16 @@ function rmTrack(n){setTracks(getTracks().filter(x=>x!==n));renderChips();rfrTL(
 // ─── TODAY MODE TOGGLE ───
 let _todayMode='watching'; // 'watching' | 'reviewing'
 
+function _toggleRunningToday(){
+  const list=document.getElementById('t-running-today-list');
+  const chev=document.getElementById('t-running-chevron');
+  if(!list)return;
+  const collapsed=list.style.display==='none';
+  list.style.display=collapsed?'block':'none';
+  if(chev)chev.style.transform=collapsed?'rotate(0deg)':'rotate(-90deg)';
+  localStorage.setItem('rp-running-today-collapsed',collapsed?'0':'1');
+}
+
 // ─── TODAY SELECT MODE ───
 let _todaySelectMode=false;
 let _todaySelected=new Set();
@@ -775,11 +785,19 @@ async function checkWatchlistRunners(races){
 
   const todayStr=td();
 
+  const _runTodayCollapsed=localStorage.getItem('rp-running-today-collapsed')==='1';
   alertEl.innerHTML='<div class="t-alert-pur">'
-    +'<div class="t-wl-hdr">'
-      +'<div class="t-alert-lbl-pur">Running Today</div>'
-      +'<button onclick="shareWatchlistAlerts()" class="t-pdf-btn" style="display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>'
+    +'<div class="t-wl-hdr" onclick="_toggleRunningToday()" style="cursor:pointer;user-select:none;">'
+      +'<div style="display:flex;align-items:center;gap:7px;">'
+        +'<div class="t-alert-lbl-pur">Running Today</div>'
+        +'<span style="font-size:11px;color:var(--mut);">'+alerts.length+' horse'+(alerts.length!==1?'s':'')+'</span>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;">'
+        +'<button onclick="event.stopPropagation();shareWatchlistAlerts()" class="t-pdf-btn" style="display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>'
+        +'<span id="t-running-chevron" style="font-size:16px;color:var(--mut);transition:transform .2s;display:inline-block;transform:rotate('+(_runTodayCollapsed?'-90':'0')+'deg);">⌄</span>'
+      +'</div>'
     +'</div>'
+    +'<div id="t-running-today-list" style="display:'+(_runTodayCollapsed?'none':'block')+';">'
     +alerts.map(function(a){
       const wid=(a.wlEntry&&a.wlEntry.id)?a.wlEntry.id:'';
       const alreadyReviewed=(D.reviews||[]).some(function(r){
@@ -1266,6 +1284,7 @@ async function checkWatchlistRunners(races){
       +'</div>';
       return reviewCard;
     }).join('')
+  +'</div>'  // close t-running-today-list
   +'</div>';
 
   // Schedule push notifications for declared Profiler horses

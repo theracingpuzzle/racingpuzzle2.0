@@ -608,7 +608,7 @@ function rcSwRenderRunners(idx, course, el){
   const race=(rcSwRacesByMeeting[course]||rcSwSortedRaces||[])[idx];if(!race){el.innerHTML='';return;}
   const runners=race.runners||race.horses||[];
   const time=race.off||race.off_time||race.time||'—';
-  const dist=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||'');
+  const dist=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||race.distance_furlongs||race.distance_yards||'');
   const prize=race.prize||race.total_prize_money||'';
   const going=race.going||'';
   const raceClassRaw=String(race.race_class||race.class||'').trim().replace(/^class\s*/i,'');
@@ -958,7 +958,6 @@ function _lboSave(){
   const od=fo(odRaw);
   if(!horse){alert('Enter a horse name.');return;}
   if(!stake||stake<=0){alert('Enter a valid stake.');return;}
-  if(!od||od<1){alert('Enter valid odds — e.g. 5/1 or EVS');return;}
 
   // Resolve mode: primary = data-mode attr baked into save button at render time; fallback = window._lboMode
   const _saveBtn=document.getElementById('lbo-save-btn');
@@ -1141,7 +1140,7 @@ function rcSwRaceCard(race, course){
     + (function(){
         var _raceClass=String(race.race_class||race.class||'').trim().replace(/^class\s*/i,'');
         var _g=race.going||'';
-        var _d=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||'');
+        var _d=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||race.distance_furlongs||race.distance_yards||'');
         var _p=race.prize||race.total_prize_money||'';
         const items=[
           _g?{lbl:'Going',val:_g}:null,
@@ -1508,7 +1507,8 @@ function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, 
       dist:    distF||'',
       going:   cleanGoing,
       cls:     cleanClass,
-      result:  resultVal
+      result:  resultVal,
+      position: position||''
     }
   });
 }

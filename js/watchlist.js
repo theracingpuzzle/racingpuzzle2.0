@@ -1384,7 +1384,9 @@ function _wlInferFromReview(profileId, review){
   const result=review.result||'';
   const ranWell=result==='win'||result==='place';
   const ranPoor=result==='unplaced';
-  const going=(review.groundConditions||review.going||review.raceGoing||'').trim();
+  const _goingRaw=(review.groundConditions||review.going||review.raceGoing||'').trim();
+  const _VALID_GOING=['firm','good to firm','good','good to soft','soft','heavy','standard','standard to slow','slow'];
+  const going=_VALID_GOING.includes(_goingRaw.toLowerCase())?_goingRaw:'';
   const dist=(review.distance||review.raceDist||'').trim();
   let changed=false;
 

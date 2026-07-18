@@ -924,20 +924,7 @@ async function checkWatchlistRunners(races){
       const _total=_conditions.length;
       const _pct=_total?Math.round((_matched/_total)*100):0;
 
-      const matchBadge=_total>=2?(function(){
-        const allGood=_matched===_total;
-        const someGood=_matched>0;
-        const bg=allGood?'rgba(22,163,74,.12)':someGood?'rgba(217,119,6,.12)':'rgba(220,38,38,.1)';
-        const col=allGood?'var(--grn)':someGood?'var(--gld)':'var(--red)';
-        const bdr=allGood?'rgba(22,163,74,.35)':someGood?'rgba(217,119,6,.35)':'rgba(220,38,38,.3)';
-        return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">'
-          +'<span style="font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:'+bg+';color:'+col+';border:1px solid '+bdr+';">'+_matched+'/'+_total+' CONDITIONS MATCHED</span>'
-          +'<span style="font-size:11px;font-weight:800;color:'+col+';">'+_pct+'%</span>'
-          +'<div style="display:flex;gap:3px;align-items:center;">'
-          +_conditions.map(function(c){return'<span title="'+c.label+'" style="width:7px;height:7px;border-radius:50%;background:'+(c.ok?'var(--grn)':'var(--bdr)')+';flex-shrink:0;"></span>';}).join('')
-          +'</div>'
-        +'</div>';
-      })():'';
+      const matchBadge='';
 
       const chipBase='font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;border:1px solid var(--bdr);background:rgba(255,255,255,.06);color:var(--mut);';
       // Icons after the word
@@ -1001,99 +988,148 @@ async function checkWatchlistRunners(races){
         const watchingRaceMeta=[a.time,a.course,_raceDist].filter(Boolean).join(' · ');
 
         // Condition comparison table: Race vs Horse ideal
-        const _condRows=(function(){
+        const _condResult=(function(){
           const rows=[];
           var _met=0,_total=0;
-          const _mkRow=function(label,raceVal,idealVal,ok){
+          const _mkRow=function(label,raceVal,idealVal,ok,note){
             _total++;
             if(ok===true)_met++;
             const dot='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block;background:'+(ok===true?'var(--grn)':ok===false?'var(--red)':'var(--bdr)')+';margin-top:1px;"></span>';
             return'<div style="display:grid;grid-template-columns:52px 1fr 1fr 10px;gap:6px;align-items:start;padding:4px 0;border-bottom:1px solid var(--bdr);">'
               +'<span style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding-top:1px;">'+label+'</span>'
-              +'<span style="font-size:12px;font-weight:600;color:var(--txt);">'+(raceVal||'—')+'</span>'
+              +'<span style="font-size:12px;font-weight:600;color:var(--txt);">'+(raceVal||'—')+(note?'<div style="font-size:9px;color:var(--mut);margin-top:1px;">'+note+'</div>':'')+'</span>'
               +'<span style="font-size:12px;color:var(--mut);">'+(idealVal||'Any')+'</span>'
               +dot
             +'</div>';
           };
-          // ── Going (always shown) ──────────────────────────────────────────────
+
+          // Shared helpers & review lookup
+          const _hReviews=(D.reviews||[]).filter(function(r){return r.profileId===wid;});
+          const _NC=['1','2','3','4','5','6','7'];
+          const _GOING_SCALE=['Firm','Good to Firm','Good','Good to Soft','Soft','Heavy'];
+          const _normG=function(g){return(g||'').toLowerCase().replace(/\s+/g,' ').trim();};
+          const _goingIdx=function(g){return _GOING_SCALE.findIndex(function(s){return _normG(s)===_normG(g);});};
+          const _VALID_G=['firm','good to firm','good','good to soft','soft','heavy'];
+          const _distToF=function(d){
+            if(!d)return null;
+            const s=d.replace(/\s/g,'').toLowerCase();
+            var f=0;
+            const mM=s.match(/(\d+(?:\.\d+)?)m/);const fM=s.match(/(\d+(?:\.\d+)?)f/);const yM=s.match(/(\d+)y/);
+            if(mM)f+=parseFloat(mM[1])*8;if(fM)f+=parseFloat(fM[1]);if(yM)f+=parseFloat(yM[1])/220;
+            return f>0?f:null;
+          };
+          const _fToStr=function(f){
+            const m=Math.floor(f/8);const rem=Math.round((f%8)*10)/10;
+            return m>0?(m+'m'+(rem>0?rem+'f':'')):(Math.round(f*10)/10+'f');
+          };
+
+          // ── Going ─────────────────────────────────────────────────────────────
           {
-            const _GOING_SCALE=['Firm','Good to Firm','Good','Good to Soft','Soft','Heavy'];
-            const _normG=function(g){return(g||'').toLowerCase().replace(/\s+/g,' ').trim();};
-            const _goingIdx=function(g){return _GOING_SCALE.findIndex(function(s){return _normG(s)===_normG(g);});};
-            var _goingLabel=null,_goingOk=null;
-            if(_goingPrefs.length){
-              const _prefIdxs=_goingPrefs.map(_goingIdx).filter(function(i){return i>-1;});
-              if(_prefIdxs.length){
-                const _minI=Math.min.apply(null,_prefIdxs);
-                const _maxI=Math.max.apply(null,_prefIdxs);
-                const _softI=Math.min(_maxI+1,_GOING_SCALE.length-1);
-                const _range=[...new Set([..._prefIdxs.map(function(i){return _GOING_SCALE[i];})])];
-                _goingLabel=_range.slice(0,2).join(', ')+(_softI>_maxI?' ('+_GOING_SCALE[_softI]+' OK)':'');
+            const _getG=function(r){return r.groundConditions||r.going||r.raceGoing||'';};
+            const _goingRvws=_hReviews.filter(function(r){return _VALID_G.includes(_normG(_getG(r)));});
+            const _goodG=_goingRvws.filter(function(r){return r.result==='win'||r.result==='place';});
+            const _badG=_goingRvws.filter(function(r){return r.result==='unplaced';});
+            var _goingLabel=null,_goingOk=null,_goingNote='';
+            if(_goingRvws.length){
+              const _goodIs=_goodG.map(function(r){return _goingIdx(_getG(r));}).filter(function(i){return i>-1;});
+              const _badIs=_badG.map(function(r){return _goingIdx(_getG(r));}).filter(function(i){return i>-1;});
+              if(_goodIs.length){
+                const _minI=Math.min.apply(null,_goodIs),_maxI=Math.max.apply(null,_goodIs);
+                const _tol=_goodIs.length>1?1:0;
+                const _tolMin=Math.max(0,_minI-_tol),_tolMax=Math.min(_GOING_SCALE.length-1,_maxI+_tol);
+                const _rangeStr=_GOING_SCALE[_minI]+(_minI<_maxI?' – '+_GOING_SCALE[_maxI]:'');
+                _goingLabel=_rangeStr+' · '+_goodG.length+'W/P/'+_goingRvws.length+'runs';
                 if(_raceGoing){
-                  const _todayI=_goingIdx(_raceGoing);
-                  _goingOk=_todayI>=_minI&&_todayI<=_softI;
+                  const _tI=_goingIdx(_raceGoing);
+                  _goingOk=_tI>=_tolMin&&_tI<=_tolMax;
+                  if(!_goingOk&&_badIs.includes(_tI))_goingNote='Ran poorly on this ground before';
                 }
-              } else {
-                _goingLabel=_goingPrefs.slice(0,2).join(', ');
-                if(_raceGoing)_goingOk=_goingPrefs.some(function(g){return _normG(g)===_normG(_raceGoing);});
+              } else if(_badIs.length){
+                const _badGs=[...new Set(_badG.map(function(r){return _getG(r);}))].join(', ');
+                _goingLabel='Unproven — poor on: '+_badGs;
+                if(_raceGoing){const _tI=_goingIdx(_raceGoing);_goingOk=_badIs.includes(_tI)?false:null;}
               }
             }
-            rows.push(_mkRow('Going',_raceGoing,_goingLabel,_goingOk));
-          }
-          // ── Distance (always shown) ───────────────────────────────────────────
-          {
-            const _distToF=function(d){
-              if(!d)return null;
-              const s=d.replace(/\s/g,'').toLowerCase();
-              var f=0;
-              const mM=s.match(/(\d+(?:\.\d+)?)m/);const fM=s.match(/(\d+(?:\.\d+)?)f/);const yM=s.match(/(\d+)y/);
-              if(mM)f+=parseFloat(mM[1])*8;
-              if(fM)f+=parseFloat(fM[1]);
-              if(yM)f+=parseFloat(yM[1])/220;
-              return f>0?f:null;
-            };
-            const _fToStr=function(f){
-              const m=Math.floor(f/8);const rem=Math.round((f%8)*10)/10;
-              return m>0?(m+'m'+(rem>0?rem+'f':'')):(Math.round(f*10)/10+'f');
-            };
-            var _distLabel=null,_distOk=null;
-            const _srcDists=[_distancePref,..._distanceWins].filter(Boolean);
-            const _srcFs=_srcDists.map(_distToF).filter(Boolean);
-            if(_srcFs.length){
-              const _minF=Math.min.apply(null,_srcFs)-1;
-              const _maxF=Math.max.apply(null,_srcFs)+2;
-              _distLabel=_fToStr(Math.max(_minF,1))+'–'+_fToStr(_maxF);
-              if(_raceDist){
-                const _todayF=_distToF(_raceDist);
-                _distOk=_todayF!=null&&_todayF>=_minF&&_todayF<=_maxF;
+            // Fall back to manual going prefs
+            if(!_goingLabel){
+              const _cleanPrefs=(_goingPrefs||[]).filter(function(g){return _VALID_G.includes(_normG(g));});
+              if(_cleanPrefs.length){
+                const _pIs=_cleanPrefs.map(_goingIdx).filter(function(i){return i>-1;});
+                if(_pIs.length){
+                  const _minI=Math.min.apply(null,_pIs),_maxI=Math.max.apply(null,_pIs);
+                  const _softI=Math.min(_maxI+1,_GOING_SCALE.length-1);
+                  _goingLabel=_cleanPrefs.slice(0,2).join(', ')+(_softI>_maxI?' ('+_GOING_SCALE[_softI]+' OK)':'');
+                  if(_raceGoing){const _tI=_goingIdx(_raceGoing);_goingOk=_tI>=_minI&&_tI<=_softI;}
+                }
               }
-            } else if(_distancePref){
-              _distLabel=_distancePref;
-              if(_raceDist)_distOk=_distMatch(_distancePref,_raceDist);
             }
-            rows.push(_mkRow('Dist',_raceDist,_distLabel,_distOk));
+            rows.push(_mkRow('Going',_raceGoing,_goingLabel,_goingOk,_goingNote));
           }
-          // ── Class (always shown) ──────────────────────────────────────────────
+
+          // ── Distance ──────────────────────────────────────────────────────────
           {
-            const _NC=['1','2','3','4','5','6','7'];
-            const _hReviews=(D.reviews||[]).filter(function(r){return r.profileId===wid;});
+            const _getD=function(r){return r.distance||r.raceDist||'';};
+            const _distRvws=_hReviews.filter(function(r){return _distToF(_getD(r))!==null;});
+            const _goodD=_distRvws.filter(function(r){return r.result==='win'||r.result==='place';});
+            const _badD=_distRvws.filter(function(r){return r.result==='unplaced';});
+            var _distLabel=null,_distOk=null,_distNote='';
+            if(_distRvws.length){
+              const _goodFs=_goodD.map(function(r){return _distToF(_getD(r));}).filter(Boolean);
+              const _badFs=_badD.map(function(r){return _distToF(_getD(r));}).filter(Boolean);
+              if(_goodFs.length){
+                const _minF=Math.min.apply(null,_goodFs),_maxF=Math.max.apply(null,_goodFs);
+                const _tol=_minF<8?1:_minF<16?2:4;
+                const _tolMin=Math.max(_minF-_tol,1),_tolMax=_maxF+_tol;
+                const _rStr=_minF===_maxF?_fToStr(_minF):_fToStr(_minF)+'–'+_fToStr(_maxF);
+                _distLabel=_rStr+' · '+_goodD.length+'W/P/'+_distRvws.length+'runs';
+                if(_raceDist){
+                  const _tF=_distToF(_raceDist);
+                  if(_tF!==null){
+                    _distOk=_tF>=_tolMin&&_tF<=_tolMax;
+                    if(!_distOk){
+                      // Check beaten distances at this trip from poor runs
+                      const _bl=_badD.filter(function(r){const f=_distToF(_getD(r));return f!==null&&Math.abs(f-_tF)<_tol+1;})
+                        .map(function(r){return parseFloat(r.beatenDistance);}).filter(function(n){return !isNaN(n)&&n>0;});
+                      if(_bl.length){const _avg=(_bl.reduce(function(a,b){return a+b;},0)/_bl.length).toFixed(1);_distNote='Avg beaten '+_avg+'L at this trip';}
+                    }
+                  }
+                }
+              } else if(_badFs.length){
+                const _badStrs=[...new Set(_badD.map(function(r){return _getD(r);}))].join(', ');
+                _distLabel='Unproven — poor at: '+_badStrs;
+                if(_raceDist){const _tF=_distToF(_raceDist);_distOk=_tF!==null&&_badFs.some(function(f){return Math.abs(f-_tF)<2;})?false:null;}
+              }
+            }
+            // Fall back to manual prefs
+            if(!_distLabel){
+              const _srcFs=[_distancePref,..._distanceWins].filter(Boolean).map(_distToF).filter(Boolean);
+              if(_srcFs.length){
+                const _minF=Math.min.apply(null,_srcFs)-1,_maxF=Math.max.apply(null,_srcFs)+2;
+                _distLabel=_fToStr(Math.max(_minF,1))+'–'+_fToStr(_maxF);
+                if(_raceDist){const _tF=_distToF(_raceDist);_distOk=_tF!=null&&_tF>=_minF&&_tF<=_maxF;}
+              } else if(_distancePref){
+                _distLabel=_distancePref;
+                if(_raceDist)_distOk=_distMatch(_distancePref,_raceDist);
+              }
+            }
+            rows.push(_mkRow('Dist',_raceDist,_distLabel,_distOk,_distNote));
+          }
+
+          // ── Class ─────────────────────────────────────────────────────────────
+          {
             const _wpR=_hReviews.filter(function(r){return r.result==='win'||r.result==='place';});
             const _winC=_wpR.map(function(r){return(r.raceClass||'').trim();}).filter(function(c){return _NC.indexOf(c)>-1;});
             var _idealClassLabel=null,_classOk=null,_stepUp=false;
             if(_winC.length){
               const _nums=_winC.map(Number).sort(function(a,b){return a-b;});
-              const _best=_nums[0];
-              const _worst=_nums[_nums.length-1];
+              const _best=_nums[0],_worst=_nums[_nums.length-1];
               const _allC=_hReviews.map(function(r){return parseInt(r.raceClass||'');}).filter(function(n){return !isNaN(n);});
               const _higher=_allC.some(function(n){return n<_best;});
               const _ceil=_higher&&_best>1?_best-1:_best;
               const _stepCeil=!_higher&&_best>1?_best-1:_ceil;
               _idealClassLabel='Class '+_stepCeil+(_stepCeil<_worst?'–'+_worst:'+')+(_stepCeil<_best?' ↑':'');
               const _todayNum=parseInt(_rc)||parseInt((raceType||'').replace(/[^0-9]/g,''));
-              if(!isNaN(_todayNum)){
-                _classOk=_todayNum>=_stepCeil&&_todayNum<=_worst+1;
-                _stepUp=_todayNum<_best;
-              }
+              if(!isNaN(_todayNum)){_classOk=_todayNum>=_stepCeil&&_todayNum<=_worst+1;_stepUp=_todayNum<_best;}
             } else if(_classPref){
               _idealClassLabel=_classPref;
               _classOk=!!classIcon&&classIcon.trim()==='✓';
@@ -1102,26 +1138,38 @@ async function checkWatchlistRunners(races){
             const _classRow=_mkRow('Class',_classToday,_idealClassLabel,_classOk);
             rows.push(_stepUp?_classRow.replace('</div>','<div style="font-size:9px;color:var(--gld);margin-top:1px;">Step up ↑</div></div>'):_classRow);
           }
-          // ── Mark (optional — only when MR+OR both set) ───────────────────────
+
+          // ── Mark (only when MR+OR both set) ───────────────────────────────────
           if(a.mr&&a.or){
             const ok=a.edge>0;
             rows.push(_mkRow('Mark',(a.edge>0?'+':'')+a.edge+' edge','My '+a.mr+' vs OR '+a.or,ok));
           }
-          const _scoreCol=_met===_total?'var(--grn)':_met===0?'var(--red)':'var(--ora)';
-          const _scoreLabel=_met+' / '+_total+' conditions';
-          return'<div style="margin-bottom:8px;">'
-            +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'
-              +'<div style="display:grid;grid-template-columns:52px 1fr 1fr 10px;gap:6px;flex:1;">'
-                +'<span></span>'
-                +'<span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Today</span>'
-                +'<span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Horse Wants</span>'
-                +'<span></span>'
-              +'</div>'
-              +'<span style="font-size:10px;font-weight:700;color:'+_scoreCol+';white-space:nowrap;padding-left:8px;">'+_scoreLabel+'</span>'
+          const html='<div style="margin-bottom:8px;">'
+            +'<div style="display:grid;grid-template-columns:52px 1fr 1fr 10px;gap:6px;margin-bottom:4px;">'
+              +'<span></span>'
+              +'<span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Today</span>'
+              +'<span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Horse Wants</span>'
+              +'<span></span>'
             +'</div>'
             +rows.join('')
           +'</div>';
+          return{html:html,met:_met,total:_total};
         })();
+        const _condRows=_condResult?_condResult.html:'';
+        const _condMet=_condResult?_condResult.met:0;
+        const _condTotal=_condResult?_condResult.total:0;
+        const matchBadge=_condTotal>=2?(function(){
+          const allGood=_condMet===_condTotal;
+          const someGood=_condMet>0;
+          const bg=allGood?'rgba(22,163,74,.12)':someGood?'rgba(217,119,6,.12)':'rgba(220,38,38,.1)';
+          const col=allGood?'var(--grn)':someGood?'var(--gld)':'var(--red)';
+          const bdr=allGood?'rgba(22,163,74,.35)':someGood?'rgba(217,119,6,.35)':'rgba(220,38,38,.3)';
+          const pct=Math.round((_condMet/_condTotal)*100);
+          return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">'
+            +'<span style="font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:'+bg+';color:'+col+';border:1px solid '+bdr+';">'+_condMet+'/'+_condTotal+' CONDITIONS MATCHED</span>'
+            +'<span style="font-size:11px;font-weight:800;color:'+col+';">'+pct+'%</span>'
+          +'</div>';
+        })():'';
 
         const watchCard='<div id="tcard_'+_selId+'" data-tier-border="'+_tc.border+'" class="t-alert-row-pur" style="border-color:'+(_isSelected?'#F5A623':_tc.border)+';background:'+_tc.bg+';">'
           +'<div class="t-flex-info"'+(profileClick?' onclick="'+profileClick+'" style="cursor:pointer;"':'')+'>'

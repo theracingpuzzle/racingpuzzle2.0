@@ -639,7 +639,15 @@ function rcSwRenderRunners(idx, course, el){
     const age=r.age?r.age+'yo':'';
     const form=r.form||'';
     const rpr=r.ofr||r.rpr||r.official_rating||r.officialRating||r.or||'';
-    const wt=r.weight||r.lbs||r.stone_lbs||r.weight_lbs||'';
+    const _wtRaw=r.weight||r.lbs||r.stone_lbs||r.weight_lbs||'';
+    const wt=(function(){
+      if(!_wtRaw)return'';
+      // Already formatted (e.g. "9-0", "9st 0lb", "9.0")
+      if(/[a-zA-Z\-]/.test(String(_wtRaw)))return String(_wtRaw);
+      const n=parseInt(_wtRaw,10);
+      if(isNaN(n))return String(_wtRaw);
+      return Math.floor(n/14)+'st '+( n%14)+'lb';
+    })();
     const isNR=!!(r.non_runner||r.isNonRunner||(''+r.number).toUpperCase()==='NR'||r.status==='non_runner'||(''+r.status).toLowerCase()==='nr'||(''+r.jockey).toUpperCase()==='NON-RUNNER');
     const _bh=isNR?'':getBetHighlight(name,course,time);
     const _wl2=getWL();const _nl2=(name||'').toLowerCase().trim();
@@ -1305,7 +1313,9 @@ function rcProfilePanelHtml(profiled,panelId){
   +'</div>';
   if(profiled.reasonNote)html+='<div style="font-size:12px;color:var(--txt);line-height:1.5;margin-bottom:7px;font-style:italic;">“'+profiled.reasonNote+'”</div>';
   const conditions=[];
-  if(profiled.goingPrefs&&profiled.goingPrefs.length)conditions.push(profiled.goingPrefs.join(', '));
+  const _vg=['firm','good to firm','good','good to soft','soft','heavy','standard','standard to slow','slow'];
+  const _cleanGoing=(profiled.goingPrefs||[]).filter(function(g){return _vg.includes((g||'').toLowerCase().trim());});
+  if(_cleanGoing.length)conditions.push(_cleanGoing.join(', '));
   if(profiled.distancePref)conditions.push(profiled.distancePref);
   if(profiled.trackPref)conditions.push(profiled.trackPref);
   if(conditions.length)html+='<div class="rc-pp-cond">'+conditions.join(' · ')+'</div>';
@@ -1315,7 +1325,7 @@ function rcProfilePanelHtml(profiled,panelId){
     html+='<div class="rc-pp-sec-lbl">Recent observations</div>';
     obs.forEach(function(o){
       html+='<div class="rc-pp-obs-row">'
-        +(o.date?'<span class="rc-pp-obs-date">'+o.date+'</span>':'')
+        +(o.date?'<span class="rc-pp-obs-date">'+fdate(o.date)+'</span>':'')
         +(o.result?'<span class="'+(o.result.toLowerCase().includes('win')?'rc-pp-obs-result-win':'rc-pp-obs-result-mut')+'">'+o.result+'</span>':'')
         +(o.notes||o.raceName||'')
       +'</div>';

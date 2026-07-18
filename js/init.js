@@ -18,6 +18,8 @@ function toggleDarkMode() {
   const isDark = document.body.classList.contains('dark');
   localStorage.setItem(_DARK_KEY, !isDark ? '1' : '0');
   _applyDark(!isDark);
+  // Re-render current card so inline theme colours (bg, border) update
+  if(typeof renderSwCard==='function')renderSwCard();
 }
 
 // Apply on page load before first paint

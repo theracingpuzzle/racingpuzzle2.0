@@ -84,17 +84,18 @@ function _todayShareSelected(){
     const gPrefs=Array.isArray(w.goingPrefs)?w.goingPrefs:[];
     if(a.raceGoing){
       const ok=gPrefs.length&&gPrefs.some(function(g){return(g||'').toLowerCase().trim()===(a.raceGoing||'').toLowerCase().trim();});
-      condParts.push((ok?'✓':'✗')+' Going: '+a.raceGoing);
+      condParts.push((ok?'✓':'~')+' Going: '+a.raceGoing);
     }
     if(a.raceDist){
       const dPref=(w.distancePref||'').trim();
       const dWins=Array.isArray(w.distanceWins)?w.distanceWins:[];
       function _dm(x,y){return(x||'').toLowerCase().replace(/\s/g,'')===(y||'').toLowerCase().replace(/\s/g,'');}
       const ok=(_dm(dPref,a.raceDist))||dWins.some(function(d){return _dm(d,a.raceDist);});
-      condParts.push((ok?'✓':'✗')+' Distance: '+a.raceDist);
+      condParts.push((ok?'✓':'~')+' Distance: '+a.raceDist);
     }
     if(a.mr&&a.or){
-      condParts.push((a.edge>0?'✓':'✗')+' My Mark: '+(a.edge>0?'+':'')+a.edge+' vs OR '+a.or);
+      const _edgeStr=a.edge>0?'+'+a.edge:a.edge===0?'on mark':a.edge;
+      condParts.push((a.edge>0?'✓':'~')+' Mark: MR '+a.mr+' vs OR '+a.or+' ('+_edgeStr+')');
     }
     lines.push(
       a.horse.toUpperCase()
@@ -634,7 +635,11 @@ async function checkWatchlistRunners(races){
       const racecardOR=String(r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||(typeof rcGetOFR==='function'?rcGetOFR(r.horse||r.name||''):'')||'').trim();
       watching2.forEach(function(w){
         const wlName=(typeof stripCountrySuffix==='function'?stripCountrySuffix(w.horse||''):(w.horse||'')).toLowerCase().trim();
-        if(horseName&&wlName&&horseName===wlName){
+        // If the profile has a trainer, use it to confirm it's the same horse (disambiguates same-named horses abroad)
+        const _rTrainer=(r.trainer||r.trainerName||'').toLowerCase().trim();
+        const _wTrainer=(w.trainer||'').toLowerCase().trim();
+        const _trainerOk=!_wTrainer||!_rTrainer||_rTrainer.includes(_wTrainer)||_wTrainer.includes(_rTrainer);
+        if(horseName&&wlName&&horseName===wlName&&_trainerOk){
           // Auto-update OR if racecard has one and it differs from stored value — once per day only
           const storedOR=String(w.currentRating||'').trim();
           const alreadyUpdatedToday=w.orUpdatedDate===td();
@@ -992,9 +997,8 @@ async function checkWatchlistRunners(races){
           const rows=[];
           var _met=0,_total=0;
           const _mkRow=function(label,raceVal,idealVal,ok,note){
-            _total++;
-            if(ok===true)_met++;
-            const dot='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block;background:'+(ok===true?'var(--grn)':ok===false?'var(--red)':'var(--bdr)')+';margin-top:1px;"></span>';
+            if(ok===true||ok===false){_total++;if(ok===true)_met++;}
+            const dot='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block;background:'+(ok===true?'var(--grn)':ok===false?'var(--gld)':'var(--bdr)')+';margin-top:1px;"></span>';
             return'<div style="display:grid;grid-template-columns:52px 1fr 1fr 10px;gap:6px;align-items:start;padding:4px 0;border-bottom:1px solid var(--bdr);">'
               +'<span style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding-top:1px;">'+label+'</span>'
               +'<span style="font-size:12px;font-weight:600;color:var(--txt);">'+(raceVal||'—')+(note?'<div style="font-size:9px;color:var(--mut);margin-top:1px;">'+note+'</div>':'')+'</span>'
@@ -1038,11 +1042,16 @@ async function checkWatchlistRunners(races){
                 const _tol=_goodIs.length>1?1:0;
                 const _tolMin=Math.max(0,_minI-_tol),_tolMax=Math.min(_GOING_SCALE.length-1,_maxI+_tol);
                 const _rangeStr=_GOING_SCALE[_minI]+(_minI<_maxI?' – '+_GOING_SCALE[_maxI]:'');
-                _goingLabel=_rangeStr+' · '+_goodG.length+'W/P/'+_goingRvws.length+'runs';
+                _goingLabel=_rangeStr+(_goingRvws.length>1?' ('+_goingRvws.length+' runs)':'');
                 if(_raceGoing){
                   const _tI=_goingIdx(_raceGoing);
                   _goingOk=_tI>=_tolMin&&_tI<=_tolMax;
-                  if(!_goingOk&&_badIs.includes(_tI))_goingNote='Ran poorly on this ground before';
+                  if(!_goingOk&&_badIs.includes(_tI)){
+                    // Only flag if pattern is clear: 2+ poor runs, or 1 poor run with significant beaten distance
+                    const _badAtToday=_badG.filter(function(r){return _goingIdx(_getG(r))===_tI;});
+                    const _maxBeaten=Math.max.apply(null,_badAtToday.map(function(r){return parseFloat(r.beatenDistance)||0;}));
+                    if(_badAtToday.length>=2||_maxBeaten>5)_goingNote=_badAtToday.length>=2?'Unplaced '+_badAtToday.length+'x on this going':'Beaten '+_maxBeaten+'L on this ground';
+                  }
                 }
               } else if(_badIs.length){
                 const _badGs=[...new Set(_badG.map(function(r){return _getG(r);}))].join(', ');
@@ -1081,7 +1090,7 @@ async function checkWatchlistRunners(races){
                 const _tol=_minF<8?1:_minF<16?2:4;
                 const _tolMin=Math.max(_minF-_tol,1),_tolMax=_maxF+_tol;
                 const _rStr=_minF===_maxF?_fToStr(_minF):_fToStr(_minF)+'–'+_fToStr(_maxF);
-                _distLabel=_rStr+' · '+_goodD.length+'W/P/'+_distRvws.length+'runs';
+                _distLabel=_rStr+(_distRvws.length>1?' ('+_distRvws.length+' runs)':'');
                 if(_raceDist){
                   const _tF=_distToF(_raceDist);
                   if(_tF!==null){

@@ -23,7 +23,7 @@ function formatDist(d){
     const rem   = Math.round((fur%8)*2)/2;
     if(miles && rem) return miles+'m '+rem+'f';
     if(miles)        return miles+'m';
-    return fur+'f';
+    return Math.round(fur)+'f';
   }
   // Yards: e.g. "1408y"
   const yd = s.match(/^(\d+)y$/i);
@@ -43,7 +43,7 @@ function formatDist(d){
     const rem   = Math.round((raw%8)*2)/2;
     if(miles && rem) return miles+'m '+rem+'f';
     if(miles)        return miles+'m';
-    return raw+'f';
+    return Math.round(raw)+'f';
   }
   return s;
 }

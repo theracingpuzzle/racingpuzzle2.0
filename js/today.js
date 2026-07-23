@@ -645,11 +645,7 @@ async function checkWatchlistRunners(races){
       const racecardOR=String(r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||(typeof rcGetOFR==='function'?rcGetOFR(r.horse||r.name||''):'')||'').trim();
       watching2.forEach(function(w){
         const wlName=(typeof stripCountrySuffix==='function'?stripCountrySuffix(w.horse||''):(w.horse||'')).toLowerCase().trim();
-        // If the profile has a trainer, use it to confirm it's the same horse (disambiguates same-named horses abroad)
-        const _rTrainer=(r.trainer||r.trainerName||'').toLowerCase().trim();
-        const _wTrainer=(w.trainer||'').toLowerCase().trim();
-        const _trainerOk=!_wTrainer||!_rTrainer||_rTrainer.includes(_wTrainer)||_wTrainer.includes(_rTrainer);
-        if(horseName&&wlName&&horseName===wlName&&_trainerOk){
+        if(horseName&&wlName&&horseName===wlName){
           // Auto-update OR if racecard has one and it differs from stored value — once per day only
           const storedOR=String(w.currentRating||'').trim();
           const alreadyUpdatedToday=w.orUpdatedDate===td();

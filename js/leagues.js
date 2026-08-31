@@ -205,7 +205,6 @@ function lgRenderList(el){
   function _lgLeagueRow(l, idx, dimmed){
     const uid=_lgUid();
     const myPicks=_lgMyPicks[l.id]||[];
-    const todayPicks=myPicks.filter(function(p){return p.pick_date===_lgToday();});
     const allScore=_lgCalcScore(myPicks,l.scoring);
     const scoreVal=l.scoring==='wins'?allScore.wins+' W':(allScore.score>=0?'+':'')+allScore.score.toFixed(2);
     const scoreCol=dimmed?'var(--mut)':allScore.score>0?'var(--grn)':allScore.score<0?'#f87171':'var(--txt)';
@@ -231,17 +230,38 @@ function lgRenderList(el){
         +posLabel+' <span style="font-size:11px;font-weight:700;opacity:.7;">of '+total+'</span>'
       +'</div>';
     }
-    return '<div onclick="lgOpenLeague(\''+l.id+'\')" style="display:flex;align-items:center;gap:12px;padding:15px 16px;'+(idx?'border-top:1px solid var(--bdr);':'')+'cursor:pointer;'+(dimmed?'opacity:.75;':'')+'">'
-      +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-family:var(--font);font-size:20px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1;">'+_lgEsc(l.name)+'</div>'
-        +'<div style="font-size:12px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Win count':'£1 stakes')+(l.end_date?' · Ended '+_lgFmtDate(l.end_date):'')+'</div>'
-        +posHtml
+    // Determine swipe action: delete if owner+solo, leave otherwise
+    const isOwner=l.created_by===uid;
+    const memberCount=allMembers?allMembers.length:1;
+    const canDelete=isOwner&&memberCount<=1;
+    const actionLabel=canDelete?'Delete':'Leave';
+    const actionBg=canDelete?'#dc2626':'#f59e0b';
+    const actionFn=canDelete?'lgDeleteLeague(\''+l.id+'\')':'lgLeaveLeague(\''+l.id+'\')';
+    const rowContent='<div style="flex:1;min-width:0;">'
+      +'<div style="font-family:var(--font);font-size:20px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1;">'+_lgEsc(l.name)+'</div>'
+      +'<div style="font-size:12px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Win count':'£1 stakes')+(l.end_date?' · Ended '+_lgFmtDate(l.end_date):'')+'</div>'
+      +posHtml
+    +'</div>'
+    +'<div style="text-align:right;flex-shrink:0;">'
+      +'<div style="font-family:var(--font);font-size:22px;font-weight:900;color:'+scoreCol+';">'+scoreVal+'</div>'
+      +'<div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;">'+(l.scoring==='wins'?'wins':'P&L')+'</div>'
+    +'</div>'
+    +'<span id="lg-row-chev-'+l.id+'" style="color:var(--mut);font-size:18px;margin-left:2px;">›</span>';
+    return '<div style="position:relative;overflow:hidden;'+(idx?'border-top:1px solid var(--bdr);':'')+'">'
+      +'<div style="position:absolute;right:0;top:0;bottom:0;width:88px;display:flex;align-items:center;justify-content:center;background:'+actionBg+';">'
+        +'<button onclick="'+actionFn+'" style="background:none;border:none;color:#fff;font-family:var(--font);font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;padding:0;display:flex;flex-direction:column;align-items:center;gap:3px;">'
+          +(canDelete?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>')
+          +actionLabel
+        +'</button>'
       +'</div>'
-      +'<div style="text-align:right;flex-shrink:0;">'
-        +'<div style="font-family:var(--font);font-size:22px;font-weight:900;color:'+scoreCol+';">'+scoreVal+'</div>'
-        +'<div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;">'+(l.scoring==='wins'?'wins':'P&L')+'</div>'
+      +'<div id="lg-row-inner-'+l.id+'" '
+        +'ontouchstart="_lgSwipeStart(\''+l.id+'\',event)" '
+        +'ontouchmove="_lgSwipeMove(\''+l.id+'\',event)" '
+        +'ontouchend="_lgSwipeEnd(\''+l.id+'\')" '
+        +'onclick="_lgRowClick(\''+l.id+'\')" '
+        +'style="display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;'+(dimmed?'opacity:.75;':'')+';background:var(--sur);position:relative;will-change:transform;">'
+        +rowContent
       +'</div>'
-      +'<span style="color:var(--mut);font-size:18px;margin-left:2px;">›</span>'
     +'</div>';
   }
 
@@ -1082,6 +1102,46 @@ async function lgLeaveLeague(id){
     _lgCurrent=null;_lgView='list';
     lgRender();
   }catch(e){alert('Error leaving league.');}
+}
+
+// ─── Swipe-to-action on league list rows ─────────────────────────────────────
+var _lgSwipe={id:null,x0:0,y0:0,dx:0,active:false,committed:false};
+
+function _lgSwipeStart(id,e){
+  if(_lgSwipe.id&&_lgSwipe.id!==id)_lgSwipeReset(_lgSwipe.id);
+  const t=e.touches[0];
+  _lgSwipe={id:id,x0:t.clientX,y0:t.clientY,dx:0,active:true,committed:false};
+}
+function _lgSwipeMove(id,e){
+  if(!_lgSwipe.active||_lgSwipe.id!==id)return;
+  const dx=e.touches[0].clientX-_lgSwipe.x0;
+  const dy=e.touches[0].clientY-_lgSwipe.y0;
+  if(Math.abs(dy)>Math.abs(dx)&&Math.abs(_lgSwipe.dx)<5)return; // vertical scroll
+  if(dx>0){if(_lgSwipe.committed){_lgSwipe.committed=false;_lgSwipeReset(id);}return;}
+  e.preventDefault();
+  _lgSwipe.dx=dx;
+  const el=document.getElementById('lg-row-inner-'+id);
+  if(el)el.style.transform='translateX('+Math.max(dx,-96)+'px)';
+}
+function _lgSwipeEnd(id){
+  if(!_lgSwipe.active||_lgSwipe.id!==id)return;
+  _lgSwipe.active=false;
+  if(_lgSwipe.dx<-44){
+    _lgSwipe.committed=true;
+    const el=document.getElementById('lg-row-inner-'+id);
+    if(el){el.style.transition='transform .2s';el.style.transform='translateX(-88px)';}
+  }else{
+    _lgSwipeReset(id);
+  }
+}
+function _lgSwipeReset(id){
+  const el=document.getElementById('lg-row-inner-'+id);
+  if(el){el.style.transition='transform .2s';el.style.transform='translateX(0)';}
+  if(_lgSwipe.id===id)_lgSwipe={id:null,x0:0,y0:0,dx:0,active:false,committed:false};
+}
+function _lgRowClick(id){
+  if(_lgSwipe.committed&&_lgSwipe.id===id){_lgSwipeReset(id);return;}
+  lgOpenLeague(id);
 }
 
 // ─── Utility ──────────────────────────────────────────────────────────────────

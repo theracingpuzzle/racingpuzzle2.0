@@ -2359,7 +2359,27 @@ function saveWLEntry(id){
     aiAssessedAt:old?old.aiAssessedAt||null:null,
     raceDate,
     createdAt:old?old.createdAt||Date.now():Date.now(),
-    updatedAt:Date.now()
+    updatedAt:(function(){
+      if(!old)return Date.now();
+      // Only bump the timestamp if something the user can edit actually changed
+      const _changed=function(a,b){return JSON.stringify(a)!==JSON.stringify(b);};
+      const fields=['horse','trainer','age','surface','raceType','reason','reasonNote','unraced',
+        'currentRating','myRating','goingPrefs','distancePref','trackPref','classPref',
+        'fieldSizePref','runStyle','intelEntries'];
+      const newVals={horse,trainer:entry.trainer,age:entry.age,surface:entry.surface,
+        raceType:entry.raceType,reason:entry.reason,reasonNote:entry.reasonNote,
+        unraced:entry.unraced,currentRating:entry.currentRating,myRating:entry.myRating,
+        goingPrefs:entry.goingPrefs,distancePref:entry.distancePref,trackPref:entry.trackPref,
+        classPref:entry.classPref,fieldSizePref:entry.fieldSizePref,runStyle:entry.runStyle,
+        intelEntries:entry.intelEntries};
+      const oldVals={horse:old.horse,trainer:old.trainer,age:old.age,surface:old.surface,
+        raceType:old.raceType,reason:old.reason,reasonNote:old.reasonNote,
+        unraced:old.unraced,currentRating:old.currentRating,myRating:old.myRating,
+        goingPrefs:old.goingPrefs,distancePref:old.distancePref,trackPref:old.trackPref,
+        classPref:old.classPref,fieldSizePref:old.fieldSizePref,runStyle:old.runStyle,
+        intelEntries:old.intelEntries};
+      return _changed(newVals,oldVals)?Date.now():(old.updatedAt||old.createdAt||Date.now());
+    })()
   };
   const old2=id?(D.watchlist||[]).find(x=>x.id===id):null;
   const removedTargetIds=old2?(old2.targets||[]).filter(function(t){return !entry.targets.find(function(n){return n.id===t.id;});}).map(function(t){return t.id;}).filter(Boolean):[];

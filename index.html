@@ -339,10 +339,20 @@
           <div class="card-title" style="color:#60a5fa;" id="stats-card-title">Stats</div>
         </div>
 
-        <!-- History moved to Profile overlay -->
+        <!-- ══ TAB BAR ══ -->
+        <div class="set-tabs" id="stats-tab-bar" style="margin-bottom:12px;">
+          <button class="set-tab on" onclick="setStatsTab('stats',this)">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>
+            <span>Stats</span>
+          </button>
+          <button class="set-tab" onclick="setStatsTab('betlog',this)">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span>Bet Log</span>
+          </button>
+        </div>
 
         <!-- ══ STATS PANE ══ -->
-        <div id="cp-stats">
+        <div id="cp-stats" style="display:block;">
           <div style="display:flex;flex-wrap:nowrap;gap:8px;margin-bottom:10px;align-items:center;">
             <div class="rc-view-tog" style="margin-bottom:0;flex-shrink:0;">
               <button id="st-tog-both" onclick="setStatsScope('both')" class="rc-view-btn on">Both</button>
@@ -413,8 +423,45 @@
           </div>
         </div>
 
-        <!-- ══ HISTORY PANE ══ -->
-        <!-- History content moved to Profile overlay -->
+        <!-- ══ BET LOG PANE ══ -->
+        <div id="cp-betlog" style="display:none;">
+          <div class="hist-tog" style="margin-bottom:14px;">
+            <button id="hist-tog-real" class="hist-tog-btn on" onclick="setHistMode('real')">Real</button>
+            <button id="hist-tog-virt" class="hist-tog-btn off" onclick="setHistMode('virt')">Virtual</button>
+          </div>
+          <div id="hist-real-section">
+            <div class="blk" id="hist-pending-blk">
+              <div class="bttl">Awaiting Results</div>
+              <div id="hist-pending"></div>
+            </div>
+            <div class="blk">
+              <div class="bttl">All Bets</div>
+              <div class="row-g7" style="margin-bottom:10px;">
+                <input type="text" id="hfs" class="inp-flex" oninput="renderHist()" placeholder="Search horse or track…">
+                <select id="hfr" onchange="renderHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option><option value="needs-review">Needs Review</option></select>
+                <button class="btn bout bsm" onclick="clrHF()">Clear</button>
+                <span style="font-family:var(--font);font-size:10px;color:var(--mut);align-self:center;" id="hcnt"></span>
+              </div>
+              <div id="hist-list"></div>
+            </div>
+          </div>
+          <div id="hist-virt-section" style="display:none;">
+            <div class="blk" id="hist-vpending-blk" style="display:none;">
+              <div class="bttl">Awaiting Results</div>
+              <div id="hist-vpending"></div>
+            </div>
+            <div class="blk">
+              <div class="bttl">All Virtual Bets</div>
+              <div class="row-g7" style="margin-bottom:10px;">
+                <input type="text" id="hvfs" oninput="renderVirtHist()" placeholder="Search horse or track…" style="flex:1;min-width:140px;font-size:13px;">
+                <select id="hvfr" onchange="renderVirtHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
+                <button class="btn bout bsm" onclick="clrVHF()">Clear</button>
+                <span style="font-family:monospace;font-size:10px;color:var(--mut);align-self:center;" id="hvcnt"></span>
+              </div>
+              <div id="hist-virt-list"></div>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -908,44 +955,9 @@
         <button onclick="profileClose()" style="width:100%;padding:13px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:var(--font);font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">Close</button>
       </div>
 
-      <!-- History panel -->
+      <!-- History panel — content moved to Stats card Bet Log tab -->
       <div id="prof-panel-history" style="display:none;padding:16px 20px 28px;">
-        <div class="hist-tog" style="margin-bottom:14px;">
-          <button id="hist-tog-real" class="hist-tog-btn on" onclick="setHistMode('real')">Real</button>
-          <button id="hist-tog-virt" class="hist-tog-btn off" onclick="setHistMode('virt')">Virtual</button>
-        </div>
-        <div id="hist-real-section">
-          <div class="blk" id="hist-pending-blk">
-            <div class="bttl">Awaiting Results</div>
-            <div id="hist-pending"></div>
-          </div>
-          <div class="blk">
-            <div class="bttl">All Bets</div>
-            <div class="row-g7" style="margin-bottom:10px;">
-              <input type="text" id="hfs" class="inp-flex" oninput="renderHist()" placeholder="Search horse or track…">
-              <select id="hfr" onchange="renderHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option><option value="needs-review">Needs Review</option></select>
-              <button class="btn bout bsm" onclick="clrHF()">Clear</button>
-              <span style="font-family:var(--font);font-size:10px;color:var(--mut);align-self:center;" id="hcnt"></span>
-            </div>
-            <div id="hist-list"></div>
-          </div>
-        </div>
-        <div id="hist-virt-section" style="display:none;">
-          <div class="blk" id="hist-vpending-blk" style="display:none;">
-            <div class="bttl">Awaiting Results</div>
-            <div id="hist-vpending"></div>
-          </div>
-          <div class="blk">
-            <div class="bttl">All Virtual Bets</div>
-            <div class="row-g7" style="margin-bottom:10px;">
-              <input type="text" id="hvfs" oninput="renderVirtHist()" placeholder="Search horse or track…" style="flex:1;min-width:140px;font-size:13px;">
-              <select id="hvfr" onchange="renderVirtHist()" class="inp-110"><option value="">All results</option><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place</option><option value="loss">Loss</option><option value="nr">NR</option></select>
-              <button class="btn bout bsm" onclick="clrVHF()">Clear</button>
-              <span style="font-family:monospace;font-size:10px;color:var(--mut);align-self:center;" id="hvcnt"></span>
-            </div>
-            <div id="hist-virt-list"></div>
-          </div>
-        </div>
+        <p style="color:var(--mut);font-size:13px;text-align:center;padding:24px 0;">Your bet log has moved to the <strong>Stats</strong> card — tap the Bet Log tab there.</p>
       </div>
 
     </div>

@@ -2917,6 +2917,9 @@ function _wlpBuildHTML(e){
   const lastDate=latestReview?latestReview.date:latestObs?latestObs.date:(e.createdAt?new Date(e.createdAt).toISOString().slice(0,10):'');
   const nextTarget=targets[0]||null;
 
+  const _VALID_GOING_WLP=['firm','good to firm','good','good to soft','soft','heavy','standard','standard to slow','slow'];
+  const _cleanGoingPrefs=(e.goingPrefs||[]).filter(function(g){return _VALID_GOING_WLP.includes((g||'').toLowerCase().trim());});
+
   const condItems=[
     {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',label:'Going',    value:_cleanGoingPrefs.length?_cleanGoingPrefs[0]:'Any',   color:_cleanGoingPrefs.length?'#4ade80':'#3a3a5c'},
     {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><polyline points="8 6 2 12 8 18"/><polyline points="16 6 22 12 16 18"/></svg>',label:'Distance', value:e.distancePref||'—',  color:e.distancePref?'#38bdf8':'#3a3a5c'},
@@ -3026,8 +3029,6 @@ function _wlpBuildHTML(e){
   +'</div>';
 
   // ── HERO — compact, pinned, gives race-day essentials at a glance ─────────
-  const _VALID_GOING_WLP=['firm','good to firm','good','good to soft','soft','heavy','standard','standard to slow','slow'];
-  const _cleanGoingPrefs=(e.goingPrefs||[]).filter(function(g){return _VALID_GOING_WLP.includes((g||'').toLowerCase().trim());});
   const goingPill=_cleanGoingPrefs.length?_cleanGoingPrefs.slice(0,2).join(' · '):'Any ground';
   h+='<div class="wlp-hero">'
     +'<div class="wlp-hero-bg">🐎</div>'

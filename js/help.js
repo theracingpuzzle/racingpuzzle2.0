@@ -8,7 +8,12 @@ function helpOpen(startSection) {
 
   const modal = document.createElement('div');
   modal.id = 'help-modal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:3000;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;';
+  // Sit between app header and bottom nav — read their heights dynamically
+  const _hdrEl=document.getElementById('hdr');
+  const _bnavEl=document.getElementById('bnav');
+  const _topOffset=_hdrEl?_hdrEl.getBoundingClientRect().bottom:56;
+  const _bottomOffset=_bnavEl?(window.innerHeight-_bnavEl.getBoundingClientRect().top):72;
+  modal.style.cssText='position:fixed;left:0;right:0;top:'+Math.round(_topOffset)+'px;bottom:'+Math.round(_bottomOffset)+'px;z-index:3000;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;';
   modal.innerHTML = _helpBuildHTML(startSection || 'overview');
   document.body.appendChild(modal);
 }

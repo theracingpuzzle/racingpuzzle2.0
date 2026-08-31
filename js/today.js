@@ -809,10 +809,17 @@ async function checkWatchlistRunners(races){
           +'</span>'
         :'';
       const ri=a.resultInfo;
-      const finishBadge=ri
+      // Fallback: if API hasn't returned a result yet, check the user's logged bet for this horse today
+      const _loggedBet=(D.bets||[]).find(function(b){
+        return (b.horse||'').toLowerCase().trim()===(a.horse||'').toLowerCase().trim()
+          && b.date===todayStr
+          && b.result && b.result!=='pending';
+      });
+      const _riOrBet=ri||((_loggedBet)?{result:_loggedBet.result,position:_loggedBet.result==='win'?'1':''}:null);
+      const finishBadge=_riOrBet
         ?'<span style="font-size:10px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:6px;margin-left:5px;'
-          +(ri.result==='win'?'background:rgba(22,163,74,.15);color:var(--grn);':ri.result==='place'?'background:rgba(217,119,6,.15);color:var(--gld);':'background:rgba(220,38,38,.12);color:var(--red);')
-          +'">Finished '+ri.position+'</span>'
+          +(_riOrBet.result==='win'?'background:rgba(22,163,74,.15);color:var(--grn);':_riOrBet.result==='place'?'background:rgba(217,119,6,.15);color:var(--gld);':'background:rgba(220,38,38,.12);color:var(--red);')
+          +'">'+(_riOrBet.position?'Finished '+_riOrBet.position:(_riOrBet.result||'').toUpperCase())+'</span>'
         :'';
       // Don't show review button if the watchlist entry was created today (just added)
       const addedToday=a.wlEntry&&a.wlEntry.createdAt&&new Date(a.wlEntry.createdAt).toISOString().slice(0,10)===todayStr;
@@ -827,9 +834,9 @@ async function checkWatchlistRunners(races){
       const reviewBtn=alreadyReviewed
         ?''
         :addedToday?''
-        :(ri||raceMinsPast)
+        :(_riOrBet||raceMinsPast)
           ?'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" data-dist="'+(a.raceDist||'')+'" data-going="'+(a.raceGoing||'')+'" data-class="'+(a.raceClass||'')+'"'
-            +(ri?' data-result="'+ri.result+'" data-pos="'+ri.position+'"':'')
+            +(_riOrBet?' data-result="'+_riOrBet.result+'" data-pos="'+(_riOrBet.position||'')+'"':'')
             +' class="t-wl-review-btn t-review-btn"'+(ri?' style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);"':'')+'>'
             +(ri?'✓ Confirm Review':'Review ✍️')+'</button>'
           :'';
@@ -990,7 +997,7 @@ async function checkWatchlistRunners(races){
         +' data-dist="'+(_raceDist||'')+'"'
         +' data-going="'+(a.raceGoing||'')+'"'
         +' data-class="'+(a.raceClass||'')+'"'
-        +(ri?' data-result="'+ri.result+'" data-pos="'+(ri.position||'')+'"':'');
+        +(_riOrBet?' data-result="'+_riOrBet.result+'" data-pos="'+(_riOrBet.position||'')+'"':'');
 
       const _selId='tsel_'+(a.horse+a.time).replace(/[^a-zA-Z0-9]/g,'_');
       const _isSelected=_todaySelected.has(_selId);
@@ -1228,24 +1235,24 @@ async function checkWatchlistRunners(races){
       // ════════════════════════════════════════════════════════════════
       // REVIEWING MODE — outcome & review focus, unreviewed first
       // ════════════════════════════════════════════════════════════════
-      const posNum=ri&&ri.position?parseInt(ri.position)||0:0;
-      const ranWell=posNum>=1&&posNum<=3;
+      const posNum=_riOrBet&&_riOrBet.position?parseInt(_riOrBet.position)||0:0;
+      const ranWell=posNum>=1&&posNum<=3||(_riOrBet&&(_riOrBet.result==='win'||_riOrBet.result==='place'));
       let outcomeText='',outcomeCol='var(--mut)';
-      if(ri&&_hasMR&&_hasOR){
+      if(_riOrBet&&_hasMR&&_hasOR){
         if(a.edge>0&&ranWell){outcomeText='Value confirmed — ran to the rating';outcomeCol='var(--grn)';}
         else if(a.edge>0&&!ranWell){outcomeText='Underperformed the rating gap';outcomeCol='var(--red)';}
         else if(a.edge<=0&&ranWell){outcomeText='Ran above OR — reassess MR upward';outcomeCol='var(--blu)';}
         else{outcomeText='Ran to OR expectation';outcomeCol='var(--mut)';}
-      } else if(raceMinsPast&&!ri){
+      } else if(raceMinsPast&&!_riOrBet){
         outcomeText='Awaiting result';outcomeCol='var(--mut)';
       }
 
       const reviewingCTA=alreadyReviewed
         ?'<button'+_reviewDataAttrs+' class="t-wl-review-btn" style="width:100%;padding:7px 0;font-size:12px;font-weight:600;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;text-align:center;">Logged — tap to edit review</button>'
         :addedToday?''
-        :(ri||raceMinsPast)
+        :(_riOrBet||raceMinsPast)
           ?'<button'+_reviewDataAttrs+' class="t-wl-review-btn t-review-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 0;font-size:13px;">'
-            +(ri?'✓ Confirm Review':'Review ✍️')+'</button>'
+            +(_riOrBet?'✓ Confirm Review':'Review ✍️')+'</button>'
           :'<div style="font-size:11px;color:var(--mut);text-align:center;padding:5px 0;">Race not yet run</div>';
 
       const _revTier=_computeAlertTier(a);
@@ -1264,7 +1271,7 @@ async function checkWatchlistRunners(races){
           +'<div style="display:flex;align-items:stretch;gap:1px;border-radius:8px;overflow:hidden;border:1px solid var(--bdr);margin-bottom:8px;">'
             +'<div style="flex:1;background:var(--sur2);padding:8px 12px;">'
               +'<div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Finished</div>'
-              +'<div class="t-display-num" style="color:var(--txt);">'+(ri&&ri.position?ri.position:'—')+'</div>'
+              +'<div class="t-display-num" style="color:var(--txt);">'+(_riOrBet&&_riOrBet.position?_riOrBet.position:(_riOrBet&&_riOrBet.result?(_riOrBet.result).toUpperCase():'—'))+'</div>'
             +'</div>'
             +'<div style="width:1px;background:var(--bdr);flex-shrink:0;"></div>'
             +'<div style="flex:1;background:var(--sur2);padding:8px 12px;text-align:right;">'

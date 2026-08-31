@@ -696,18 +696,10 @@ function renderWLList(){
       if(_t)_runningMap[_n].push(_t);
     });
   });
-  // Match profile entries: if profile has a trainer, confirm it matches a runner's trainer
+  // Match profile entries by horse name only (consistent with the Running Today filter)
   const _runningEntries=entries.filter(function(e){
     const _en=(e.horse||'').toLowerCase().trim();
-    if(!_runningMap[_en])return false;
-    const _trainers=_runningMap[_en];
-    const _profTrainer=(e.trainer||'').toLowerCase().trim();
-    // If profile has a trainer AND we have trainer data from the API, require a match
-    if(_profTrainer&&_trainers.length){
-      return _trainers.some(function(t){return t.includes(_profTrainer)||_profTrainer.includes(t);});
-    }
-    // No trainer to disambiguate — match on name alone
-    return true;
+    return !!_runningMap[_en];
   });
   if(_runningEntries.length){
     html+='<div style="border:1px solid #10b98140;background:#10b98108;border-radius:10px;margin-bottom:10px;overflow:hidden;">'
@@ -725,7 +717,7 @@ function renderWLList(){
       html+='<div style="padding:10px 14px;border-bottom:1px solid #10b98120;display:flex;align-items:center;gap:10px;cursor:pointer;" data-wl-id="'+e.id+'">'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-size:14px;font-weight:800;color:var(--txt);">'+_wlpEsc(e.horse||'')+'</div>'
-          +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'+(e.trainer||'')+(e.goingPrefs&&e.goingPrefs.length?' · '+e.goingPrefs[0]:'')+'</div>'
+          +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'+(e.trainer||'')+(function(){const _vgp=(e.goingPrefs||[]).filter(function(g){return['firm','good to firm','good','good to soft','soft','heavy','standard','standard to slow','slow'].includes((g||'').toLowerCase().trim());});return _vgp.length?' · '+_vgp[0]:'';})()+'</div>'
           +'<div style="display:flex;align-items:center;gap:5px;margin-top:4px;">'
             +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+br.col+';"></span>'
             +'<span style="font-size:10px;font-weight:700;color:'+br.col+';">'+br.label+'</span>'
@@ -1055,7 +1047,7 @@ function openWLEditReview(reviewId){
         saveLocal();
         if(typeof _supaUpsertNow==='function')_supaUpsertNow();else save();
         document.getElementById('wl-review-modal').remove();
-        if(document.getElementById('wlp-modal'))openWLProfile(r.profileId);
+        if(document.getElementById('wlp-modal')){window._wlpActiveTab='history';openWLProfile(r.profileId);}
       });
     }
   },50);
@@ -1391,7 +1383,7 @@ function saveWLReview(profileId,horse,course){
       ||window._cachedRaces||[];
     if(_rr.length)checkWatchlistRunners(_rr);
   }
-  if(document.getElementById('wlp-modal'))openWLProfile(profileId);
+  if(document.getElementById('wlp-modal')){window._wlpActiveTab='history';openWLProfile(profileId);}
 }
 
 function _wlInferFromReview(profileId, review){
@@ -2890,6 +2882,8 @@ function openWLProfile(id){
   modal.id='wlp-modal';
   modal.innerHTML=_wlpBuildHTML(e);
   document.body.appendChild(modal);
+  // Restore active tab (important when re-opening after review edit)
+  wlpTab(window._wlpActiveTab||'intel');
 }
 
 function _wlpBuildHTML(e){
@@ -2924,7 +2918,7 @@ function _wlpBuildHTML(e){
   const nextTarget=targets[0]||null;
 
   const condItems=[
-    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',label:'Going',    value:(e.goingPrefs&&e.goingPrefs.length)?e.goingPrefs[0]:'Any',   color:(e.goingPrefs&&e.goingPrefs.length)?'#4ade80':'#3a3a5c'},
+    {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',label:'Going',    value:_cleanGoingPrefs.length?_cleanGoingPrefs[0]:'Any',   color:_cleanGoingPrefs.length?'#4ade80':'#3a3a5c'},
     {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="22" y2="12"/><polyline points="8 6 2 12 8 18"/><polyline points="16 6 22 12 16 18"/></svg>',label:'Distance', value:e.distancePref||'—',  color:e.distancePref?'#38bdf8':'#3a3a5c'},
     {icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>',label:'Track',    value:e.trackPref||'—',     color:e.trackPref?'#8b5cf6':'#3a3a5c'},
   ];
@@ -3032,7 +3026,9 @@ function _wlpBuildHTML(e){
   +'</div>';
 
   // ── HERO — compact, pinned, gives race-day essentials at a glance ─────────
-  const goingPill=(e.goingPrefs&&e.goingPrefs.length)?e.goingPrefs.slice(0,2).join(' · '):'Any ground';
+  const _VALID_GOING_WLP=['firm','good to firm','good','good to soft','soft','heavy','standard','standard to slow','slow'];
+  const _cleanGoingPrefs=(e.goingPrefs||[]).filter(function(g){return _VALID_GOING_WLP.includes((g||'').toLowerCase().trim());});
+  const goingPill=_cleanGoingPrefs.length?_cleanGoingPrefs.slice(0,2).join(' · '):'Any ground';
   h+='<div class="wlp-hero">'
     +'<div class="wlp-hero-bg">🐎</div>'
     // Row 1: name + OR badge
@@ -3080,7 +3076,7 @@ function _wlpBuildHTML(e){
       // Going pref
       +'<div class="wlp-hero-metric">'
         +'<span class="wlp-hero-metric-label">Going</span>'
-        +'<div style="font-size:12px;font-weight:800;color:'+(e.goingPrefs&&e.goingPrefs.length?'#4ade80':'rgba(255,255,255,.3)')+';line-height:1.2;margin-top:2px;">'+goingPill+'</div>'
+        +'<div style="font-size:12px;font-weight:800;color:'+(_cleanGoingPrefs.length?'#4ade80':'rgba(255,255,255,.3)')+';line-height:1.2;margin-top:2px;">'+goingPill+'</div>'
       +'</div>'
     +'</div>'
   +'</div>';
@@ -3160,8 +3156,8 @@ function _wlpBuildHTML(e){
       const sorted=GOING_ORDER.filter(function(g){return uniq[g];});
       const others=Object.keys(uniq).filter(function(g){return GOING_ORDER.indexOf(g)<0;});
       idealGoing=[...sorted,...others].join(', ')||null;
-    } else if(e.goingPrefs&&e.goingPrefs.length){
-      idealGoing=e.goingPrefs.slice(0,3).join(', ');
+    } else if(_cleanGoingPrefs.length){
+      idealGoing=_cleanGoingPrefs.slice(0,3).join(', ');
     }
 
     // ── SURFACE + TYPE ───────────────────────────────────────────────────────

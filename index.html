@@ -547,6 +547,17 @@
             <div class="body-sm" style="margin-top:8px;" id="set-pv-status"></div>
           </div>
 
+          <!-- Danger Zone -->
+          <div class="blk" style="border:1px solid #ef444444;background:rgba(239,68,68,.06);">
+            <div class="bttl" style="color:#f87171;">Danger Zone</div>
+            <div class="body-mut" style="margin-bottom:12px;">Permanently delete betting history. Your bank settings, watchlist and puzzle profiles are not affected.</div>
+            <div style="display:flex;gap:9px;flex-wrap:wrap;">
+              <button class="btn" style="background:#7f1d1d;color:#fca5a5;border:1px solid #ef4444;" onclick="_clearRealBets()">Clear Real Bets</button>
+              <button class="btn" style="background:#431407;color:#fdba74;border:1px solid #fb923c;" onclick="_clearVirtBets()">Clear Virtual Bets</button>
+              <button class="btn" style="background:#450a0a;color:#f87171;border:1px solid #dc2626;" onclick="_clearAllBets()">Clear All Bets</button>
+            </div>
+          </div>
+
         </div>
 
         <!-- ── Tab: Setup ── -->

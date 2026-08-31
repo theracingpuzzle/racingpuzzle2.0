@@ -15,8 +15,9 @@ function renderRealBankMini(){
 
 function saveStartBank(){
   if(!D.bank||typeof D.bank!=='object')D.bank={start:0,current:0};
-  const val=parseFloat(document.getElementById('set-bk-start').value)||0;
-  if(!val){alert('Enter a valid amount.');return;}
+  const raw=document.getElementById('set-bk-start').value;
+  if(raw===''||raw===null){alert('Enter a starting bank amount (0 or more).');return;}
+  const val=parseFloat(raw)||0;
   D.bank.start=val;
   // If current bank hasn't been set yet, default it to starting bank
   if(!D.bank.current||D.bank.current===0)D.bank.current=val;
@@ -48,6 +49,40 @@ function resetVBank(){
   const st=document.getElementById('set-vbk-status');
   if(st){st.textContent='✓ Virtual bank reset to £'+D.vBank.start.toFixed(2);st.style.color='#fb923c';}
   setTimeout(()=>{const el=document.getElementById('set-vbk-status');if(el)el.textContent='';},3000);
+}
+
+function _clearRealBets(){
+  if(!confirm('Clear ALL real bets? This cannot be undone.\n\nYour bank and watchlist are not affected.'))return;
+  D.bets=[];
+  D.bank.current=D.bank.start||0;
+  save();updHdr();renderBkCard();renderRealBankMini();
+  const st=document.getElementById('set-bk-status');
+  if(st){st.textContent='✓ Real bets cleared';st.style.color='var(--grn)';}
+  setTimeout(()=>{const el=document.getElementById('set-bk-status');if(el)el.textContent='';},3000);
+}
+
+function _clearVirtBets(){
+  if(!confirm('Clear ALL virtual bets? This cannot be undone.'))return;
+  if(!D.vBank||typeof D.vBank!=='object')D.vBank={start:500,current:500,bets:[]};
+  D.vBank.bets=[];
+  D.vBank.current=D.vBank.start||500;
+  save();updHdr();renderVBMini();
+  const st=document.getElementById('set-vbk-status');
+  if(st){st.textContent='✓ Virtual bets cleared';st.style.color='#fb923c';}
+  setTimeout(()=>{const el=document.getElementById('set-vbk-status');if(el)el.textContent='';},3000);
+}
+
+function _clearAllBets(){
+  if(!confirm('Clear ALL real AND virtual bets?\n\nThis cannot be undone. Your bank and watchlist are not affected.'))return;
+  D.bets=[];
+  D.bank.current=D.bank.start||0;
+  if(!D.vBank||typeof D.vBank!=='object')D.vBank={start:500,current:500,bets:[]};
+  D.vBank.bets=[];
+  D.vBank.current=D.vBank.start||500;
+  save();updHdr();renderBkCard();renderRealBankMini();renderVBMini();
+  const st=document.getElementById('set-bk-status');
+  if(st){st.textContent='✓ All bets cleared';st.style.color='var(--grn)';}
+  setTimeout(()=>{const el=document.getElementById('set-bk-status');if(el)el.textContent='';},3000);
 }
 
 function loadStartBankField(){

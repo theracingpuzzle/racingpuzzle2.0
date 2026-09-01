@@ -1196,8 +1196,10 @@ function rcSwRaceCard(race, course){
           : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\',\''+esc(String(race.race_class||race.class||'').trim().replace(/^class\\s*/i,''))+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
         const _qrRes=(wlEntry&&wlEntry.myRating)?{mr:wlEntry.myRating}:(D.ratings&&D.ratings[hn]);
         const rateBtnRes='<span onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\')" class="rc-mr-chip'+(_qrRes?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qrRes?_qrRes.mr:'\u2014')+'</span>';
+        const _resSilk=r.silk_url||r.silk||'';
         return '<div class="rc-res-runner">'
           + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
+          + (_resSilk?'<img src="'+_resSilk+'" alt="" width="28" height="28" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':'')
           + '<div class="rc-runner-main">'
             + '<div class="rc-runner-name-row">'
               + '<span class="rc-runner-name">'+horse+'</span>'
@@ -1477,8 +1479,10 @@ async function rcLoadResults(){
             const ofr=r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||rcGetOFR(horse)||'';
             const posCol=pos==1?'var(--grn)':pos==2?'#60a5fa':pos==3?'#fb923c':'var(--mut)';
             const esc2=function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");};
+            const _resSilk2=r.silk_url||r.silk||'';
             return'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bdr);">'
               +'<span style="font-family:var(--font-ui);font-weight:700;font-size:14px;color:'+posCol+';min-width:20px;">'+pos+'</span>'
+              +(_resSilk2?'<img src="'+_resSilk2+'" alt="" width="28" height="28" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':'')
               +'<div class="rc-runner-body">'
                 +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
                   +'<span style="font-weight:600;font-size:13px;">'+horse+'</span>'

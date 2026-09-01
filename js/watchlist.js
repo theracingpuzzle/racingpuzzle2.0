@@ -1140,8 +1140,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
   document.getElementById('rvw-save-btn').addEventListener('click',function(){saveWLReview(profileId,horse,course);});
 
   // Auto-populate from a known race result (already fetched for Track Pulse / results tab).
-  // NOTE: results/today/free does not return beaten distance or SP, so only result + position
-  // can be pre-filled — beaten distance stays a manual field.
+  // Basic plan: results/today now returns sp and btn (beaten distance).
   if(prefillResult){
     setTimeout(function(){
       const rbtn=modal.querySelector('.rvw-btn[data-grp="result"][data-result="'+prefillResult+'"]');

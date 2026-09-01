@@ -346,7 +346,7 @@ async function loadTodayMeetings(){
   if(stEl)stEl.textContent='Loading…';
   // Credentials are server-side (Cloudflare Worker) — no client check needed
   try{
-    if(!window._todayMeetingsCache||window._todayMeetingsCacheDate!==td()){window._todayMeetingsCache=await callRacingAPI('racecards/free',{});window._todayMeetingsCacheDate=td();}
+    if(!window._todayMeetingsCache||window._todayMeetingsCacheDate!==td()){window._todayMeetingsCache=await callRacingAPI('racecards/basic',{});window._todayMeetingsCacheDate=td();}
     const data=window._todayMeetingsCache;
     const races=data.racecards||data.races||[];
     const courses=[...new Set(races.map(r=>r.course||r.venue||'').filter(Boolean))].sort();
@@ -566,11 +566,7 @@ function markStudyDone(){
 // ── Combined "Running Today" — watchlist + edge in one section ──
 // Cross-reference a watched horse against today's results cache (already fetched for Track Pulse).
 // Returns {position, result, going} once the race has actually finished, else null.
-// NOTE: results/today/free (the free-tier endpoint) does NOT return beaten distance or SP —
-// confirmed against a live runner payload (fields: horse_id, horse, age, sex, number, position,
-// draw, weight, weight_lbs, headgear, or, jockey, jockey_id, trainer, trainer_id, owner, owner_id,
-// sire, sire_id, dam, dam_id, damsire, damsire_id). Don't re-add those fields here without
-// confirming a paid/upgraded endpoint actually returns them.
+// NOTE: Now using results/today (basic plan) which adds sp and btn (beaten distance).
 function _wlFindResult(horseName, course){
   const results=window._todayResultsCache||[];
   if(!results.length)return null;
@@ -595,7 +591,9 @@ function _wlFindResult(horseName, course){
       const result=posNum===1?'win':(posNum>=2&&posNum<=3?'place':(posNum>3?'unplaced':''));
       return{
         position:String(pos),result:result,
-        going:race.going||race.going_description||''
+        going:race.going||race.going_description||'',
+        sp:r.sp||'',
+        beatenDistance:posNum>1?(r.btn||r.distance_beaten||r.beaten||''):''
       };
     }
   }
@@ -2001,7 +1999,7 @@ async function fetchTodayResults(){
   }
   // 2. Fetch from the correct results endpoint
   try{
-    const data=await callRacingAPI('results/today/free',{});
+    const data=await callRacingAPI('results/today',{});
     const res=data.results||data.racecards||data.races||[];
     if(res.length){
       window._todayResultsCache=res;
@@ -2355,7 +2353,7 @@ async function initTrackPulse(){
   window._tpRefreshTimer=setInterval(async function(){
     window._todayResultsCache=null;
     if(typeof rcSwResultsData!=='undefined')rcSwResultsData=[];
-    try{ window._todayMeetingsCache=await callRacingAPI('racecards/free',{}); }catch(e){}
+    try{ window._todayMeetingsCache=await callRacingAPI('racecards/basic',{}); }catch(e){}
     await fetchTodayResults();
     renderTrackPulse();
     if(typeof checkWatchlistRunners==='function'){

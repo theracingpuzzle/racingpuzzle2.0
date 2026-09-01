@@ -65,7 +65,7 @@ async function rcSwLoadMeetings(){
   try{
     // Credentials are server-side (Cloudflare Worker) — no client check needed
     // Share cache with today.js to avoid double-fetching
-    if(!window._todayMeetingsCache) window._todayMeetingsCache=await callRacingAPI('racecards/free',{});
+    if(!window._todayMeetingsCache) window._todayMeetingsCache=await callRacingAPI('racecards/basic',{});
     const data=window._todayMeetingsCache;
     rcSwCurrentRaces=data.racecards||data.races||[];
     if(stEl) stEl.style.display='none';
@@ -658,7 +658,7 @@ function rcSwRenderRunners(idx, course, el){
     const pid='sw-profile-'+course.replace(/\W/g,'_')+'-'+i;
     const _profileStrip=(!isNR&&!_bh&&_pm2)?'border-left:3px solid '+_pm2.col+';padding-left:11px;':'';
     return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'" style="'+_profileStrip+'">'
-      +'<div class="rc-cloth">'+(isNR?'<span class="rc-nr-chip">NR</span>':'<span>'+no+'</span>')+'</div>'
+      +'<div class="rc-cloth">'+(isNR?'<span class="rc-nr-chip">NR</span>':(r.silk_url||r.silk)?'<img src="'+(r.silk_url||r.silk)+'" alt="'+no+'" width="32" height="32" style="object-fit:contain;display:block;" onerror="this.outerHTML=\'<span>'+no+'</span>\'">':'<span>'+no+'</span>')+'</div>'
       +'<div class="rc-runner-body">'
         +(function(){
           const _wl=getWL();const _nl=(name||'').toLowerCase().trim();
@@ -691,8 +691,10 @@ function rcSwRenderRunners(idx, course, el){
               +(_suffix?'<span style="opacity:.8;">'+_suffix+'</span>':'')
               +'</span>';
           }());
+          const _hg=r.headgear||r.head_gear||'';
           return'<div class="rc-runner-name-row">'
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'
+            +(_hg?'<span style="font-size:10px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);border-radius:4px;padding:1px 5px;margin-left:3px;letter-spacing:.03em;">'+_hg+'</span>':'')
             +(age?'<span class="rc-runner-age" style="font-size:0.72em;color:var(--mut);margin-left:4px;">'+age+'</span>':'')
             +(rpr?'<span class="rc-or">'+rpr+'</span>':'')
             +(!isNR?'<span onclick="rcQuickRate(event,\''+name.replace(/'/g,"\\'")+'\',\''+rpr+'\')" class="rc-mr-chip'+((_qr2)?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qr2?_qr2.mr:'—')+'</span>':'')
@@ -704,9 +706,11 @@ function rcSwRenderRunners(idx, course, el){
             ?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Form</span><span class="rc-runner-form" style="margin-bottom:0;">'+form+'</span></div>'
             :'');
         }())
-        +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
-        +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
+        +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+(r.jockey_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.jockey_rtf+'</span>':'')+'</span></div>':'')
+        +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+(r.trainer_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.trainer_rtf+'</span>':'')+'</span></div>':'')
         +(wt?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Weight</span><span class="rc-runner-jt">'+wt+'</span></div>':'')
+        +(r.dslr!=null&&r.dslr!==''?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Last run</span><span class="rc-runner-jt">'+r.dslr+' days ago</span></div>':'')
+        +(r.owner?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Owner</span><span class="rc-runner-jt" style="color:var(--mut);">'+r.owner+'</span></div>':'')
       +'</div>'
       +'<div class="rc-runner-actions">'
         +(isNR?''
@@ -1082,7 +1086,7 @@ async function rcSwLoadResults(){
   if(listEl) listEl.innerHTML = '';
   if(filterEl) filterEl.style.display = 'none';
   try{
-    const data = await callRacingAPI('results/today/free', {});
+    const data = await callRacingAPI('results/today', {});
     rcSwResultsData = data.results||data.races||[];
     if(rcSwResultsData.length){const _s=rcSwResultsData[0];console.log('[Results] first race keys:',Object.keys(_s),'dist fields:',{distance_f:_s.distance_f,distance_round:_s.distance_round,distance:_s.distance,dist:_s.dist,distance_furlongs:_s.distance_furlongs,distance_yards:_s.distance_yards});}
     if(stEl) stEl.style.display = 'none';
@@ -1142,11 +1146,13 @@ function rcSwRaceCard(race, course){
         var _g=race.going||'';
         var _d=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||race.distance_furlongs||race.distance_yards||'');
         var _p=race.prize||race.total_prize_money||'';
+        var _wt=race.win_time||race.winning_time||'';
         const items=[
           _g?{lbl:'Going',val:_g}:null,
           _d?{lbl:'Distance',val:_d}:null,
           _raceClass?{lbl:'Class',val:'Class '+_raceClass}:null,
           _p?{lbl:'Prize',val:_p}:null,
+          _wt?{lbl:'Time',val:_wt}:null,
         ].filter(Boolean);
         return items.length?'<div class="rc-info-bar">'+items.map(function(it){return'<div class="rc-info-item"><div class="rc-info-lbl">'+it.lbl+'</div><div class="rc-info-val">'+it.val+'</div></div>';}).join('')+'</div>':'';
       }())
@@ -1201,6 +1207,7 @@ function rcSwRaceCard(race, course){
             + '</div>'
             + (jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
             + (trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
+            + (pos>1&&(r.btn||r.distance_beaten||r.beaten)?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Beaten</span><span class="rc-runner-jt" style="color:var(--mut);">'+(r.btn||r.distance_beaten||r.beaten)+'</span></div>':'')
           + '</div>'
           + '<div class="rc-runner-right">'
             + (sp?'<span class="rc-sp">'+sp+'</span>':'')
@@ -1435,7 +1442,7 @@ async function rcLoadResults(){
   const el=document.getElementById('rc-results-list');
   if(el)el.innerHTML='';
   try{
-    const data=await callRacingAPI('results/today/free',{});
+    const data=await callRacingAPI('results/today',{});
     const results=data.results||data.races||[];
     rcSetStatus('');
     autoMatchBetResults(results);
@@ -1840,7 +1847,8 @@ function rcSlRenderCard(){
     +'</div>';
   }
 
-  // ── Silk colours derived from horse name (deterministic) ──
+  // ── Silk: use real image from API, fall back to generated SVG ──
+  const _silkUrl=r.silk_url||r.silk||r.colours_url||r.color_url||'';
   const _slkC=(function(str){
     let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}
     const P=[
@@ -1853,25 +1861,31 @@ function rcSlRenderCard(){
     return P[Math.abs(h)%P.length];
   })(name);
 
-  // Large Top-Trumps silk SVG
-  const silkSVG='<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">'
-    // body/silhouette
-    +'<ellipse cx="60" cy="62" rx="34" ry="38" fill="'+_slkC.body+'"/>'
-    // sash / accent stripe
-    +'<path d="M26 62 Q60 48 94 62 Q60 76 26 62Z" fill="'+_slkC.accent+'" opacity=".7"/>'
-    // cap
-    +'<ellipse cx="60" cy="30" rx="18" ry="10" fill="'+_slkC.body+'"/>'
-    +'<rect x="42" y="26" width="36" height="8" rx="4" fill="'+_slkC.accent+'"/>'
-    // head
-    +'<circle cx="60" cy="22" r="12" fill="#f5d0a9"/>'
-    // goggles
-    +'<ellipse cx="55" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
-    +'<ellipse cx="65" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
-    +'<line x1="60" y1="21" x2="60" y2="21" stroke="rgba(0,0,0,.3)" stroke-width="2"/>'
-    // saddle cloth number
-    +'<rect x="44" y="72" width="32" height="20" rx="5" fill="rgba(0,0,0,.25)"/>'
-    +'<text x="60" y="87" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#fff">'+no+'</text>'
-  +'</svg>';
+  // Large Top-Trumps silk — real image preferred, generated SVG fallback
+  const silkSVG=_silkUrl
+    ?'<img src="'+_silkUrl+'" alt="silk" width="120" height="120" style="object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4));" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">'
+     +'<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none;">'
+       +'<ellipse cx="60" cy="62" rx="34" ry="38" fill="'+_slkC.body+'"/>'
+       +'<path d="M26 62 Q60 48 94 62 Q60 76 26 62Z" fill="'+_slkC.accent+'" opacity=".7"/>'
+       +'<ellipse cx="60" cy="30" rx="18" ry="10" fill="'+_slkC.body+'"/>'
+       +'<rect x="42" y="26" width="36" height="8" rx="4" fill="'+_slkC.accent+'"/>'
+       +'<circle cx="60" cy="22" r="12" fill="#f5d0a9"/>'
+       +'<ellipse cx="55" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
+       +'<ellipse cx="65" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
+       +'<rect x="44" y="72" width="32" height="20" rx="5" fill="rgba(0,0,0,.25)"/>'
+       +'<text x="60" y="87" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#fff">'+no+'</text>'
+     +'</svg>'
+    :'<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">'
+       +'<ellipse cx="60" cy="62" rx="34" ry="38" fill="'+_slkC.body+'"/>'
+       +'<path d="M26 62 Q60 48 94 62 Q60 76 26 62Z" fill="'+_slkC.accent+'" opacity=".7"/>'
+       +'<ellipse cx="60" cy="30" rx="18" ry="10" fill="'+_slkC.body+'"/>'
+       +'<rect x="42" y="26" width="36" height="8" rx="4" fill="'+_slkC.accent+'"/>'
+       +'<circle cx="60" cy="22" r="12" fill="#f5d0a9"/>'
+       +'<ellipse cx="55" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
+       +'<ellipse cx="65" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
+       +'<rect x="44" y="72" width="32" height="20" rx="5" fill="rgba(0,0,0,.25)"/>'
+       +'<text x="60" y="87" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#fff">'+no+'</text>'
+     +'</svg>';
 
   uiEl.innerHTML=toggleHTML
     +'<div id="rc-sl-card-wrap">'

@@ -711,6 +711,18 @@ function rcSwRenderRunners(idx, course, el){
         +(wt?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Weight</span><span class="rc-runner-jt">'+wt+'</span></div>':'')
         +(r.dslr!=null&&r.dslr!==''?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Last run</span><span class="rc-runner-jt">'+r.dslr+' days ago</span></div>':'')
         +(r.owner?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Owner</span><span class="rc-runner-jt" style="color:var(--mut);">'+r.owner+'</span></div>':'')
+        +(function(){
+          const _cmt=(r.comment||r.spotlight||'').trim();
+          if(!_cmt)return'';
+          const _cid='rc-cmt-'+course.replace(/\W/g,'_')+'-'+i;
+          return'<div style="margin-top:4px;">'
+            +'<button onclick="event.stopPropagation();(function(){var b=document.getElementById(\''+_cid+'\');var a=document.getElementById(\''+_cid+'-arr\');if(!b)return;var open=b.style.display===\'block\';b.style.display=open?\'none\':\'block\';a.style.transform=open?\'rotate(0deg)\':\'rotate(180deg)\';})()" style="display:flex;align-items:center;gap:5px;background:none;border:none;padding:2px 0;cursor:pointer;">'
+              +'<span style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);">Spotlight</span>'
+              +'<span id="'+_cid+'-arr" style="font-size:11px;color:var(--mut);display:inline-block;transition:transform .2s;">▾</span>'
+            +'</button>'
+            +'<div id="'+_cid+'" style="display:none;font-size:12px;line-height:1.6;color:var(--txt);padding:4px 0 2px;">'+_cmt+'</div>'
+          +'</div>';
+        })()
       +'</div>'
       +'<div class="rc-runner-actions">'
         +(isNR?''

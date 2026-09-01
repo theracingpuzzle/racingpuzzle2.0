@@ -734,6 +734,14 @@ function rcSwRenderRunners(idx, course, el){
     +(_pr2?'<div id="'+pid+'" class="rc-profile-panel" style="display:none;">'+rcProfilePanelHtml(_pr2,pid)+'</div>':'')
     +'</div>';
   }).join('');
+  // Headgear key — only if any runner has headgear
+  const _hasHG=runners.some(function(r){return !!(r.headgear||r.head_gear);});
+  if(_hasHG){
+    html+='<div style="padding:8px 14px 4px;font-size:10px;color:var(--mut);line-height:1.8;border-top:1px solid var(--bdr);">'
+      +'<span style="font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-right:6px;">Headgear:</span>'
+      +'b Blinkers · p Cheekpieces · v Visor · h Hood · t Tongue tie · e Eye shield · ow Overreach boots'
+    +'</div>';
+  }
   el.innerHTML=html;
 }
 
@@ -1205,7 +1213,7 @@ function rcSwRaceCard(race, course){
         const _eyeSvg='<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>';
         const watchBtn = wlEntry
           ? '<button class="rc-act-btn" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.1);color:var(--grn);" title="Watching">'+_eyeSvg+'</button>'
-          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\',\''+esc(String(race.race_class||race.class||'').trim().replace(/^class\\s*/i,''))+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
+          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\',\''+esc(String(race.race_class||race.class||'').trim().replace(/^class\\s*/i,''))+'\',\''+esc(r.silk_url||r.silk||'')+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
         const _qrRes=(wlEntry&&wlEntry.myRating)?{mr:wlEntry.myRating}:(D.ratings&&D.ratings[hn]);
         const rateBtnRes='<span onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\')" class="rc-mr-chip'+(_qrRes?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qrRes?_qrRes.mr:'\u2014')+'</span>';
         const _resSilk=r.silk_url||r.silk||'';
@@ -1503,7 +1511,7 @@ async function rcLoadResults(){
                 +'<div style="font-size:11px;color:var(--mut);">'+jock+'</div>'
               +'</div>'
               +'<span class="rc-sp">'+sp+'</span>'
-              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\',\''+esc2(race.going||'')+'\',\''+esc2(time)+'\',\''+esc2(race.date||td())+'\',\''+esc2(formatDist(race.distance_f||race.distance_round||race.distance||race.dist||''))+'\',\''+String(pos)+'\',\''+esc2(String(race.race_class||race.class||''))+'\')" class="rc-watch-btn-sm">W</button>'
+              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\',\''+esc2(race.going||'')+'\',\''+esc2(time)+'\',\''+esc2(race.date||td())+'\',\''+esc2(formatDist(race.distance_f||race.distance_round||race.distance||race.dist||''))+'\',\''+String(pos)+'\',\''+esc2(String(race.race_class||race.class||''))+'\',\''+esc2(r.silk_url||r.silk||'')+'\')" class="rc-watch-btn-sm">W</button>'
               +'</div>';
           }).join('')
           +'</div>';
@@ -1514,7 +1522,7 @@ async function rcLoadResults(){
   }
 }
 
-function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, time, date, distF, position, raceClass){
+function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, time, date, distF, position, raceClass, silkUrl){
   var posNum=parseInt(position)||0;
   var resultVal=posNum===1?'win':posNum>=2&&posNum<=3?'place':posNum>3?'unplaced':'watched';
   var cleanClass=String(raceClass||'').trim().replace(/^class\s*/i,'');
@@ -1523,6 +1531,7 @@ function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, 
     horse:         horse,
     trainer:       trainer,
     currentRating: ofr||'',
+    silkUrl:       silkUrl||'',
     firstSighting: {
       date:    date||td(),
       course:  course||'',
@@ -1948,8 +1957,16 @@ function rcSlRenderCard(){
         +'</div>'
       +'</div>'
 
+      // Comment / Spotlight — always visible above stats grid
+      +(r.comment||r.spotlight?
+        '<div style="padding:10px 14px 12px;border-top:2px solid '+_slkC.body+';background:rgba(245,158,11,.04);">'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#f59e0b;margin-bottom:5px;">Spotlight</div>'
+          +'<div style="font-size:12px;line-height:1.65;color:var(--txt);">'+(r.comment||r.spotlight||'').trim()+'</div>'
+        +'</div>'
+       :'')
+
       // Stats grid — Top Trumps style rows
-      +'<div style="display:grid;grid-template-columns:1fr 1fr;border-top:2px solid '+_slkC.body+';">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;border-top:'+(r.comment||r.spotlight?'1px':'2px')+' solid '+(r.comment||r.spotlight?'var(--bdr)':_slkC.body)+';">'
         +(sp?'<div style="padding:10px 14px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">'
           +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Price</div>'
           +'<div style="font-size:18px;font-weight:900;font-family:var(--font);color:var(--gld);">'+sp+'</div>'
@@ -1967,21 +1984,6 @@ function rcSlRenderCard(){
           +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+trainer+'</div>'
         +'</div>':'')
       +'</div>'
-
-      // Comment / Spotlight — expandable
-      +(r.comment||r.spotlight?
-        (function(){
-          const _cmt=(r.comment||r.spotlight||'').trim();
-          const _cid='rc-sl-cmt-'+_rcSlIdx;
-          return'<div style="border-top:1px solid var(--bdr);">'
-            +'<button onclick="(function(){var b=document.getElementById(\''+_cid+'\');var a=document.getElementById(\''+_cid+'-arr\');if(!b)return;var open=b.style.display===\'block\';b.style.display=open?\'none\':\'block\';a.style.transform=open?\'rotate(0deg)\':\'rotate(180deg)\';a.style.transition=\'transform .2s\';})()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:none;border:none;cursor:pointer;">'
-              +'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);">Spotlight</span>'
-              +'<span id="'+_cid+'-arr" style="font-size:12px;color:var(--mut);line-height:1;display:inline-block;">▾</span>'
-            +'</button>'
-            +'<div id="'+_cid+'" style="display:none;padding:0 14px 12px;font-size:12px;line-height:1.6;color:var(--txt);">'+_cmt+'</div>'
-          +'</div>';
-        })()
-       :'')
 
       // Profile panel (if horse is in Profiler)
       +profHtml

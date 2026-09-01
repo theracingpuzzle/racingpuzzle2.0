@@ -1209,7 +1209,7 @@ function rcSwRaceCard(race, course){
             + '</div>'
             + (jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
             + (trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
-            + (pos>1&&(r.btn||r.distance_beaten||r.beaten)?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Beaten</span><span class="rc-runner-jt" style="color:var(--mut);">'+(r.btn||r.distance_beaten||r.beaten)+'</span></div>':'')
+            + (pos>1&&(r.ovr_btn||r.btn||r.distance_beaten||r.beaten)?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Beaten</span><span class="rc-runner-jt" style="color:var(--mut);">'+(r.ovr_btn||r.btn||r.distance_beaten||r.beaten)+'</span></div>':'')
           + '</div>'
           + '<div class="rc-runner-right">'
             + (sp?'<span class="rc-sp">'+sp+'</span>':'')
@@ -1955,6 +1955,21 @@ function rcSlRenderCard(){
           +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+trainer+'</div>'
         +'</div>':'')
       +'</div>'
+
+      // Comment / Spotlight — expandable
+      +(r.comment||r.spotlight?
+        (function(){
+          const _cmt=(r.comment||r.spotlight||'').trim();
+          const _cid='rc-sl-cmt-'+_rcSlIdx;
+          return'<div style="border-top:1px solid var(--bdr);">'
+            +'<button onclick="(function(){var b=document.getElementById(\''+_cid+'\');var a=document.getElementById(\''+_cid+'-arr\');if(!b)return;var open=b.style.display===\'block\';b.style.display=open?\'none\':\'block\';a.style.transform=open?\'rotate(0deg)\':\'rotate(180deg)\';a.style.transition=\'transform .2s\';})()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:none;border:none;cursor:pointer;">'
+              +'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);">Spotlight</span>'
+              +'<span id="'+_cid+'-arr" style="font-size:12px;color:var(--mut);line-height:1;display:inline-block;">▾</span>'
+            +'</button>'
+            +'<div id="'+_cid+'" style="display:none;padding:0 14px 12px;font-size:12px;line-height:1.6;color:var(--txt);">'+_cmt+'</div>'
+          +'</div>';
+        })()
+       :'')
 
       // Profile panel (if horse is in Profiler)
       +profHtml

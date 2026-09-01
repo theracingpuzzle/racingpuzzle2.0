@@ -593,7 +593,7 @@ function _wlFindResult(horseName, course){
         position:String(pos),result:result,
         going:race.going||race.going_description||'',
         sp:r.sp||'',
-        beatenDistance:posNum>1?(r.btn||r.distance_beaten||r.beaten||''):''
+        beatenDistance:posNum>1?(r.ovr_btn||r.btn||r.distance_beaten||r.beaten||''):''
       };
     }
   }

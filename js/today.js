@@ -349,6 +349,7 @@ async function loadTodayMeetings(){
     if(!window._todayMeetingsCache||window._todayMeetingsCacheDate!==td()){window._todayMeetingsCache=await callRacingAPI('racecards/basic',{});window._todayMeetingsCacheDate=td();}
     const data=window._todayMeetingsCache;
     const races=data.racecards||data.races||[];
+    if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(races);
     const courses=[...new Set(races.map(r=>r.course||r.venue||'').filter(Boolean))].sort();
     const current=getTracks();
     const listEl=document.getElementById('t-meetings-list');
@@ -2003,6 +2004,7 @@ async function fetchTodayResults(){
     const res=data.results||data.racecards||data.races||[];
     if(res.length){
       window._todayResultsCache=res;
+      if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(res);
       // Share with racecards so Results tab benefits too
       if(typeof rcSwResultsData!=='undefined')rcSwResultsData=res;
       return res;

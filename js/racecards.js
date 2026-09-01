@@ -68,6 +68,7 @@ async function rcSwLoadMeetings(){
     if(!window._todayMeetingsCache) window._todayMeetingsCache=await callRacingAPI('racecards/basic',{});
     const data=window._todayMeetingsCache;
     rcSwCurrentRaces=data.racecards||data.races||[];
+    if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(rcSwCurrentRaces);
     if(stEl) stEl.style.display='none';
     if(!rcSwCurrentRaces.length){
       if(uiEl) uiEl.innerHTML='<div class="rc-empty">No racecards available.</div>';
@@ -1468,6 +1469,7 @@ async function rcLoadResults(){
     const results=data.results||data.races||[];
     rcSetStatus('');
     autoMatchBetResults(results);
+    if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(results);
     if(!results.length){
       if(el)el.innerHTML='<div class="rc-empty">No results yet today.</div>';
       return;

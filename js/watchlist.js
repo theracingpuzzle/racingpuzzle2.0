@@ -522,6 +522,46 @@ function _applyWLFilter(entries){
   return entries;
 }
 
+// ── Patch silk URLs from API runner data into watchlist profiles ──
+function wlPatchSilksFromRunners(races){
+  if(!races||!races.length)return;
+  const wl=getWL();
+  let changed=false;
+  races.forEach(function(race){
+    (race.runners||[]).forEach(function(r){
+      const silk=r.silk_url||r.silk||'';
+      if(!silk)return;
+      const name=(r.horse||r.name||'').toLowerCase().trim();
+      if(!name)return;
+      const entry=wl.find(function(e){return(e.horse||'').toLowerCase().trim()===name;});
+      if(entry&&!entry.silkUrl){entry.silkUrl=silk;changed=true;}
+    });
+  });
+  if(changed){D.watchlist=wl;save();}
+}
+
+async function wlFetchAndPatchSilks(){
+  const btn=document.getElementById('wl-fetch-silks-btn');
+  if(btn){btn.textContent='Fetching…';btn.disabled=true;}
+  try{
+    const [todayData,yestData,cardsData]=await Promise.allSettled([
+      callRacingAPI('results/today',{}),
+      callRacingAPI('results/yesterday',{}),
+      callRacingAPI('racecards/basic',{})
+    ]);
+    const allRaces=[
+      ...((todayData.status==='fulfilled'&&(todayData.value.results||todayData.value.races))||[]),
+      ...((yestData.status==='fulfilled'&&(yestData.value.results||yestData.value.races))||[]),
+      ...((cardsData.status==='fulfilled'&&(cardsData.value.racecards||cardsData.value.races))||[])
+    ];
+    wlPatchSilksFromRunners(allRaces);
+    const patched=getWL().filter(function(e){return e.silkUrl;}).length;
+    if(btn){btn.textContent='✓ Done ('+patched+' silks)';setTimeout(function(){renderWatchlist();},1200);}
+  }catch(e){
+    if(btn){btn.textContent='⚠ Error';btn.disabled=false;}
+  }
+}
+
 // ── Silk colour palette — deterministic from horse name ──
 function _silkColors(str){
   let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}
@@ -673,12 +713,17 @@ function renderWLList(){
   const readyCount=getWL().filter(function(e){return e.betReadiness==='ready';}).length;
 
   // ── Stats strip ──
+  const _silkCount=getWL().filter(function(e){return e.silkUrl;}).length;
+  const _noSilkCount=total-_silkCount;
   html+='<div class="wll-stats">'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--gld2);">'+total+'</div><div class="wll-stat-l">Profiles</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:#10b981;">'+readyCount+'</div><div class="wll-stat-l">Ready</div></div>'
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--ora);">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
     +'<div class="wll-stat" onclick="wlShowRatedList()" style="cursor:pointer;" title="View all rated horses"><div class="wll-stat-n" style="color:#d97706;">'+totalMR+'</div><div class="wll-stat-l" style="color:#d97706;">Rated ›</div></div>'
-  +'</div>';
+  +'</div>'
+  +(_noSilkCount>0
+    ?'<div style="padding:0 14px 10px;"><button id="wl-fetch-silks-btn" onclick="wlFetchAndPatchSilks()" style="width:100%;padding:8px;border-radius:9px;border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.08);color:#f59e0b;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.03em;">🎨 Fetch Silks for '+_noSilkCount+' profile'+(  _noSilkCount===1?'':'s')+'</button></div>'
+    :'');
   // ── Running Today — pinned section ───────────────────────────────────────
   const _todayRaces=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
   // Build map: horse name → set of trainers running today
@@ -3065,9 +3110,14 @@ function _wlpBuildHTML(e){
           +'</div>';
         })()
       +'</div>'
-      +'<div class="wlp-or-box" style="flex-shrink:0;">'
-        +'<span class="wlp-or-label">OR</span>'
-        +(or?'<span class="wlp-or-value">'+or+'</span>':'<span class="wlp-or-na">—</span>')
+      +'<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">'
+        +(e.silkUrl
+          ?'<img src="'+esc(e.silkUrl)+'" alt="silk" width="44" height="44" style="object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));" onerror="this.style.display=\'none\'">'
+          :'')
+        +'<div class="wlp-or-box">'
+          +'<span class="wlp-or-label">OR</span>'
+          +(or?'<span class="wlp-or-value">'+or+'</span>':'<span class="wlp-or-na">—</span>')
+        +'</div>'
       +'</div>'
     +'</div>'
     // ── 3-metric strip (the race-day decision strip) ──────────────────────

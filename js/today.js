@@ -837,6 +837,8 @@ async function checkWatchlistRunners(races){
         :(_riOrBet||raceMinsPast)
           ?'<button data-wlid="'+wid+'" data-horse="'+a.horse+'" data-course="'+a.course+'" data-time="'+a.time+'" data-race="'+(a.raceName||'')+'" data-dist="'+(a.raceDist||'')+'" data-going="'+(a.raceGoing||'')+'" data-class="'+(a.raceClass||'')+'"'
             +(_riOrBet?' data-result="'+_riOrBet.result+'" data-pos="'+(_riOrBet.position||'')+'"':'')
+            +(ri&&ri.beatenDistance?' data-beaten="'+(ri.beatenDistance||'')+'"':'')
+            +(ri&&ri.sp?' data-sp="'+(ri.sp||'')+'"':'')
             +' class="t-wl-review-btn t-review-btn"'+(ri?' style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.35);color:var(--grn);"':'')+'>'
             +(ri?'✓ Confirm Review':'Review ✍️')+'</button>'
           :'';
@@ -997,7 +999,9 @@ async function checkWatchlistRunners(races){
         +' data-dist="'+(_raceDist||'')+'"'
         +' data-going="'+(a.raceGoing||'')+'"'
         +' data-class="'+(a.raceClass||'')+'"'
-        +(_riOrBet?' data-result="'+_riOrBet.result+'" data-pos="'+(_riOrBet.position||'')+'"':'');
+        +(_riOrBet?' data-result="'+_riOrBet.result+'" data-pos="'+(_riOrBet.position||'')+'"':'')
+        +(ri&&ri.beatenDistance?' data-beaten="'+(ri.beatenDistance||'')+'"':'')
+        +(ri&&ri.sp?' data-sp="'+(ri.sp||'')+'"':'');
 
       const _selId='tsel_'+(a.horse+a.time).replace(/[^a-zA-Z0-9]/g,'_');
       const _isSelected=_todaySelected.has(_selId);
@@ -1310,7 +1314,9 @@ async function checkWatchlistRunners(races){
           btn.getAttribute('data-going')||'',
           btn.getAttribute('data-class')||'',
           btn.getAttribute('data-result')||'',
-          btn.getAttribute('data-pos')||''
+          btn.getAttribute('data-pos')||'',
+          btn.getAttribute('data-beaten')||'',
+          btn.getAttribute('data-sp')||''
         );
       });
     });

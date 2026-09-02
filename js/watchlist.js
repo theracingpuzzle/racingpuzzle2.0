@@ -1097,7 +1097,7 @@ function openWLEditReview(reviewId){
     }
   },50);
 }
-function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,raceGoing,raceClass,prefillResult,prefillPos){
+function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,raceGoing,raceClass,prefillResult,prefillPos,prefillBeaten,prefillSP){
   const existing=document.getElementById('wl-review-modal');if(existing)existing.remove();
   const wl=getWL();
   const entry=wl.find(function(x){return x.id===profileId;});
@@ -1166,15 +1166,18 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
       +'<div class="fg" id="rvw-beaten-row"><label>Beaten Distance</label><input type="text" id="rvw-beaten" placeholder="e.g. 2.5L"></div>'
     +'</div>'
     +'<div class="fg" id="rvw-odds-row"><label>Odds</label><input type="text" id="rvw-odds" placeholder="e.g. 7/2 or 4.50"></div>'
-    +'<div class="fg" id="rvw-verdict-row"><label>Verdict</label><div class="rvw-btn-group">'
-    +[{k:'upgrade',col:'var(--grn)',lbl:'Upgrade ↑'},{k:'hold',col:'var(--blu)',lbl:'Hold →'},{k:'downgrade',col:'var(--red)',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="--rvw-col:'+v.col+'" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
-    +'</div></div>'
-    +(currentMR?'<div class="fg"><label>MR Adjustment <span style="color:var(--mut);font-weight:400;">(current: '+currentMR+')</span></label><input type="number" id="rvw-mr-adj" placeholder="e.g. 5 or -3" oninput="_rvwUpdateSignals()"></div>':'<input type="hidden" id="rvw-mr-adj" value="0">')
-    +'<div class="fg"><label>Bet Readiness</label><div class="rvw-btn-group" id="rvw-readiness-row">'
-    +BR_STAGES.map(function(s){const isCur=(entry&&(entry.betReadiness||'watching')===s.id);return'<button data-readiness="'+s.id+'" data-grp="readiness" class="rvw-btn" style="--rvw-col:'+s.col+';'+(isCur?'opacity:1':'opacity:0.4')+'" data-selected="'+(isCur?'1':'')+'" onclick="wlRvwToggle(this)">'+s.label+'</button>';}).join('')
-    +'</div></div>'
-    +'<div id="rvw-signals" style="margin:4px 0 2px;"></div>'
     +'<div class="fg"><label>Notes</label><textarea id="rvw-notes" placeholder="What you saw, sectionals, paddock notes…" style="min-height:64px;"></textarea></div>'
+    +'<div style="margin:14px 0 10px;border-top:1px solid var(--bdr);padding-top:14px;">'
+      +'<div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:12px;">Your Assessment</div>'
+      +'<div class="fg" id="rvw-verdict-row"><label>Verdict</label><div class="rvw-btn-group">'
+      +[{k:'upgrade',col:'var(--grn)',lbl:'Upgrade ↑'},{k:'hold',col:'var(--blu)',lbl:'Hold →'},{k:'downgrade',col:'var(--red)',lbl:'Downgrade ↓'}].map(function(v){return'<button data-verdict="'+v.k+'" data-grp="verdict" class="rvw-btn" style="--rvw-col:'+v.col+'" onclick="wlRvwToggle(this)">'+v.lbl+'</button>';}).join('')
+      +'</div></div>'
+      +(currentMR?'<div class="fg"><label>MR Adjustment <span style="color:var(--mut);font-weight:400;">(current: '+currentMR+')</span></label><input type="number" id="rvw-mr-adj" placeholder="e.g. 5 or -3" oninput="_rvwUpdateSignals()"></div>':'<input type="hidden" id="rvw-mr-adj" value="0">')
+      +'<div class="fg"><label>Bet Readiness</label><div class="rvw-btn-group" id="rvw-readiness-row">'
+      +BR_STAGES.map(function(s){const isCur=(entry&&(entry.betReadiness||'watching')===s.id);return'<button data-readiness="'+s.id+'" data-grp="readiness" class="rvw-btn" style="--rvw-col:'+s.col+';'+(isCur?'opacity:1':'opacity:0.4')+'" data-selected="'+(isCur?'1':'')+'" onclick="wlRvwToggle(this)">'+s.label+'</button>';}).join('')
+      +'</div></div>'
+      +'<div id="rvw-signals" style="margin:4px 0 2px;"></div>'
+    +'</div>'
     +'<div style="display:flex;gap:8px;margin-top:4px;">'
     +'<button id="rvw-save-btn" class="btn bgld" style="flex:1;">Save Review</button>'
     +'<button onclick="document.getElementById(\'wl-review-modal\').remove()" class="btn bout">Cancel</button>'
@@ -1192,7 +1195,10 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
       if(rbtn)wlRvwToggle(rbtn);
       const posEl=document.getElementById('rvw-pos');
       if(posEl&&prefillPos)posEl.value=prefillPos;
-      // Flag the banner so the user knows this was pre-filled, not manually entered
+      const beatenEl=document.getElementById('rvw-beaten');
+      if(beatenEl&&prefillBeaten)beatenEl.value=prefillBeaten;
+      const oddsEl=document.getElementById('rvw-odds');
+      if(oddsEl&&prefillSP)oddsEl.value=prefillSP;
       const sub=modal.querySelector('.wlr-sub');
       if(sub)sub.innerHTML+=' <span style="color:var(--grn);font-weight:700;">· Auto-filled from result ⚡</span>';
     },0);

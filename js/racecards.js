@@ -659,7 +659,7 @@ function rcSwRenderRunners(idx, course, el){
     const pid='sw-profile-'+course.replace(/\W/g,'_')+'-'+i;
     const _profileStrip=(!isNR&&!_bh&&_pm2)?'border-left:3px solid '+_pm2.col+';padding-left:11px;':'';
     return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'" style="'+_profileStrip+'">'
-      +'<div class="rc-cloth">'+(isNR?'<span class="rc-nr-chip">NR</span>':(r.silk_url||r.silk)?'<img src="'+(r.silk_url||r.silk)+'" alt="'+no+'" width="32" height="32" style="object-fit:contain;display:block;" onerror="this.outerHTML=\'<span>'+no+'</span>\'">':'<span>'+no+'</span>')+'</div>'
+      +'<div class="rc-cloth">'+(isNR?'<span class="rc-nr-chip">NR</span>':(r.silk_url||r.silk)?'<img src="'+(r.silk_url||r.silk)+'" alt="'+no+'" width="44" height="44" style="object-fit:contain;display:block;" onerror="this.outerHTML=\'<span>'+no+'</span>\'">':'<span>'+no+'</span>')+'</div>'
       +'<div class="rc-runner-body">'
         +(function(){
           const _wl=getWL();const _nl=(name||'').toLowerCase().trim();
@@ -1220,7 +1220,7 @@ function rcSwRaceCard(race, course){
         const _resSilk=r.silk_url||r.silk||'';
         return '<div class="rc-res-runner">'
           + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
-          + (_resSilk?'<img src="'+_resSilk+'" alt="" width="28" height="28" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':'')
+          + (_resSilk?'<img src="'+_resSilk+'" alt="" width="48" height="48" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':'')
           + '<div class="rc-runner-main">'
             + '<div class="rc-runner-name-row">'
               + '<span class="rc-runner-name">'+horse+'</span>'
@@ -1504,7 +1504,7 @@ async function rcLoadResults(){
             const _resSilk2=r.silk_url||r.silk||'';
             return'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bdr);">'
               +'<span style="font-family:var(--font-ui);font-weight:700;font-size:14px;color:'+posCol+';min-width:20px;">'+pos+'</span>'
-              +(_resSilk2?'<img src="'+_resSilk2+'" alt="" width="28" height="28" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':'')
+              +(_resSilk2?'<img src="'+_resSilk2+'" alt="" width="48" height="48" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':'')
               +'<div class="rc-runner-body">'
                 +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
                   +'<span style="font-weight:600;font-size:13px;">'+horse+'</span>'

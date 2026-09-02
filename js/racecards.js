@@ -1976,24 +1976,26 @@ function rcSlRenderCard(){
         +'</div>'
        :'')
 
-      // Stats grid — Top Trumps style rows
+      // Stats grid — Form/Weight then Jockey/Trainer
       +'<div style="display:grid;grid-template-columns:1fr 1fr;border-top:'+(r.comment||r.spotlight?'1px':'2px')+' solid '+(r.comment||r.spotlight?'var(--bdr)':_slkC.body)+';">'
-        +(sp?'<div style="padding:10px 14px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">'
-          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Price</div>'
-          +'<div style="font-size:18px;font-weight:900;font-family:var(--font);color:var(--gld);">'+sp+'</div>'
-        +'</div>':'<div style="border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);"></div>')
-        +(form?'<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">'
+        // Row 1: Form | Weight
+        +'<div style="padding:10px 14px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">'
           +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Form</div>'
-          +'<div style="font-size:15px;font-weight:800;letter-spacing:3px;color:var(--txt);font-family:var(--font-ui);">'+form+'</div>'
-        +'</div>':'<div style="border-bottom:1px solid var(--bdr);"></div>')
-        +(jock?'<div style="padding:10px 14px;border-right:1px solid var(--bdr);'+(trainer?'border-bottom:1px solid var(--bdr);':'')+'">'
+          +'<div style="font-size:15px;font-weight:800;letter-spacing:3px;color:var(--txt);font-family:var(--font-ui);">'+(form||'—')+'</div>'
+        +'</div>'
+        +'<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Weight</div>'
+          +'<div style="font-size:14px;font-weight:700;color:var(--txt);">'+(wt||'—')+'</div>'
+        +'</div>'
+        // Row 2: Jockey | Trainer
+        +'<div style="padding:10px 14px;border-right:1px solid var(--bdr);">'
           +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Jockey</div>'
-          +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+jock+'</div>'
-        +'</div>':'<div style="border-right:1px solid var(--bdr);'+(trainer?'border-bottom:1px solid var(--bdr);':'')+'""></div>')
-        +(trainer?'<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">'
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+(jock||'—')+'</div>'
+        +'</div>'
+        +'<div style="padding:10px 14px;">'
           +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Trainer</div>'
-          +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+trainer+'</div>'
-        +'</div>':'')
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+(trainer||'—')+'</div>'
+        +'</div>'
       +'</div>'
 
       // Profile panel (if horse is in Profiler)

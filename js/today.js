@@ -8,6 +8,11 @@ function rmTrack(n){setTracks(getTracks().filter(x=>x!==n));renderChips();rfrTL(
 
 // ─── TODAY MODE TOGGLE ───
 let _todayMode='watching'; // 'watching' | 'reviewing'
+function _todayAutoMode(){
+  const h=new Date().getHours();
+  // After 16:00 and before midnight switch to reviewing; midnight resets to watching
+  return (h>=16)?'reviewing':'watching';
+}
 
 function _toggleRunningToday(){
   const list=document.getElementById('t-running-today-list');
@@ -188,7 +193,20 @@ const _TIER_CFG_LIGHT={
 };
 function _getTierCfg(){return document.body.classList.contains('dark')?_TIER_CFG_DARK:_TIER_CFG_LIGHT;}
 const _TIER_CFG=new Proxy({},{get:function(_,k){return _getTierCfg()[k];}});
-function setTodayMode(m){
+let _todayModeManual=false; // true once user explicitly clicks a tab
+let _todayModeDay=''; // tracks which day the auto-mode last applied
+function _applyAutoMode(){
+  const today=td();
+  if(_todayModeManual&&_todayModeDay===today)return; // user chose manually today — respect it
+  const auto=_todayAutoMode();
+  if(_todayModeDay!==today||_todayMode!==auto){
+    _todayMode=auto;
+    _todayModeDay=today;
+    _todayModeManual=false;
+  }
+}
+function setTodayMode(m,_auto){
+  if(!_auto)_todayModeManual=true;
   _todayMode=m;
   _todaySelectMode=false;_todaySelected.clear();_todayUpdateSelectBar();
   const btn=document.getElementById('t-select-toggle-btn');
@@ -1726,6 +1744,13 @@ function renderToday(){
   const t=td();
   const dl=document.getElementById('tdlbl');
   if(dl) dl.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'});
+
+  // ── Auto-switch mode by time of day (16:00 → reviewing, midnight → watching) ──
+  _applyAutoMode();
+  const _wBtn=document.getElementById('t-mode-watching');
+  const _rBtn=document.getElementById('t-mode-reviewing');
+  if(_wBtn){_wBtn.style.background=_todayMode==='watching'?'#F5A623':'transparent';_wBtn.style.color=_todayMode==='watching'?'#000':'var(--mut)';}
+  if(_rBtn){_rBtn.style.background=_todayMode==='reviewing'?'#F5A623':'transparent';_rBtn.style.color=_todayMode==='reviewing'?'#000':'var(--mut)';}
 
   // ── Real P&L today ──
   const tb=D.bets.filter(b=>b.date===t);

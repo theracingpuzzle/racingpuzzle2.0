@@ -1843,7 +1843,7 @@ function rcSlRenderCard(){
   const age=r.age?r.age+'yo':'';
   const form=r.form||'';
   const rpr=r.ofr||r.rpr||r.official_rating||r.officialRating||r.or||'';
-  const wt=r.weight||r.lbs||r.stone_lbs||'';
+  const wt=(function(){const _r=r.weight||r.lbs||r.stone_lbs||r.weight_lbs||'';if(!_r)return'';if(/[a-zA-Z\-]/.test(String(_r)))return String(_r);const n=parseInt(_r,10);if(isNaN(n))return String(_r);return Math.floor(n/14)+'st '+(n%14)+'lb';})();
   const sp=r.sp||r.price||r.odds||'';
   const time=_rcSlRace.off||_rcSlRace.off_time||_rcSlRace.time||'—';
   const dist=formatDist(_rcSlRace.distance_round||_rcSlRace.distance_f||_rcSlRace.distance||_rcSlRace.dist||'');

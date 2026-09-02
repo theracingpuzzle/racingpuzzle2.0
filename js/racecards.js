@@ -49,7 +49,7 @@ function formatDist(d){
 }
 
 // ─── SWIPE RACECARDS / RESULTS ───
-let rcSwCurrentRaces=[], rcSwRacesByMeeting={}, rcSwView='time', _pendingRCBet=null, rcSwFilter='all';
+let rcSwCurrentRaces=[], rcSwRacesByMeeting={}, rcSwView='time', _pendingRCBet=null, rcSwFilter='all', rcSwDensity='compact';
 
 function rcSwipeInit(){
   if(!rcSwCurrentRaces.length) rcSwLoadMeetings();
@@ -97,10 +97,16 @@ function rcSwRenderUI(){
     {k:'league',lbl:'League',   icon:_svgTrophy},
     {k:'watchlist',lbl:'Watchlist',icon:_svgEye},
   ];
-  let html='<div class="rc-view-tog" style="width:100%;">'
-    +'<button class="rc-view-btn '+(v==='time'?'on':'off')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
-    +'<button class="rc-view-btn '+(v==='course'?'on':'off')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
+  let html='<div style="display:flex;gap:6px;align-items:center;width:100%;margin-bottom:2px;">'
+    +'<div class="rc-view-tog" style="flex:1;">'
+      +'<button class="rc-view-btn '+(v==='time'?'on':'off')+'" onclick="rcSwView=\'time\';rcSwRenderUI();">Time</button>'
+      +'<button class="rc-view-btn '+(v==='course'?'on':'off')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
     +'</div>'
+    +'<div class="rc-view-tog">'
+      +'<button class="rc-view-btn '+(rcSwDensity==='compact'?'on':'off')+'" onclick="rcSwDensity=\'compact\';rcSwRenderUI();">Compact</button>'
+      +'<button class="rc-view-btn '+(rcSwDensity==='detailed'?'on':'off')+'" onclick="rcSwDensity=\'detailed\';rcSwRenderUI();">Detailed</button>'
+    +'</div>'
+  +'</div>'
     +'<div style="display:flex;gap:6px;padding:0 2px 10px;flex-wrap:wrap;">'
     +filters.map(function(opt){
       const on=f===opt.k;
@@ -710,22 +716,29 @@ function rcSwRenderRunners(idx, course, el){
             ?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Form</span><span class="rc-runner-form" style="margin-bottom:0;">'+form+'</span></div>'
             :'');
         }())
-        +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+(r.jockey_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.jockey_rtf+'</span>':'')+'</span></div>':'')
-        +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+(r.trainer_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.trainer_rtf+'</span>':'')+'</span></div>':'')
-        +(wt?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Weight</span><span class="rc-runner-jt">'+wt+'</span></div>':'')
-        +(r.dslr!=null&&r.dslr!==''?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Last run</span><span class="rc-runner-jt">'+r.dslr+' days ago</span></div>':'')
-        +(r.owner?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Owner</span><span class="rc-runner-jt" style="color:var(--mut);">'+r.owner+'</span></div>':'')
+        +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">J</span><span class="rc-runner-jt">'+jock+(r.jockey_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.jockey_rtf+'</span>':'')+'</span></div>':'')
         +(function(){
+          const _eid='rc-exp-'+course.replace(/\W/g,'_')+'-'+i;
           const _cmt=(r.comment||r.spotlight||'').trim();
-          if(!_cmt)return'';
-          const _cid='rc-cmt-'+course.replace(/\W/g,'_')+'-'+i;
-          return'<div style="margin-top:4px;">'
-            +'<button onclick="event.stopPropagation();(function(){var b=document.getElementById(\''+_cid+'\');var a=document.getElementById(\''+_cid+'-arr\');if(!b)return;var open=b.style.display===\'block\';b.style.display=open?\'none\':\'block\';a.style.transform=open?\'rotate(0deg)\':\'rotate(180deg)\';})()" style="display:flex;align-items:center;gap:5px;background:none;border:none;padding:2px 0;cursor:pointer;">'
-              +'<span style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);">Spotlight</span>'
-              +'<span id="'+_cid+'-arr" style="font-size:11px;color:var(--mut);display:inline-block;transition:transform .2s;">▾</span>'
-            +'</button>'
-            +'<div id="'+_cid+'" style="display:none;font-size:12px;line-height:1.6;color:var(--txt);padding:4px 0 2px;">'+_cmt+'</div>'
-          +'</div>';
+          const _hasExtra=!!(trainer||wt||(r.dslr!=null&&r.dslr!=='')||r.owner||_cmt);
+          if(!_hasExtra)return'';
+          const _detailed=rcSwDensity==='detailed';
+          const _extraHtml=''
+            +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+(r.trainer_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.trainer_rtf+'</span>':'')+'</span></div>':'')
+            +(wt?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Weight</span><span class="rc-runner-jt">'+wt+'</span></div>':'')
+            +(r.dslr!=null&&r.dslr!==''?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Last run</span><span class="rc-runner-jt">'+r.dslr+' days ago</span></div>':'')
+            +(r.owner?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Owner</span><span class="rc-runner-jt" style="color:var(--mut);">'+r.owner+'</span></div>':'')
+            +(_cmt?'<div style="margin-top:6px;padding:7px 10px;border-radius:7px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);">'
+              +'<div style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#f59e0b;margin-bottom:4px;">Spotlight</div>'
+              +'<div style="font-size:12px;line-height:1.6;color:var(--txt);">'+_cmt+'</div>'
+            +'</div>':'');
+          if(_detailed){
+            return'<div style="margin-top:6px;border-top:1px solid var(--bdr);padding-top:6px;">'+_extraHtml+'</div>';
+          }
+          return'<button onclick="event.stopPropagation();(function(){var p=document.getElementById(\''+_eid+'\');var a=document.getElementById(\''+_eid+'-arr\');if(!p)return;var open=p.style.display===\'block\';p.style.display=open?\'none\':\'block\';a.textContent=open?\'▾\':\'▴\';})()" style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;background:none;border:1px solid var(--bdr);border-radius:5px;padding:2px 8px;cursor:pointer;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);">'
+            +'More <span id="'+_eid+'-arr">▾</span>'
+          +'</button>'
+          +'<div id="'+_eid+'" style="display:none;margin-top:6px;border-top:1px solid var(--bdr);padding-top:6px;">'+_extraHtml+'</div>';
         })()
       +'</div>'
       +'<div class="rc-runner-actions">'

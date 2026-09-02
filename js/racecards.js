@@ -726,12 +726,10 @@ function rcSwRenderRunners(idx, course, el){
       +'</div>'
     +'</div>'
     +(function(){
-      if(isNR)return _pr2?'<div id="'+pid+'" class="rc-profile-panel" style="display:none;">'+rcProfilePanelHtml(_pr2,pid)+'</div>':'';
       const _cmt=(r.comment||r.spotlight||'').trim();
-      const _hasExtra=!!(trainer||wt||(r.dslr!=null&&r.dslr!=='')||r.owner||_cmt);
-      const _dp=_hasExtra&&rcSwDensity==='detailed'
+      const _hasExtra=!!(wt||(r.dslr!=null&&r.dslr!==''))||r.owner||_cmt;
+      const _dp=_hasExtra&&rcSwDensity==='detailed'&&!isNR
         ?'<div style="padding:8px 14px 10px;border-top:1px solid var(--bdr);background:rgba(0,0,0,.15);">'
-          +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+(r.trainer_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.trainer_rtf+'</span>':'')+'</span></div>':'')
           +(wt?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Weight</span><span class="rc-runner-jt">'+wt+'</span></div>':'')
           +(r.dslr!=null&&r.dslr!==''?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Last run</span><span class="rc-runner-jt">'+r.dslr+' days ago</span></div>':'')
           +(r.owner?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Owner</span><span class="rc-runner-jt" style="color:var(--mut);">'+r.owner+'</span></div>':'')
@@ -744,3 +742,1434 @@ function rcSwRenderRunners(idx, course, el){
       return _dp+(_pr2?'<div id="'+pid+'" class="rc-profile-panel" style="display:none;">'+rcProfilePanelHtml(_pr2,pid)+'</div>':'');
     }())
     +'</div>';
+  }).join('');
+  // Headgear key — only if any runner has headgear
+  const _hasHG=runners.some(function(r){return !!(r.headgear||r.head_gear);});
+  if(_hasHG){
+    html+='<div style="padding:8px 14px 4px;font-size:10px;color:var(--mut);line-height:1.8;border-top:1px solid var(--bdr);">'
+      +'<span style="font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-right:6px;">Headgear:</span>'
+      +'b Blinkers · p Cheekpieces · v Visor · h Hood · t Tongue tie · e Eye shield · ow Overreach boots'
+    +'</div>';
+  }
+  el.innerHTML=html;
+}
+
+// ── Overlay flow: Racecard R/V → Checklist overlay → Log Bet overlay → back to Racecards ──
+function rcSwBet(event, horse, course, time, jockey, trainer, raceName){
+  event.stopPropagation();
+  openBetFlow('real', horse, course, time, jockey, trainer, raceName);
+}
+
+function openPrebetOverlay(){
+  resetCks();
+  const overlay=document.getElementById('prebet-overlay');
+  const src=document.getElementById('c_PREBET_OLD');
+  if(src){
+    // Move the actual card into the overlay so IDs are unique and events work
+    src.style.display='block';
+    src.style.position='static';
+    src.style.height='auto';
+    src.style.overflow='visible';
+    const tgt=document.getElementById('pbo-content');
+    if(tgt){tgt.innerHTML='';tgt.appendChild(src);}
+  }
+  const hEl=document.getElementById('pbo-horse');
+  if(hEl&&_pendingRCBet){hEl.textContent='→ '+_pendingRCBet.horse+' · '+_pendingRCBet.course+' · '+_pendingRCBet.time;hEl.style.display='block';}
+  overlay.style.display='block';
+  document.body.style.overflow='hidden';
+  renderPrebet();
+  updCkScore();
+}
+
+function closePrebetOverlay(){
+  const overlay=document.getElementById('prebet-overlay');
+  // Return the pre-bet card to its original hidden home
+  const src=document.getElementById('c_PREBET_OLD');
+  const swShell=document.getElementById('sw-shell');
+  if(src&&swShell){src.style.display='none';swShell.appendChild(src);}
+  overlay.style.display='none';
+  document.body.style.overflow='';
+  _pendingRCBet=null;
+}
+
+// ─── LOG BET OVERLAY — edit-modal style ───────────────────────────────────────
+// Renders a form identical in layout to #emod (the edit bet screen).
+// Pre-fills from `prefill` ({horse,course,time,jockey,trainer}) and the
+// bet-flow state for source/mode.  Saves via _lboSave().
+
+function openLogbetOverlay(mode, prefill){
+  const overlay=document.getElementById('logbet-overlay');
+  if(!overlay)return;
+  window._lboMode=mode; // stash for _lboSave — do not rely on _betFlowState which may lag
+  const accentCol=mode==='virt'?'#fb923c':'#60a5fa';
+  const typeLabel=mode==='virt'?'Virtual Bet':'Real Bet';
+
+  // ── Update sticky header ──
+  const solidCol=mode==='virt'?'#ea580c':'#1d4ed8';
+  const hdrEl=document.getElementById('lbo-header');
+  if(hdrEl)hdrEl.style.background=solidCol;
+
+  const typeEl=document.getElementById('lbo-type-lbl');
+  const titleEl=document.getElementById('lbo-title');
+  const subEl=document.getElementById('lbo-horse-sub');
+  const closeBtn=hdrEl&&hdrEl.querySelector('button');
+
+  // Force white text regardless of any cached CSS/HTML state
+  if(typeEl){typeEl.textContent=typeLabel;typeEl.style.color='rgba(255,255,255,.7)';}
+  if(titleEl){titleEl.textContent=prefill&&prefill.horse?prefill.horse:'Log Bet';titleEl.style.color='#fff';}
+  if(closeBtn){closeBtn.style.color='#fff';closeBtn.style.borderColor='rgba(255,255,255,.3)';closeBtn.style.background='rgba(255,255,255,.15)';}
+  if(subEl){
+    subEl.style.color='rgba(255,255,255,.75)';
+    const parts=[];
+    if(prefill&&prefill.time)parts.push(prefill.time);
+    if(prefill&&prefill.course)parts.push(prefill.course);
+    if(parts.length){subEl.textContent=parts.join(' · ');subEl.style.display='block';}
+    else subEl.style.display='none';
+  }
+
+  // ── Source options ──
+  const srcOpts=(function(){
+    const saved=(D.settings&&D.settings.sources&&D.settings.sources.length)?D.settings.sources:[];
+    const labels=saved.map(function(s){return typeof s==='object'?s.label:s;});
+    const all=['Own Form Study'].concat(labels.filter(function(s){return s!=='Own Form Study';}));
+    return all.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
+  })();
+
+  // Determine pre-selected source from bet flow state
+  const bfs=window._betFlowState||{};
+  const preSrc=bfs.source==='tip'?(bfs.tipSource||'Own Form Study'):'Own Form Study';
+
+  // ── Render edit-modal-style form into #lbo-content ──
+  const tgt=document.getElementById('lbo-content');
+  if(!tgt)return;
+  tgt.innerHTML=
+    '<div class="em-body" style="padding-bottom:100px;">'
+    // Section 1 — Bet Details (coloured to match mode)
+    +'<div class="em-section">'
+      +'<div class="em-sec-hdr" style="background:'+solidCol+';border-bottom-color:rgba(255,255,255,.15);"><span class="em-sec-num" style="background:rgba(255,255,255,.2);color:#fff;">1</span><span class="em-sec-title" style="color:#fff;">Bet Details</span></div>'
+      +'<div class="em-sec-body">'
+        +'<div class="g2">'
+          +'<div class="fg"><label>Horse</label><input type="text" id="lbo-f-horse" autocomplete="off" value="'+(prefill&&prefill.horse?_escAttr(prefill.horse):'')+'"></div>'
+          +'<div class="fg"><label>Track</label><input type="text" id="lbo-f-track" autocomplete="off" value="'+(prefill&&prefill.course?_escAttr(prefill.course):'')+'"></div>'
+          +'<div class="fg"><label>Time</label><input type="text" id="lbo-f-time" value="'+(prefill&&prefill.time?_escAttr(prefill.time):'')+'"></div>'
+          +'<div class="fg"><label>Odds</label><input type="text" id="lbo-f-odds" style="font-family:monospace;" placeholder="e.g. 5/1" oninput="_lboResChange()"></div>'
+          +'<div class="fg"><label>Confidence</label>'
+            +'<select id="lbo-f-conf" onchange="_lboCalcStake()">'
+            +'<option value="1">1 — Speculative</option>'
+            +'<option value="2">2 — Interested</option>'
+            +'<option value="3" selected>3 — Solid</option>'
+            +'<option value="4">4 — Strong</option>'
+            +'<option value="5">5 — Best Bet</option>'
+            +'</select>'
+          +'</div>'
+          +'<div class="fg"><label>Type</label><select id="lbo-f-type" onchange="_lboResChange();_lboCalcStake()"><option value="win">Win</option><option value="ew">Each Way</option><option value="place">Place</option></select></div>'
+          +'<div class="fg"><label>Jockey</label><input type="text" id="lbo-f-jockey" autocomplete="off" value="'+(prefill&&prefill.jockey?_escAttr(prefill.jockey):'')+'"></div>'
+          +'<div class="fg"><label>Trainer</label><input type="text" id="lbo-f-trainer" autocomplete="off" value="'+(prefill&&prefill.trainer?_escAttr(prefill.trainer):'')+'"></div>'
+        +'</div>'
+        // Stake guide — tappable, updates on confidence/type change
+        +'<div id="lbo-stake-guide" onclick="_lboApplyStake()" style="display:none;cursor:pointer;margin:10px 0 4px;padding:10px 14px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.25);border-radius:10px;"></div>'
+        +'<div class="fg"><label>Stake (£)</label><input type="number" id="lbo-f-stake" step="0.5" min="0" oninput="_lboResChange();_lboCalcStake()"></div>'
+        +'<div class="fg"><label>Source</label><select id="lbo-f-source">'+srcOpts+'</select></div>'
+        +'<div class="fg"><label>Pre-Race Notes</label><textarea id="lbo-f-prenotes" style="min-height:52px" placeholder="Why are you backing this horse?"></textarea></div>'
+      +'</div>'
+    +'</div>'
+    // Section 2 — Result (coloured to match mode)
+    +'<div class="em-section">'
+      +'<div class="em-sec-hdr" style="background:'+solidCol+';border-bottom-color:rgba(255,255,255,.15);"><span class="em-sec-num" style="background:rgba(255,255,255,.2);color:#fff;">2</span><span class="em-sec-title" style="color:#fff;">Result <span style="font-weight:400;color:rgba(255,255,255,.65);font-size:11px;">(optional — settle later)</span></span></div>'
+      +'<div class="em-sec-body">'
+        +'<div class="g2">'
+          +'<div class="fg"><label>Result</label><select id="lbo-f-result" onchange="_lboResChange()"><option value="pending" selected>Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>'
+          +'<div class="fg"><label>Returns (£)</label><input type="number" id="lbo-f-returns" step="0.01" min="0" placeholder="Auto-calculated"></div>'
+        +'</div>'
+        +'<div class="fg"><label>Post-Race Notes</label><textarea id="lbo-f-postnotes" placeholder="What happened? What did I learn?" style="min-height:52px"></textarea></div>'
+      +'</div>'
+    +'</div>'
+    // Actions
+    +'<div class="em-actions">'
+      +'<button id="lbo-save-btn" data-mode="'+mode+'" class="em-save-btn" onclick="_lboSave()" style="background:'+solidCol+';color:#fff;">Log '+(mode==='virt'?'Virtual':'Real')+' Bet</button>'
+      +'<button class="em-cancel-btn" onclick="_lboBackToChecklist()">← Back</button>'
+    +'</div>'
+    +'</div>';
+
+  // Set source and trigger stake guide
+  setTimeout(function(){
+    const srcEl=document.getElementById('lbo-f-source');
+    if(srcEl)srcEl.value=preSrc;
+    _lboCalcStake();
+  },50);
+
+  overlay.style.display='block';
+}
+
+// Escape helper for HTML attribute values
+function _escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+// Stake guide — mirrors calcStakeGuide() in utils.js but uses lbo-f-* field IDs
+function _lboCalcStake(){
+  const guideEl=document.getElementById('lbo-stake-guide');
+  if(!guideEl)return;
+  const conf=parseInt((document.getElementById('lbo-f-conf')||{value:'3'}).value)||3;
+  const betType=(document.getElementById('lbo-f-type')||{value:'win'}).value;
+  const stakeEl=document.getElementById('lbo-f-stake');
+  const pv=typeof getPointValue==='function'?getPointValue():parseFloat((D.settings&&D.settings.pointValue)||5);
+  const CONF_PTS_LOCAL=[1,1.5,2,2.5,3];
+  const pts=CONF_PTS_LOCAL[conf-1]||2;
+  const isEW=betType==='ew';
+  const suggested=parseFloat((pts*pv).toFixed(2));
+  const current=parseFloat(stakeEl&&stakeEl.value)||0;
+  const _sb=document.getElementById('lbo-save-btn');
+  const mode=(_sb&&_sb.getAttribute('data-mode'))||window._lboMode||'real';
+  const accentCol=mode==='virt'?'#ea580c':'#60a5fa';
+
+  if(!pv||pv<=0){
+    guideEl.style.display='block';
+    guideEl.innerHTML='<div style="font-size:12px;color:var(--gld);">⚠️ Set your point value in Settings → Staking Plan.</div>';
+    return;
+  }
+
+  let html='<div style="display:flex;justify-content:space-between;align-items:center;">'
+    +'<div>'
+      +'<div style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Suggested Stake</div>'
+      +'<div style="font-family:monospace;font-size:20px;font-weight:700;color:'+accentCol+';">£'+suggested.toFixed(2)+'</div>'
+      +'<div style="font-size:10px;color:var(--mut);margin-top:1px;">'+pts+'pt × £'+pv.toFixed(2)+'/pt'+(isEW?' · EW (£'+(suggested/2).toFixed(2)+' each leg)':'')+'</div>'
+    +'</div>'
+    +'<div style="text-align:right;">';
+  if(current&&current!==suggested){
+    const diffPts=(current/pv).toFixed(2);
+    html+='<div style="font-size:11px;color:var(--mut);">Your entry: £'+current.toFixed(2)+'</div>'
+      +'<div style="font-size:10px;color:var(--mut);">('+diffPts+'pts)</div>';
+  } else {
+    html+='<div style="font-size:11px;color:'+accentCol+';">Tap to apply →</div>';
+  }
+  html+='</div></div>';
+  guideEl.innerHTML=html;
+  guideEl.style.display='block';
+  guideEl.style.borderColor=mode==='virt'?'rgba(234,88,12,.3)':'rgba(96,165,250,.25)';
+  guideEl.style.background=mode==='virt'?'rgba(234,88,12,.08)':'rgba(96,165,250,.08)';
+}
+
+function _lboApplyStake(){
+  const conf=parseInt((document.getElementById('lbo-f-conf')||{value:'3'}).value)||3;
+  const pv=typeof getPointValue==='function'?getPointValue():parseFloat((D.settings&&D.settings.pointValue)||5);
+  const CONF_PTS_LOCAL=[1,1.5,2,2.5,3];
+  const pts=CONF_PTS_LOCAL[conf-1]||2;
+  const suggested=parseFloat((pts*pv).toFixed(2));
+  const stakeEl=document.getElementById('lbo-f-stake');
+  if(stakeEl){stakeEl.value=suggested.toFixed(2);}
+  _lboCalcStake();
+  _lboResChange();
+}
+
+// Auto-calculate returns when result/odds/stake change
+function _lboResChange(){
+  const res=(document.getElementById('lbo-f-result')||{value:'pending'}).value;
+  const odRaw=(document.getElementById('lbo-f-odds')||{value:''}).value.trim();
+  const stake=parseFloat((document.getElementById('lbo-f-stake')||{value:0}).value)||0;
+  const bt=(document.getElementById('lbo-f-type')||{value:'win'}).value;
+  const retEl=document.getElementById('lbo-f-returns');
+  if(!retEl)return;
+  const od=fo(odRaw);
+  if(res==='pending'||res==='void'||res==='nr'){retEl.value='';return;}
+  if(stake>0&&od>=1){retEl.value=calcReturns(res,stake,od,bt,'');}
+}
+
+// Save the new bet from the overlay form
+function _lboSave(){
+  const horse=(document.getElementById('lbo-f-horse')||{value:''}).value.trim();
+  const track=(document.getElementById('lbo-f-track')||{value:''}).value.trim();
+  const time=(document.getElementById('lbo-f-time')||{value:''}).value.trim();
+  const odRaw=(document.getElementById('lbo-f-odds')||{value:''}).value.trim();
+  const stake=parseFloat((document.getElementById('lbo-f-stake')||{value:0}).value)||0;
+  const bt=(document.getElementById('lbo-f-type')||{value:'win'}).value;
+  const jockey=(document.getElementById('lbo-f-jockey')||{value:''}).value.trim();
+  const trainer=(document.getElementById('lbo-f-trainer')||{value:''}).value.trim();
+  const source=(document.getElementById('lbo-f-source')||{value:'Own Form Study'}).value;
+  const conf=parseInt((document.getElementById('lbo-f-conf')||{value:'3'}).value)||3;
+  const preNotes=(document.getElementById('lbo-f-prenotes')||{value:''}).value.trim();
+  const result=(document.getElementById('lbo-f-result')||{value:'pending'}).value;
+  const postNotes=(document.getElementById('lbo-f-postnotes')||{value:''}).value.trim();
+  const od=fo(odRaw);
+  if(!horse){alert('Enter a horse name.');return;}
+  if(!stake||stake<=0){alert('Enter a valid stake.');return;}
+
+  // Resolve mode: primary = data-mode attr baked into save button at render time; fallback = window._lboMode
+  const _saveBtn=document.getElementById('lbo-save-btn');
+  const mode=(_saveBtn&&_saveBtn.getAttribute('data-mode'))||window._lboMode||'real';
+  const _limit=D.settings&&D.settings.dailyLimit?D.settings.dailyLimit:5;
+  if(mode==='real'){
+    const _today=D.bets.filter(function(b){return b.date===td();}).length;
+    if(_today>=_limit&&!confirm('⚠️ You\'ve reached your daily limit of '+_limit+' bets. Log anyway?'))return;
+  }
+
+  const autoRet=calcReturns(result,stake,od,bt,'');
+  const returns=parseFloat((document.getElementById('lbo-f-returns')||{value:0}).value)||autoRet;
+
+  const bet={
+    id:gid(), date:td(), horse, track, time, jockey, trainer,
+    odds:od, oddsDisplay:odRaw||String(od), stake, betType:bt,
+    conf, source, notes:preNotes, postNotes,
+    checklistScore:_pendingCkScore||0,
+    checklistAnswers:Object.assign({},_pendingCkAnswers),
+    result, returns, betBanked:false, createdAt:Date.now()
+  };
+  _pendingCkScore=0; _pendingCkAnswers={};
+
+  if(mode==='virt'){
+    const vb=getVBank();
+    // Deduct stake; add returns if already settled at log time
+    vb.current=parseFloat((vb.current-stake).toFixed(2));
+    if(result&&result!=='pending'&&result!=='nr'&&result!=='void'){
+      vb.current=parseFloat((vb.current+returns).toFixed(2));
+    }
+    vb.bets=vb.bets||[];
+    vb.bets.push(bet);
+  } else {
+    // Pre-deduct stake from real bank immediately (applyBankDelta handles this via betBanked flag)
+    applyBankDelta(bet,null,0);
+    D.bets.push(bet);
+  }
+
+  save();
+  updHdr();
+  if(typeof flashHdrBalance==='function')flashHdrBalance(mode, stake);
+  refreshRacecardHighlights();
+  // Close and navigate
+  closeLogbetOverlay();
+  renderToday();
+  if(typeof renderVBMini==='function')renderVBMini();
+  if(typeof renderRealBankMini==='function')renderRealBankMini();
+}
+
+function closeLogbetOverlay(){
+  const overlay=document.getElementById('logbet-overlay');
+  // Return log bet card to its hidden home
+  const src=document.getElementById('c_LOGBET_OLD');
+  const swShell=document.getElementById('sw-shell');
+  if(src&&swShell){src.style.display='none';swShell.appendChild(src);}
+  overlay.style.display='none';
+  const cb=document.getElementById('lbo-close-bar');if(cb)cb.style.display='none';
+  const prebetOv=document.getElementById('prebet-overlay');if(prebetOv)prebetOv.style.display='none';
+  document.body.style.overflow='';
+  _pendingRCBet=null;
+  // Return to Racecards card
+  goTo(1);
+}
+
+function _lboBackToChecklist(){
+  // Close the log bet overlay without navigating away
+  const overlay=document.getElementById('logbet-overlay');
+  if(overlay)overlay.style.display='none';
+  const cb=document.getElementById('lbo-close-bar');if(cb)cb.style.display='none';
+  const src=document.getElementById('c_LOGBET_OLD');
+  const swShell=document.getElementById('sw-shell');
+  if(src&&swShell){src.style.display='none';swShell.appendChild(src);}
+  document.body.style.overflow='';
+  // _betFlowClose() removed _bflow-ov from DOM — rebuild it then show checklist
+  // openBetFlow recreates the shell; _betFlowShowChecklist then populates it
+  if(typeof openBetFlow==='function'&&typeof _betFlowShowChecklist==='function'){
+    const s=_betFlowState;
+    openBetFlow(s.mode,s.horse,s.course,s.time,s.jockey,s.trainer,s.raceName);
+    // openBetFlow shows source picker — skip it, go straight to checklist
+    setTimeout(function(){
+      if(s.source==='tip'&&s.tipSource){
+        _flowActiveCKS=CKS_TIP;
+      } else {
+        _flowActiveCKS=CKS_OWN;
+      }
+      _betFlowShowChecklist();
+    },50);
+  }
+}
+
+
+let rcSwResultsData = [], rcSwResultsView = 'time', rcSwResultsOpenCourse = '', rcSwResultsYesterday = false;
+const _rcResTimeOpen = {}; // tracks which time-view result races are expanded
+
+function rcSwToggleResTime(idx){
+  _rcResTimeOpen[idx] = !_rcResTimeOpen[idx];
+  const body = document.getElementById('rcrt-body-'+idx);
+  const chev = document.getElementById('rcrt-chev-'+idx);
+  if(body){ body.style.display = _rcResTimeOpen[idx] ? 'block' : 'none'; }
+  if(chev){ chev.style.transform = _rcResTimeOpen[idx] ? 'rotate(90deg)' : ''; }
+}
+
+// Look up OR for a horse name from today's racecard data
+function rcGetOFR(horseName){
+  const nl=(horseName||'').toLowerCase().trim();
+  for(const race of rcSwCurrentRaces){
+    for(const r of (race.runners||[])){
+      if((r.horse||r.name||'').toLowerCase().trim()===nl){
+        return r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||'';
+      }
+    }
+  }
+  return '';
+}
+
+async function rcSwLoadResults(){
+  const stEl = document.getElementById('sw-results-status');
+  const listEl = document.getElementById('sw-results-list');
+  const filterEl = document.getElementById('sw-results-filters');
+  if(rcSwResultsData.length){ rcSwRenderResultsUI(); return; }
+  if(stEl){ stEl.style.display='block'; stEl.textContent='Loading results\u2026'; }
+  if(listEl) listEl.innerHTML = '';
+  if(filterEl) filterEl.style.display = 'none';
+  try{
+    const data = await callRacingAPI('results/today', {});
+    rcSwResultsData = data.results||data.races||[];
+    if(rcSwResultsData.length){const _s=rcSwResultsData[0];console.log('[Results] first race keys:',Object.keys(_s),'dist fields:',{distance_f:_s.distance_f,distance_round:_s.distance_round,distance:_s.distance,dist:_s.dist,distance_furlongs:_s.distance_furlongs,distance_yards:_s.distance_yards});}
+    if(stEl) stEl.style.display = 'none';
+    autoMatchBetResults(rcSwResultsData);
+    if(!rcSwResultsData.length){
+      if(listEl) listEl.innerHTML = '<div class="rc-empty">No results yet today — check back after the first race.</div>';
+      return;
+    }
+    rcSwResultsOpenCourse = '';
+    rcSwRenderResultsUI();
+  }catch(e){
+    if(stEl){ stEl.style.display='block'; stEl.textContent='\u26a0\ufe0f '+e.message; }
+  }
+}
+
+function rcSwRenderResultsUI(){
+  const filterEl = document.getElementById('sw-results-filters');
+  if(!filterEl) return;
+
+  const onT = rcSwResultsView==='time';
+  const btnBase = 'font-family:var(--font-ui);font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 18px;border:none;cursor:pointer;font-weight:700;transition:all .12s;';
+
+  filterEl.style.display = 'block';
+  const _rsb='font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;';
+  filterEl.innerHTML =
+    '<div class="rc-view-tog">'
+    + '<button class="rc-view-btn '+(onT?'on':'off')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
+    + '<button class="rc-view-btn '+(!onT?'on':'off')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
+    + '</div>';
+
+  const listEl = document.getElementById('sw-results-list');
+  if(!listEl) return;
+
+  if(rcSwResultsView === 'time'){
+    rcSwRenderResultsTime(listEl);
+  } else {
+    rcSwRenderResultsCourse(listEl);
+  }
+}
+
+function rcSwRaceCard(race, course){
+  const time = race.off_time||race.off||race.time||'—';
+  const name = race.race_name||race.name||'Race';
+  const places = (race.runners||[]).slice(0,5);
+  const todayBets=[...D.bets,...((D.vBank&&D.vBank.bets)||[])];
+  const esc = function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"  );};
+  return '<div class="rc-race-block">'
+    + '<div class="rc-race-hdr" >'
+      + '<div class="rc-race-hdr-left">'
+        + '<div class="rc-race-time">'+time+'</div>'
+        + '<div class="rc-race-name">'+name+'</div>'
+      + '</div>'
+      + '<span class="rc-race-count">'+places.length+' shown</span>'
+    + '</div>'
+    + (function(){
+        var _raceClass=String(race.race_class||race.class||'').trim().replace(/^class\s*/i,'');
+        var _g=race.going||'';
+        var _d=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||race.distance_furlongs||race.distance_yards||'');
+        var _p=race.prize||race.total_prize_money||'';
+        var _wt=race.win_time||race.winning_time||'';
+        const items=[
+          _g?{lbl:'Going',val:_g}:null,
+          _d?{lbl:'Distance',val:_d}:null,
+          _raceClass?{lbl:'Class',val:'Class '+_raceClass}:null,
+          _p?{lbl:'Prize',val:_p}:null,
+          _wt?{lbl:'Time',val:_wt}:null,
+        ].filter(Boolean);
+        return items.length?'<div class="rc-info-bar">'+items.map(function(it){return'<div class="rc-info-item"><div class="rc-info-lbl">'+it.lbl+'</div><div class="rc-info-val">'+it.val+'</div></div>';}).join('')+'</div>':'';
+      }())
+    + places.map(function(r,i){
+        const pos = r.position||r.place||(i+1);
+        const horse = stripCountrySuffix(r.horse||r.name||'—');
+        const jock = r.jockey||'';
+        const trainer = r.trainer||'';
+        const sp = r.sp||'';
+        const ofr = r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||rcGetOFR(horse)||'';
+        const posClass = pos==1?'rc-pos-1':pos==2?'rc-pos-2':pos==3?'rc-pos-3':'rc-pos-n';
+        const hn = horse.toLowerCase().trim();
+        const myBet = todayBets.find(function(b){return (b.horse||'').toLowerCase().trim()===hn;});
+        const myBetPnl = myBet?(parseFloat(myBet.returns||0)-parseFloat(myBet.stake||0)):0;
+        const betBadge = (function(){
+          if(!myBet)return'';
+          const _stk=parseFloat(myBet.stake)||0;
+          const _bt=myBet.betType||'win';
+          const _od=myBet.oddsDisplay||(myBet.odds?decToFrac(myBet.odds):'');
+          const _btLbl={win:'Win',ew:'E/W',place:'Place'}[_bt]||_bt;
+          const _isVirt=!!(myBet.is_virtual||myBet._virt);
+          const _pending=!myBet.result||myBet.result==='pending';
+          const _won=myBet.result==='win'||myBet.result==='place';
+          const _col=_pending?(_isVirt?'#fb923c':'#60a5fa'):_won?'#4ade80':'#f87171';
+          const _bg=_pending?(_isVirt?'rgba(251,146,60,.15)':'rgba(96,165,250,.15)'):_won?'rgba(74,222,128,.15)':'rgba(248,113,113,.15)';
+          const _bdr=_pending?(_isVirt?'rgba(251,146,60,.35)':'rgba(96,165,250,.35)'):_won?'rgba(74,222,128,.35)':'rgba(248,113,113,.35)';
+          const _pnlStr=_pending?'':myBetPnl>=0?' +£'+myBetPnl.toFixed(2):' -£'+Math.abs(myBetPnl).toFixed(2);
+          return'<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;background:'+_bg+';border:1px solid '+_bdr+';color:'+_col+';border-radius:5px;padding:2px 6px;margin-left:5px;letter-spacing:.01em;">'
+            +(_isVirt?'V ':'')+'£'+_stk.toFixed(2)+' '+_btLbl+(_od?' @ '+_od:'')
+            +(_pnlStr?'<span style="opacity:.85;">'+_pnlStr+'</span>':'')
+            +'</span>';
+        }());
+        const wlEntry = getWL().find(function(w){return(w.horse||'').toLowerCase().trim()===hn;});
+        const _rGoing = esc(race.going||race.going_description||'');
+        const _rDate  = esc(race.date||td());
+        const _rDist  = esc(race.distance_f||race.distance_round||race.distance||race.dist||'');
+        const _rPos   = String(pos);
+        const _eyeSvg='<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>';
+        const watchBtn = wlEntry
+          ? '<button class="rc-act-btn" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.1);color:var(--grn);" title="Watching">'+_eyeSvg+'</button>'
+          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\',\''+esc(String(race.race_class||race.class||'').trim().replace(/^class\\s*/i,''))+'\',\''+esc(r.silk_url||r.silk||'')+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
+        const _qrRes=(wlEntry&&wlEntry.myRating)?{mr:wlEntry.myRating}:(D.ratings&&D.ratings[hn]);
+        const rateBtnRes='<span onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\')" class="rc-mr-chip'+(_qrRes?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qrRes?_qrRes.mr:'\u2014')+'</span>';
+        const _resSilk=r.silk_url||r.silk||'';
+        return '<div class="rc-res-runner">'
+          + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
+          + (_resSilk?'<img src="'+_resSilk+'" alt="" width="48" height="48" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':'')
+          + '<div class="rc-runner-main">'
+            + '<div class="rc-runner-name-row">'
+              + '<span class="rc-runner-name">'+horse+'</span>'
+              + (ofr?'<span class="rc-or">'+ofr+'</span>':'')
+              + rateBtnRes
+              + betBadge
+            + '</div>'
+            + (jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
+            + (trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
+            + (pos>1&&(r.ovr_btn||r.btn||r.distance_beaten||r.beaten)?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Beaten</span><span class="rc-runner-jt" style="color:var(--mut);">'+(r.ovr_btn||r.btn||r.distance_beaten||r.beaten)+'</span></div>':'')
+          + '</div>'
+          + '<div class="rc-runner-right">'
+            + (sp?'<span class="rc-sp">'+sp+'</span>':'')
+            + watchBtn
+          + '</div>'
+        + '</div>';
+      }).join('')
+    + '</div>';
+}
+
+
+function rcSwRenderResultsTime(listEl){
+  // Sort all races chronologically (descending — latest first)
+  const all = rcSwResultsData.slice().sort(function(a,b){
+    return cmpTime(b.off_time||b.off||b.time||'', a.off_time||a.off||a.time||'');
+  });
+
+  let idx = 0;
+  let html = all.map(function(race){
+    const course = race.course||race.venue||'Unknown';
+    const time   = race.off_time||race.off||race.time||'—';
+    const name   = race.race_name||race.name||'';
+    const flag   = rcCountryFlag(rcCourseCountry(course));
+    const count  = (race.runners||[]).length;
+    const i      = idx++;
+    const isOpen = !!_rcResTimeOpen[i];
+    return '<div class="rc-meeting">'
+      +'<div class="rc-meeting-hdr rc-mtg-ora" onclick="rcSwToggleResTime('+i+')">'
+        +'<span class="rc-meeting-flag">'+flag+'</span>'
+        +'<div class="rc-meeting-info">'
+          +'<div style="display:flex;align-items:baseline;gap:10px;">'
+            +'<span class="rc-mtg-course" style="letter-spacing:.5px;">'+time+'</span>'
+            +'<span class="rc-mtg-course" style="letter-spacing:.2px;color:rgba(255,255,255,.9);">'+course+'</span>'
+          +'</div>'
+          +'<div class="rc-mtg-meta">'+count+' runners'+(name?' · '+name:'')+'</div>'
+        +'</div>'
+        +'<span id="rcrt-chev-'+i+'" class="rc-meeting-chevron'+(isOpen?' open':'')+'" style="'+(isOpen?'transform:rotate(90deg);':'')+'">\u203a</span>'
+      +'</div>'
+      +'<div id="rcrt-body-'+i+'" class="rc-meeting-body" style="display:'+(isOpen?'block':'none')+';">'
+        +rcSwRaceCard(race, course)
+      +'</div>'
+    +'</div>';
+  }).join('');
+
+  listEl.innerHTML = html;
+}
+
+
+function rcSwRenderResultsCourse(listEl){
+  const meetings = {};
+  rcSwResultsData.forEach(function(r){
+    const c = r.course||r.venue||'Unknown';
+    if(!meetings[c]) meetings[c] = [];
+    meetings[c].push(r);
+  });
+  const courses = Object.keys(meetings).sort(function(a,b){
+    const ca=rcCourseCountry(a),cb=rcCourseCountry(b);
+    const order={eng:0,sco:0,wal:0,ie:1,aus:2,fra:3,ger:4,rsa:5,usa:6,intl:99};
+    const oa=order[ca]!=null?order[ca]:50,ob=order[cb]!=null?order[cb]:50;
+    if(oa!==ob)return oa-ob;
+    return a.localeCompare(b);
+  });
+
+  listEl.innerHTML = courses.map(function(course){
+    const races = meetings[course].slice().sort(function(a,b){
+      return cmpTime(a.off_time||a.off||a.time||'',b.off_time||b.off||b.time||'');
+    });
+    const safeId = course.replace(/\W/g,'_');
+    const isOpen = rcSwResultsOpenCourse === course;
+    const count = races.length;
+    const flag=rcCountryFlag(rcCourseCountry(course));
+    return '<div class="rc-meeting">'
+      + '<div class="rc-meeting-hdr rc-mtg-ora" onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':' +"'"+course+"'"+ ';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));">'
+        + '<span class="rc-meeting-flag">'+flag+'</span>'
+        + '<div class="rc-meeting-info">'
+          + '<div class="rc-mtg-course">'+course+'</div>'
+          + '<div class="rc-mtg-meta">'+count+' race'+(count!==1?'s':'')+'</div>'
+        + '</div>'
+        + '<span class="rc-meeting-chevron'+(isOpen?' open':'')+'" >›</span>'
+      + '</div>'
+      + (isOpen
+          ? '<div class="rc-meeting-body">'
+              + races.map(function(race){ return rcSwRaceCard(race, course); }).join('')
+            + '</div>'
+          : '')
+    + '</div>';
+  }).join('');
+}
+
+
+
+function rcProfilePanelHtml(profiled,panelId){
+  if(!profiled)return'';
+  const rm={'eye-catcher':{svg:'<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>',col:'#a78bfa',label:'Eye Catcher'},'future-target':{svg:'<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3"/><line x1="10" y1="1" x2="10" y2="3"/><line x1="10" y1="17" x2="10" y2="19"/><line x1="1" y1="10" x2="3" y2="10"/><line x1="17" y1="10" x2="19" y2="10"/></svg>',col:'#34d399',label:'Future Target'},'trainer-intel':{svg:'<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13a8 8 0 1 0-8 5h8v-5z"/></svg>',col:'#38bdf8',label:'Trainer Intel'},'form-study':{svg:'<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>',col:'#f59e0b',label:'Form Study'},'tip-source':{svg:'<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2a6 6 0 0 1 4.47 10.06A4 4 0 0 1 13 15H7a4 4 0 0 1-1.47-2.94A6 6 0 0 1 10 2z"/><line x1="8" y1="18" x2="12" y2="18"/><line x1="9" y1="21" x2="11" y2="21"/></svg>',col:'#fb7185',label:'Tip Source'}};
+  const meta=rm[profiled.reason||'eye-catcher']||rm['eye-catcher'];
+  const edge=(function(){const mr=parseFloat(profiled.myRating),or=parseFloat(profiled.currentRating);if(!mr||!or)return null;return mr-or;}());
+  const edgeHtml=edge===null?''
+    :edge>0?'<span style="font-family:var(--font-ui);font-size:10px;font-weight:700;color:var(--grn);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.25);padding:2px 6px;border-radius:4px;">▲ +'+edge+' edge</span>'
+    :edge<0?'<span style="font-family:var(--font-ui);font-size:10px;font-weight:700;color:var(--red);background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);padding:2px 6px;border-radius:4px;">▼ '+edge+' edge</span>'
+    :'<span style="font-family:var(--font-ui);font-size:10px;color:var(--mut);border:1px solid var(--bdr);padding:2px 6px;border-radius:4px;">→ on mark</span>';
+  const obs=(profiled.observations||[]).slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');}).slice(0,3);
+  const targets=(profiled.targets||[]).slice(0,3);
+  let html='<div class="rc-profile-panel">';
+  html+='<div class="rc-pp-header">'
+    +'<span class="rc-pp-reason-badge" style="border-color:'+meta.col+';color:'+meta.col+';display:inline-flex;align-items:center;gap:4px;">'+meta.svg+' '+meta.label+'</span>'
+    +(profiled.myRating?'<span class="rc-pp-mr">MR '+profiled.myRating+'</span>':'')
+    +(profiled.currentRating?'<span class="rc-pp-or">OR '+profiled.currentRating+'</span>':'')
+    +edgeHtml
+  +'</div>';
+  if(profiled.reasonNote)html+='<div style="font-size:12px;color:var(--txt);line-height:1.5;margin-bottom:7px;font-style:italic;">“'+profiled.reasonNote+'”</div>';
+  const conditions=[];
+  const _vg=['firm','good to firm','good','good to soft','soft','heavy','standard','standard to slow','slow'];
+  const _cleanGoing=(profiled.goingPrefs||[]).filter(function(g){return _vg.includes((g||'').toLowerCase().trim());});
+  if(_cleanGoing.length)conditions.push(_cleanGoing.join(', '));
+  if(profiled.distancePref)conditions.push(profiled.distancePref);
+  if(profiled.trackPref)conditions.push(profiled.trackPref);
+  if(conditions.length)html+='<div class="rc-pp-cond">'+conditions.join(' · ')+'</div>';
+  if(profiled.trainerIntel)html+='<div class="rc-pp-intel" style="display:flex;align-items:flex-start;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;opacity:.7;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'+profiled.trainerIntel+'</div>';
+  if(profiled.conditionsNotes)html+='<div class="rc-pp-cond-notes" style="display:flex;align-items:flex-start;gap:5px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;opacity:.7;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>'+profiled.conditionsNotes+'</div>';
+  if(obs.length){
+    html+='<div class="rc-pp-sec-lbl">Recent observations</div>';
+    obs.forEach(function(o){
+      html+='<div class="rc-pp-obs-row">'
+        +(o.date?'<span class="rc-pp-obs-date">'+fdate(o.date)+'</span>':'')
+        +(o.result?'<span class="'+(o.result.toLowerCase().includes('win')?'rc-pp-obs-result-win':'rc-pp-obs-result-mut')+'">'+o.result+'</span>':'')
+        +(o.notes||o.raceName||'')
+      +'</div>';
+    });
+  }
+  if(targets.length){
+    html+='<div class="rc-pp-sec-lbl" style="margin-top:6px;">Targets</div>';
+    targets.forEach(function(t){
+      html+='<div class="rc-pp-target" style="display:flex;align-items:center;gap:5px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:.7;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>'+t.race+(t.date?' · '+t.date:'')+(t.track?' · '+t.track:'')+'</div>';
+    });
+  }
+  html+='</div>';
+  return html;
+}
+
+function rcToggleProfile(panelId,btn){
+  const panel=document.getElementById(panelId);
+  if(!panel)return;
+  const open=panel.style.display!=='none';
+  panel.style.display=open?'none':'block';
+  if(btn)btn.textContent=open?'▼':'▲';
+}
+
+
+function autoMatchBetResults(resultsData){
+  if(!resultsData||!resultsData.length)return 0;
+  const today=td();
+  let updated=0;
+
+  resultsData.forEach(function(race){
+    const course=(race.course||race.venue||'').trim().toLowerCase();
+    const ewTerms=race.each_way_terms||race.ew_terms||'';
+    const runners=race.runners||[];
+    // Determine EW places from API data or estimate from field size
+    const numPlaces=parseInt(race.each_way_places||race.num_places||race.places||0)||
+      (runners.length>=16?4:runners.length>=8?3:runners.length>=5?2:1);
+
+    runners.forEach(function(r){
+      const posRaw=r.position||r.place;
+      const pos=parseInt(posRaw);
+      const horseName=(r.horse||r.name||'').trim().toLowerCase();
+      if(!horseName)return;
+      const isNR=!!(r.non_runner||r.isNonRunner||(''+r.number).toUpperCase()==='NR'||(''+r.status).toLowerCase()==='nr'||(''+r.jockey).toUpperCase()==='NON-RUNNER');
+
+      function resolveResult(b){
+        if(isNR)return'nr';
+        if(isNaN(pos))return null; // position unknown yet — skip
+        if(pos===1)return'win';
+        if(pos<=numPlaces&&(b.betType==='ew'||b.betType==='place'))return'place';
+        return'loss';
+      }
+
+      // ── Real bets ──
+      D.bets.forEach(function(b){
+        if(b.date!==today)return;
+        if(b.result&&b.result!=='pending')return;
+        if((b.horse||'').trim().toLowerCase()!==horseName)return;
+        if(course&&b.track&&(b.track||'').trim().toLowerCase()!==course)return;
+        const result=resolveResult(b);
+        if(result===null)return;
+        const oldResult=b.result;
+        const oldReturns=b.returns||0;
+        b.result=result;
+        b.returns=calcReturns(result,b.stake,b.odds,b.betType,ewTerms);
+        applyBankDelta(b,oldResult,oldReturns);
+        updated++;
+      });
+
+      // ── Virtual bets ──
+      const vb=getVBank();
+      (vb.bets||[]).forEach(function(b){
+        if(b.date!==today)return;
+        if(b.result&&b.result!=='pending')return;
+        if((b.horse||'').trim().toLowerCase()!==horseName)return;
+        if(course&&b.track&&(b.track||'').trim().toLowerCase()!==course)return;
+        const result=resolveResult(b);
+        if(result===null)return;
+        const oldReturns=b.returns||0;
+        b.result=result;
+        b.returns=calcReturns(result,b.stake,b.odds,b.betType,ewTerms);
+        // Apply to virtual bank: was pending (0 returns banked), now settled
+        vb.current=parseFloat((vb.current+(b.returns-oldReturns)).toFixed(2));
+        updated++;
+      });
+    });
+  });
+
+  if(updated>0){
+    save();updHdr();renderToday();
+    // Toast notification
+    let toast=document.getElementById('_auto-result-toast');
+    if(!toast){
+      toast=document.createElement('div');
+      toast.id='_auto-result-toast';
+      toast.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#34d399;color:#141414;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:.06em;padding:8px 16px;border-radius:20px;z-index:9999;transition:opacity .4s;pointer-events:none;';
+      document.body.appendChild(toast);
+    }
+    toast.textContent='✓ '+updated+' bet'+(updated===1?'':'s')+' auto-updated from results';
+    toast.style.opacity='1';
+    clearTimeout(toast._t);
+    toast._t=setTimeout(function(){toast.style.opacity='0';},4000);
+  }
+  return updated;
+}
+
+async function rcLoadResults(){
+  rcSetStatus('Loading today\'s results…');
+  const el=document.getElementById('rc-results-list');
+  if(el)el.innerHTML='';
+  try{
+    const data=await callRacingAPI('results/today',{});
+    const results=data.results||data.races||[];
+    rcSetStatus('');
+    autoMatchBetResults(results);
+    if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(results);
+    if(!results.length){
+      if(el)el.innerHTML='<div class="rc-empty">No results yet today.</div>';
+      return;
+    }
+    // Sort latest first, then render
+    results.sort(function(a,b){
+      return cmpTime(b.off_time||b.off||b.time||'', a.off_time||a.off||a.time||'');
+    });
+    if(el){
+      el.innerHTML=results.map(function(race){
+        const course=race.course||race.venue||'Unknown';
+        const time=race.off_time||race.time||race.off||'—';
+        const name=race.race_name||race.name||'Race';
+        const runners=race.runners||[];
+        const places=runners.slice(0,4);
+        const flag=rcCountryFlag(rcCourseCountry(course));
+        return'<div class="blk">'
+          +'<div class="row-g8" style="margin-bottom:8px;">'
+            +'<span style="font-size:18px;flex-shrink:0;">'+flag+'</span>'
+            +'<div><div class="rc-race-time">'+time+' '+course+'</div>'
+            +'<div class="rc-race-name">'+name+'</div></div>'
+          +'</div>'
+          +places.map(function(r,i){
+            const pos=r.position||r.place||(i+1);
+            const horse=stripCountrySuffix(r.horse||r.name||'—');
+            const jock=fmtJockey(r.jockey);
+            const trainer=r.trainer||'—';
+            const sp=r.sp||r.starting_price||'—';
+            const ofr=r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||rcGetOFR(horse)||'';
+            const posCol=pos==1?'var(--grn)':pos==2?'#60a5fa':pos==3?'#fb923c':'var(--mut)';
+            const esc2=function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");};
+            const _resSilk2=r.silk_url||r.silk||'';
+            return'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bdr);">'
+              +'<span style="font-family:var(--font-ui);font-weight:700;font-size:14px;color:'+posCol+';min-width:20px;">'+pos+'</span>'
+              +(_resSilk2?'<img src="'+_resSilk2+'" alt="" width="48" height="48" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':'')
+              +'<div class="rc-runner-body">'
+                +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
+                  +'<span style="font-weight:600;font-size:13px;">'+horse+'</span>'
+                  +(ofr?'<span class="rc-or">'+ofr+'</span>':'')
+                +'</div>'
+                +'<div style="font-size:11px;color:var(--mut);">'+jock+'</div>'
+              +'</div>'
+              +'<span class="rc-sp">'+sp+'</span>'
+              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\',\''+esc2(race.going||'')+'\',\''+esc2(time)+'\',\''+esc2(race.date||td())+'\',\''+esc2(formatDist(race.distance_f||race.distance_round||race.distance||race.dist||''))+'\',\''+String(pos)+'\',\''+esc2(String(race.race_class||race.class||''))+'\',\''+esc2(r.silk_url||r.silk||'')+'\')" class="rc-watch-btn-sm">W</button>'
+              +'</div>';
+          }).join('')
+          +'</div>';
+      }).join('');
+    }
+  }catch(e){
+    rcSetStatus('⚠️ '+e.message);
+  }
+}
+
+function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, time, date, distF, position, raceClass, silkUrl){
+  var posNum=parseInt(position)||0;
+  var resultVal=posNum===1?'win':posNum>=2&&posNum<=3?'place':posNum>3?'unplaced':'watched';
+  var cleanClass=String(raceClass||'').trim().replace(/^class\s*/i,'');
+  var cleanGoing=(going||'').replace(/ To /g,' to ').replace(/ to firm/i,' to Firm').replace(/ to soft/i,' to Soft').replace(/ to slow/i,' to Slow');
+  openWLForm(null, {
+    horse:         horse,
+    trainer:       trainer,
+    currentRating: ofr||'',
+    silkUrl:       silkUrl||'',
+    firstSighting: {
+      date:    date||td(),
+      course:  course||'',
+      race:    raceName||'',
+      dist:    distF||'',
+      going:   cleanGoing,
+      cls:     cleanClass,
+      result:  resultVal,
+      position: position||''
+    }
+  });
+}
+
+function rcBetFromRunner(event, horse, course, time, jockey, trainer, raceName){
+  event.stopPropagation();
+  openBetFlow('real', horse, course, time, jockey, trainer, raceName);
+}
+
+// ── Quick MR Rating ──────────────────────────────────────────────────────────
+function rcQuickRate(event, horse, or_val){
+  event.stopPropagation();
+  const key=(horse||'').toLowerCase().trim();
+  const existing=D.ratings[key]||{};
+  const overlay=document.createElement('div');
+  overlay.id='rc-qr-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;';
+  overlay.innerHTML=
+    '<div style="background:var(--sur);border-radius:16px 16px 0 0;padding:22px 20px 34px;width:100%;max-width:520px;box-shadow:0 -4px 30px rgba(0,0,0,.35);">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'
+      +'<div>'
+        +'<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:3px;">Quick Rating</div>'
+        +'<div style="font-size:19px;font-weight:800;color:var(--txt);">'+horse+'</div>'
+      +'</div>'
+      +'<button onclick="document.getElementById(\'rc-qr-overlay\').remove()" style="background:var(--bdr);border:none;border-radius:50%;width:30px;height:30px;font-size:18px;color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:14px;">'
+      +'<div style="flex:1;">'
+        +'<label style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:block;">My Rating (MR)</label>'
+        +'<input id="qr-mr" type="number" min="0" max="200" value="'+(existing.mr||or_val||'')+'" placeholder="e.g. 115" style="width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:18px;font-weight:700;text-align:center;">'
+      +'</div>'
+      +'<div style="flex:1;">'
+        +'<label style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:block;">Official Rating</label>'
+        +'<div style="padding:10px 12px;border-radius:9px;border:1px solid var(--bdr);background:rgba(0,0,0,.05);color:var(--mut);font-size:18px;font-weight:700;text-align:center;">'+(or_val||'—')+'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="margin-bottom:14px;">'
+      +'<label style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:block;">Note (optional)</label>'
+      +'<input id="qr-note" type="text" value="'+(existing.note||'')+'" placeholder="e.g. Underrated by handicapper…" style="width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);font-size:13px;">'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;">'
+      +'<button onclick="rcSaveQuickRate(\''+horse.replace(/'/g,"\\'")+'\',\''+String(or_val||'')+'\')" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--gld);color:#000;font-size:14px;font-weight:800;cursor:pointer;">★ Save Rating</button>'
+      +'<button onclick="rcPromoteToProfile(\''+horse.replace(/'/g,"\\'")+'\',\''+String(or_val||'')+'\')" style="padding:12px 14px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-size:12px;font-weight:700;cursor:pointer;">Full Profile</button>'
+    +'</div>'
+    +'</div>';
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
+  document.body.appendChild(overlay);
+  setTimeout(function(){const inp=document.getElementById('qr-mr');if(inp){inp.focus();inp.select();}},100);
+}
+
+function rcSaveQuickRate(horse, or_val){
+  const key=(horse||'').toLowerCase().trim();
+  const mr=parseInt(document.getElementById('qr-mr').value)||0;
+  const note=(document.getElementById('qr-note').value||'').trim();
+  if(!mr){alert('Please enter a rating.');return;}
+  D.ratings[key]={horse:horse,mr:mr,note:note,or:String(or_val||''),date:td()};
+  save();
+  const overlay=document.getElementById('rc-qr-overlay');
+  if(overlay){
+    overlay.innerHTML='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;">'
+      +'<div style="font-size:40px;margin-bottom:10px;">★</div>'
+      +'<div style="font-size:17px;font-weight:700;">Rating saved: MR '+mr+'</div>'
+      +'<div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:5px;">'+horse+'</div>'
+      +'</div>';
+    overlay.style.alignItems='center';
+    setTimeout(function(){overlay.remove();},1200);
+  }
+}
+
+function rcPromoteToProfile(horse, or_val){
+  const key=(horse||'').toLowerCase().trim();
+  const mr=parseInt((document.getElementById('qr-mr')||{}).value)||0;
+  const note=(document.getElementById('qr-note').value||'').trim();
+  if(mr){
+    D.ratings[key]={horse:horse,mr:mr,note:note,or:String(or_val||''),date:td()};
+    save();
+  }
+  const overlay=document.getElementById('rc-qr-overlay');
+  if(overlay)overlay.remove();
+  openWLForm(null,{horse:horse,currentRating:String(or_val||''),myRating:mr?String(mr):''});
+}
+
+// Called by _betFlowProceed in betting.js once checklist is complete
+function _rcDoLogBet(s){
+  const _pf={horse:s.horse,course:s.course,time:s.time,jockey:s.jockey,trainer:s.trainer};
+  openLogbetOverlay(s.mode, _pf);
+}
+
+function rcSetStatus(msg){
+  const el=document.getElementById('rc-status');
+  if(el){el.textContent=msg;el.style.display=msg?'block':'none';}
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// ─── SHORTLIST MODE ─── Tinder-style runner cards
+// ═══════════════════════════════════════════════════════════════════
+
+let _rcSlShortlist = [];   // accumulated shortlisted runners for this session
+let _rcSlRunners   = [];   // runners in the current race being reviewed
+let _rcSlIdx       = 0;    // current runner index
+let _rcSlRace      = null; // current race object
+let _rcSlCourse    = '';   // current course name
+
+// Reason map (shared with profile panel)
+const _RC_SL_REASONS = {
+  'eye-catcher':  {emoji:'👁', col:'#a78bfa', label:'Eye Catcher'},
+  'future-target':{emoji:'📰', col:'#34d399', label:'Future Target'},
+  'trainer-intel':{emoji:'🗣', col:'#38bdf8', label:'Trainer Intel'},
+  'form-study':   {emoji:'📊', col:'#f59e0b', label:'Form Study'},
+  'tip-source':   {emoji:'💡', col:'#fb7185', label:'Tip Source'},
+};
+
+// ── Step 1: Race picker ────────────────────────────────────────────
+function rcSlRenderPicker(container){
+  // Group by meeting (same as Course view)
+  const meetings={};
+  rcSwCurrentRaces.forEach(function(meeting){
+    const course=meeting.course||meeting.venue||'Unknown';
+    if(meeting.runners){
+      if(!meetings[course])meetings[course]=[];
+      meetings[course].push(meeting);
+    } else {
+      (meeting.races||[]).forEach(function(r){
+        if(!meetings[course])meetings[course]=[];
+        meetings[course].push(r);
+      });
+    }
+  });
+
+  // Flatten sorted for index lookup
+  const allRaces=[];
+  const sorted=Object.keys(meetings).sort(function(a,b){return a.localeCompare(b);});
+  sorted.forEach(function(course){
+    meetings[course].slice().sort(function(a,b){
+      return timeToMins(a.off||a.off_time||a.time||'')-timeToMins(b.off||b.off_time||b.time||'');
+    }).forEach(function(r){ allRaces.push({race:r,course:course}); });
+  });
+  window._rcSlAllRaces=allRaces;
+
+  if(!allRaces.length){
+    const d=document.createElement('div');
+    d.className='rc-empty';d.style.marginTop='20px';
+    d.textContent='No races loaded — refresh the card first.';
+    container.appendChild(d);
+    return;
+  }
+
+  // Build grouped HTML matching Course view style
+  let html='<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Select a race to shortlist</div>';
+  sorted.forEach(function(course){
+    const races=meetings[course].slice().sort(function(a,b){
+      return timeToMins(a.off||a.off_time||a.time||'')-timeToMins(b.off||b.off_time||b.time||'');
+    });
+    const flag=rcCountryFlag(rcCourseCountry(course));
+    const type=rcMeetingType(races);
+    const span=rcTimeSpan(races);
+    const count=races.length;
+    html+='<div class="rc-meeting">'
+      +'<div class="rc-meeting-hdr rc-mtg-pur">'
+        +'<span class="rc-meeting-flag">'+flag+'</span>'
+        +'<div class="rc-meeting-info">'
+          +'<div class="rc-mtg-course">'+course+'</div>'
+          +'<div class="rc-mtg-meta">'+type+' · '+count+' race'+(count!==1?'s':'')+(span?' · '+span:'')+'</div>'
+        +'</div>'
+      +'</div>'
+      +races.map(function(r){
+        const idx=allRaces.findIndex(function(a){return a.race===r&&a.course===course;});
+        const time=r.off||r.off_time||r.time||'—';
+        const name=r.race_name||r.name||r.title||'Race';
+        const cnt=(r.runners||r.horses||[]).filter(function(h){
+          return !h.non_runner&&!h.isNonRunner&&(''+h.number).toUpperCase()!=='NR';
+        }).length;
+        const dist=formatDist(r.distance_round||r.distance_f||r.distance||r.dist||'');
+        const going=r.going||'';
+        return'<div class="rc-race-row rc-sl-race-row" onclick="rcSlStartRace('+idx+')">'
+          +'<div class="rc-race-hdr" style="pointer-events:none;">'
+            +'<div class="rc-race-hdr-left">'
+              +'<div class="rc-race-time">'+time+'</div>'
+              +'<div class="rc-race-name">'+name+'</div>'
+              +'<div class="rc-race-meta-row" style="display:flex;align-items:center;gap:4px;">'
+                +(dist?'<span class="rc-dist-chip">'+dist+'</span>':'')
+                +(going?'<span class="rc-dist-chip">'+going+'</span>':'')
+                +_rcClassChip(name,r.race_class||r.class)
+                +' <span class="rc-race-runners-lbl">'+cnt+' runners</span>'
+              +'</div>'
+            +'</div>'
+            +'<span style="color:var(--blu);font-size:20px;flex-shrink:0;">›</span>'
+          +'</div>'
+        +'</div>';
+      }).join('')
+    +'</div>';
+  });
+
+  const wrap=document.createElement('div');
+  wrap.style.cssText='margin-top:12px;';
+  wrap.innerHTML=html;
+  container.appendChild(wrap);
+}
+
+// ── Entry point from time-view flat race row ──────────────────────
+function rcSlStartFromFlat(flatIdx){
+  const entry=_rcSwFlatRaces[flatIdx];
+  if(!entry||!entry.race)return;
+  const course=entry.course;
+  const race=entry.race;
+  // Ensure the race is registered in rcSwRacesByMeeting so the shortlist can find it
+  if(!rcSwRacesByMeeting[course])rcSwRacesByMeeting[course]=[];
+  let raceIdx=rcSwRacesByMeeting[course].findIndex(function(r){return r===race;});
+  if(raceIdx===-1){rcSwRacesByMeeting[course].push(race);raceIdx=rcSwRacesByMeeting[course].length-1;}
+  // Delegate to the standard expanded-race entry point
+  rcSlStartFromExpanded(course, raceIdx);
+}
+
+// ── Entry point from expanded race (inline toggle) ────────────────
+let _rcSlReturnCourse='';
+let _rcSlReturnIdx=0;
+let _rcSlReturnSafeId='';
+
+function rcSlStartFromExpanded(course, raceIdx){
+  const races=rcSwRacesByMeeting[course]||rcSwSortedRaces||[];
+  const race=races[raceIdx];
+  if(!race)return;
+  _rcSlReturnCourse=course;
+  _rcSlReturnIdx=raceIdx;
+  _rcSlReturnSafeId=course.replace(/\W/g,'_');
+  _rcSlRace=race;
+  _rcSlCourse=course;
+  _rcSlRunners=(race.runners||race.horses||[]).filter(function(r){
+    return !r.non_runner&&!r.isNonRunner
+      &&(''+r.number).toUpperCase()!=='NR'
+      &&(''+r.status).toLowerCase()!=='nr'
+      &&(''+r.jockey).toUpperCase()!=='NON-RUNNER';
+  });
+  _rcSlIdx=0;
+  _rcSlShortlist=[];
+  rcSlRenderCard();
+}
+
+function rcSlBackToRace(){
+  // Re-open the meeting and race row
+  rcSwView='time';
+  rcSwRenderUI();
+  if(_rcSlReturnCourse){
+    setTimeout(function(){
+      rcSwToggleMeeting(_rcSlReturnCourse);
+      setTimeout(function(){
+        rcSwToggle(_rcSlReturnIdx,_rcSlReturnCourse,_rcSlReturnSafeId,true);
+      },120);
+    },60);
+  }
+}
+
+// ── Step 2: Start reviewing a race (from race picker tab — kept for compat) ──
+function rcSlStartRace(idx){
+  const item=window._rcSlAllRaces[idx];
+  if(!item)return;
+  _rcSlReturnCourse=''; // no expanded race to go back to
+  _rcSlRace=item.race;
+  _rcSlCourse=item.course;
+  // Filter out non-runners
+  _rcSlRunners=(item.race.runners||item.race.horses||[]).filter(function(r){
+    return !r.non_runner&&!r.isNonRunner
+      &&(''+r.number).toUpperCase()!=='NR'
+      &&(''+r.status).toLowerCase()!=='nr'
+      &&(''+r.jockey).toUpperCase()!=='NON-RUNNER';
+  });
+  _rcSlIdx=0;
+  _rcSlShortlist=[];
+  rcSlRenderCard();
+}
+
+// ── Step 3: Render the current runner card ─────────────────────────
+function rcSlRenderCard(){
+  const uiEl=document.getElementById('sw-rc-ui');
+  if(!uiEl)return;
+
+  if(_rcSlIdx>=_rcSlRunners.length){ rcSlRenderSummary(); return; }
+
+  const r=_rcSlRunners[_rcSlIdx];
+  const total=_rcSlRunners.length;
+  const pct=Math.round((_rcSlIdx/total)*100);
+
+  const name=stripCountrySuffix(r.horse||r.name||'—');
+  const no=r.number||r.saddle_cloth||(_rcSlIdx+1);
+  const draw=(r.draw&&r.draw!==0&&r.draw!=='0')?'('+r.draw+')':'';
+  const jock=fmtJockey(r.jockey||r.jockeyName);
+  const trainer=r.trainer||r.trainerName||'';
+  const age=r.age?r.age+'yo':'';
+  const form=r.form||'';
+  const rpr=r.ofr||r.rpr||r.official_rating||r.officialRating||r.or||'';
+  const wt=r.weight||r.lbs||r.stone_lbs||'';
+  const sp=r.sp||r.price||r.odds||'';
+  const time=_rcSlRace.off||_rcSlRace.off_time||_rcSlRace.time||'—';
+  const dist=formatDist(_rcSlRace.distance_round||_rcSlRace.distance_f||_rcSlRace.distance||_rcSlRace.dist||'');
+  const going=_rcSlRace.going||'';
+
+  // Profile notes from Puzzle Profiler
+  const wl=getWL();
+  const nl=name.toLowerCase().trim();
+  const prof=wl.find(function(w){return(w.horse||'').toLowerCase().trim()===nl;});
+  const profMeta=prof?(_RC_SL_REASONS[prof.reason||'eye-catcher']||_RC_SL_REASONS['eye-catcher']):null;
+  const edge=prof?(function(){const mr=parseFloat(prof.myRating),or=parseFloat(prof.currentRating);return(mr&&or)?mr-or:null;}()):null;
+  const alreadyIn=_rcSlShortlist.some(function(s){return s.name===name;});
+
+  const _slBackFn=_rcSlReturnCourse?'rcSlBackToRace()':'rcSwView=\'course\';rcSwRenderUI();';
+  const toggleHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+    +'<button onclick="'+_slBackFn+'" style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:4px 0;text-transform:uppercase;">'
+      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
+      +'Back'
+    +'</button>'
+    +'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);">Shortlist</span>'
+    +'<div style="width:48px;"></div>'
+  +'</div>';
+
+  // Profile panel — reuses existing rc-profile-panel styles
+  let profHtml='';
+  if(prof){
+    profHtml='<div class="rc-profile-panel" style="margin:0 -14px;border-top:1px solid var(--bdr);border-radius:0;">'
+      +'<div class="rc-pp-header">'
+        +'<span class="rc-pp-reason-badge" style="border-color:'+profMeta.col+';color:'+profMeta.col+';display:inline-flex;align-items:center;gap:4px;">'+profMeta.svg+' '+profMeta.label+'</span>'
+        +(prof.myRating?'<span class="rc-pp-mr">MR '+prof.myRating+'</span>':'')
+        +(prof.currentRating?'<span class="rc-pp-or">OR '+prof.currentRating+'</span>':'')
+        +(edge!==null?(edge>0?'<span class="rc-sl-edge-pos">▲ +'+edge+'</span>':(edge<0?'<span class="rc-sl-edge-neg">▼ '+edge+'</span>':'')):'')
+      +'</div>'
+      +(prof.reasonNote?'<div class="rc-pp-note">"'+prof.reasonNote+'"</div>':'')
+      +(prof.trainerIntel?'<div class="rc-pp-intel">'+prof.trainerIntel+'</div>':'')
+      +(prof.conditionsNotes?'<div class="rc-pp-cond-notes">'+prof.conditionsNotes+'</div>':'')
+    +'</div>';
+  }
+
+  // ── Silk: use real image from API, fall back to generated SVG ──
+  const _silkUrl=r.silk_url||r.silk||r.colours_url||r.color_url||'';
+  const _slkC=(function(str){
+    let h=0;for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;}
+    const P=[
+      {body:'#7c3aed',accent:'#fbbf24'},{body:'#ef4444',accent:'#ffffff'},
+      {body:'#0ea5e9',accent:'#fbbf24'},{body:'#16a34a',accent:'#fbbf24'},
+      {body:'#db2777',accent:'#ffffff'},{body:'#d97706',accent:'#1e1e2e'},
+      {body:'#0891b2',accent:'#fbbf24'},{body:'#1d4ed8',accent:'#ffffff'},
+      {body:'#be185d',accent:'#fbbf24'},{body:'#065f46',accent:'#ffffff'},
+    ];
+    return P[Math.abs(h)%P.length];
+  })(name);
+
+  // Large Top-Trumps silk — real image preferred, generated SVG fallback
+  const silkSVG=_silkUrl
+    ?'<img src="'+_silkUrl+'" alt="silk" width="120" height="120" style="object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4));" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">'
+     +'<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none;">'
+       +'<ellipse cx="60" cy="62" rx="34" ry="38" fill="'+_slkC.body+'"/>'
+       +'<path d="M26 62 Q60 48 94 62 Q60 76 26 62Z" fill="'+_slkC.accent+'" opacity=".7"/>'
+       +'<ellipse cx="60" cy="30" rx="18" ry="10" fill="'+_slkC.body+'"/>'
+       +'<rect x="42" y="26" width="36" height="8" rx="4" fill="'+_slkC.accent+'"/>'
+       +'<circle cx="60" cy="22" r="12" fill="#f5d0a9"/>'
+       +'<ellipse cx="55" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
+       +'<ellipse cx="65" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
+       +'<rect x="44" y="72" width="32" height="20" rx="5" fill="rgba(0,0,0,.25)"/>'
+       +'<text x="60" y="87" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#fff">'+no+'</text>'
+     +'</svg>'
+    :'<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">'
+       +'<ellipse cx="60" cy="62" rx="34" ry="38" fill="'+_slkC.body+'"/>'
+       +'<path d="M26 62 Q60 48 94 62 Q60 76 26 62Z" fill="'+_slkC.accent+'" opacity=".7"/>'
+       +'<ellipse cx="60" cy="30" rx="18" ry="10" fill="'+_slkC.body+'"/>'
+       +'<rect x="42" y="26" width="36" height="8" rx="4" fill="'+_slkC.accent+'"/>'
+       +'<circle cx="60" cy="22" r="12" fill="#f5d0a9"/>'
+       +'<ellipse cx="55" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
+       +'<ellipse cx="65" cy="21" rx="5" ry="4" fill="rgba(0,0,0,.18)"/>'
+       +'<rect x="44" y="72" width="32" height="20" rx="5" fill="rgba(0,0,0,.25)"/>'
+       +'<text x="60" y="87" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#fff">'+no+'</text>'
+     +'</svg>';
+
+  uiEl.innerHTML=toggleHTML
+    +'<div id="rc-sl-card-wrap">'
+
+    // ── Race context header ──
+    +'<div class="rc-meeting rc-sl-race-header">'
+      +'<div class="rc-meeting-hdr rc-mtg-pur" style="cursor:default;border-radius:12px;">'
+        +'<div class="rc-meeting-info">'
+          +'<div style="display:flex;align-items:baseline;gap:10px;">'
+            +'<span class="rc-mtg-course">'+time+'</span>'
+            +'<span style="font-size:14px;font-weight:700;color:rgba(255,255,255,.9);">'+_rcSlCourse+'</span>'
+          +'</div>'
+          +'<div class="rc-mtg-meta">'
+            +(_rcSlRace.race_name||_rcSlRace.name||'')
+            +(dist?' · '+dist:'')
+            +(going?' · '+going:'')
+          +'</div>'
+        +'</div>'
+        +'<div style="text-align:right;flex-shrink:0;">'
+          +'<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.9);">'+(_rcSlIdx+1)+' / '+total+'</div>'
+          +(_rcSlShortlist.length?'<div style="font-size:10px;color:rgba(255,255,255,.75);margin-top:2px;">★ '+_rcSlShortlist.length+' picked</div>':'')
+        +'</div>'
+      +'</div>'
+      +'<div style="height:3px;background:rgba(255,255,255,.15);">'
+        +'<div style="width:'+pct+'%;height:100%;background:var(--blu);transition:width .3s;"></div>'
+      +'</div>'
+    +'</div>'
+
+    // ── Top Trumps card ──
+    +'<div class="rc-sl-card rc-meeting" id="rc-sl-card" style="overflow:hidden;padding:0;">'
+
+      // Silk panel — coloured band with big silk in centre
+      +'<div style="background:linear-gradient(160deg,'+_slkC.body+'dd,'+_slkC.body+'99);padding:20px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;">'
+        // OR chip top-right
+        +(rpr?'<span class="rc-or" style="position:absolute;top:12px;right:12px;font-size:13px;padding:4px 10px;">'+rpr+'</span>':'')
+        // Draw chip top-left
+        +(draw?'<span style="position:absolute;top:12px;left:12px;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.25);color:#fff;padding:3px 8px;border-radius:6px;">Draw '+draw+'</span>':'')
+        // Silk
+        +silkSVG
+        // Horse name below silk
+        +'<div style="text-align:center;">'
+          +'<div style="font-family:var(--font);font-size:26px;font-weight:900;color:#fff;letter-spacing:.3px;line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.4);">'+name+'</div>'
+          +(age||wt?'<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:4px;">'+[age,wt].filter(Boolean).join(' · ')+'</div>':'')
+        +'</div>'
+      +'</div>'
+
+      // Comment / Spotlight — always visible above stats grid
+      +(r.comment||r.spotlight?
+        '<div style="padding:10px 14px 12px;border-top:2px solid '+_slkC.body+';background:rgba(245,158,11,.04);">'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#f59e0b;margin-bottom:5px;">Spotlight</div>'
+          +'<div style="font-size:12px;line-height:1.65;color:var(--txt);">'+(r.comment||r.spotlight||'').trim()+'</div>'
+        +'</div>'
+       :'')
+
+      // Stats grid — Top Trumps style rows
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;border-top:'+(r.comment||r.spotlight?'1px':'2px')+' solid '+(r.comment||r.spotlight?'var(--bdr)':_slkC.body)+';">'
+        +(sp?'<div style="padding:10px 14px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);">'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Price</div>'
+          +'<div style="font-size:18px;font-weight:900;font-family:var(--font);color:var(--gld);">'+sp+'</div>'
+        +'</div>':'<div style="border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);"></div>')
+        +(form?'<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Form</div>'
+          +'<div style="font-size:15px;font-weight:800;letter-spacing:3px;color:var(--txt);font-family:var(--font-ui);">'+form+'</div>'
+        +'</div>':'<div style="border-bottom:1px solid var(--bdr);"></div>')
+        +(jock?'<div style="padding:10px 14px;border-right:1px solid var(--bdr);'+(trainer?'border-bottom:1px solid var(--bdr);':'')+'">'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Jockey</div>'
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+jock+'</div>'
+        +'</div>':'<div style="border-right:1px solid var(--bdr);'+(trainer?'border-bottom:1px solid var(--bdr);':'')+'""></div>')
+        +(trainer?'<div style="padding:10px 14px;border-bottom:1px solid var(--bdr);">'
+          +'<div style="font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Trainer</div>'
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt);line-height:1.2;">'+trainer+'</div>'
+        +'</div>':'')
+      +'</div>'
+
+      // Profile panel (if horse is in Profiler)
+      +profHtml
+
+    +'</div>'
+
+    // ── Pass / Shortlist buttons ──
+    +'<div class="rc-sl-actions">'
+      +'<button class="rc-sl-btn-pass" onclick="rcSlPass()">✕  Pass</button>'
+      +(alreadyIn
+        ?'<button class="rc-sl-btn-shortlist rc-sl-btn-added" onclick="rcSlUnshortlist()">★  Added</button>'
+        :'<button class="rc-sl-btn-shortlist" onclick="rcSlAdd()">★  Shortlist</button>'
+      )
+    +'</div>'
+
+    +(_rcSlShortlist.length
+      ?'<div style="text-align:center;margin-top:10px;">'
+        +'<button class="btn bout bsm" onclick="rcSlRenderSummary()">Review shortlist ('+_rcSlShortlist.length+') →</button>'
+      +'</div>'
+      :'')
+
+    +'</div>';
+
+  _rcSlBindSwipe(document.getElementById('rc-sl-card'));
+}
+
+// ── Swipe gesture binding ──────────────────────────────────────────
+function _rcSlBindSwipe(el){
+  if(!el)return;
+  let startX=0,startY=0,dragging=false;
+  el.addEventListener('touchstart',function(e){
+    startX=e.touches[0].clientX;startY=e.touches[0].clientY;dragging=true;
+    el.style.transition='none';
+  },{passive:true});
+  el.addEventListener('touchmove',function(e){
+    if(!dragging)return;
+    const dx=e.touches[0].clientX-startX;
+    const dy=e.touches[0].clientY-startY;
+    if(Math.abs(dx)>Math.abs(dy)){
+      el.style.transform='translateX('+dx+'px) rotate('+(dx*0.04)+'deg)';
+      el.style.opacity=String(1-Math.abs(dx)/400);
+    }
+  },{passive:true});
+  el.addEventListener('touchend',function(e){
+    if(!dragging)return;dragging=false;
+    const dx=e.changedTouches[0].clientX-startX;
+    el.style.transition='transform .25s,opacity .25s';
+    if(dx>80){
+      el.style.transform='translateX(120%) rotate(15deg)';
+      el.style.opacity='0';
+      setTimeout(rcSlAdd,240);
+    } else if(dx<-80){
+      el.style.transform='translateX(-120%) rotate(-15deg)';
+      el.style.opacity='0';
+      setTimeout(rcSlPass,240);
+    } else {
+      el.style.transform='';el.style.opacity='1';
+    }
+  },{passive:true});
+}
+
+// ── Actions ────────────────────────────────────────────────────────
+function rcSlAdd(){
+  const r=_rcSlRunners[_rcSlIdx];
+  if(!r)return;
+  const name=stripCountrySuffix(r.horse||r.name||'—');
+  if(!_rcSlShortlist.some(function(s){return s.name===name;})){
+    _rcSlShortlist.push({
+      name:name,
+      no:r.number||r.saddle_cloth||(_rcSlIdx+1),
+      jockey:fmtJockey(r.jockey||r.jockeyName),
+      trainer:r.trainer||r.trainerName||'',
+      odds:r.sp||r.price||r.odds||'',
+      or:r.ofr||r.rpr||r.official_rating||r.officialRating||r.or||'',
+      form:r.form||'',
+      course:_rcSlCourse,
+      time:_rcSlRace.off||_rcSlRace.off_time||_rcSlRace.time||'—',
+      raceName:_rcSlRace.race_name||_rcSlRace.name||'',
+      _raw:r
+    });
+  }
+  _rcSlIdx++;
+  rcSlRenderCard();
+}
+
+function rcSlPass(){
+  _rcSlIdx++;
+  rcSlRenderCard();
+}
+
+function rcSlUnshortlist(){
+  const r=_rcSlRunners[_rcSlIdx];
+  if(!r)return;
+  const name=stripCountrySuffix(r.horse||r.name||'—');
+  _rcSlShortlist=_rcSlShortlist.filter(function(s){return s.name!==name;});
+  rcSlRenderCard(); // re-render to show Pass state
+}
+
+// ── Step 4: Summary screen ─────────────────────────────────────────
+function rcSlRenderSummary(){
+  const uiEl=document.getElementById('sw-rc-ui');
+  if(!uiEl)return;
+
+  const _slBackFn2=_rcSlReturnCourse?'rcSlBackToRace()':'rcSwView=\'course\';rcSwRenderUI();';
+  const toggleHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
+    +'<button onclick="'+_slBackFn2+'" style="display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;padding:4px 0;text-transform:uppercase;">'
+      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
+      +'Back'
+    +'</button>'
+    +'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);">Shortlist</span>'
+    +'<div style="width:48px;"></div>'
+  +'</div>';
+
+  if(!_rcSlShortlist.length){
+    uiEl.innerHTML=toggleHTML
+      +'<div style="text-align:center;padding:40px 20px;">'
+        +'<div style="font-size:32px;margin-bottom:12px;">🤷</div>'
+        +'<div style="font-weight:700;font-size:16px;margin-bottom:8px;">Nothing shortlisted</div>'
+        +'<div style="font-size:13px;color:var(--mut);margin-bottom:20px;">You passed on everyone in this race.</div>'
+        +'<button class="btn bout" onclick="rcSwView=\'shortlist\';rcSwRenderUI();">Pick another race</button>'
+      +'</div>';
+    return;
+  }
+
+  // Render using full racecard runner rows
+  const runners=_rcSlShortlist.map(function(s){return s._raw||s;});
+  const fakeEl=document.createElement('div');
+  const fakeRace=Object.assign({},_rcSlRace,{runners:runners,horses:runners});
+  const savedMeetings=rcSwRacesByMeeting;
+  rcSwRacesByMeeting={__sl__:[fakeRace]};
+  rcSwRenderRunners(0,'__sl__',fakeEl);
+  rcSwRacesByMeeting=savedMeetings;
+
+  uiEl.innerHTML=toggleHTML
+    +'<div style="margin-top:12px;">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
+        +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--blu);">★ Your Shortlist ('+_rcSlShortlist.length+')</div>'
+        +'<button class="btn bout bsm" onclick="rcSwView=\'shortlist\';rcSwRenderUI();">Review another race</button>'
+      +'</div>'
+      +fakeEl.innerHTML
+    +'</div>';
+}
+
+function rcSlBet(idx){
+  const s=_rcSlShortlist[idx];
+  if(!s)return;
+  openBetFlow('real',s.name,s.course,s.time,s.jockey,s.trainer,s.raceName);
+}
+
+function rcSlAddToTracker(idx){
+  const s=_rcSlShortlist[idx];
+  if(!s)return;
+  const wl=getWL();
+  const existing=wl.find(function(w){return(w.horse||'').toLowerCase().trim()===s.name.toLowerCase().trim();});
+  if(existing){
+    alert(s.name+' is already in your Tracker.');
+    return;
+  }
+  wl.push({
+    id:gid(),horse:s.name,trainer:s.trainer,
+    currentRating:s.or,myRating:'',
+    reason:'eye-catcher',reasonNote:'Added from shortlist',
+    orHistory:[],observations:[],targets:[],
+    createdAt:Date.now()
+  });
+  setWL(wl);save();
+  // Update button to show added
+  const btn=document.querySelectorAll('.rc-sl-summary-row')[idx];
+  if(btn){
+    const tBtn=btn.querySelectorAll('button')[1];
+    if(tBtn){tBtn.textContent='✓ Added';tBtn.style.color='var(--grn)';}
+  }
+}
+
+function rcSlRemove(idx){
+  _rcSlShortlist.splice(idx,1);
+  rcSlRenderSummary();
+}
+

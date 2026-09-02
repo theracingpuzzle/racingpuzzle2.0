@@ -685,6 +685,18 @@
   <div class="snav" id="snav" style="display:none;"></div>
 </div>
 
+<!-- SHORTLIST OVERLAY -->
+<div id="rc-sl-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:var(--bg);flex-direction:column;overflow:hidden;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;">
+    <div>
+      <div id="rc-sl-title" style="font-size:14px;font-weight:700;color:var(--txt);"></div>
+      <div id="rc-sl-sub" style="font-size:11px;color:var(--mut);margin-top:2px;"></div>
+    </div>
+    <button onclick="rcSlClose()" style="background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer;padding:4px;">✕</button>
+  </div>
+  <div id="rc-sl-body" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
+</div>
+
 <!-- COACH DRAWER -->
 <div id="coach-drawer-overlay" onclick="coachDrawerClose()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;backdrop-filter:blur(2px);"></div>
 <div id="coach-drawer" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:901;background:var(--sur);border-radius:20px 20px 0 0;border-top:1px solid var(--bdr);max-height:85vh;display:none;flex-direction:column;">

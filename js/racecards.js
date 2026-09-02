@@ -659,7 +659,10 @@ function rcSwRenderRunners(idx, course, el){
     const pid='sw-profile-'+course.replace(/\W/g,'_')+'-'+i;
     const _profileStrip=(!isNR&&!_bh&&_pm2)?'border-left:3px solid '+_pm2.col+';padding-left:11px;':'';
     return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'" style="'+_profileStrip+'">'
-      +'<div class="rc-cloth">'+(isNR?'<span class="rc-nr-chip">NR</span>':(r.silk_url||r.silk)?'<img src="'+(r.silk_url||r.silk)+'" alt="'+no+'" width="44" height="44" style="object-fit:contain;display:block;" onerror="this.outerHTML=\'<span>'+no+'</span>\'">':'<span>'+no+'</span>')+'</div>'
+      +(isNR
+        ?'<div class="rc-cloth"><span class="rc-nr-chip">NR</span></div>'
+        :'<div class="rc-cloth"><span>'+no+'</span></div>'
+         +((r.silk_url||r.silk)?'<img src="'+(r.silk_url||r.silk)+'" alt="" width="44" height="44" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':''))
       +'<div class="rc-runner-body">'
         +(function(){
           const _wl=getWL();const _nl=(name||'').toLowerCase().trim();

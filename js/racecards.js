@@ -2125,9 +2125,10 @@ function rcSlRenderSummary(){
   const runners=_rcSlShortlist.map(function(s){return s._raw||s;});
   const fakeEl=document.createElement('div');
   const fakeRace=Object.assign({},_rcSlRace,{runners:runners,horses:runners});
+  const _slCourse=_rcSlCourse||'Unknown';
   const savedMeetings=rcSwRacesByMeeting;
-  rcSwRacesByMeeting={__sl__:[fakeRace]};
-  rcSwRenderRunners(0,'__sl__',fakeEl);
+  rcSwRacesByMeeting={[_slCourse]:[fakeRace]};
+  rcSwRenderRunners(0,_slCourse,fakeEl);
   rcSwRacesByMeeting=savedMeetings;
 
   uiEl.innerHTML=toggleHTML

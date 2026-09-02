@@ -670,7 +670,8 @@ async function checkWatchlistRunners(races){
               orUpdated:orChanged?racecardOR:null,
               orPrev:orChanged?storedOR:null,
               edge,mr,or,
-              resultInfo
+              resultInfo,
+              silkUrl:r.silk_url||r.silk||w.silkUrl||''
             });
           }
         }
@@ -1205,10 +1206,13 @@ async function checkWatchlistRunners(races){
             // Top: checkbox (if select mode) + horse name + tier badge
             +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">'
               +_cbBtn
-              +'<div style="flex:1;min-width:0;">'
+              +'<div style="flex:1;min-width:0;display:flex;align-items:flex-start;gap:8px;">'
+                +(a.silkUrl?'<img src="'+a.silkUrl+'" alt="" width="36" height="36" style="object-fit:contain;flex-shrink:0;margin-top:2px;" onerror="this.style.display=\'none\'">':'')
+                +'<div style="flex:1;min-width:0;">'
                 +(reasonBadge?'<div style="margin-bottom:5px;">'+reasonBadge+'</div>':'')
                 +'<span class="t-horse-name">'+a.horse+'</span>'
                 +'<div class="t-muted" style="font-size:13px;margin-top:2px;">'+watchingRaceMeta+'</div>'
+              +'</div>'
               +'</div>'
               +'<span style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:6px;border:1px solid '+_tc.border+';color:'+_tc.text+';white-space:nowrap;flex-shrink:0;margin-top:4px;">'+_tc.label+'</span>'
             +'</div>'

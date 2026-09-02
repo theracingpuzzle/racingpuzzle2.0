@@ -716,7 +716,8 @@ function rcSwRenderRunners(idx, course, el){
             ?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Form</span><span class="rc-runner-form" style="margin-bottom:0;">'+form+'</span></div>'
             :'');
         }())
-        +((jock||trainer)?'<div class="rc-runner-detail-row">'+(jock?'<span class="rc-detail-lbl">J</span><span class="rc-runner-jt">'+jock+(r.jockey_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.jockey_rtf+'</span>':'')+'</span>':'')+(trainer?'<span class="rc-detail-lbl" style="margin-left:8px;">T</span><span class="rc-runner-jt">'+trainer+(r.trainer_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.trainer_rtf+'</span>':'')+'</span>':'')+'</div>':'')
+        +(jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+(r.jockey_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.jockey_rtf+'</span>':'')+'</span></div>':'')
+        +(trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+(r.trainer_rtf?'<span style="margin-left:5px;font-size:10px;color:var(--mut);">'+r.trainer_rtf+'</span>':'')+'</span></div>':'')
       +'</div>'
       +'<div class="rc-runner-actions">'
         +(isNR?''

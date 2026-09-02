@@ -1207,7 +1207,7 @@ async function checkWatchlistRunners(races){
             +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">'
               +_cbBtn
               +'<div style="flex:1;min-width:0;display:flex;align-items:flex-start;gap:8px;">'
-                +(a.silkUrl?'<img src="'+a.silkUrl+'" alt="" width="36" height="36" style="object-fit:contain;flex-shrink:0;margin-top:2px;" onerror="this.style.display=\'none\'">':'')
+                +(a.silkUrl?'<img src="'+a.silkUrl+'" alt="" width="52" height="52" style="object-fit:contain;flex-shrink:0;margin-top:2px;" onerror="this.style.display=\'none\'">':'')
                 +'<div style="flex:1;min-width:0;">'
                 +(reasonBadge?'<div style="margin-bottom:5px;">'+reasonBadge+'</div>':'')
                 +'<span class="t-horse-name">'+a.horse+'</span>'

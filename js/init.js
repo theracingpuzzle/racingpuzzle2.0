@@ -61,6 +61,7 @@ async function bootApp() {
 
   goTo(0, true);
   updHdr();
+  _applyBalanceVisibility();
   renderToday();
   renderBkCard();
   if (typeof renderCmdRules === 'function') renderCmdRules();

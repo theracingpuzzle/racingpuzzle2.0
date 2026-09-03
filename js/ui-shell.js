@@ -175,6 +175,33 @@ function renderSwCard(){
   if(id==='leagues'){if(typeof lgInit==='function')lgInit();}
 }
 
+// ─── BALANCE VISIBILITY TOGGLE ───────────────────────────────────────────────
+function _applyBalanceVisibility(){
+  const hidden=D.settings&&D.settings.balancesHidden;
+  const wrap=document.getElementById('hdr-bal-wrap');
+  const eye=document.getElementById('hdr-bal-eye');
+  if(wrap){
+    const vals=wrap.querySelectorAll('.hdr-bal-val');
+    vals.forEach(function(el){
+      el.style.filter=hidden?'blur(6px)':'';
+      el.style.userSelect=hidden?'none':'';
+    });
+  }
+  if(eye){
+    if(hidden){
+      eye.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 10 20C3 20 0 10 0 10a17.35 17.35 0 0 1 2.06-3.94M6.53 6.53A10.07 10.07 0 0 1 10 6c7 0 10 10 10 10a17.35 17.35 0 0 1-1.67 2.68M1 1l18 18"/><circle cx="10" cy="10" r="2.5"/>';
+    } else {
+      eye.innerHTML='<path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/>';
+    }
+  }
+}
+function toggleBalanceVisibility(){
+  if(!D.settings)D.settings={};
+  D.settings.balancesHidden=!D.settings.balancesHidden;
+  save();
+  _applyBalanceVisibility();
+}
+
 // ─── HEADER FLASH — visual confirmation when a balance changes ───
 function flashHdrBalance(mode, deductedAmount){
   // mode: 'real' | 'virt'

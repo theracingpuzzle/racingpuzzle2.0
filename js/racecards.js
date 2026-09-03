@@ -1223,7 +1223,7 @@ function rcSwRaceCard(race, course){
         const _eyeSvg='<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>';
         const watchBtn = wlEntry
           ? '<button class="rc-act-btn" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.1);color:var(--grn);" title="Watching">'+_eyeSvg+'</button>'
-          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\',\''+esc(String(race.race_class||race.class||'').trim().replace(/^class\\s*/i,''))+'\',\''+esc(r.silk_url||r.silk||'')+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
+          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\',\''+esc(String(race.race_class||race.class||'').trim().replace(/^class\\s*/i,''))+'\',\''+esc(r.silk_url||r.silk||'')+'\',\''+esc(String(r.age||''))+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
         const _qrRes=(wlEntry&&wlEntry.myRating)?{mr:wlEntry.myRating}:(D.ratings&&D.ratings[hn]);
         const rateBtnRes='<span onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\')" class="rc-mr-chip'+(_qrRes?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qrRes?_qrRes.mr:'\u2014')+'</span>';
         const _resSilk=r.silk_url||r.silk||'';
@@ -1522,7 +1522,7 @@ async function rcLoadResults(){
                 +'<div style="font-size:11px;color:var(--mut);">'+jock+'</div>'
               +'</div>'
               +'<span class="rc-sp">'+sp+'</span>'
-              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\',\''+esc2(race.going||'')+'\',\''+esc2(time)+'\',\''+esc2(race.date||td())+'\',\''+esc2(formatDist(race.distance_f||race.distance_round||race.distance||race.dist||''))+'\',\''+String(pos)+'\',\''+esc2(String(race.race_class||race.class||''))+'\',\''+esc2(r.silk_url||r.silk||'')+'\')" class="rc-watch-btn-sm">W</button>'
+              +'<button onclick="rcAddToWatchlist(\''+esc2(horse)+'\',\''+esc2(course)+'\',\''+esc2(jock)+'\',\''+esc2(trainer)+'\',\''+esc2(name)+'\',\''+esc2(ofr)+'\',\''+esc2(race.going||'')+'\',\''+esc2(time)+'\',\''+esc2(race.date||td())+'\',\''+esc2(formatDist(race.distance_f||race.distance_round||race.distance||race.dist||''))+'\',\''+String(pos)+'\',\''+esc2(String(race.race_class||race.class||''))+'\',\''+esc2(r.silk_url||r.silk||'')+'\',\''+esc2(String(r.age||''))+'\')" class="rc-watch-btn-sm">W</button>'
               +'</div>';
           }).join('')
           +'</div>';
@@ -1533,7 +1533,7 @@ async function rcLoadResults(){
   }
 }
 
-function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, time, date, distF, position, raceClass, silkUrl){
+function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, time, date, distF, position, raceClass, silkUrl, age){
   var posNum=parseInt(position)||0;
   var resultVal=posNum===1?'win':posNum>=2&&posNum<=3?'place':posNum>3?'unplaced':'watched';
   var cleanClass=String(raceClass||'').trim().replace(/^class\s*/i,'');
@@ -1541,6 +1541,7 @@ function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, 
   openWLForm(null, {
     horse:         horse,
     trainer:       trainer,
+    age:           age||'',
     currentRating: ofr||'',
     silkUrl:       silkUrl||'',
     firstSighting: {

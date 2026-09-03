@@ -2070,46 +2070,72 @@ function openWLForm(id,prefill){
     }).join('')
   +'</div>'):'';
 
-  // ── Single-page scrollable form for new profiles ───────────────────────────
+  // ── Step-based wizard for new profiles ────────────────────────────────────
+  const _cancelFn="var _r=window._wlEditReturnId;window._wlEditReturnId=null;document.getElementById('wl-modal').remove();if(_r)openWLProfile(_r);";
   const newProfileBodyHtml=!e?(function(){
-    return'<div class="wlf-body">'
-      // ── Horse Identity ──
-      +'<div class="wlf-section">'
-        +'<div style="padding:12px 13px 0;">'
-          +'<button type="button" id="wlf-scan-btn" onclick="wlScanScreenshot()" style="width:100%;padding:11px;border-radius:9px;border:1.5px dashed rgba(250,204,21,.4);background:rgba(250,204,21,.06);color:var(--gld);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;">📷 Scan Screenshot — fill from Racing Post / ATR</button>'
-          +'<div id="wlf-scan-notice" style="display:none;font-size:12px;color:var(--grn);padding:6px 2px 0;"></div>'
+    const fs=p.firstSighting||{};
+    const resultBtns=[{k:'win',lbl:'Win',col:'var(--grn)'},{k:'place',lbl:'Place',col:'var(--gld)'},{k:'unplaced',lbl:'Unplaced',col:'var(--red)'}];
+    const stepIndicator=
+      '<div id="wlf-step-indicator" style="display:flex;align-items:center;justify-content:center;gap:0;padding:10px 20px 2px;">'
+        +'<div id="wlf-si-1" onclick="wlNewStep(1)" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;flex:1;">'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:var(--navy);border:2px solid var(--navy);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:900;color:#fff;">1</div>'
+          +'<div style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--navy);">Racehorse</div>'
         +'</div>'
-        +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
-          +'<div class="fg"><label>Horse Name</label><input type="text" id="wlf-horse" value="'+(p.horse||'')+'"></div>'
-          +'<div class="g2">'
-            +'<div class="fg"><label>Trainer</label><input type="text" id="wlf-trainer" value="'+(p.trainer||'')+'"></div>'
-            +'<div class="fg"><label>Age</label><input type="number" id="wlf-age" min="2" max="20" placeholder="e.g. 3" value="'+(p.age||'')+'"></div>'
+        +'<div style="flex:1;height:2px;background:rgba(255,255,255,.15);margin-bottom:14px;"></div>'
+        +'<div id="wlf-si-2" onclick="wlNewStep(2)" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;flex:1;">'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:900;color:rgba(255,255,255,.4);">2</div>'
+          +'<div style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.3);">Why Logging</div>'
+        +'</div>'
+        +'<div style="flex:1;height:2px;background:rgba(255,255,255,.15);margin-bottom:14px;"></div>'
+        +'<div id="wlf-si-3" onclick="wlNewStep(3)" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;flex:1;">'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:900;color:rgba(255,255,255,.4);">3</div>'
+          +'<div style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.3);">First Sighting</div>'
+        +'</div>'
+      +'</div>';
+
+    // Step 1: Racehorse identity
+    const step1=
+      '<div id="wlf-step-1" class="wlf-body">'
+        +'<div class="wlf-section">'
+          +'<div style="padding:12px 13px 0;">'
+            +'<button type="button" id="wlf-scan-btn" onclick="wlScanScreenshot()" style="width:100%;padding:11px;border-radius:9px;border:1.5px dashed rgba(250,204,21,.4);background:rgba(250,204,21,.06);color:var(--gld);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.02em;">📷 Scan Screenshot — fill from Racing Post / ATR</button>'
+            +'<div id="wlf-scan-notice" style="display:none;font-size:12px;color:var(--grn);padding:6px 2px 0;"></div>'
           +'</div>'
-          +'<div class="g2">'
-            +'<div class="fg"><label>Current OR</label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(p.currentRating||'')+'"></div>'
-            +'<div class="fg"><label style="color:var(--gld);">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="" class="wlf-mr-input"></div>'
+          +'<div class="wlf-sec-body" style="display:flex;flex-direction:column;gap:10px;">'
+            +'<div class="fg"><label>Horse Name</label><input type="text" id="wlf-horse" value="'+(p.horse||'')+'"></div>'
+            +'<div class="g2">'
+              +'<div class="fg"><label>Trainer</label><input type="text" id="wlf-trainer" value="'+(p.trainer||'')+'"></div>'
+              +'<div class="fg"><label>Age</label><input type="number" id="wlf-age" min="2" max="20" placeholder="e.g. 3" value="'+(p.age||'')+'"></div>'
+            +'</div>'
+            +'<div class="g2">'
+              +'<div class="fg"><label>Current OR</label><input type="number" id="wlf-rating" placeholder="e.g. 85" value="'+(p.currentRating||'')+'"></div>'
+              +'<div class="fg"><label style="color:var(--gld);">My Mark (MR) ★</label><input type="number" id="wlf-myrating" placeholder="e.g. 88" value="" class="wlf-mr-input"></div>'
+            +'</div>'
           +'</div>'
         +'</div>'
-      +'</div>'
-      // ── Why Am I Watching ──
-      +'<div class="wlf-section">'
-        +'<div class="wlf-sec-hdr"><span class="wlf-sec-title">Why Am I Watching?</span></div>'
-        +'<div style="display:flex;gap:5px;flex-wrap:wrap;padding:12px 13px 13px;" id="wlf-reasons">'+reasonHtml+'</div>'
-        +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
-        +'<div class="wlf-sec-body">'
-          +'<div class="fg"><label>In a sentence…</label><input type="text" id="wlf-reason-note" placeholder="e.g. Kept on well from rear, bumped 2f out — needs a clearer run" value="" autocomplete="off"></div>'
-          +'<div id="wlf-unraced-row" style="display:'+(showUnraced?'flex':'none')+';align-items:center;gap:10px;padding:10px 13px;background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.2);border-radius:9px;">'
-            +'<input type="checkbox" id="wlf-unraced" onchange="wlToggleUnraced()" style="width:16px;height:16px;accent-color:#fb7185;cursor:pointer;flex-shrink:0;">'
-            +'<label for="wlf-unraced" style="font-size:12px;font-weight:700;color:var(--txt);cursor:pointer;margin:0;">Unraced — no observations possible yet</label>'
+      +'</div>';
+
+    // Step 2: Why Am I Logging
+    const step2=
+      '<div id="wlf-step-2" class="wlf-body" style="display:none;">'
+        +'<div class="wlf-section">'
+          +'<div class="wlf-sec-hdr"><span class="wlf-sec-title">Why Am I Watching?</span></div>'
+          +'<div style="display:flex;gap:5px;flex-wrap:wrap;padding:12px 13px 13px;" id="wlf-reasons">'+reasonHtml+'</div>'
+          +'<input type="hidden" id="wlf-reason" value="'+curReason+'">'
+          +'<div class="wlf-sec-body">'
+            +'<div class="fg"><label>In a sentence…</label><textarea id="wlf-reason-note" placeholder="e.g. Kept on well from rear, bumped 2f out — needs a clearer run" autocomplete="off" style="min-height:60px;resize:vertical;"></textarea></div>'
+            +'<div id="wlf-unraced-row" style="display:'+(showUnraced?'flex':'none')+';align-items:center;gap:10px;padding:10px 13px;background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.2);border-radius:9px;">'
+              +'<input type="checkbox" id="wlf-unraced" onchange="wlToggleUnraced()" style="width:16px;height:16px;accent-color:#fb7185;cursor:pointer;flex-shrink:0;">'
+              +'<label for="wlf-unraced" style="font-size:12px;font-weight:700;color:var(--txt);cursor:pointer;margin:0;">Unraced — no observations possible yet</label>'
+            +'</div>'
           +'</div>'
         +'</div>'
-      +'</div>'
-      // ── First Sighting ──
-      +(function(){
-        const fs=p.firstSighting||{};
-        const goingOpts=['Firm','Good to Firm','Good','Good to Soft','Soft','Heavy','Standard','Standard to Slow','Slow'];
-        const resultBtns=[{k:'win',lbl:'Win',col:'var(--grn)'},{k:'place',lbl:'Place',col:'var(--gld)'},{k:'unplaced',lbl:'Unplaced',col:'var(--red)'}];
-        return'<div class="wlf-section" style="border:1px solid rgba(56,189,248,.25);border-radius:12px;background:rgba(56,189,248,.04);">'
+      +'</div>';
+
+    // Step 3: First Sighting
+    const step3=
+      '<div id="wlf-step-3" class="wlf-body" style="display:none;">'
+        +'<div class="wlf-section" style="border:1px solid rgba(56,189,248,.25);border-radius:12px;background:rgba(56,189,248,.04);">'
           +'<div class="wlf-sec-hdr" style="border-color:rgba(56,189,248,.15);">'
             +'<span class="wlf-sec-title" style="color:#38bdf8;">First Sighting</span>'
             +(fs.course?'<span style="font-size:11px;font-weight:400;color:#38bdf8;margin-left:8px;">Pre-filled from results</span>':'<span style="font-size:11px;font-weight:400;color:var(--mut);margin-left:8px;">— what did you see?</span>')
@@ -2147,9 +2173,10 @@ function openWLForm(id,prefill){
             +'</div>'
             +'<div class="fg"><label>What did you see?</label><textarea id="wlf-sight-notes" placeholder="What caught your eye — running style, finish, unlucky in running, potential..." style="min-height:72px;"></textarea></div>'
           +'</div>'
-        +'</div>';
-      }())
-    +'</div>';
+        +'</div>'
+      +'</div>';
+
+    return stepIndicator+step1+step2+step3;
   }()):'';
 
   modal.innerHTML=
@@ -2158,7 +2185,7 @@ function openWLForm(id,prefill){
     +'<div class="wlf-brand">RACING <span class="wlf-brand-accent">PUZZLE</span></div>'
     +'<div class="wlf-nav-btns">'
       +(e?'<button onclick="delWLEntry(\''+e.id+'\')" class="wlf-del-btn">Delete</button>':'')
-      +'<button onclick="var _r=window._wlEditReturnId;window._wlEditReturnId=null;document.getElementById(\'wl-modal\').remove();if(_r)openWLProfile(_r);" class="wlf-close-btn">✕</button>'
+      +'<button onclick="'+_cancelFn+'" class="wlf-close-btn">✕</button>'
     +'</div>'
   +'</div>'
   +'<div class="wlf-hero">'
@@ -2176,14 +2203,18 @@ function openWLForm(id,prefill){
     ?('<div class="wlf-body">'+horseTabHtml+conditionsTabHtml+racesHtml+intelTabHtml+'</div>')
     :newProfileBodyHtml)
   +'<div class="wlf-actions">'
-    +'<button class="wlf-save-btn" onclick="saveWLEntry(\''+(e?e.id:'')+'\')">'+( e?'Save Profile':'Create Profile')+'</button>'
-    +'<button class="wlf-cancel-btn" onclick="var _r=window._wlEditReturnId;window._wlEditReturnId=null;document.getElementById(\'wl-modal\').remove();if(_r)openWLProfile(_r);">Cancel</button>'
+    +(e
+      ?('<button class="wlf-save-btn" onclick="saveWLEntry(\''+e.id+'\')">Save Profile</button>'
+        +'<button class="wlf-cancel-btn" onclick="'+_cancelFn+'">Cancel</button>')
+      :('<button id="wlf-back-btn" class="wlf-cancel-btn" style="display:none;" onclick="wlNewStep(window._wlNewStep-1)">← Back</button>'
+        +'<button id="wlf-next-btn" class="wlf-save-btn" onclick="wlNewStep(window._wlNewStep+1)">Next →</button>'))
   +'</div>'
   +'</div>';
 
   document.body.appendChild(modal);
   _renderObsList();_renderTargetsList();_wlRenderIntelList();
   if(e)wlSwitchTab(defaultTab);
+  else{window._wlNewStep=1;}
   setTimeout(function(){
     const f=document.getElementById('wlf-horse');if(f)f.focus();
   },100);
@@ -2326,6 +2357,45 @@ function wlToggleGoing(btn){
   if(idx>-1){_wlDossier.goingPrefs.splice(idx,1);}else{_wlDossier.goingPrefs.push(g);}
   const sel=_wlDossier.goingPrefs.includes(g);
   btn.className='wlf-going-btn'+(sel?' on':'');
+}
+
+window._wlNewStep=1;
+function wlNewStep(n){
+  const total=3;
+  n=Math.max(1,Math.min(total,n));
+  if(n===total+1){saveWLEntry('');return;}
+  // Validate step 1 before advancing
+  if(n>1&&window._wlNewStep===1){
+    const h=document.getElementById('wlf-horse');
+    if(h&&!h.value.trim()){h.focus();h.style.outline='2px solid #ef4444';setTimeout(function(){h.style.outline='';},1500);return;}
+  }
+  window._wlNewStep=n;
+  for(var i=1;i<=total;i++){
+    const el=document.getElementById('wlf-step-'+i);
+    if(el)el.style.display=i===n?'':'none';
+  }
+  // Update step indicator styles
+  for(var j=1;j<=total;j++){
+    const si=document.getElementById('wlf-si-'+j);
+    if(!si)continue;
+    const dot=si.querySelector('div:first-child');
+    const lbl=si.querySelector('div:last-child');
+    const active=j===n,done=j<n;
+    if(dot){
+      dot.style.background=active?'var(--navy)':done?'rgba(22,163,74,.8)':'rgba(255,255,255,.1)';
+      dot.style.border='2px solid '+(active?'var(--navy)':done?'rgba(22,163,74,.8)':'rgba(255,255,255,.2)');
+      dot.style.color=active||done?'#fff':'rgba(255,255,255,.4)';
+      dot.textContent=done?'✓':String(j);
+    }
+    if(lbl){lbl.style.color=active?'var(--navy)':done?'rgba(22,163,74,.8)':'rgba(255,255,255,.3)';}
+  }
+  const back=document.getElementById('wlf-back-btn');
+  const next=document.getElementById('wlf-next-btn');
+  if(back)back.style.display=n>1?'':'none';
+  if(next)next.textContent=n===total?'Create Profile':'Next →';
+  // Scroll step into view
+  const active=document.getElementById('wlf-step-'+n);
+  if(active)active.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function wlSightResult(btn){

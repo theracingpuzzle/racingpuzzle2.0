@@ -705,7 +705,6 @@ function rcSwRenderRunners(idx, course, el){
           return'<div class="rc-runner-name-row">'
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'
             +(_hg?'<span style="font-size:10px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);border-radius:4px;padding:1px 5px;margin-left:3px;letter-spacing:.03em;">'+_hg+'</span>':'')
-            +(age?'<span class="rc-runner-age" style="font-size:0.72em;color:var(--mut);margin-left:4px;">'+age+'</span>':'')
             +(rpr?'<span class="rc-or">'+rpr+'</span>':'')
             +(!isNR?'<span onclick="rcQuickRate(event,\''+name.replace(/'/g,"\\'")+'\',\''+rpr+'\')" class="rc-mr-chip'+((_qr2)?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qr2?_qr2.mr:'—')+'</span>':'')
             +(_badge?'<span class="rc-wl-pill">'+_pm.svg+'</span>':'')
@@ -728,9 +727,10 @@ function rcSwRenderRunners(idx, course, el){
     +'</div>'
     +(function(){
       const _cmt=(r.comment||r.spotlight||'').trim();
-      const _hasExtra=!!(wt||(r.dslr!=null&&r.dslr!==''))||r.owner||_cmt;
+      const _hasExtra=!!(age||wt||(r.dslr!=null&&r.dslr!==''))||r.owner||_cmt;
       const _dp=_hasExtra&&rcSwDensity==='detailed'&&!isNR
         ?'<div style="padding:8px 14px 10px;border-top:1px solid var(--bdr);background:rgba(0,0,0,.15);">'
+          +(age?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Age</span><span class="rc-runner-jt">'+age+'</span></div>':'')
           +(wt?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Weight</span><span class="rc-runner-jt">'+wt+'</span></div>':'')
           +(r.dslr!=null&&r.dslr!==''?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Last run</span><span class="rc-runner-jt">'+r.dslr+' days ago</span></div>':'')
           +(r.owner?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Owner</span><span class="rc-runner-jt" style="color:var(--mut);">'+r.owner+'</span></div>':'')

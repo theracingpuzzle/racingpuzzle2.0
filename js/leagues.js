@@ -548,12 +548,11 @@ function lgRenderDetail(el){
     +'</div>';
   }
 
-  // Footer action
-  h+='<div style="text-align:center;margin-top:4px;">'
-    +(isAdmin
-      ?'<button onclick="lgDeleteLeague(\''+l.id+'\')" style="font-size:11px;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;">Delete league</button>'
-      :'<button onclick="lgLeaveLeague(\''+l.id+'\')" style="font-size:11px;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;">Leave league</button>'
-    )
+  // Footer action — archived leagues show both options; active leagues show role-based single option
+  const _isArchived=_lgIsEnded(l);
+  h+='<div style="text-align:center;margin-top:4px;display:flex;gap:16px;justify-content:center;">'
+    +(_isArchived||!isAdmin?'<button onclick="lgLeaveLeague(\''+l.id+'\')" style="font-size:11px;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;">Leave league</button>':'')
+    +(_isArchived||isAdmin?'<button onclick="lgDeleteLeague(\''+l.id+'\')" style="font-size:11px;color:#f87171;background:none;border:none;cursor:pointer;text-decoration:underline;">Delete league</button>':'')
   +'</div>';
 
   el.innerHTML=h;

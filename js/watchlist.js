@@ -605,7 +605,7 @@ function _injectAlbumCSS(){
     .wll-sec-cnt{font-family:var(--font);font-size:10px;color:var(--mut);}
     .wll-row{display:flex;align-items:center;border-left:3px solid;padding:10px 10px 10px 12px;margin-bottom:6px;background:var(--sur2);border-radius:0 9px 9px 0;cursor:pointer;transition:background .12s;}
     .wll-row:active{background:var(--dim);}
-    .wll-silks{width:30px;height:30px;border-radius:50%;background:var(--sur);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;}
+    .wll-silks{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;}
     .wll-main{flex:1;min-width:0;}
     .wll-name{font-family:var(--font);font-size:16px;font-weight:600;letter-spacing:.2px;color:var(--txt);line-height:1;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .wll-sub{font-size:11px;color:var(--mut);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -892,7 +892,7 @@ function renderWLList(){
 
       html+='<div style="position:relative;border-bottom:1px solid var(--bdr);" data-wl-id="'+e.id+'">'
         +'<div class="wll-row" style="border-left:none;border-bottom:none;">'
-          +'<div class="wll-silks">'+(e.silkUrl?'<img src="'+e.silkUrl+'" alt="" width="30" height="30" style="object-fit:contain;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><span style="display:none;width:30px;height:30px;align-items:center;justify-content:center;">'+_silkSVG(e.horse||'?',18)+'</span>':_silkSVG(e.horse||'?',18))+'</div>'
+          +'<div class="wll-silks">'+(e.silkUrl?'<img src="'+e.silkUrl+'" alt="" width="44" height="44" style="object-fit:contain;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><span style="display:none;width:44px;height:44px;align-items:center;justify-content:center;">'+_silkSVG(e.horse||'?',24)+'</span>':_silkSVG(e.horse||'?',18))+'</div>'
           +'<div class="wll-main">'
             +'<div class="wll-name">'+_cmdBRDot+(e.horse||'Unknown')+_cmdPuzzleBadge+(_cmdAwaitingCount?'<span style="font-size:9px;font-weight:800;margin-left:6px;padding:1px 6px;border-radius:8px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#f59e0b;vertical-align:middle;">'+_cmdAwaitingCount+' due</span>':'')+(e.needsReview?'<span class="wll-review-badge">REVIEW</span>':'')+'</div>'
             +'<div class="wll-sub">'+subParts.join(' · ')+'</div>'
@@ -963,7 +963,7 @@ function renderWLEntry(e){
     +'</span>'
     :'';
   return'<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
-    +'<div class="wll-silks">'+(e.silkUrl?'<img src="'+e.silkUrl+'" alt="" width="30" height="30" style="object-fit:contain;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><span style="display:none;width:30px;height:30px;align-items:center;justify-content:center;">'+_silkSVG(e.horse||'?',18)+'</span>':_silkSVG(e.horse||'?',18))+'</div>'
+    +'<div class="wll-silks">'+(e.silkUrl?'<img src="'+e.silkUrl+'" alt="" width="44" height="44" style="object-fit:contain;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><span style="display:none;width:44px;height:44px;align-items:center;justify-content:center;">'+_silkSVG(e.horse||'?',24)+'</span>':_silkSVG(e.horse||'?',18))+'</div>'
     +'<div class="wll-main">'
       +'<div class="wll-name">'+brDot+(e.horse||'Unknown')+(mom?'<span style="font-size:10px;font-weight:700;margin-left:6px;color:'+mom.col+';">'+mom.icon+'</span>':'')+(awaitingCount?'<span style="font-size:9px;font-weight:800;margin-left:7px;padding:1px 6px;border-radius:8px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#f59e0b;vertical-align:middle;">'+awaitingCount+' review'+(awaitingCount>1?'s':'')+' due</span>':'')+'</div>'
       +'<div class="wll-sub">'+subParts.join(' · ')+(daysAgo?' · '+daysAgo:'')+'</div>'

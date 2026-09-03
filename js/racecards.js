@@ -103,8 +103,6 @@ function rcSwRenderUI(){
       +'<button class="rc-view-btn '+(v==='course'?'on':'off')+'" onclick="rcSwView=\'course\';rcSwRenderUI();">Course</button>'
     +'</div>'
     +'<div class="rc-view-tog">'
-      +'<button class="rc-view-btn '+(rcSwDensity==='compact'?'on':'off')+'" onclick="rcSwDensity=\'compact\';rcSwRenderUI();">Compact</button>'
-      +'<button class="rc-view-btn '+(rcSwDensity==='detailed'?'on':'off')+'" onclick="rcSwDensity=\'detailed\';rcSwRenderUI();">Detailed</button>'
     +'</div>'
   +'</div>'
     +'<div style="display:flex;gap:6px;padding:0 2px 10px;flex-wrap:wrap;">'
@@ -664,7 +662,8 @@ function rcSwRenderRunners(idx, course, el){
     const _qr2=(_pr2&&_pr2.myRating)?{mr:_pr2.myRating}:(D.ratings&&D.ratings[_nl2]);
     const pid='sw-profile-'+course.replace(/\W/g,'_')+'-'+i;
     const _profileStrip=(!isNR&&!_bh&&_pm2)?'border-left:3px solid '+_pm2.col+';padding-left:11px;':'';
-    return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'" style="'+_profileStrip+'">'
+    const _dpId='rc-dp-'+course.replace(/\W/g,'_')+'-'+i;
+    return'<div class="rc-runner'+(isNR?' rc-runner-nr':_bh?(_bh.includes('96,165')?' rc-runner-bet-real':' rc-runner-bet-virt'):'')+'" style="'+_profileStrip+'cursor:pointer;" onclick="rcToggleDetail(\''+_dpId+'\',this)">'
       +(isNR
         ?'<div class="rc-cloth"><span class="rc-nr-chip">NR</span></div>'
         :'<div class="rc-cloth"><span>'+no+'</span></div>'
@@ -720,7 +719,7 @@ function rcSwRenderRunners(idx, course, el){
       +'</div>'
       +'<div class="rc-runner-actions">'
         +(isNR?''
-          :'<button onclick="rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\')\" class="rc-act-btn rc-bet-btn" title="Log a bet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>')
+          :'<button onclick="event.stopPropagation();rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\')\" class="rc-act-btn rc-bet-btn" title="Log a bet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>')
         +(!isNR&&typeof _lgMyLeagues!=='undefined'&&_lgMyLeagues.length?'<button onclick="event.stopPropagation();lgPickFromRacecard(\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+(r.sp||r.price||r.odds||'')+'\')" title="Pick for League" class="rc-act-btn" style="border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.08);color:#10b981;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></button>':'')
         +(_pr2&&!isNR?'<button onclick="rcToggleProfile(\''+pid+'\',this)" class="rc-profile-tog" style="border-color:'+_pm2.col+';color:'+_pm2.col+';">\u25bc</button>':'')
       +'</div>'
@@ -728,8 +727,8 @@ function rcSwRenderRunners(idx, course, el){
     +(function(){
       const _cmt=(r.comment||r.spotlight||'').trim();
       const _hasExtra=!!(age||wt||(r.dslr!=null&&r.dslr!==''))||r.owner||_cmt;
-      const _dp=_hasExtra&&rcSwDensity==='detailed'&&!isNR
-        ?'<div style="padding:8px 14px 10px;border-top:1px solid var(--bdr);background:rgba(0,0,0,.15);">'
+      const _dp=(_hasExtra&&!isNR)
+        ?'<div id="'+_dpId+'" style="display:none;padding:8px 14px 10px;border-top:1px solid var(--bdr);background:rgba(0,0,0,.15);">'
           +(age?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Age</span><span class="rc-runner-jt">'+age+'</span></div>':'')
           +(wt?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Weight</span><span class="rc-runner-jt">'+wt+'</span></div>':'')
           +(r.dslr!=null&&r.dslr!==''?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Last run</span><span class="rc-runner-jt">'+r.dslr+' days ago</span></div>':'')
@@ -1223,7 +1222,7 @@ function rcSwRaceCard(race, course){
         const _eyeSvg='<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>';
         const watchBtn = wlEntry
           ? '<button class="rc-act-btn" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.1);color:var(--grn);" title="Watching">'+_eyeSvg+'</button>'
-          : '<button onclick="rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\',\''+esc(String(race.race_class||race.class||'').trim().replace(/^class\\s*/i,''))+'\',\''+esc(r.silk_url||r.silk||'')+'\',\''+esc(String(r.age||''))+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
+          : '<button onclick="event.stopPropagation();rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\',\''+esc(String(race.race_class||race.class||'').trim().replace(/^class\\s*/i,''))+'\',\''+esc(r.silk_url||r.silk||'')+'\',\''+esc(String(r.age||''))+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
         const _qrRes=(wlEntry&&wlEntry.myRating)?{mr:wlEntry.myRating}:(D.ratings&&D.ratings[hn]);
         const rateBtnRes='<span onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\')" class="rc-mr-chip'+(_qrRes?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qrRes?_qrRes.mr:'\u2014')+'</span>';
         const _resSilk=r.silk_url||r.silk||'';
@@ -1377,6 +1376,14 @@ function rcProfilePanelHtml(profiled,panelId){
   }
   html+='</div>';
   return html;
+}
+
+function rcToggleDetail(dpId, rowEl){
+  const dp=document.getElementById(dpId);
+  if(!dp)return;
+  const open=dp.style.display!=='none';
+  dp.style.display=open?'none':'block';
+  if(rowEl)rowEl.style.background=open?'':'rgba(255,255,255,.03)';
 }
 
 function rcToggleProfile(panelId,btn){

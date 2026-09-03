@@ -1198,7 +1198,7 @@ function openWLPostRaceReview(profileId,horse,course,time,raceName,raceDist,race
       const beatenEl=document.getElementById('rvw-beaten');
       if(beatenEl&&prefillBeaten)beatenEl.value=prefillBeaten;
       const oddsEl=document.getElementById('rvw-odds');
-      if(oddsEl&&prefillSP)oddsEl.value=prefillSP;
+      if(oddsEl&&prefillSP)oddsEl.value=prefillSP.replace(/[A-Za-z]+$/,'').trim();
       const sub=modal.querySelector('.wlr-sub');
       if(sub)sub.innerHTML+=' <span style="color:var(--grn);font-weight:700;">· Auto-filled from result ⚡</span>';
     },0);

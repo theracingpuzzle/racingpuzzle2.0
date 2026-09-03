@@ -1956,7 +1956,7 @@ function rcSlRenderCard(){
       // Silk panel — coloured band with big silk in centre
       +'<div style="background:linear-gradient(160deg,'+_slkC.body+'dd,'+_slkC.body+'99);padding:20px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;">'
         // OR chip top-right
-        +(rpr?'<span class="rc-or" style="position:absolute;top:12px;right:12px;font-size:13px;padding:4px 10px;">'+rpr+'</span>':'')
+        +(rpr?'<span style="position:absolute;top:12px;right:12px;font-size:12px;font-weight:800;font-family:var(--font);padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;letter-spacing:.04em;">'+rpr+'</span>':'')
         // Draw chip top-left
         +(draw?'<span style="position:absolute;top:12px;left:12px;font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.25);color:#fff;padding:3px 8px;border-radius:6px;">Draw '+draw+'</span>':'')
         // Silk

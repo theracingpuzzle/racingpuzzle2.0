@@ -105,13 +105,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   background: var(--navy);
   position: relative; z-index: 80; flex-shrink: 0; box-sizing: content-box;
 }
-.hdr-top  { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.logo     { font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: .03em; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: #fff; text-transform: uppercase; flex-shrink: 0; }
+.hdr-top  { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.logo     { font-size: 16px; font-weight: 800; cursor: pointer; letter-spacing: .03em; display: flex; align-items: center; gap: 6px; white-space: nowrap; color: #fff; text-transform: uppercase; flex-shrink: 0; order: 1; }
 .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gld2); }
 .hdr-r    { display: flex; align-items: center; gap: 6px; }
-/* Right side of header: balances + profile icon */
 .hdr-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.hdr-bal   { display: flex; align-items: center; gap: 2px; }
+/* Icons group (coach, dark, profile) */
+.hdr-icons { display: flex; align-items: center; gap: 6px; flex-shrink: 0; order: 2; margin-left: auto; }
+/* Balances row — full width second row on mobile */
+.hdr-bal   { display: flex; align-items: center; gap: 2px; order: 3; width: 100%; justify-content: center; padding: 2px 0 0; }
+/* On wider screens collapse back to single row */
+@media (min-width: 480px) {
+  .hdr-top { flex-wrap: nowrap; }
+  .hdr-bal { order: 2; width: auto; flex: 1; justify-content: flex-end; padding: 0; margin: 0 4px; }
+  .hdr-icons { order: 3; margin-left: 0; }
+}
 .hdr-bal-pill { display: flex; align-items: center; gap: 3px; padding: 2px 0; }
 .hdr-bal-lbl  { display: none; }
 .hdr-bal-val  { font-size: 13px; font-weight: 700; white-space: nowrap; }

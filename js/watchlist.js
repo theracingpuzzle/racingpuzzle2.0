@@ -3186,18 +3186,19 @@ function _wlpBuildHTML(e){
           +'</div>';
         })()
       +'</div>'
-      +'<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;">'
-        +(e.silkUrl
-          ?'<img src="'+esc(e.silkUrl)+'" alt="silk" width="44" height="44" style="object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));" onerror="this.style.display=\'none\'">'
-          :'')
-        +'<div class="wlp-or-box">'
-          +'<span class="wlp-or-label">OR</span>'
-          +(or?'<span class="wlp-or-value">'+or+'</span>':'<span class="wlp-or-na">—</span>')
-        +'</div>'
-      +'</div>'
+      +(e.silkUrl
+        ?'<img src="'+esc(e.silkUrl)+'" alt="silk" width="64" height="64" style="object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));flex-shrink:0;" onerror="this.style.display=\'none\'">'
+        :'')
     +'</div>'
     // ── 3-metric strip (the race-day decision strip) ──────────────────────
     +'<div class="wlp-hero-metrics">'
+      // OR
+      +'<div class="wlp-hero-metric">'
+        +'<span class="wlp-hero-metric-label">OR</span>'
+        +(or
+          ?'<div class="wlp-hero-metric-val" style="color:#94a3b8;">'+or+'</div>'
+          :'<div style="font-size:13px;color:rgba(255,255,255,.3);font-weight:700;padding-top:2px;">—</div>')
+      +'</div>'
       // My Mark
       +'<div class="wlp-hero-metric">'
         +'<span class="wlp-hero-metric-label">My Mark ★</span>'
@@ -3211,11 +3212,6 @@ function _wlpBuildHTML(e){
         +(edge!==null
           ?'<div class="wlp-hero-metric-val" style="color:'+edgeCol+';">'+(edge>0?'+':'')+edge+'</div>'
           :'<div style="font-size:13px;color:rgba(255,255,255,.3);font-weight:700;padding-top:2px;">—</div>')
-      +'</div>'
-      // Going pref
-      +'<div class="wlp-hero-metric">'
-        +'<span class="wlp-hero-metric-label">Going</span>'
-        +'<div style="font-size:12px;font-weight:800;color:'+(_cleanGoingPrefs.length?'#4ade80':'rgba(255,255,255,.3)')+';line-height:1.2;margin-top:2px;">'+goingPill+'</div>'
       +'</div>'
     +'</div>'
   +'</div>';

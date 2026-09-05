@@ -2081,15 +2081,15 @@ function openWLForm(id,prefill){
           +'<div style="width:28px;height:28px;border-radius:50%;background:var(--navy);border:2px solid var(--navy);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:900;color:#fff;">1</div>'
           +'<div style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--navy);">Racehorse</div>'
         +'</div>'
-        +'<div style="flex:1;height:2px;background:rgba(255,255,255,.15);margin-bottom:14px;"></div>'
+        +'<div style="flex:1;height:2px;background:var(--bdr);margin-bottom:14px;"></div>'
         +'<div id="wlf-si-2" onclick="wlNewStep(2)" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;flex:1;">'
-          +'<div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:900;color:rgba(255,255,255,.4);">2</div>'
-          +'<div style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.3);">Why Logging</div>'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:var(--sur2);border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:900;color:var(--mut);">2</div>'
+          +'<div style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);">Why Logging</div>'
         +'</div>'
-        +'<div style="flex:1;height:2px;background:rgba(255,255,255,.15);margin-bottom:14px;"></div>'
+        +'<div style="flex:1;height:2px;background:var(--bdr);margin-bottom:14px;"></div>'
         +'<div id="wlf-si-3" onclick="wlNewStep(3)" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;flex:1;">'
-          +'<div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:900;color:rgba(255,255,255,.4);">3</div>'
-          +'<div style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.3);">First Sighting</div>'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:var(--sur2);border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:11px;font-weight:900;color:var(--mut);">3</div>'
+          +'<div style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);">First Sighting</div>'
         +'</div>'
       +'</div>';
 
@@ -2382,12 +2382,12 @@ function wlNewStep(n){
     const lbl=si.querySelector('div:last-child');
     const active=j===n,done=j<n;
     if(dot){
-      dot.style.background=active?'var(--navy)':done?'rgba(22,163,74,.8)':'rgba(255,255,255,.1)';
-      dot.style.border='2px solid '+(active?'var(--navy)':done?'rgba(22,163,74,.8)':'rgba(255,255,255,.2)');
-      dot.style.color=active||done?'#fff':'rgba(255,255,255,.4)';
+      dot.style.background=active?'var(--navy)':done?'rgba(22,163,74,.8)':'var(--sur2)';
+      dot.style.border='2px solid '+(active?'var(--navy)':done?'rgba(22,163,74,.8)':'var(--bdr)');
+      dot.style.color=active||done?'#fff':'var(--mut)';
       dot.textContent=done?'✓':String(j);
     }
-    if(lbl){lbl.style.color=active?'var(--navy)':done?'rgba(22,163,74,.8)':'rgba(255,255,255,.3)';}
+    if(lbl){lbl.style.color=active?'var(--navy)':done?'rgba(22,163,74,.8)':'var(--mut)';}
   }
   const back=document.getElementById('wlf-back-btn');
   const next=document.getElementById('wlf-next-btn');
@@ -3194,14 +3194,14 @@ function _wlpBuildHTML(e){
     +'<div class="wlp-hero-metrics">'
       // OR
       +'<div class="wlp-hero-metric">'
-        +'<span class="wlp-hero-metric-label">OR</span>'
+        +'<span class="wlp-hero-metric-label">Official Rating</span>'
         +(or
           ?'<div class="wlp-hero-metric-val" style="color:#94a3b8;">'+or+'</div>'
           :'<div style="font-size:13px;color:rgba(255,255,255,.3);font-weight:700;padding-top:2px;">—</div>')
       +'</div>'
       // My Mark
       +'<div class="wlp-hero-metric">'
-        +'<span class="wlp-hero-metric-label">My Mark ★</span>'
+        +'<span class="wlp-hero-metric-label">My Rating</span>'
         +(mr
           ?'<div class="wlp-hero-metric-val" style="color:var(--gld);">'+mr+'</div>'
           :'<div style="font-size:13px;color:rgba(255,255,255,.3);font-weight:700;padding-top:2px;">—</div>')

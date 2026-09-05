@@ -187,6 +187,11 @@ function _applyBalanceVisibility(){
       el.style.userSelect=hidden?'none':'';
     });
   }
+  // Also blur today page P&L tiles
+  ['tpnl','t-real-bank-sub','t-virt-pnl','t-virt-bank-sub'].forEach(function(id){
+    const el=document.getElementById(id);
+    if(el){el.style.filter=hidden?'blur(6px)':'';el.style.userSelect=hidden?'none':'';}
+  });
   if(eye){
     if(hidden){
       eye.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 10 20C3 20 0 10 0 10a17.35 17.35 0 0 1 2.06-3.94M6.53 6.53A10.07 10.07 0 0 1 10 6c7 0 10 10 10 10a17.35 17.35 0 0 1-1.67 2.68M1 1l18 18"/><circle cx="10" cy="10" r="2.5"/>';

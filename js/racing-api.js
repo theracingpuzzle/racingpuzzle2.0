@@ -48,6 +48,24 @@ async function callRacingAPI(endpoint, params={}){
   return await resp.json();
 }
 
+// Fetches all pages from a paginated endpoint (API default limit=50, max=100).
+// resultKey: the array key in the response ('results', 'racecards', 'races').
+async function callRacingAPIAll(endpoint, params={}, resultKey){
+  const all=[];
+  let skip=0;
+  const LIMIT=100;
+  while(true){
+    const data=await callRacingAPI(endpoint,{...params,limit:LIMIT,skip});
+    const page=resultKey?data[resultKey]:(data.results||data.racecards||data.races||[]);
+    if(!page||!page.length)break;
+    all.push(...page);
+    if(page.length<LIMIT)break; // last page
+    skip+=LIMIT;
+    if(skip>=1000)break; // safety cap — 1000 races covers any conceivable day
+  }
+  return all;
+}
+
 async function testRacingAPI(){
   const st=document.getElementById('racing-api-status');
   if(st){st.innerHTML='<div style="font-family:monospace;font-size:11px;color:var(--mut);">Testing…</div>';}

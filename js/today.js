@@ -364,7 +364,7 @@ async function loadTodayMeetings(){
   if(stEl)stEl.textContent='Loading…';
   // Credentials are server-side (Cloudflare Worker) — no client check needed
   try{
-    if(!window._todayMeetingsCache||window._todayMeetingsCacheDate!==td()){window._todayMeetingsCache=await callRacingAPI('racecards/basic',{});window._todayMeetingsCacheDate=td();}
+    if(!window._todayMeetingsCache||window._todayMeetingsCacheDate!==td()){window._todayMeetingsCache=await callRacingAPI('racecards/basic',{limit:100});window._todayMeetingsCacheDate=td();}
     const data=window._todayMeetingsCache;
     const races=data.racecards||data.races||[];
     if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(races);
@@ -2036,8 +2036,7 @@ async function fetchTodayResults(){
   }
   // 2. Fetch from the correct results endpoint
   try{
-    const data=await callRacingAPI('results/today',{});
-    const res=data.results||data.racecards||data.races||[];
+    const res=await callRacingAPIAll('results/today',{},'results');
     if(res.length){
       window._todayResultsCache=res;
       if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(res);
@@ -2391,7 +2390,7 @@ async function initTrackPulse(){
   window._tpRefreshTimer=setInterval(async function(){
     window._todayResultsCache=null;
     if(typeof rcSwResultsData!=='undefined')rcSwResultsData=[];
-    try{ window._todayMeetingsCache=await callRacingAPI('racecards/basic',{}); }catch(e){}
+    try{ window._todayMeetingsCache=await callRacingAPI('racecards/basic',{limit:100}); }catch(e){}
     await fetchTodayResults();
     renderTrackPulse();
     if(typeof checkWatchlistRunners==='function'){

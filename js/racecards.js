@@ -65,7 +65,7 @@ async function rcSwLoadMeetings(){
   try{
     // Credentials are server-side (Cloudflare Worker) — no client check needed
     // Share cache with today.js to avoid double-fetching
-    if(!window._todayMeetingsCache) window._todayMeetingsCache=await callRacingAPI('racecards/basic',{});
+    if(!window._todayMeetingsCache){const _d=await callRacingAPI('racecards/basic',{limit:100});window._todayMeetingsCache=_d;}
     const data=window._todayMeetingsCache;
     rcSwCurrentRaces=data.racecards||data.races||[];
     if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(rcSwCurrentRaces);
@@ -1083,7 +1083,7 @@ function _lboBackToChecklist(){
 }
 
 
-let rcSwResultsData = [], rcSwResultsView = 'time', rcSwResultsOpenCourse = '', rcSwResultsYesterday = false;
+let rcSwResultsData = [], rcSwResultsView = 'time', rcSwResultsOpenCourse = '', rcSwResultsYesterday = false, rcSwResultsDesc = false;
 const _rcResTimeOpen = {}; // tracks which time-view result races are expanded
 
 function rcSwToggleResTime(idx){
@@ -1116,8 +1116,7 @@ async function rcSwLoadResults(){
   if(listEl) listEl.innerHTML = '';
   if(filterEl) filterEl.style.display = 'none';
   try{
-    const data = await callRacingAPI('results/today', {});
-    rcSwResultsData = data.results||data.races||[];
+    rcSwResultsData = await callRacingAPIAll('results/today', {}, 'results');
     if(rcSwResultsData.length){const _s=rcSwResultsData[0];console.log('[Results] first race keys:',Object.keys(_s),'dist fields:',{distance_f:_s.distance_f,distance_round:_s.distance_round,distance:_s.distance,dist:_s.dist,distance_furlongs:_s.distance_furlongs,distance_yards:_s.distance_yards});}
     if(stEl) stEl.style.display = 'none';
     autoMatchBetResults(rcSwResultsData);
@@ -1142,9 +1141,12 @@ function rcSwRenderResultsUI(){
   filterEl.style.display = 'block';
   const _rsb='font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;';
   filterEl.innerHTML =
-    '<div class="rc-view-tog">'
+    '<div style="display:flex;align-items:center;gap:8px;">'
+    + '<div class="rc-view-tog">'
     + '<button class="rc-view-btn '+(onT?'on':'off')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
     + '<button class="rc-view-btn '+(!onT?'on':'off')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
+    + '</div>'
+    + (onT?'<button onclick="rcSwResultsDesc=!rcSwResultsDesc;rcSwRenderResultsUI();" style="margin-left:auto;background:none;border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--mut);cursor:pointer;white-space:nowrap;">'+(rcSwResultsDesc?'↓ Latest first':'↑ Earliest first')+'</button>':'')
     + '</div>';
 
   const listEl = document.getElementById('sw-results-list');
@@ -1252,9 +1254,10 @@ function rcSwRaceCard(race, course){
 
 
 function rcSwRenderResultsTime(listEl){
-  // Sort all races chronologically (descending — latest first)
+  // Sort chronologically — ascending by default (earliest first), toggle for latest first
   const all = rcSwResultsData.slice().sort(function(a,b){
-    return cmpTime(b.off_time||b.off||b.time||'', a.off_time||a.off||a.time||'');
+    const ta=a.off_time||a.off||a.time||'', tb=b.off_time||b.off||b.time||'';
+    return rcSwResultsDesc ? cmpTime(tb,ta) : cmpTime(ta,tb);
   });
 
   let idx = 0;
@@ -1482,8 +1485,7 @@ async function rcLoadResults(){
   const el=document.getElementById('rc-results-list');
   if(el)el.innerHTML='';
   try{
-    const data=await callRacingAPI('results/today',{});
-    const results=data.results||data.races||[];
+    const results=await callRacingAPIAll('results/today',{},'results');
     rcSetStatus('');
     autoMatchBetResults(results);
     if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(results);

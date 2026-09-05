@@ -892,7 +892,7 @@ function renderWLList(){
 
       html+='<div style="position:relative;border-bottom:1px solid var(--bdr);" data-wl-id="'+e.id+'">'
         +'<div class="wll-row" style="border-left:none;border-bottom:none;">'
-          +'<div class="wll-silks">'+(e.silkUrl?'<img src="'+e.silkUrl+'" alt="" width="44" height="44" style="object-fit:contain;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><span style="display:none;width:44px;height:44px;align-items:center;justify-content:center;">'+_silkSVG(e.horse||'?',24)+'</span>':_silkSVG(e.horse||'?',18))+'</div>'
+          +'<div class="wll-silks">'+(e.silkUrl?'<img src="'+e.silkUrl+'" alt="" width="44" height="44" style="object-fit:contain;" onerror="this.style.display=\'none\'">':'')+'</div>'
           +'<div class="wll-main">'
             +'<div class="wll-name">'+_cmdBRDot+(e.horse||'Unknown')+_cmdPuzzleBadge+(_cmdAwaitingCount?'<span style="font-size:9px;font-weight:800;margin-left:6px;padding:1px 6px;border-radius:8px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#f59e0b;vertical-align:middle;">'+_cmdAwaitingCount+' due</span>':'')+(e.needsReview?'<span class="wll-review-badge">REVIEW</span>':'')+'</div>'
             +'<div class="wll-sub">'+subParts.join(' · ')+'</div>'
@@ -963,7 +963,7 @@ function renderWLEntry(e){
     +'</span>'
     :'';
   return'<div class="wll-row" style="border-left-color:'+rm.col+';" data-wl-id="'+e.id+'">'
-    +'<div class="wll-silks">'+(e.silkUrl?'<img src="'+e.silkUrl+'" alt="" width="44" height="44" style="object-fit:contain;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><span style="display:none;width:44px;height:44px;align-items:center;justify-content:center;">'+_silkSVG(e.horse||'?',24)+'</span>':_silkSVG(e.horse||'?',18))+'</div>'
+    +'<div class="wll-silks">'+(e.silkUrl?'<img src="'+e.silkUrl+'" alt="" width="44" height="44" style="object-fit:contain;" onerror="this.style.display=\'none\'">':'')+'</div>'
     +'<div class="wll-main">'
       +'<div class="wll-name">'+brDot+(e.horse||'Unknown')+(mom?'<span style="font-size:10px;font-weight:700;margin-left:6px;color:'+mom.col+';">'+mom.icon+'</span>':'')+(awaitingCount?'<span style="font-size:9px;font-weight:800;margin-left:7px;padding:1px 6px;border-radius:8px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.35);color:#f59e0b;vertical-align:middle;">'+awaitingCount+' review'+(awaitingCount>1?'s':'')+' due</span>':'')+'</div>'
       +'<div class="wll-sub">'+subParts.join(' · ')+(daysAgo?' · '+daysAgo:'')+'</div>'

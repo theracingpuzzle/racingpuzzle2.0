@@ -705,7 +705,7 @@ function rcSwRenderRunners(idx, course, el){
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'
             +(_hg?'<span style="font-size:10px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);border-radius:4px;padding:1px 5px;margin-left:3px;letter-spacing:.03em;">'+_hg+'</span>':'')
             +(rpr?'<span class="rc-or">'+rpr+'</span>':'')
-            +(!isNR?'<span onclick="rcQuickRate(event,\''+name.replace(/'/g,"\\'")+'\',\''+rpr+'\')" class="rc-mr-chip'+((_qr2)?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qr2?_qr2.mr:'—')+'</span>':'')
+            +(!isNR?'<span onclick="rcQuickRate(event,\''+name.replace(/'/g,"\\'")+'\',\''+rpr+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+String(r.age||'')+'\')" class="rc-mr-chip'+((_qr2)?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qr2?_qr2.mr:'—')+'</span>':'')
             +(_badge?'<span class="rc-wl-pill">'+_pm.svg+'</span>':'')
             +_betChip
             +(draw?'<span class="rc-runner-age">'+draw+'</span>':'')
@@ -827,17 +827,18 @@ function openLogbetOverlay(mode, prefill){
     else subEl.style.display='none';
   }
 
-  // ── Source options ──
+  // Determine pre-selected source from bet flow state
+  const bfs=window._betFlowState||{};
+  const preSrc=bfs.source==='tip'?(bfs.tipSource||'Own Form Study'):'Own Form Study';
+
+  // ── Source options — ensure preSrc is always present ──
   const srcOpts=(function(){
     const saved=(D.settings&&D.settings.sources&&D.settings.sources.length)?D.settings.sources:[];
     const labels=saved.map(function(s){return typeof s==='object'?s.label:s;});
     const all=['Own Form Study'].concat(labels.filter(function(s){return s!=='Own Form Study';}));
-    return all.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
+    if(preSrc!=='Own Form Study'&&all.indexOf(preSrc)===-1)all.push(preSrc);
+    return all.map(function(s){return'<option value="'+s+'"'+(s===preSrc?' selected':'')+'>'+s+'</option>';}).join('');
   })();
-
-  // Determine pre-selected source from bet flow state
-  const bfs=window._betFlowState||{};
-  const preSrc=bfs.source==='tip'?(bfs.tipSource||'Own Form Study'):'Own Form Study';
 
   // ── Render edit-modal-style form into #lbo-content ──
   const tgt=document.getElementById('lbo-content');
@@ -1224,7 +1225,7 @@ function rcSwRaceCard(race, course){
           ? '<button class="rc-act-btn" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.1);color:var(--grn);" title="Watching">'+_eyeSvg+'</button>'
           : '<button onclick="event.stopPropagation();rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\',\''+esc(String(race.race_class||race.class||'').trim().replace(/^class\\s*/i,''))+'\',\''+esc(r.silk_url||r.silk||'')+'\',\''+esc(String(r.age||''))+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
         const _qrRes=(wlEntry&&wlEntry.myRating)?{mr:wlEntry.myRating}:(D.ratings&&D.ratings[hn]);
-        const rateBtnRes='<span onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\')" class="rc-mr-chip'+(_qrRes?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qrRes?_qrRes.mr:'\u2014')+'</span>';
+        const rateBtnRes='<span onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\',\''+esc(trainer)+'\',\''+esc(String(r.age||''))+'\')" class="rc-mr-chip'+(_qrRes?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qrRes?_qrRes.mr:'\u2014')+'</span>';
         const _resSilk=r.silk_url||r.silk||'';
         return '<div class="rc-res-runner">'
           + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
@@ -1570,7 +1571,7 @@ function rcBetFromRunner(event, horse, course, time, jockey, trainer, raceName){
 }
 
 // ── Quick MR Rating ──────────────────────────────────────────────────────────
-function rcQuickRate(event, horse, or_val){
+function rcQuickRate(event, horse, or_val, trainer, age){
   event.stopPropagation();
   const key=(horse||'').toLowerCase().trim();
   const existing=D.ratings[key]||{};
@@ -1602,7 +1603,7 @@ function rcQuickRate(event, horse, or_val){
     +'</div>'
     +'<div style="display:flex;gap:8px;">'
       +'<button onclick="rcSaveQuickRate(\''+horse.replace(/'/g,"\\'")+'\',\''+String(or_val||'')+'\')" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--gld);color:#000;font-size:14px;font-weight:800;cursor:pointer;">★ Save Rating</button>'
-      +'<button onclick="rcPromoteToProfile(\''+horse.replace(/'/g,"\\'")+'\',\''+String(or_val||'')+'\')" style="padding:12px 14px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-size:12px;font-weight:700;cursor:pointer;">Full Profile</button>'
+      +'<button onclick="rcPromoteToProfile(\''+horse.replace(/'/g,"\\'")+'\',\''+String(or_val||'')+'\',\''+String(trainer||'').replace(/'/g,"\\'")+'\',\''+String(age||'')+'\')" style="padding:12px 14px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-size:12px;font-weight:700;cursor:pointer;">Full Profile</button>'
     +'</div>'
     +'</div>';
   overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove();});
@@ -1629,7 +1630,7 @@ function rcSaveQuickRate(horse, or_val){
   }
 }
 
-function rcPromoteToProfile(horse, or_val){
+function rcPromoteToProfile(horse, or_val, trainer, age){
   const key=(horse||'').toLowerCase().trim();
   const mr=parseInt((document.getElementById('qr-mr')||{}).value)||0;
   const note=(document.getElementById('qr-note').value||'').trim();
@@ -1639,7 +1640,7 @@ function rcPromoteToProfile(horse, or_val){
   }
   const overlay=document.getElementById('rc-qr-overlay');
   if(overlay)overlay.remove();
-  openWLForm(null,{horse:horse,currentRating:String(or_val||''),myRating:mr?String(mr):''});
+  openWLForm(null,{horse:horse,trainer:trainer||'',age:age||'',currentRating:String(or_val||''),myRating:mr?String(mr):''});
 }
 
 // Called by _betFlowProceed in betting.js once checklist is complete

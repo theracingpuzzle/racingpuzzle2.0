@@ -297,12 +297,6 @@ function onEditResChange(){
 
 // ─── LOG BET SWIPE ───
 function saveLB(){
-  // Daily limit check
-  const _limit=D.settings&&D.settings.dailyLimit?D.settings.dailyLimit:5;
-  const _today=D.bets.filter(b=>b.date===td()).length;
-  if(_today>=_limit){
-    if(!confirm('⚠️ You have reached your daily limit of '+_limit+' bets. Are you sure you want to place another?'))return;
-  }
   const horse=document.getElementById('lbh').value.trim(),track=document.getElementById('lbt').value.trim(),or=document.getElementById('lbo').value.trim(),stake=parseFloat(document.getElementById('lbs').value),od=fo(or);
   if(!horse){alert('Enter a horse name.');return;}if(!stake||stake<=0){alert('Enter a valid stake.');return;}
   const result=document.getElementById('lbres').value,bt=document.getElementById('lbtype').value;

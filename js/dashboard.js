@@ -1290,6 +1290,7 @@ function _openModal(b,type){
   document.getElementById('emres').value=b.result||'pending';
   document.getElementById('emret').value=b.returns||'';
   document.getElementById('emnotes').value=b.postNotes||'';
+  const fpEl=document.getElementById('em-finish-pos');if(fpEl)fpEl.value=b.finishPosition||'';
   const scr=document.getElementById('emod');scr.style.display='block';scr.scrollTop=0;
 }
 function closeEM(){
@@ -1329,6 +1330,8 @@ function saveEM(){
     if(horse)b.horse=horse;b.track=track;b.time=time;if(od>=1){b.odds=od;b.oddsDisplay=odRaw;}
     if(newStake>0)b.stake=newStake;b.betType=bt;b.jockey=jockey;b.trainer=trainer;b.source=source;b.notes=preNotes;
     b.result=newRes;b.returns=newRet;b.postNotes=postNotes;
+    const _fpElV=document.getElementById('em-finish-pos');
+    if(_fpElV)b.finishPosition=_fpElV.value?parseInt(_fpElV.value)||null:null;
     const finalStake=parseFloat(b.stake)||0;
     // Step 3: apply new bank impact
     if(!newRes||newRes==='pending'){
@@ -1349,6 +1352,8 @@ function saveEM(){
   if(horse)b.horse=horse;b.track=track;b.time=time;if(od>=1){b.odds=od;b.oddsDisplay=odRaw;}
   if(newStake>0)b.stake=newStake;b.betType=bt;b.jockey=jockey;b.trainer=trainer;b.source=source;b.notes=preNotes;
   b.result=newRes;b.returns=newRet;b.postNotes=postNotes;
+  const _fpEl=document.getElementById('em-finish-pos');
+  if(_fpEl)b.finishPosition=_fpEl.value?parseInt(_fpEl.value)||null:null;
   applyBankDelta(b,oldResult,oldReturns);
   save();updHdr();closeEM();renderToday();renderNums();
   renderStats();renderHist();

@@ -323,10 +323,10 @@
       <div class="cin rc-cin">
         <div class="row-sb mb12">
           <div>
-            <div class="lbl" id="sw-results-subtitle">Today's Racing</div>
+            <div class="lbl">Today's Racing</div>
             <div class="card-title" style="color:var(--ora);">Results</div>
           </div>
-          <button class="btn-refresh" onclick="rcSwResultsData=[];rcSwResultsYesterdayData=[];rcSwResultsOpenCourse='';rcSwLoadResults();">↻ Refresh</button>
+          <button class="btn-refresh" onclick="rcSwResultsData=[];rcSwResultsOpenCourse='';rcSwLoadResults();">↻ Refresh</button>
         </div>
         <div id="sw-results-filters" style="display:none;margin-bottom:10px;"></div>
         <div id="sw-results-list"><div class="status-txt">Swipe to this card to load today's results.</div></div>
@@ -815,6 +815,7 @@
           <div class="fg"><label>Result</label><select id="emres" onchange="onEditResChange()"><option value="pending">Pending</option><option value="win">Win</option><option value="place">Place (EW)</option><option value="loss">Loss</option><option value="void">Void</option><option value="nr">Non-Runner</option></select></div>
           <div class="fg"><label>Returns (£)</label><input type="number" id="emret" step="0.01" min="0" placeholder=""></div>
         </div>
+        <div class="fg"><label>Finishing Position <span style="font-weight:400;color:var(--mut);font-size:10px;">(optional — e.g. 2nd even on a win bet)</span></label><input type="number" id="em-finish-pos" min="1" step="1" placeholder="e.g. 2"></div>
         <div class="fg"><label>Post-Race Notes</label><textarea id="emnotes" placeholder="What happened? What did I learn?" style="min-height:52px"></textarea></div>
       </div>
     </div>

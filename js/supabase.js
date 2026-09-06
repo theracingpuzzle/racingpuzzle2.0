@@ -202,6 +202,7 @@ async function _syncBets(){
     checklist_score:b.checklistScore||0,
     checklist_answers:b.checklistAnswers&&Object.keys(b.checklistAnswers).length?b.checklistAnswers:null,
     result:b.result||null,returns:b.returns||0,
+    finish_position:b.finishPosition||null,
     bet_banked:!!b.betBanked,
     created_at:b.createdAt?new Date(b.createdAt).toISOString():new Date().toISOString()
   };});
@@ -216,6 +217,7 @@ async function _syncBets(){
     checklist_score:b.checklistScore||0,
     checklist_answers:b.checklistAnswers&&Object.keys(b.checklistAnswers).length?b.checklistAnswers:null,
     result:b.result||null,returns:b.returns||0,
+    finish_position:b.finishPosition||null,
     bet_banked:!!b.betBanked,
     created_at:b.createdAt?new Date(b.createdAt).toISOString():new Date().toISOString()
   };});
@@ -426,6 +428,7 @@ async function supaLoad(){
         source:b.source||'',notes:b.pre_notes||'',postNotes:b.post_notes||'',
         checklistScore:b.checklist_score||0,checklistAnswers:b.checklist_answers||{},
         result:b.result,returns:b.returns||0,
+        finishPosition:b.finish_position||null,
         betBanked:!!b.bet_banked,
         createdAt:new Date(b.created_at).getTime()
       };});
@@ -438,6 +441,7 @@ async function supaLoad(){
         source:b.source||'',notes:b.pre_notes||'',postNotes:b.post_notes||'',
         checklistScore:b.checklist_score||0,checklistAnswers:b.checklist_answers||{},
         result:b.result,returns:b.returns||0,
+        finishPosition:b.finish_position||null,
         createdAt:new Date(b.created_at).getTime()
       };});
     }

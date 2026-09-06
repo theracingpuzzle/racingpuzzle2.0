@@ -739,10 +739,16 @@ async function checkWatchlistRunners(races){
     // Skip if snapshot already saved for this profile + race date
     const alreadySaved=D.pendingReviews.some(function(p){return p.profileId===wid&&p.date===todayDateStr;});
     if(alreadySaved){
-      // Update result/position if we now have result info we didn't before
+      // Update result/position/sp/beatenDistance if we now have result info we didn't before
       if(a.resultInfo){
         const saved=D.pendingReviews.find(function(p){return p.profileId===wid&&p.date===todayDateStr;});
-        if(saved&&!saved.result){saved.result=a.resultInfo.result||'';saved.position=a.resultInfo.position||'';pendingChanged=true;}
+        if(saved&&!saved.result){
+          saved.result=a.resultInfo.result||'';
+          saved.position=a.resultInfo.position||'';
+          saved.sp=a.resultInfo.sp||'';
+          saved.beatenDistance=a.resultInfo.beatenDistance||'';
+          pendingChanged=true;
+        }
       }
       return;
     }
@@ -759,6 +765,8 @@ async function checkWatchlistRunners(races){
       raceClass:a.raceClass||'',
       result:(a.resultInfo&&a.resultInfo.result)||'',
       position:(a.resultInfo&&a.resultInfo.position)||'',
+      sp:(a.resultInfo&&a.resultInfo.sp)||'',
+      beatenDistance:(a.resultInfo&&a.resultInfo.beatenDistance)||'',
       savedAt:new Date().toISOString(),
     });
     pendingChanged=true;
@@ -1958,7 +1966,7 @@ function renderTodayBets(tb, vtb){
     el.setAttribute('onclick',isV?'openVEM("'+b.id+'")':'openEM("'+b.id+'")');
     el.innerHTML='<div class="mbl"><div class="mh">'+b.horse+(isV?' <span class="t-virt-lbl">VIRT</span>':'')+'</div>'
       +'<div class="mm">'+(b.track||'—')+(b.time?' · '+b.time:'')+' · <span style="font-family:var(--font-ui);">'+os+'</span></div></div>'
-      +'<div class="mbr"><span class="bdg '+pendBadge+'">'+(b.result||'pending')+'</span>'
+      +'<div class="mbr"><span class="bdg '+pendBadge+'">'+(b.result||'pending')+(b.finishPosition&&b.result!=='win'?' · '+b.finishPosition+(b.finishPosition===1?'st':b.finishPosition===2?'nd':b.finishPosition===3?'rd':'th'):'')+'</span>'
       +'<div class="mp '+(p2===null?'':p2>=0?'pos':'neg')+'" style="margin-top:2px;">'+(p2===null?'—':fmt(p2))+'</div></div>';
     return el.outerHTML;
   }).join('');
@@ -2451,11 +2459,21 @@ function syncBetResults(results){
   }
 
   function settleBet(b){
-    if(b.result&&b.result!=='pending')return false; // already settled
-    if(b.date!==today)return false;                 // only today's bets
+    if(b.date!==today)return false; // only today's bets
     const hn=normHorse(b.horse||'');
     const res=resultMap[hn];
     if(!res)return false;
+
+    let changed=false;
+
+    // Always backfill missing odds/SP and finishing position regardless of settlement status
+    if(res.sp){
+      if(!b.odds){b.odds=fo(String(res.sp));changed=true;}
+      if(!b.oddsDisplay){b.oddsDisplay=String(res.sp);changed=true;}
+    }
+    if(!b.finishPosition&&res.pos){b.finishPosition=res.pos;changed=true;}
+
+    if(b.result&&b.result!=='pending')return changed; // already settled — fields filled above, done
 
     const pos=res.pos;
     const places=placesNum(res.numRunners);
@@ -2470,7 +2488,7 @@ function syncBetResults(results){
       result='loss';
     }
 
-    // Use stored odds; fall back to SP from results
+    // Use stored odds (now guaranteed to exist if SP available) or SP directly
     const oddsRaw=b.oddsDisplay||b.odds||res.sp||'';
     const odDec=fo(String(oddsRaw));
     const ewT=placeTerms(res.numRunners)||'1/4';
@@ -2478,9 +2496,6 @@ function syncBetResults(results){
 
     b.result=result;
     b.returns=returns;
-    // If no odds were stored, fill in the SP so it shows on the bet
-    if(!b.odds&&res.sp)b.odds=fo(String(res.sp));
-    if(!b.oddsDisplay&&res.sp)b.oddsDisplay=String(res.sp);
     return true;
   }
 

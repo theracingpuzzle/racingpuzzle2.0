@@ -489,7 +489,11 @@ function _applyWLFilter(entries){
       const noDateTarget=(e.targets||[]).some(function(t){return t.race&&!t.date;});
       const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
       const incompleteReview=rvws.length&&rvws.some(_rvwIncomplete);
-      return noReviews||pastTarget||noDateTarget||incompleteReview;
+      const awaitingReview=(D.pendingReviews||[]).some(function(p){
+        if(p.profileId!==e.id)return false;
+        return!(D.reviews||[]).some(function(r){return r.profileId===e.id&&r.date===p.date;});
+      });
+      return noReviews||pastTarget||noDateTarget||incompleteReview||awaitingReview;
     });
   }
   if(_wlFilter==='running-today'){
@@ -1020,6 +1024,14 @@ function wlCompletePendingReview(pendingId){
     // Fill position if we have it
     if(p.position){
       const posEl=document.getElementById('rvw-pos');if(posEl)posEl.value=p.position;
+    }
+    // Fill beaten distance if we have it
+    if(p.beatenDistance){
+      const beatenEl=document.getElementById('rvw-beaten');if(beatenEl)beatenEl.value=p.beatenDistance;
+    }
+    // Fill SP/odds if we have it
+    if(p.sp){
+      const oddsEl=document.getElementById('rvw-odds');if(oddsEl)oddsEl.value=p.sp;
     }
     // Override save to also clear the pending entry when saved
     const saveBtn=document.getElementById('rvw-save-btn');
@@ -3507,7 +3519,7 @@ function _wlpBuildHTML(e){
             +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'
               +[item.date?_wlpFmt(item.date):'',item.course,item.raceDist,item.raceGoing].filter(Boolean).join(' · ')
             +'</div>'
-            +(item.position?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">Finished: <strong>'+esc(item.position)+'</strong></div>':'')
+            +(item.position?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">Finished: <strong>'+esc(item.position)+'</strong>'+(item.beatenDistance?' · <span style="color:var(--mut);">'+esc(item.beatenDistance)+'L</span>':'')+(item.sp?' · <span style="color:var(--mut);">SP '+esc(item.sp)+'</span>':'')+'</div>':'')
             +(label?'<div style="font-size:10px;color:#f59e0b;margin-top:3px;font-style:italic;">'+label+'</div>':'')
           +'</div>'
           +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'

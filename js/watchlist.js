@@ -245,6 +245,7 @@ function wlToggleGroup(r){
 let _wlFilter=null; // null = all, or one of: 'no-obs','past-target','running-today','edge'
 let _wlGroupBy='reason'; // 'reason' | 'race-type' | 'surface' | 'age'
 let _wlShowCold=false;
+let _wlRunningTodayCollapsed=false;
 
 const BR_STAGES=[
   {id:'watching',   label:'Watching',       col:'#94a3b8'},
@@ -730,9 +731,7 @@ function renderWLList(){
     +'<div class="wll-stat"><div class="wll-stat-n" style="color:var(--ora);">'+totalTargets+'</div><div class="wll-stat-l">Targets</div></div>'
     +'<div class="wll-stat" onclick="wlShowRatedList()" style="cursor:pointer;" title="View all rated horses"><div class="wll-stat-n" style="color:#d97706;">'+totalMR+'</div><div class="wll-stat-l" style="color:#d97706;">Rated ›</div></div>'
   +'</div>'
-  +(_noSilkCount>0
-    ?'<div style="padding:0 14px 10px;"><button id="wl-fetch-silks-btn" onclick="wlFetchAndPatchSilks()" style="width:100%;padding:8px;border-radius:9px;border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.08);color:#f59e0b;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.03em;">🎨 Fetch Silks for '+_noSilkCount+' profile'+(  _noSilkCount===1?'':'s')+'</button></div>'
-    :'');
+;
   // ── Running Today — pinned section ───────────────────────────────────────
   const _todayRaces=(window._todayMeetingsCache&&(window._todayMeetingsCache.racecards||window._todayMeetingsCache.races))||[];
   // Build map: horse name → set of trainers running today
@@ -757,12 +756,13 @@ function renderWLList(){
   });
   if(_runningEntries.length){
     html+='<div style="border:1px solid #10b98140;background:#10b98108;border-radius:10px;margin-bottom:10px;overflow:hidden;">'
-      +'<div style="padding:9px 14px;background:#10b98118;border-bottom:1px solid #10b98130;display:flex;align-items:center;gap:8px;">'
+      +'<div onclick="_wlRunningTodayCollapsed=!_wlRunningTodayCollapsed;renderWLList();" style="padding:9px 14px;background:#10b98118;border-bottom:1px solid #10b98130;display:flex;align-items:center;gap:8px;cursor:pointer;">'
         +'<span style="width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 0 3px #10b98130;flex-shrink:0;"></span>'
         +'<span style="font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#10b981;">Running Today</span>'
-        +'<span style="font-size:11px;color:var(--mut);margin-left:auto;">'+_runningEntries.length+' horse'+(  _runningEntries.length>1?'s':'')+'</span>'
+        +'<span style="font-size:11px;color:var(--mut);margin-left:auto;">'+_runningEntries.length+' horse'+(  _runningEntries.length>1?'s':'')+' &nbsp;</span>'
+        +'<span style="font-size:12px;color:#10b981;">'+(_wlRunningTodayCollapsed?'▼':'▲')+'</span>'
       +'</div>';
-    _runningEntries.forEach(function(e){
+    if(!_wlRunningTodayCollapsed)_runningEntries.forEach(function(e){
       const or=parseFloat(e.currentRating)||null;
       const mr=parseFloat(e.myRating)||null;
       const edge=(or&&mr)?(mr-or):null;
@@ -3062,6 +3062,23 @@ function _wlpBuildHTML(e){
   // horse_reviews = all subsequent race reviews
   const horseReviews=(D.reviews||[]).filter(function(r){return r.profileId===e.id;}).slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
   const latestReview=horseReviews[0]||null;
+  // Pre-compute awaiting count for History tab badge
+  const _earlyToday=td();
+  const _earlyReviewedDates=new Set(horseReviews.map(function(r){return r.date||'';}));
+  const _earlyPending=(D.pendingReviews||[]).filter(function(p){
+    if(p.profileId!==e.id)return false;
+    return!horseReviews.some(function(r){return r.date===p.date;});
+  });
+  const _earlyOverdue=(e.targets||[]).filter(function(t){
+    if(!t.date||t.date>=_earlyToday)return false;
+    return!(D.reviews||[]).some(function(r){
+      if(r.profileId!==e.id)return false;
+      const tMs=new Date(t.date+'T00:00:00').getTime();
+      const rMs=r.date?new Date(r.date+'T00:00:00').getTime():null;
+      return rMs&&Math.abs(rMs-tMs)<=7*24*60*60*1000;
+    });
+  });
+  const _awaitingCount=_earlyPending.length+_earlyOverdue.filter(function(t){return!_earlyPending.some(function(p){return p.date===t.date;});}).length;
   const sortedObs=obs.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
   const latestObs=sortedObs[0]||null;
   const lastDate=latestReview?latestReview.date:latestObs?latestObs.date:(e.createdAt?new Date(e.createdAt).toISOString().slice(0,10):'');
@@ -3256,7 +3273,7 @@ function _wlpBuildHTML(e){
   };
   h+='<div style="display:flex;background:var(--sur);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:5;">'
     +_tBtn('intel','Intel',0)
-    +_tBtn('history','History',horseReviews.length)
+    +_tBtn('history','History',horseReviews.length+_awaitingCount)
     +_tBtn('targets','Targets',_upcomingTargCnt)
     +_tBtn('bets','Bets',horseBets.length)
   +'</div>';

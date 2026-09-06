@@ -1083,7 +1083,7 @@ function _lboBackToChecklist(){
 }
 
 
-let rcSwResultsData = [], rcSwResultsView = 'time', rcSwResultsOpenCourse = '', rcSwResultsYesterday = false, rcSwResultsDesc = false;
+let rcSwResultsData = [], rcSwResultsYesterdayData = [], rcSwResultsView = 'time', rcSwResultsOpenCourse = '', rcSwResultsYesterday = false, rcSwResultsDesc = false;
 const _rcResTimeOpen = {}; // tracks which time-view result races are expanded
 
 function rcSwToggleResTime(idx){
@@ -1107,24 +1107,36 @@ function rcGetOFR(horseName){
   return '';
 }
 
-async function rcSwLoadResults(){
-  const stEl = document.getElementById('sw-results-status');
-  const listEl = document.getElementById('sw-results-list');
-  const filterEl = document.getElementById('sw-results-filters');
-  if(rcSwResultsData.length){ rcSwRenderResultsUI(); return; }
+function rcSwResultsActiveData(){
+  return rcSwResultsYesterday ? rcSwResultsYesterdayData : rcSwResultsData;
+}
+
+async function rcSwLoadResults(forceDay){
+  if(forceDay!==undefined) rcSwResultsYesterday=forceDay;
+  const stEl=document.getElementById('sw-results-status');
+  const listEl=document.getElementById('sw-results-list');
+  const filterEl=document.getElementById('sw-results-filters');
+
+  const cached=rcSwResultsActiveData();
+  if(cached.length){ rcSwRenderResultsUI(); return; }
+
   if(stEl){ stEl.style.display='block'; stEl.textContent='Loading results\u2026'; }
-  if(listEl) listEl.innerHTML = '';
-  if(filterEl) filterEl.style.display = 'none';
+  if(listEl) listEl.innerHTML='';
+  if(filterEl) filterEl.style.display='none';
+
+  const endpoint=rcSwResultsYesterday?'results/yesterday':'results/today';
+  const emptyMsg=rcSwResultsYesterday?'No results found for yesterday.':'No results yet today \u2014 check back after the first race.';
+
   try{
-    rcSwResultsData = await callRacingAPIAll('results/today', {}, 'results');
-    if(rcSwResultsData.length){const _s=rcSwResultsData[0];console.log('[Results] first race keys:',Object.keys(_s),'dist fields:',{distance_f:_s.distance_f,distance_round:_s.distance_round,distance:_s.distance,dist:_s.dist,distance_furlongs:_s.distance_furlongs,distance_yards:_s.distance_yards});}
-    if(stEl) stEl.style.display = 'none';
-    autoMatchBetResults(rcSwResultsData);
-    if(!rcSwResultsData.length){
-      if(listEl) listEl.innerHTML = '<div class="rc-empty">No results yet today — check back after the first race.</div>';
+    const data=await callRacingAPIAll(endpoint,{},'results');
+    if(rcSwResultsYesterday){ rcSwResultsYesterdayData=data; } else { rcSwResultsData=data; }
+    if(stEl) stEl.style.display='none';
+    if(!rcSwResultsYesterday) autoMatchBetResults(rcSwResultsData);
+    if(!data.length){
+      if(listEl) listEl.innerHTML='<div class="rc-empty">'+emptyMsg+'</div>';
       return;
     }
-    rcSwResultsOpenCourse = '';
+    rcSwResultsOpenCourse='';
     rcSwRenderResultsUI();
   }catch(e){
     if(stEl){ stEl.style.display='block'; stEl.textContent='\u26a0\ufe0f '+e.message; }
@@ -1138,10 +1150,19 @@ function rcSwRenderResultsUI(){
   const onT = rcSwResultsView==='time';
   const btnBase = 'font-family:var(--font-ui);font-size:10px;letter-spacing:.07em;text-transform:uppercase;padding:7px 18px;border:none;cursor:pointer;font-weight:700;transition:all .12s;';
 
+  // Update card subtitle to reflect active day
+  const subtitleEl=document.getElementById('sw-results-subtitle');
+  if(subtitleEl) subtitleEl.textContent=rcSwResultsYesterday?"Yesterday's Racing":"Today's Racing";
+
   filterEl.style.display = 'block';
-  const _rsb='font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;flex:1;padding:7px 12px;border:none;cursor:pointer;';
   filterEl.innerHTML =
-    '<div style="display:flex;align-items:center;gap:8px;">'
+    // Day toggle row
+    '<div style="display:flex;gap:6px;margin-bottom:8px;">'
+    + '<button class="rc-view-btn '+(rcSwResultsYesterday?'off':'on')+'" onclick="rcSwResultsYesterday=false;rcSwLoadResults();" style="flex:1;">Today</button>'
+    + '<button class="rc-view-btn '+(rcSwResultsYesterday?'on':'off')+'" onclick="rcSwResultsYesterday=true;rcSwLoadResults();" style="flex:1;">Yesterday</button>'
+    + '</div>'
+    // View + sort row
+    + '<div style="display:flex;align-items:center;gap:8px;">'
     + '<div class="rc-view-tog">'
     + '<button class="rc-view-btn '+(onT?'on':'off')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
     + '<button class="rc-view-btn '+(!onT?'on':'off')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
@@ -1152,11 +1173,15 @@ function rcSwRenderResultsUI(){
   const listEl = document.getElementById('sw-results-list');
   if(!listEl) return;
 
+  // Render from whichever day's data is active
+  const _savedData = rcSwResultsData;
+  if(rcSwResultsYesterday) rcSwResultsData = rcSwResultsYesterdayData;
   if(rcSwResultsView === 'time'){
     rcSwRenderResultsTime(listEl);
   } else {
     rcSwRenderResultsCourse(listEl);
   }
+  if(rcSwResultsYesterday) rcSwResultsData = _savedData;
 }
 
 function rcSwRaceCard(race, course){

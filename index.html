@@ -323,10 +323,10 @@
       <div class="cin rc-cin">
         <div class="row-sb mb12">
           <div>
-            <div class="lbl">Today's Racing</div>
+            <div class="lbl" id="sw-results-subtitle">Today's Racing</div>
             <div class="card-title" style="color:var(--ora);">Results</div>
           </div>
-          <button class="btn-refresh" onclick="rcSwResultsData=[];rcSwResultsOpenCourse='';rcSwLoadResults();">↻ Refresh</button>
+          <button class="btn-refresh" onclick="rcSwResultsData=[];rcSwResultsYesterdayData=[];rcSwResultsOpenCourse='';rcSwLoadResults();">↻ Refresh</button>
         </div>
         <div id="sw-results-filters" style="display:none;margin-bottom:10px;"></div>
         <div id="sw-results-list"><div class="status-txt">Swipe to this card to load today's results.</div></div>

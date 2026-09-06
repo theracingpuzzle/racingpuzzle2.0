@@ -2403,8 +2403,8 @@ function wlToggleGoing(btn){
 window._wlNewStep=1;
 function wlNewStep(n){
   const total=3;
+  if(n>total){saveWLEntry('');return;}
   n=Math.max(1,Math.min(total,n));
-  if(n===total+1){saveWLEntry('');return;}
   // Validate step 1 before advancing
   if(n>1&&window._wlNewStep===1){
     const h=document.getElementById('wlf-horse');

@@ -290,14 +290,17 @@ function updHdr(){
   var _raf=null, _speed=1.0, _active=false;
 
   function _scrollTarget(){
-    // Find the visible .cin inside the active card
-    var cins=document.querySelectorAll('.cin');
-    for(var i=0;i<cins.length;i++){
-      var el=cins[i];
-      var rect=el.getBoundingClientRect();
-      if(rect.width>0&&rect.height>0&&el.scrollHeight>el.clientHeight)return el;
+    // Find the active card (.card with opacity:1) and return its .cin
+    var cards=document.querySelectorAll('.card');
+    for(var i=0;i<cards.length;i++){
+      var card=cards[i];
+      var op=parseFloat(card.style.opacity);
+      if(op>=0.99){
+        var cin=card.querySelector('.cin');
+        if(cin)return cin;
+      }
     }
-    // Fallback: any scrollable .cin or cpane-wrap
+    // CMD mode fallback
     var pane=document.querySelector('.cpane-wrap');
     if(pane&&pane.scrollHeight>pane.clientHeight)return pane;
     return document.scrollingElement||document.documentElement;

@@ -244,7 +244,6 @@ function wlToggleGroup(r){
 // ─── PROFILER FILTERS ───
 let _wlFilter=null; // null = all, or one of: 'no-obs','past-target','running-today','edge'
 let _wlGroupBy='reason'; // 'reason' | 'race-type' | 'surface' | 'age'
-let _wlShowCold=false;
 let _wlRunningTodayCollapsed=false;
 
 const BR_STAGES=[
@@ -416,7 +415,6 @@ function _wlAttentionCount(entries){
   return ids.size;
 }
 
-function _wlToggleCold(){_wlShowCold=!_wlShowCold;renderWLList();}
 
 function wlShowRatedList(){
   const existing=document.getElementById('wl-rated-modal');if(existing)existing.remove();
@@ -525,11 +523,8 @@ function _applyWLFilter(entries){
   if(_wlFilter==='ready'){
     return entries.filter(function(e){return e.betReadiness==='ready';});
   }
-  // Default: hide Cold unless toggled on
-  if(!_wlShowCold){
-    return entries.filter(function(e){return (e.betReadiness||'watching')!=='cold';});
-  }
-  return entries;
+  // Cold horses are always hidden from the list
+  return entries.filter(function(e){return (e.betReadiness||'watching')!=='cold';});
 }
 
 // ── Patch silk URLs from API runner data into watchlist profiles ──
@@ -785,14 +780,6 @@ function renderWLList(){
     html+='</div>';
   }
 
-  // Cold toggle
-  if(coldCount){
-    html+='<div style="text-align:center;margin-bottom:10px;">'
-      +'<button onclick="_wlToggleCold()" style="font-size:10px;font-weight:700;color:var(--mut);background:none;border:none;padding:0;cursor:pointer;letter-spacing:.04em;">'
-        +(_wlShowCold?'▲ Hide':'▼ Show')+' '+coldCount+' Cold horse'+(coldCount>1?'s':'')
-      +'</button>'
-    +'</div>';
-  }
 
   // ── Group-by selector ──
   const GB_OPTS=[
@@ -990,15 +977,18 @@ function renderWLEntry(e){
     +(function(){
       const edge=(or&&mr)?(mr-or):null;
       const ecol=edge===null?'var(--mut)':edge>0?'#4ade80':edge<0?'#f87171':'#888';
-      return'<div class="wll-right" style="min-width:52px;text-align:right;">'
+      return'<div class="wll-right" style="min-width:56px;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'
         +(edge!==null
-          ?'<div style="font-size:20px;font-weight:900;line-height:1;color:'+ecol+';">'+(edge>0?'+':'')+edge+'</div><div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-top:1px;">EDGE</div><div style="font-size:9px;color:var(--mut);margin-top:2px;">OR '+or+'</div>'
-          : or
-            ?'<div style="font-size:16px;font-weight:900;color:var(--txt);">'+or+'</div><div style="font-size:9px;color:var(--mut);">OR</div>'
-            : mr
-              ?'<div style="font-size:16px;font-weight:900;color:#f97316;">'+mr+'</div><div style="font-size:9px;color:var(--mut);">MR</div>'
-              :'<div style="font-size:12px;color:var(--mut);">—</div>'
-        )
+          ?'<div style="font-size:20px;font-weight:900;line-height:1;color:'+ecol+';">'+(edge>0?'+':'')+edge+'</div>'
+           +'<div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-top:1px;">EDGE</div>'
+          :'')
+        +(or
+          ?'<div style="font-size:11px;font-weight:700;color:var(--mut);margin-top:'+(edge!==null?'4':'0')+'px;">OR <span style="color:var(--txt);">'+or+'</span></div>'
+          :'')
+        +(mr
+          ?'<div style="font-size:11px;font-weight:700;color:var(--mut);">MR <span style="color:#f97316;">'+mr+'</span></div>'
+          :'')
+        +(!or&&!mr?'<div style="font-size:12px;color:var(--mut);">—</div>':'')
       +'</div>';
     })()
   +'</div>';

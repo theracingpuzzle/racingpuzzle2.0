@@ -65,7 +65,7 @@ async function rcSwLoadMeetings(){
   try{
     // Credentials are server-side (Cloudflare Worker) — no client check needed
     // Share cache with today.js to avoid double-fetching
-    if(!window._todayMeetingsCache){const _d=await callRacingAPI('racecards/basic',{limit:100});window._todayMeetingsCache=_d;}
+    if(!window._todayMeetingsCache) window._todayMeetingsCache=await callRacingAPI('racecards/basic',{});
     const data=window._todayMeetingsCache;
     rcSwCurrentRaces=data.racecards||data.races||[];
     if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(rcSwCurrentRaces);
@@ -1128,7 +1128,8 @@ async function rcSwLoadResults(forceDay){
   const emptyMsg=rcSwResultsYesterday?'No results found for yesterday.':'No results yet today \u2014 check back after the first race.';
 
   try{
-    const data=await callRacingAPIAll(endpoint,{},'results');
+    const raw=await callRacingAPI(endpoint,{});
+    const data=raw.results||raw.races||[];
     if(rcSwResultsYesterday){ rcSwResultsYesterdayData=data; } else { rcSwResultsData=data; }
     if(stEl) stEl.style.display='none';
     if(!rcSwResultsYesterday) autoMatchBetResults(rcSwResultsData);
@@ -1510,7 +1511,8 @@ async function rcLoadResults(){
   const el=document.getElementById('rc-results-list');
   if(el)el.innerHTML='';
   try{
-    const results=await callRacingAPIAll('results/today',{},'results');
+    const _rd=await callRacingAPI('results/today',{});
+    const results=_rd.results||_rd.races||[];
     rcSetStatus('');
     autoMatchBetResults(results);
     if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(results);

@@ -2777,7 +2777,7 @@ const WLP_CSS = `
   padding: 14px 0 14px; position: relative; z-index: 1;
 }
 .wlp-silks {
-  width: 92px; height: 92px; flex-shrink: 0; border-radius: 50%;
+  width: 130px; height: 130px; flex-shrink: 0; border-radius: 50%;
   background: var(--sur2); border: 2.5px solid rgba(139,92,246,.35);
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 0 16px rgba(139,92,246,.2);
@@ -3020,6 +3020,82 @@ function wlpTab(id){
   window._wlpActiveTab=id;
 }
 
+// ── Extract dominant colours from a silk image via canvas ─────────────────
+function _wlpApplySilkTheme(silkUrl, modal){
+  try{
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){
+      try{
+        const SIZE=40;
+        const c=document.createElement('canvas');
+        c.width=c.height=SIZE;
+        const ctx=c.getContext('2d');
+        ctx.drawImage(img,0,0,SIZE,SIZE);
+        const px=ctx.getImageData(0,0,SIZE,SIZE).data;
+
+        // Sample every 4th pixel, skip near-white/near-black/transparent
+        const buckets={};
+        for(let i=0;i<px.length;i+=16){
+          const a=px[i+3];
+          if(a<80)continue;
+          const r=px[i],g=px[i+1],b=px[i+2];
+          const bright=(r+g+b)/3;
+          if(bright>230||bright<20)continue; // skip white/black backgrounds
+          // Quantise to 32-step grid for clustering
+          const rq=Math.round(r/32)*32,gq=Math.round(g/32)*32,bq=Math.round(b/32)*32;
+          const k=rq+','+gq+','+bq;
+          buckets[k]=(buckets[k]||0)+1;
+        }
+
+        // Sort by frequency, pick top 2
+        const sorted=Object.keys(buckets).sort(function(a,b){return buckets[b]-buckets[a];});
+        if(!sorted.length)return;
+
+        function toRgb(k){const p=k.split(',');return{r:+p[0],g:+p[1],b:+p[2]};}
+        const c1=toRgb(sorted[0]);
+        // Pick second colour that's visually distinct from first
+        let c2=null;
+        for(let i=1;i<sorted.length;i++){
+          const t=toRgb(sorted[i]);
+          const dist=Math.abs(t.r-c1.r)+Math.abs(t.g-c1.g)+Math.abs(t.b-c1.b);
+          if(dist>80){c2=t;break;}
+        }
+        if(!c2)c2={r:Math.min(c1.r+40,255),g:Math.min(c1.g+40,255),b:Math.min(c1.b+40,255)};
+
+        const rgb1='rgb('+c1.r+','+c1.g+','+c1.b+')';
+        const rgb2='rgb('+c2.r+','+c2.g+','+c2.b+')';
+        const rgba1='rgba('+c1.r+','+c1.g+','+c1.b+',';
+        const rgba2='rgba('+c2.r+','+c2.g+','+c2.b+',';
+
+        // Apply to hero
+        const hero=modal.querySelector('.wlp-hero');
+        if(hero){
+          hero.style.background='linear-gradient(135deg,'+rgba1+'0.85) 0%,'+rgba2+'0.7) 60%,rgba(15,23,42,0.95) 100%)';
+          hero.style.borderBottom='3px solid '+rgba1+'0.9)';
+        }
+        // Glow on silk circle
+        const silkEl=modal.querySelector('.wlp-silks');
+        if(silkEl){
+          silkEl.style.border='2.5px solid '+rgba1+'0.7)';
+          silkEl.style.boxShadow='0 0 24px '+rgba1+'0.5)';
+        }
+        // Metric strip accent
+        const metrics=modal.querySelector('.wlp-hero-metrics');
+        if(metrics){
+          metrics.style.background=rgba1+'0.15)';
+          metrics.style.outline='1px solid '+rgba1+'0.25)';
+        }
+        // Silk circle bg
+        if(silkEl)silkEl.style.background=rgba2+'0.15)';
+
+      }catch(e2){/* canvas tainted — silently ignore */}
+    };
+    img.onerror=function(){/* silk image failed — keep default theme */};
+    img.src=silkUrl;
+  }catch(e){/* no canvas support — ignore */}
+}
+
 function openWLProfile(id){
   const wl=getWL();
   const e=wl.find(function(x){return x.id===id;});
@@ -3034,6 +3110,9 @@ function openWLProfile(id){
   document.body.appendChild(modal);
   // Restore active tab (important when re-opening after review edit)
   wlpTab(window._wlpActiveTab||'intel');
+
+  // Apply silk colour theming to the hero section
+  if(e.silkUrl)_wlpApplySilkTheme(e.silkUrl,modal);
 }
 
 function _wlpBuildHTML(e){
@@ -3221,7 +3300,7 @@ function _wlpBuildHTML(e){
         })()
       +'</div>'
       +(e.silkUrl
-        ?'<img src="'+esc(e.silkUrl)+'" alt="silk" width="64" height="64" style="object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));flex-shrink:0;" onerror="this.style.display=\'none\'">'
+        ?'<img src="'+esc(e.silkUrl)+'" alt="silk" width="100" height="100" style="object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));flex-shrink:0;" onerror="this.style.display=\'none\'">'
         :'')
     +'</div>'
     // ── 3-metric strip (the race-day decision strip) ──────────────────────
@@ -3541,7 +3620,7 @@ function _wlpBuildHTML(e){
             +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'
               +[item.date?_wlpFmt(item.date):'',item.course,item.raceDist,item.raceGoing].filter(Boolean).join(' · ')
             +'</div>'
-            +(item.position?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">Finished: <strong>'+esc(item.position)+'</strong>'+(item.beatenDistance?' · <span style="color:var(--mut);">'+esc(item.beatenDistance)+'L</span>':'')+(item.sp?' · <span style="color:var(--mut);">SP '+esc(item.sp)+'</span>':'')+'</div>':'')
+            +((item.position||item.sp)?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">'+(item.position?'Finished: <strong>'+esc(item.position)+'</strong>'+(item.beatenDistance?' · <span style="color:var(--mut);">'+esc(item.beatenDistance)+'L</span>':''):'')+(item.sp?(item.position?' · ':'')+'<span style="color:var(--gld);font-weight:700;">SP '+esc(item.sp)+'</span>':'')+'</div>':'')
             +(label?'<div style="font-size:10px;color:#f59e0b;margin-top:3px;font-style:italic;">'+label+'</div>':'')
           +'</div>'
           +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'

@@ -1670,11 +1670,26 @@ function rcSetStatus(msg){
 // ─── SHORTLIST MODE ─── Tinder-style runner cards
 // ═══════════════════════════════════════════════════════════════════
 
-let _rcSlShortlist = [];   // accumulated shortlisted runners for this session
-let _rcSlRunners   = [];   // runners in the current race being reviewed
-let _rcSlIdx       = 0;    // current runner index
-let _rcSlRace      = null; // current race object
-let _rcSlCourse    = '';   // current course name
+// Persist shortlist across view switches — stored under today's date so it auto-clears tomorrow
+var _RC_SL_KEY = 'rc-shortlist-v1';
+function _rcSlLoad(){
+  try{
+    var raw=localStorage.getItem(_RC_SL_KEY);
+    if(!raw)return[];
+    var parsed=JSON.parse(raw);
+    if(parsed.date!==td())return[];   // stale — different day
+    return Array.isArray(parsed.items)?parsed.items:[];
+  }catch(e){return[];}
+}
+function _rcSlSave(){
+  try{localStorage.setItem(_RC_SL_KEY,JSON.stringify({date:td(),items:_rcSlShortlist}));}catch(e){}
+}
+
+let _rcSlShortlist = _rcSlLoad(); // persisted across view switches; clears on new day
+let _rcSlRunners   = [];          // runners in the current race being reviewed
+let _rcSlIdx       = 0;           // current runner index
+let _rcSlRace      = null;        // current race object
+let _rcSlCourse    = '';          // current course name
 
 // Reason map (shared with profile panel)
 const _RC_SL_REASONS = {
@@ -1721,7 +1736,18 @@ function rcSlRenderPicker(container){
   }
 
   // Build grouped HTML matching Course view style
-  let html='<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Select a race to shortlist</div>';
+  // Today's picks banner — shown when the shortlist has picks from this session/day
+  let html='';
+  if(_rcSlShortlist.length){
+    html+='<div onclick="rcSlRenderSummary()" style="display:flex;align-items:center;justify-content:space-between;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:10px;padding:10px 14px;margin-bottom:14px;cursor:pointer;">'
+      +'<div>'
+        +'<div style="font-size:12px;font-weight:700;color:var(--blu);">★ Today\'s Picks ('+_rcSlShortlist.length+')</div>'
+        +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'+_rcSlShortlist.map(function(s){return s.name;}).join(', ')+'</div>'
+      +'</div>'
+      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+    +'</div>';
+  }
+  html+='<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-bottom:10px;">Select a race to shortlist</div>';
   sorted.forEach(function(course){
     const races=meetings[course].slice().sort(function(a,b){
       return timeToMins(a.off||a.off_time||a.time||'')-timeToMins(b.off||b.off_time||b.time||'');
@@ -2099,6 +2125,7 @@ function rcSlAdd(){
     });
   }
   _rcSlIdx++;
+  _rcSlSave();
   rcSlRenderCard();
 }
 
@@ -2112,6 +2139,7 @@ function rcSlUnshortlist(){
   if(!r)return;
   const name=stripCountrySuffix(r.horse||r.name||'—');
   _rcSlShortlist=_rcSlShortlist.filter(function(s){return s.name!==name;});
+  _rcSlSave();
   rcSlRenderCard(); // re-render to show Pass state
 }
 
@@ -2194,6 +2222,7 @@ function rcSlAddToTracker(idx){
 
 function rcSlRemove(idx){
   _rcSlShortlist.splice(idx,1);
+  _rcSlSave();
   rcSlRenderSummary();
 }
 

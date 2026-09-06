@@ -58,13 +58,12 @@ function gid() { return Date.now().toString(36) + Math.random().toString(36).sli
 function td()  { return new Date().toISOString().slice(0,10); }
 
 // Time helpers
-// Times before 9:30 treated as PM (covers evening flat meetings)
 function timeToMins(t) {
   if (!t) return 9999;
   const p = String(t).split(':');
   if (p.length < 2) return 9999;
-  const h = parseInt(p[0])||0, m = parseInt(p[1])||0, raw = h*60+m;
-  return raw < 570 ? raw + 720 : raw;
+  const h = parseInt(p[0])||0, m = parseInt(p[1])||0;
+  return h*60+m;
 }
 function cmpTime(a, b) { return timeToMins(a) - timeToMins(b); }
 

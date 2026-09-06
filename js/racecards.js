@@ -3,6 +3,9 @@
 // ─── DISTANCE FORMATTER ───
 // Converts API distance values (raw furlongs, "5f", "1m4f", "1408y" etc.)
 // into a clean "Xm Yf" display string.
+// Field priority: distance_f (furlongs decimal) > distance_round > distance > dist
+// distance_round from the Racing API can be a bare number like "2" meaning 2 miles —
+// values ≤ 4 with no suffix are treated as miles since no UK race is under 4f shown this way.
 function formatDist(d){
   if(!d) return '';
   const s = String(d).trim();
@@ -36,9 +39,13 @@ function formatDist(d){
     if(miles)           return miles+'m';
     return Math.round(fur)+'f';
   }
-  // Raw number (furlongs)
+  // Raw number — could be furlongs (e.g. 16.0) or a miles shorthand (e.g. 2 = 2m)
   const raw = parseFloat(s);
   if(!isNaN(raw) && raw > 0){
+    // Bare integer ≤ 4 with no suffix is almost certainly miles (Racing API distance_round)
+    if(Number.isInteger(raw) && raw <= 4 && !/[a-z]/i.test(s)){
+      return raw+'m';
+    }
     const miles = Math.floor(raw/8);
     const rem   = Math.round((raw%8)*2)/2;
     if(miles && rem) return miles+'m '+rem+'f';
@@ -504,7 +511,7 @@ function rcSwRenderMeetingRaces(course, el){
   el.innerHTML=races.map(function(r,i){
     const time=r.off||r.off_time||r.time||'\u2014';
     const name=r.race_name||r.name||r.title||('Race '+(i+1));
-    const dist=formatDist(r.distance_round||r.distance_f||r.distance||r.dist||'');
+    const dist=formatDist(r.distance_f||r.distance_round||r.distance||r.dist||'');
     const runners=(r.runners||r.horses||[]).length;
     const rname=name.toLowerCase();
     const isG1=rname.includes('group 1')||/\bg1\b/i.test(name);const isG2=rname.includes('group 2')||/\bg2\b/i.test(name);
@@ -613,7 +620,7 @@ function rcSwRenderRunners(idx, course, el){
   const race=(rcSwRacesByMeeting[course]||rcSwSortedRaces||[])[idx];if(!race){el.innerHTML='';return;}
   const runners=race.runners||race.horses||[];
   const time=race.off||race.off_time||race.time||'—';
-  const dist=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||race.distance_furlongs||race.distance_yards||'');
+  const dist=formatDist(race.distance_f||race.distance_round||race.distance||race.dist||race.distance_furlongs||race.distance_yards||'');
   const prize=race.prize||race.total_prize_money||'';
   const going=race.going||'';
   const raceClassRaw=String(race.race_class||race.class||'').trim().replace(/^class\s*/i,'');
@@ -1202,7 +1209,7 @@ function rcSwRaceCard(race, course){
     + (function(){
         var _raceClass=String(race.race_class||race.class||'').trim().replace(/^class\s*/i,'');
         var _g=race.going||'';
-        var _d=formatDist(race.distance_round||race.distance_f||race.distance||race.dist||race.distance_furlongs||race.distance_yards||'');
+        var _d=formatDist(race.distance_f||race.distance_round||race.distance||race.dist||race.distance_furlongs||race.distance_yards||'');
         var _p=race.prize||race.total_prize_money||'';
         var _wt=race.win_time||race.winning_time||'';
         const items=[
@@ -1763,7 +1770,7 @@ function rcSlRenderPicker(container){
         const cnt=(r.runners||r.horses||[]).filter(function(h){
           return !h.non_runner&&!h.isNonRunner&&(''+h.number).toUpperCase()!=='NR';
         }).length;
-        const dist=formatDist(r.distance_round||r.distance_f||r.distance||r.dist||'');
+        const dist=formatDist(r.distance_f||r.distance_round||r.distance||r.dist||'');
         const going=r.going||'';
         return'<div class="rc-race-row rc-sl-race-row" onclick="rcSlStartRace('+idx+')">'
           +'<div class="rc-race-hdr" style="pointer-events:none;">'
@@ -1884,7 +1891,7 @@ function rcSlRenderCard(){
   const wt=(function(){const _r=r.weight||r.lbs||r.stone_lbs||r.weight_lbs||'';if(!_r)return'';if(/[a-zA-Z\-]/.test(String(_r)))return String(_r);const n=parseInt(_r,10);if(isNaN(n))return String(_r);return Math.floor(n/14)+'st '+(n%14)+'lb';})();
   const sp=r.sp||r.price||r.odds||'';
   const time=_rcSlRace.off||_rcSlRace.off_time||_rcSlRace.time||'—';
-  const dist=formatDist(_rcSlRace.distance_round||_rcSlRace.distance_f||_rcSlRace.distance||_rcSlRace.dist||'');
+  const dist=formatDist(_rcSlRace.distance_f||_rcSlRace.distance_round||_rcSlRace.distance||_rcSlRace.dist||'');
   const going=_rcSlRace.going||'';
 
   // Profile notes from Puzzle Profiler

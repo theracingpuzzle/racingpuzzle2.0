@@ -340,17 +340,35 @@ function updHdr(){
     if(w)w.remove();
   };
 
+  window.asMinimise=function(){
+    var controls=document.getElementById('as-controls');
+    var dot=document.getElementById('as-dot');
+    if(controls)controls.style.display='none';
+    if(dot)dot.style.display='flex';
+  };
+  window.asExpand=function(){
+    var controls=document.getElementById('as-controls');
+    var dot=document.getElementById('as-dot');
+    if(controls)controls.style.display='flex';
+    if(dot)dot.style.display='none';
+  };
+
   window.initAutoScroll=function(){
     if(document.getElementById('as-widget'))return;
     var w=document.createElement('div');
     w.id='as-widget';
-    // Compact horizontal pill — sits at bottom edge, won't cover content
-    w.style.cssText='position:fixed;bottom:72px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);border-radius:50px;padding:6px 10px 6px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.4);pointer-events:all;';
+    w.style.cssText='position:fixed;bottom:72px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:all;';
     w.innerHTML=
-      '<input type="range" id="as-slider" min="0.2" max="5" step="0.1" value="1" oninput="asSetSpeed(this.value)" style="width:80px;accent-color:#f59e0b;cursor:pointer;">'
-      +'<span id="as-speedlbl" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);min-width:26px;">1.0×</span>'
-      +'<button id="as-playbtn" onclick="asToggle()" style="width:34px;height:34px;border-radius:50%;border:none;background:var(--gld);color:#000;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▶</button>'
-      +'<button onclick="asClose()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0;">✕</button>';
+      // Full controls pill
+      '<div id="as-controls" style="background:rgba(0,0,0,.75);backdrop-filter:blur(8px);border-radius:50px;padding:6px 10px 6px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.4);">'
+        +'<input type="range" id="as-slider" min="0.2" max="5" step="0.1" value="1" oninput="asSetSpeed(this.value)" style="width:80px;accent-color:#f59e0b;cursor:pointer;">'
+        +'<span id="as-speedlbl" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);min-width:26px;">1.0×</span>'
+        +'<button id="as-playbtn" onclick="asToggle()" style="width:34px;height:34px;border-radius:50%;border:none;background:var(--gld);color:#000;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▶</button>'
+        +'<button onclick="asMinimise()" title="Hide" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:18px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0;">–</button>'
+        +'<button onclick="asClose()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0;">✕</button>'
+      +'</div>'
+      // Minimised dot — tap to restore
+      +'<div id="as-dot" onclick="asExpand()" style="display:none;width:12px;height:12px;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.3);cursor:pointer;margin:0 auto;"></div>';
     document.body.appendChild(w);
   };
 })();

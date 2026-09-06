@@ -406,6 +406,11 @@ function _wlAttentionCount(entries){
     if((e.targets||[]).some(function(t){return t.race&&!t.date;}))ids.add(e.id);
     const rvws=(D.reviews||[]).filter(function(r){return r.profileId===e.id;});
     if(rvws.length&&rvws.some(_rvwIncomplete))ids.add(e.id);
+    const awaitingReview=(D.pendingReviews||[]).some(function(p){
+      if(p.profileId!==e.id)return false;
+      return!(D.reviews||[]).some(function(r){return r.profileId===e.id&&r.date===p.date;});
+    });
+    if(awaitingReview)ids.add(e.id);
   });
   return ids.size;
 }
@@ -3430,7 +3435,7 @@ function _wlpBuildHTML(e){
 
   // Section 4: Targets (renumbered to 5)
   h+='<div class="wlp-section" data-wlp-tab="targets">';
-  h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">4</div><span class="wlp-section-title" style="font-size:11px;">Targets</span></div>';
+  h+='<div class="wlp-section-hdr" style="padding:10px 12px;"><div class="wlp-section-left"><div class="wlp-section-num">6</div><span class="wlp-section-title" style="font-size:11px;">Targets</span></div>';
   h+='<span class="wlp-section-action" style="font-size:16px;" onclick="'+editFn+'">+</span></div>';
   if(targets.length){
     const todayStr=td();
@@ -3500,7 +3505,7 @@ function _wlpBuildHTML(e){
   ).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
 
   if(awaitingItems.length){
-    h+='<div class="wlp-section" data-wlp-tab="targets" style="border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.04);">';
+    h+='<div class="wlp-section" data-wlp-tab="history" style="border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.04);">';
     h+='<div class="wlp-section-hdr">'
       +'<div class="wlp-section-left">'
         +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
@@ -3616,7 +3621,7 @@ function _wlpBuildHTML(e){
   // ── BETS TAB PANE ────────────────────────────────────────────────────────
   h+='<div data-wlp-tab="bets">';
   h+='<div class="wlp-section">';
-  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">£</div><span class="wlp-section-title">Betting Record</span></div></div>';
+  h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">7</div><span class="wlp-section-title">Betting Record</span></div></div>';
   if(horseBets.length){
     const _bs=function(n,l,c){return'<div style="background:var(--sur);padding:14px 8px;text-align:center;"><div style="font-size:20px;font-weight:900;color:'+(c||'var(--txt)')+';">'+n+'</div><div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-top:3px;">'+l+'</div></div>';};
     const _pnlStr=horsePnl>=0?'+£'+horsePnl.toFixed(2):'−£'+Math.abs(horsePnl).toFixed(2);

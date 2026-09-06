@@ -831,53 +831,131 @@
 </div>
 
 <!-- ── AUTH OVERLAY ── shown only when no session exists ── -->
-<div id="auth-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:var(--navy);flex-direction:column;align-items:center;justify-content:center;padding:32px;">
-  <div style="width:100%;max-width:360px;">
-    <!-- Logo -->
-    <div style="text-align:center;margin-bottom:32px;">
-      <img src="icons/icon-192.png" alt="The Racing Puzzle" style="width:72px;height:72px;border-radius:18px;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,.35);">
-      <div style="font-family:var(--font);font-size:28px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#fff;">
+<div id="auth-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:var(--navy);flex-direction:column;overflow-y:auto;">
+
+  <!-- ── HOME SCREEN ── -->
+  <div id="auth-home" style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:48px 28px 36px;">
+
+    <!-- Hero -->
+    <div style="text-align:center;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 0 28px;">
+      <img src="icons/icon-192.png" alt="The Racing Puzzle" style="width:90px;height:90px;border-radius:22px;margin-bottom:22px;box-shadow:0 10px 40px rgba(0,0,0,.4);">
+      <div style="font-family:var(--font);font-size:36px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#fff;line-height:1;margin-bottom:8px;">
         RACING <span style="color:var(--gld2);">PUZZLE</span>
       </div>
-      <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:8px;">
-        Real &nbsp;·&nbsp; Virtual &nbsp;·&nbsp; Disciplined
+      <div style="font-family:var(--font);font-size:13px;font-weight:500;letter-spacing:.06em;color:rgba(255,255,255,.45);margin-bottom:36px;">
+        The Smarter Way to Follow Racing
+      </div>
+      <!-- Feature pills -->
+      <div style="display:flex;flex-direction:column;gap:11px;width:100%;max-width:320px;text-align:left;">
+        <div style="display:flex;align-items:center;gap:13px;">
+          <div style="flex-shrink:0;width:36px;height:36px;border-radius:10px;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.2);display:flex;align-items:center;justify-content:center;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>
+          </div>
+          <div>
+            <div style="font-family:var(--font);font-size:13px;font-weight:800;color:#fff;letter-spacing:.03em;">Track Real &amp; Virtual Bets</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:1px;">Full P&amp;L, stats &amp; monthly breakdown</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:13px;">
+          <div style="flex-shrink:0;width:36px;height:36px;border-radius:10px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>
+          </div>
+          <div>
+            <div style="font-family:var(--font);font-size:13px;font-weight:800;color:#fff;letter-spacing:.03em;">Horse Profiler</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:1px;">Build detailed profiles &amp; track performance</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:13px;">
+          <div style="flex-shrink:0;width:36px;height:36px;border-radius:10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v14M5 3l10 3.5L5 10"/></svg>
+          </div>
+          <div>
+            <div style="font-family:var(--font);font-size:13px;font-weight:800;color:#fff;letter-spacing:.03em;">Live Racecards &amp; Results</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:1px;">UK &amp; Irish racing, updated in real time</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:13px;">
+          <div style="flex-shrink:0;width:36px;height:36px;border-radius:10px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);display:flex;align-items:center;justify-content:center;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 1 5 5c0 2.05-1.23 3.81-3 4.58V13a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-1.42C8.23 10.81 7 9.05 7 7a5 5 0 0 1 5-5z"/><path d="M9 17h6"/><path d="M10 20h4"/></svg>
+          </div>
+          <div>
+            <div style="font-family:var(--font);font-size:13px;font-weight:800;color:#fff;letter-spacing:.03em;">AI Coaching</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:1px;">Get disciplined feedback on your betting</div>
+          </div>
+        </div>
       </div>
     </div>
-    <!-- Card -->
-    <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:28px 24px;">
-      <div id="auth-title" style="font-family:var(--font);font-size:20px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;margin-bottom:20px;">Welcome Back</div>
-      <div style="margin-bottom:14px;">
-        <label style="display:block;font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;">Email</label>
-        <input id="auth-email" type="email" autocomplete="email" placeholder="your@email.com"
-          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:var(--font);font-size:15px;outline:none;"
-          onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()">
-      </div>
-      <div id="auth-pw-wrap" style="margin-bottom:6px;">
-        <label style="display:block;font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;">Password</label>
-        <input id="auth-password" type="password" autocomplete="current-password" placeholder="••••••••"
-          style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:var(--font);font-size:15px;outline:none;"
-          onkeydown="if(event.key==='Enter')authSubmit('signin')">
-      </div>
-      <div id="auth-pw-hint" style="display:none;font-size:11px;color:rgba(255,255,255,.35);margin-bottom:14px;">Minimum 6 characters</div>
-      <div id="auth-error" style="min-height:18px;font-size:12px;color:#ef4444;margin-bottom:12px;"></div>
-      <button id="auth-submit-btn" onclick="authSubmit('signin')"
-        style="width:100%;padding:14px;border-radius:10px;border:none;background:var(--gld2);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">
+
+    <!-- CTA buttons -->
+    <div style="width:100%;max-width:360px;">
+      <button onclick="authGoForm('signup')"
+        style="width:100%;padding:16px;border-radius:12px;border:none;background:var(--gld2);color:#fff;font-family:var(--font);font-size:15px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;margin-bottom:12px;box-shadow:0 4px 20px rgba(245,166,35,.3);">
+        Create Free Account
+      </button>
+      <button onclick="authGoForm('signin')"
+        style="width:100%;padding:15px;border-radius:12px;border:2px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font-family:var(--font);font-size:15px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">
         Sign In
       </button>
-    </div>
-    <div id="auth-toggle-text" style="text-align:center;margin-top:18px;font-family:var(--font);font-size:13px;color:rgba(255,255,255,.45);">
-      New here? <a href="#" onclick="authSetMode('signup');return false;" style="color:var(--gld2);text-decoration:none;font-weight:700;">Create an account</a>
-    </div>
-    <div id="auth-forgot-link" style="text-align:center;margin-top:10px;font-family:var(--font);font-size:12px;">
-      <a href="#" onclick="authSetMode('forgot');return false;" style="color:rgba(255,255,255,.3);text-decoration:none;">Forgot password?</a>
-    </div>
-    <div id="auth-tos-hint" style="display:none;text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.25);font-family:var(--font);">
-      By creating an account you agree to our
-      <a href="#" onclick="showToS();return false;" style="color:rgba(255,255,255,.45);text-decoration:underline;">Terms of Service</a>
-      and
-      <a href="#" onclick="showToS('privacy');return false;" style="color:rgba(255,255,255,.45);text-decoration:underline;">Privacy Policy</a>
+      <div style="text-align:center;margin-top:18px;font-size:11px;color:rgba(255,255,255,.22);font-family:var(--font);line-height:1.7;">
+        By creating an account you agree to our
+        <a href="#" onclick="showToS();return false;" style="color:rgba(255,255,255,.4);text-decoration:underline;">Terms</a>
+        &amp;
+        <a href="#" onclick="showToS('privacy');return false;" style="color:rgba(255,255,255,.4);text-decoration:underline;">Privacy Policy</a>
+      </div>
     </div>
   </div>
+
+  <!-- ── FORM SCREEN ── -->
+  <div id="auth-form-screen" style="display:none;min-height:100%;align-items:center;justify-content:center;padding:32px 28px;flex-direction:column;">
+    <div style="width:100%;max-width:360px;">
+      <!-- Back link -->
+      <button onclick="authGoHome()" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:rgba(255,255,255,.4);font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;padding:0;margin-bottom:28px;">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l-6 6 6 6"/></svg>
+        Back
+      </button>
+      <!-- Logo small -->
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="font-family:var(--font);font-size:22px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#fff;">
+          RACING <span style="color:var(--gld2);">PUZZLE</span>
+        </div>
+      </div>
+      <!-- Card -->
+      <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:28px 24px;">
+        <div id="auth-title" style="font-family:var(--font);font-size:20px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;margin-bottom:20px;">Welcome Back</div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;">Email</label>
+          <input id="auth-email" type="email" autocomplete="email" placeholder="your@email.com"
+            style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:var(--font);font-size:15px;outline:none;"
+            onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()">
+        </div>
+        <div id="auth-pw-wrap" style="margin-bottom:6px;">
+          <label style="display:block;font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;">Password</label>
+          <input id="auth-password" type="password" autocomplete="current-password" placeholder="••••••••"
+            style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:var(--font);font-size:15px;outline:none;"
+            onkeydown="if(event.key==='Enter')authSubmit(_authCurrentMode||'signin')">
+        </div>
+        <div id="auth-pw-hint" style="display:none;font-size:11px;color:rgba(255,255,255,.35);margin-bottom:14px;">Minimum 6 characters</div>
+        <div id="auth-error" style="min-height:18px;font-size:12px;color:#ef4444;margin-bottom:12px;"></div>
+        <button id="auth-submit-btn" onclick="authSubmit(_authCurrentMode||'signin')"
+          style="width:100%;padding:14px;border-radius:10px;border:none;background:var(--gld2);color:#fff;font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;">
+          Sign In
+        </button>
+      </div>
+      <div id="auth-toggle-text" style="text-align:center;margin-top:18px;font-family:var(--font);font-size:13px;color:rgba(255,255,255,.45);">
+        New here? <a href="#" onclick="authSetMode('signup');return false;" style="color:var(--gld2);text-decoration:none;font-weight:700;">Create an account</a>
+      </div>
+      <div id="auth-forgot-link" style="text-align:center;margin-top:10px;font-family:var(--font);font-size:12px;">
+        <a href="#" onclick="authSetMode('forgot');return false;" style="color:rgba(255,255,255,.3);text-decoration:none;">Forgot password?</a>
+      </div>
+      <div id="auth-tos-hint" style="display:none;text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.25);font-family:var(--font);">
+        By creating an account you agree to our
+        <a href="#" onclick="showToS();return false;" style="color:rgba(255,255,255,.45);text-decoration:underline;">Terms of Service</a>
+        and
+        <a href="#" onclick="showToS('privacy');return false;" style="color:rgba(255,255,255,.45);text-decoration:underline;">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ── TERMS OF SERVICE / PRIVACY POLICY MODAL ── -->
@@ -1091,8 +1169,8 @@
     <div style="font-family:var(--font);font-size:36px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#fff;line-height:1;">
       RACING <span style="color:var(--gld2);">PUZZLE</span>
     </div>
-    <div style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-top:10px;">
-      Real &nbsp;·&nbsp; Virtual &nbsp;·&nbsp; Disciplined
+    <div style="font-family:var(--font);font-size:12px;font-weight:500;letter-spacing:.06em;color:rgba(255,255,255,.4);margin-top:10px;">
+      The Smarter Way to Follow Racing
     </div>
   </div>
   <div id="splash-status" style="font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:32px;text-align:center;">Loading…</div>

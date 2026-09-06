@@ -103,14 +103,35 @@ async function authSignOut() {
 }
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
+var _authCurrentMode = 'signin';
+
 function authShowLogin() {
   const el = document.getElementById('auth-overlay');
-  if (el) el.style.display = 'flex';
+  if (!el) return;
+  el.style.display = 'flex';
+  authGoHome();
 }
 
 function authHideLogin() {
   const el = document.getElementById('auth-overlay');
   if (el) el.style.display = 'none';
+}
+
+function authGoHome() {
+  const home   = document.getElementById('auth-home');
+  const form   = document.getElementById('auth-form-screen');
+  if (home) home.style.display = 'flex';
+  if (form) form.style.display = 'none';
+  const errEl = document.getElementById('auth-error');
+  if (errEl) errEl.textContent = '';
+}
+
+function authGoForm(mode) {
+  const home = document.getElementById('auth-home');
+  const form = document.getElementById('auth-form-screen');
+  if (home) home.style.display = 'none';
+  if (form) form.style.display = 'flex';
+  authSetMode(mode || 'signin');
 }
 
 // ── Profile modal ─────────────────────────────────────────────────────────────
@@ -217,6 +238,7 @@ async function authSubmit(mode) {
 
 // ── Toggle between sign-in, sign-up and forgot-password ──────────────────────
 function authSetMode(mode) {
+  _authCurrentMode = mode;
   const isForgot = mode === 'forgot';
   const isSignup = mode === 'signup';
   const btn      = document.getElementById('auth-submit-btn');

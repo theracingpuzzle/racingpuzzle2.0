@@ -1172,7 +1172,7 @@ function rcSwRaceCard(race, course){
   const name = race.race_name||race.name||'Race';
   const places = (race.runners||[]).slice(0,5);
   const todayBets=[...D.bets,...((D.vBank&&D.vBank.bets)||[])];
-  const esc = function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"  );};
+  const esc = function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');};
   return '<div class="rc-race-block">'
     + '<div class="rc-race-hdr" >'
       + '<div class="rc-race-hdr-left">'
@@ -1232,13 +1232,13 @@ function rcSwRaceCard(race, course){
         const _rPos   = String(pos);
         const _eyeSvg='<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2.5"/></svg>';
         const watchBtn = wlEntry
-          ? '<button class="rc-act-btn" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.1);color:var(--grn);" title="Watching">'+_eyeSvg+'</button>'
+          ? '<button onclick="event.stopPropagation();window._wlProfileSource=\'racecards\';openWLProfile(\''+wlEntry.id+'\')" class="rc-act-btn" style="border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.1);color:var(--grn);" title="Open profile">'+_eyeSvg+'</button>'
           : '<button onclick="event.stopPropagation();rcAddToWatchlist(\''+esc(horse)+'\',\''+esc(course)+'\',\''+esc(jock)+'\',\''+esc(trainer)+'\',\''+esc(name)+'\',\''+esc(ofr)+'\',\''+_rGoing+'\',\''+esc(time)+'\',\''+_rDate+'\',\''+_rDist+'\',\''+_rPos+'\',\''+esc(String(race.race_class||race.class||'').trim().replace(/^class\\s*/i,''))+'\',\''+esc(r.silk_url||r.silk||'')+'\',\''+esc(String(r.age||''))+'\')" class="rc-act-btn" style="border-color:var(--clr-watch-a5);background:var(--clr-watch-a1);color:var(--clr-watch);" title="Add to Watchlist">'+_eyeSvg+'</button>';
         const _qrRes=(wlEntry&&wlEntry.myRating)?{mr:wlEntry.myRating}:(D.ratings&&D.ratings[hn]);
         const rateBtnRes='<span onclick="rcQuickRate(event,\''+esc(horse)+'\',\''+esc(ofr)+'\',\''+esc(trainer)+'\',\''+esc(String(r.age||''))+'\')" class="rc-mr-chip'+(_qrRes?' rc-mr-chip-set':'')+'" title="Log My Rating">MR '+(_qrRes?_qrRes.mr:'\u2014')+'</span>';
         const _resSilk=r.silk_url||r.silk||'';
         return '<div class="rc-res-runner">'
-          + '<span class="rc-pos '+posClass+'">'+pos+'</span>'
+          + '<span class="rc-pos '+posClass+'">'+ordinal(pos)+'</span>'
           + (_resSilk?'<img src="'+_resSilk+'" alt="" width="48" height="48" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':'')
           + '<div class="rc-runner-main">'
             + '<div class="rc-runner-name-row">'
@@ -1528,10 +1528,10 @@ async function rcLoadResults(){
             const sp=r.sp||r.starting_price||'—';
             const ofr=r.ofr||r['or']||r.official_rating||r.officialRating||r.rpr||rcGetOFR(horse)||'';
             const posCol=pos==1?'var(--grn)':pos==2?'#60a5fa':pos==3?'#fb923c':'var(--mut)';
-            const esc2=function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");};
+            const esc2=function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');};
             const _resSilk2=r.silk_url||r.silk||'';
             return'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bdr);">'
-              +'<span style="font-family:var(--font-ui);font-weight:700;font-size:14px;color:'+posCol+';min-width:20px;">'+pos+'</span>'
+              +'<span style="font-family:var(--font-ui);font-weight:700;font-size:14px;color:'+posCol+';min-width:20px;">'+ordinal(pos)+'</span>'
               +(_resSilk2?'<img src="'+_resSilk2+'" alt="" width="48" height="48" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">':'')
               +'<div class="rc-runner-body">'
                 +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'

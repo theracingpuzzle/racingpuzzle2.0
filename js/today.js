@@ -843,7 +843,7 @@ async function checkWatchlistRunners(races){
       const finishBadge=_riOrBet
         ?'<span style="font-size:10px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:6px;margin-left:5px;'
           +(_riOrBet.result==='win'?'background:rgba(22,163,74,.15);color:var(--grn);':_riOrBet.result==='place'?'background:rgba(217,119,6,.15);color:var(--gld);':'background:rgba(220,38,38,.12);color:var(--red);')
-          +'">'+(_riOrBet.position?'Finished '+_riOrBet.position:(_riOrBet.result||'').toUpperCase())+'</span>'
+          +'">'+(_riOrBet.position?'Finished '+ordinal(_riOrBet.position):(_riOrBet.result||'').toUpperCase())+'</span>'
         :'';
       // Don't show review button if the watchlist entry was created today (just added)
       const addedToday=a.wlEntry&&a.wlEntry.createdAt&&new Date(a.wlEntry.createdAt).toISOString().slice(0,10)===todayStr;
@@ -1007,12 +1007,13 @@ async function checkWatchlistRunners(races){
           +' Racecard'
         +'</button>';
       const profileClick=wid?'window._wlProfileSource=\'today\';openWLProfile(\''+wid+'\');':'';
-      const _hn=a.horse.replace(/'/g,"\\'");
-      const _co=(a.course||'').replace(/'/g,"\\'");
+      const _escAttr=function(s){return(s+'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');};
+      const _hn=_escAttr(a.horse);
+      const _co=_escAttr(a.course||'');
       const _ti=a.time||'';
-      const _jk=(a.jockey||'').replace(/'/g,"\\'");
-      const _tr=(a.trainer||'').replace(/'/g,"\\'");
-      const _rn=(a.raceName||'').replace(/'/g,"\\'");
+      const _jk=_escAttr(a.jockey||'');
+      const _tr=_escAttr(a.trainer||'');
+      const _rn=_escAttr(a.raceName||'');
       // ── Review data attributes (shared by both mode review buttons) ──────────
       const _reviewDataAttrs=''
         +' data-wlid="'+wid+'"'
@@ -1303,7 +1304,7 @@ async function checkWatchlistRunners(races){
           +'<div style="display:flex;align-items:stretch;gap:1px;border-radius:8px;overflow:hidden;border:1px solid var(--bdr);margin-bottom:8px;">'
             +'<div style="flex:1;background:var(--sur2);padding:8px 12px;">'
               +'<div style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:2px;">Finished</div>'
-              +'<div class="t-display-num" style="color:var(--txt);">'+(_riOrBet&&_riOrBet.position?_riOrBet.position:(_riOrBet&&_riOrBet.result?(_riOrBet.result).toUpperCase():'—'))+'</div>'
+              +'<div class="t-display-num" style="color:var(--txt);">'+(_riOrBet&&_riOrBet.position?ordinal(_riOrBet.position):(_riOrBet&&_riOrBet.result?(_riOrBet.result).toUpperCase():'—'))+'</div>'
             +'</div>'
             +'<div style="width:1px;background:var(--bdr);flex-shrink:0;"></div>'
             +'<div style="flex:1;background:var(--sur2);padding:8px 12px;text-align:right;">'

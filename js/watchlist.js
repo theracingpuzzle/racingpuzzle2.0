@@ -616,7 +616,7 @@ function _injectAlbumCSS(){
     .wll-name{font-family:var(--font);font-size:16px;font-weight:600;letter-spacing:.2px;color:var(--txt);line-height:1;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .wll-sub{font-size:11px;color:var(--mut);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .wll-tag{display:inline-flex;align-items:center;gap:3px;font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;}
-    .wll-right{display:flex;gap:5px;align-items:center;flex-shrink:0;margin-left:10px;}
+    .wll-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;margin-left:10px;}
     .wll-rating{display:flex;flex-direction:column;align-items:center;background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:4px 7px;min-width:38px;}
     .wll-rating-lbl{font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);}
     .wll-rating-val{font-family:var(--font);font-size:15px;font-weight:800;letter-spacing:.5px;line-height:1.1;}
@@ -1011,7 +1011,7 @@ function renderWLEntry(e){
     +(function(){
       const edge=(or&&mr)?(mr-or):null;
       const ecol=edge===null?'var(--mut)':edge>0?'#4ade80':edge<0?'#f87171':'#888';
-      return'<div class="wll-right" style="min-width:56px;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'
+      return'<div class="wll-right" style="min-width:56px;text-align:right;">'
         +(edge!==null
           ?'<div style="font-size:20px;font-weight:900;line-height:1;color:'+ecol+';">'+(edge>0?'+':'')+edge+'</div>'
            +'<div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-top:1px;">EDGE</div>'
@@ -2020,7 +2020,7 @@ function openWLForm(id,prefill){
             ?rvws.map(function(r){
                 const rc=RCOL[r.result||'']||'var(--mut)';
                 const stats=[
-                  {lbl:'Pos',    val:r.position||'—'},
+                  {lbl:'Pos',    val:ordinal(r.position)||'—'},
                   {lbl:'Dist',   val:r.distance||'—'},
                   {lbl:'Class',  val:r.raceClass||'—'},
                   {lbl:'Ground', val:r.going||r.groundConditions||'—'},
@@ -3644,7 +3644,7 @@ function _wlpBuildHTML(e){
             +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'
               +[item.date?_wlpFmt(item.date):'',item.course,item.raceDist,item.raceGoing].filter(Boolean).join(' · ')
             +'</div>'
-            +((item.position||item.sp)?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">'+(item.position?'Finished: <strong>'+esc(item.position)+'</strong>'+(item.beatenDistance?' · <span style="color:var(--mut);">'+esc(item.beatenDistance)+'L</span>':''):'')+(item.sp?(item.position?' · ':'')+'<span style="color:var(--gld);font-weight:700;">SP '+esc(item.sp)+'</span>':'')+'</div>':'')
+            +((item.position||item.sp)?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">'+(item.position?'Finished: <strong>'+esc(ordinal(item.position))+'</strong>'+(item.beatenDistance?' · <span style="color:var(--mut);">'+esc(item.beatenDistance)+'L</span>':''):'')+(item.sp?(item.position?' · ':'')+'<span style="color:var(--gld);font-weight:700;">SP '+esc(item.sp)+'</span>':'')+'</div>':'')
             +(label?'<div style="font-size:10px;color:#f59e0b;margin-top:3px;font-style:italic;">'+label+'</div>':'')
           +'</div>'
           +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'
@@ -3693,7 +3693,7 @@ function _wlpBuildHTML(e){
       // Row 2: detail chips — always show all stats, dash if missing
       const _rGoing=r.groundConditions||r.going||r.raceGoing||r.goingConfirmed||'';
       const chips=[
-        {l:'Pos',   v:r.position||'—'},
+        {l:'Pos',   v:ordinal(r.position)||'—'},
         {l:'Dist',  v:r.distance||'—'},
         {l:'Class', v:r.raceClass||'—'},
         {l:'Ground',v:_rGoing||'—'},

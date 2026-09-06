@@ -1,6 +1,21 @@
 // ─── UTILS ─── formatting, odds, returns
 
 function fmt(n){const v=parseFloat(n)||0;return(v>=0?'+':'-')+'£'+Math.abs(v).toFixed(2);}
+// Adds ordinal suffix to a position number: 1→1st, 2→2nd, 3→3rd, 4→4th etc.
+// Handles numeric strings and passes through non-numeric values (e.g. "PU", "F", "—") unchanged.
+function ordinal(pos){
+  if(!pos&&pos!==0)return pos;
+  const s=String(pos).trim();
+  const n=parseInt(s,10);
+  if(isNaN(n)||String(n)!==s)return s; // non-numeric — return as-is
+  const mod100=n%100;
+  const mod10=n%10;
+  if(mod100>=11&&mod100<=13)return n+'th';
+  if(mod10===1)return n+'st';
+  if(mod10===2)return n+'nd';
+  if(mod10===3)return n+'rd';
+  return n+'th';
+}
 // Ensures a space between jockey name and apprentice claim e.g. "J.Smith(5)" → "J.Smith (5)"
 function fmtJockey(j){return(j||'—').replace(/([a-zA-Z])\(/g,'$1 (');}
 function fp(n){return'£'+(parseFloat(n)||0).toFixed(2);}

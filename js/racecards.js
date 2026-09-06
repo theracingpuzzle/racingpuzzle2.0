@@ -616,6 +616,11 @@ function refreshRacecardHighlights(){
   });
 }
 
+// Global runner data store — avoids string-escaping issues in inline onclick attrs
+if(!window._rcRunnerData)window._rcRunnerData=[];
+function rcRunnerBet(i){var d=window._rcRunnerData[i];if(!d)return;rcSwBet({stopPropagation:function(){}},d.name,d.course,d.time,d.jockey,d.trainer,d.raceName);}
+function rcRunnerWatch(i){var d=window._rcRunnerData[i];if(!d)return;rcAddToWatchlist(d.name,d.course,d.jockey,d.trainer,d.raceName,d.ofr,d.going,d.time,d.date,d.distF,d.position,d.raceClass,d.silkUrl,d.age);}
+
 function rcSwRenderRunners(idx, course, el){
   const race=(rcSwRacesByMeeting[course]||rcSwSortedRaces||[])[idx];if(!race){el.innerHTML='';return;}
   const runners=race.runners||race.horses||[];
@@ -645,6 +650,19 @@ function rcSwRenderRunners(idx, course, el){
   html+=runners.map(function(r,i){
     const name=stripCountrySuffix(r.horse||r.name||'—');
     const no=r.number||r.saddle_cloth||(i+1);
+    // Store runner data by index so onclick can pass a single safe integer
+    const _rdi=window._rcRunnerData.length;
+    window._rcRunnerData.push({
+      name:name, course:course, time:race.off||race.off_time||race.time||'',
+      jockey:fmtJockey(r.jockey||r.jockeyName), trainer:r.trainer||r.trainerName||'',
+      raceName:race.race_name||race.name||'',
+      ofr:r.ofr||r.rpr||r.official_rating||r.officialRating||r.or||'',
+      going:race.going||race.going_description||'',
+      date:race.date||td(),
+      distF:formatDist(race.distance_f||race.distance_round||race.distance||race.dist||''),
+      position:'', raceClass:String(race.race_class||race.class||'').trim().replace(/^class\s*/i,''),
+      silkUrl:r.silk_url||r.silk||'', age:String(r.age||'')
+    });
     const draw=(r.draw&&r.draw!==0&&r.draw!=='0')?'('+r.draw+')':'';
     const jock=fmtJockey(r.jockey||r.jockeyName);
     const trainer=r.trainer||r.trainerName||'—';
@@ -726,7 +744,7 @@ function rcSwRenderRunners(idx, course, el){
       +'</div>'
       +'<div class="rc-runner-actions">'
         +(isNR?''
-          :'<button onclick="event.stopPropagation();rcSwBet(event,\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+jock.replace(/'/g,"\\'")+'\',\''+trainer.replace(/'/g,"\\'")+'\',\''+(race.race_name||'').replace(/'/g,"\\'")+'\')\" class="rc-act-btn rc-bet-btn" title="Log a bet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>')
+          :'<button onclick="event.stopPropagation();rcRunnerBet('+_rdi+')" class="rc-act-btn rc-bet-btn" title="Log a bet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></button>')
         +(!isNR&&typeof _lgMyLeagues!=='undefined'&&_lgMyLeagues.length?'<button onclick="event.stopPropagation();lgPickFromRacecard(\''+name.replace(/'/g,"\\'")+'\',\''+course+'\',\''+time+'\',\''+(r.sp||r.price||r.odds||'')+'\')" title="Pick for League" class="rc-act-btn" style="border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.08);color:#10b981;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></button>':'')
         +(_pr2&&!isNR?'<button onclick="rcToggleProfile(\''+pid+'\',this)" class="rc-profile-tog" style="border-color:'+_pm2.col+';color:'+_pm2.col+';">\u25bc</button>':'')
       +'</div>'

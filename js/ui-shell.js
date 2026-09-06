@@ -285,6 +285,69 @@ function updHdr(){
 
 }
 
+// ─── Auto-Scroll Widget ───────────────────────────────────────────────────────
+(function(){
+  var _raf=null, _speed=1.2, _active=false;
+
+  function _scrollTarget(){
+    var sw=document.getElementById('sw-shell');
+    if(sw&&sw.offsetParent!==null&&sw.scrollHeight>sw.clientHeight)return sw;
+    return document.scrollingElement||document.documentElement;
+  }
+
+  function _tick(){
+    var el=_scrollTarget();
+    el.scrollTop+=_speed;
+    _raf=requestAnimationFrame(_tick);
+  }
+
+  function _play(){
+    _active=true;
+    _raf=requestAnimationFrame(_tick);
+    var btn=document.getElementById('as-playbtn');
+    if(btn)btn.textContent='⏸';
+  }
+
+  function _pause(){
+    _active=false;
+    if(_raf)cancelAnimationFrame(_raf);
+    var btn=document.getElementById('as-playbtn');
+    if(btn)btn.textContent='▶';
+  }
+
+  window.asToggle=function(){_active?_pause():_play();};
+
+  window.asSetSpeed=function(v){
+    _speed=parseFloat(v)||1.2;
+    var lbl=document.getElementById('as-speedlbl');
+    if(lbl)lbl.textContent=parseFloat(_speed).toFixed(1)+'×';
+  };
+
+  window.asClose=function(){
+    _pause();
+    var w=document.getElementById('as-widget');
+    if(w)w.remove();
+  };
+
+  window.initAutoScroll=function(){
+    if(document.getElementById('as-widget'))return;
+    var w=document.createElement('div');
+    w.id='as-widget';
+    w.style.cssText='position:fixed;bottom:90px;right:14px;z-index:9999;background:var(--sur);border:1px solid var(--bdr);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(0,0,0,.35);min-width:90px;';
+    w.innerHTML=
+      '<div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;">'
+        +'<span style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);">Scroll</span>'
+        +'<button onclick="asClose()" style="background:none;border:none;color:var(--mut);font-size:14px;cursor:pointer;padding:0;line-height:1;">✕</button>'
+      +'</div>'
+      +'<button id="as-playbtn" onclick="asToggle()" style="width:48px;height:48px;border-radius:50%;border:none;background:var(--gld);color:#000;font-size:20px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;">▶</button>'
+      +'<div style="display:flex;flex-direction:column;align-items:center;gap:3px;width:100%;">'
+        +'<input type="range" min="0.3" max="4" step="0.1" value="1.2" oninput="asSetSpeed(this.value)" style="width:100%;accent-color:var(--gld);">'
+        +'<span id="as-speedlbl" style="font-size:10px;font-weight:700;color:var(--mut);">1.2×</span>'
+      +'</div>';
+    document.body.appendChild(w);
+  };
+})();
+
 // ─── Settings Tabs ────────────────────────────────────────────────────────────
 function setTab(name, btn) {
   document.querySelectorAll('.set-tab').forEach(function(b){b.classList.remove('on');});

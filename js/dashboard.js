@@ -1,5 +1,19 @@
 // ─── DASHBOARD ─── cmd dashboard, history, stats, edit modal, tab router
 
+// ─── STAT HELPERS ───
+// A bet counts as a "win" for stats if result is win, or horse physically finished 1st.
+function _statWon(b){
+  return b.result==='win'||b.finishPosition===1;
+}
+// A bet counts as "placed" for stats if it was an EW/place bet that placed,
+// OR the horse physically finished 2nd or 3rd (even on a win-only bet).
+function _statPlaced(b){
+  return (b.result==='place')||
+         (b.finishPosition&&b.finishPosition>=2&&b.finishPosition<=3);
+}
+// Win or placed — used for strike rate calculations.
+function _statInFrame(b){return _statWon(b)||_statPlaced(b);}
+
 // ─── CMD DASHBOARD ───
 function renderDash(){} // Dashboard removed - stats is now the default tab
 
@@ -22,7 +36,7 @@ function renderCompare(set){
     const rRets=set.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
     const p=rRets-rStaked;
     const roi=rStaked>0?(p/rStaked*100):0;
-    const rW=set.filter(b=>b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'))).length;
+    const rW=set.filter(b=>_statInFrame(b)).length;
     const sr=set.length>0?(rW/set.length*100):0;
     // Real bank change — recalculate live same way updHdr() does
     const bankStart=D.bank&&D.bank.start!=null?D.bank.start:0;
@@ -35,7 +49,7 @@ function renderCompare(set){
     const vRets=vset.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
     const vP=vRets-vStaked;
     const vROI=vStaked>0?(vP/vStaked*100):0;
-    const vW=vset.filter(b=>b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'))).length;
+    const vW=vset.filter(b=>_statInFrame(b)).length;
     const vSR=vset.length>0?(vW/vset.length*100):0;
     const vBankChange=vset.reduce((a,b)=>a+(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0),0);
 
@@ -312,8 +326,8 @@ function renderStats(){
   const statBets=ownStudyOnly?_allStatBets.filter(b=>OWN_SOURCES.includes(b.source||'')):_allStatBets;
   _buildMonthBar();
   const disciplineSet=ownStudyOnly?set.filter(b=>OWN_SOURCES.includes(b.source||'')):set;
-  const wins=statBets.filter(b=>b.result==='win');
-  const places=statBets.filter(b=>b.result==='place'&&(b.betType==='ew'||b.betType==='place'));
+  const wins=statBets.filter(b=>_statWon(b));
+  const places=statBets.filter(b=>_statPlaced(b));
   const staked=statBets.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
   const rets=statBets.reduce((a,b)=>a+(parseFloat(b.returns)||0),0);
   const p=rets-staked,roi=staked>0?(p/staked*100):0;
@@ -374,7 +388,7 @@ function renderStats(){
         map[k].p+=(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);
         map[k].n++;
         map[k].staked+=(parseFloat(b.stake)||0);
-        if(b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place')))map[k].w++;
+        if(_statInFrame(b))map[k].w++;
       });
       const rows=Object.entries(map)
         .filter(function(_ref){return _ref[1].n>=2;})
@@ -456,7 +470,7 @@ function renderStats(){
     }
   }
   // Best source — only when NOT in own study mode (all bets are own study then)
-  const srcMap={};disciplineSet.forEach(b=>{const k=b.source||'Unknown';if(!srcMap[k])srcMap[k]={p:0,n:0,staked:0,wins:0};srcMap[k].p+=(pnl(b)||0);srcMap[k].n++;srcMap[k].staked+=(parseFloat(b.stake)||0);if(b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place')))srcMap[k].wins++;});
+  const srcMap={};disciplineSet.forEach(b=>{const k=b.source||'Unknown';if(!srcMap[k])srcMap[k]={p:0,n:0,staked:0,wins:0};srcMap[k].p+=(pnl(b)||0);srcMap[k].n++;srcMap[k].staked+=(parseFloat(b.stake)||0);if(_statInFrame(b))srcMap[k].wins++;});
   const srcArr=Object.entries(srcMap).map(([k,v])=>({k,roi:v.staked>0?v.p/v.staked*100:0,p:v.p,n:v.n,sr:v.n>0?(v.wins/v.n*100):0}));
   if(!ownStudyOnly&&srcArr.length>1){
     srcArr.sort((a,b)=>b.roi-a.roi);
@@ -537,7 +551,7 @@ function renderStats(){
         if(!bb.length)return null;
         const st=bb.reduce(function(a,b){return a+(parseFloat(b.stake)||0);},0);
         const p=bb.reduce(function(a,b){return a+(pnl(b)||0);},0);
-        const w=bb.filter(function(b){return b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'));}).length;
+        const w=bb.filter(function(b){return _statInFrame(b);}).length;
         return{n:bb.length,sr:bb.length>0?(w/bb.length*100):0,p,roi:st>0?(p/st*100):0};
       }
       function ckRow(label,bb,isGood){
@@ -632,7 +646,7 @@ function renderStats(){
     for(let c=1;c<=5;c++){
       const cb=disciplineSet.filter(b=>(b.conf||3)===c);
       if(!cb.length)continue;
-      const cW=cb.filter(b=>b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'))).length;
+      const cW=cb.filter(b=>_statInFrame(b)).length;
       const cSt=cb.reduce((a,b)=>a+(parseFloat(b.stake)||0),0);
       const cP=cb.reduce((a,b)=>a+(pnl(b)||0),0);
       const cROI=cSt>0?(cP/cSt*100):0;
@@ -683,8 +697,8 @@ function renderStats(){
       map[k].n++;
       map[k].staked+=(parseFloat(b.stake)||0);
       map[k].p+=(pnl(b)||0);
-      if(b.result==='win')map[k].wins++;
-      else if(b.result==='place'||b.result==='placed')map[k].places++;
+      if(_statWon(b))map[k].wins++;
+      else if(_statPlaced(b))map[k].places++;
     });
     const rows=Object.entries(map)
       .map(function([k,v]){return{k,n:v.n,wins:v.wins,places:v.places,p:v.p,staked:v.staked,sr:v.n>0?((v.wins+v.places)/v.n*100):0};})
@@ -726,8 +740,8 @@ function renderStats(){
       if(!map[k])map[k]={p:0,n:0,staked:0,w:0};
       const p2=(parseFloat(b.returns)||0)-(parseFloat(b.stake)||0);
       map[k].p+=p2;map[k].n++;map[k].staked+=(parseFloat(b.stake)||0);
-      const isWin=b.result==='win';
-      const isPlace=b.result==='place'&&(b.betType==='ew'||b.betType==='place');
+      const isWin=_statWon(b);
+      const isPlace=_statPlaced(b);
       if(isWin||isPlace)map[k].w++;
     });
     const rows=Object.entries(map).filter(([,v])=>v.n>=1)
@@ -839,8 +853,8 @@ function _renderProfilerStats(){
   }
 
   const total=settled.length;
-  const wins=settled.filter(r=>r.result==='win');
-  const places=settled.filter(r=>r.result==='place'||r.result==='placed');
+  const wins=settled.filter(r=>_statWon(r));
+  const places=settled.filter(r=>_statPlaced(r));
   const strikeRate=wins.length/total*100;
   const placeRate=(wins.length+places.length)/total*100;
 
@@ -866,8 +880,8 @@ function _renderProfilerStats(){
     if(isNaN(mr)||isNaN(or))return;
     (mr>or?edgeRuns:noEdgeRuns).push(r);
   });
-  const edgeWR=edgeRuns.length>0?(edgeRuns.filter(r=>r.result==='win').length/edgeRuns.length*100):null;
-  const noEdgeWR=noEdgeRuns.length>0?(noEdgeRuns.filter(r=>r.result==='win').length/noEdgeRuns.length*100):null;
+  const edgeWR=edgeRuns.length>0?(edgeRuns.filter(r=>_statWon(r)).length/edgeRuns.length*100):null;
+  const noEdgeWR=noEdgeRuns.length>0?(noEdgeRuns.filter(r=>_statWon(r)).length/noEdgeRuns.length*100):null;
 
   // Average MR edge on winners
   const winEdges=[];
@@ -999,7 +1013,7 @@ function renderCkImpact(set){
       return s>=band.min&&s<=band.max;
     });
     const n=bb.length;
-    const wins=bb.filter(function(b){return b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'));}).length;
+    const wins=bb.filter(function(b){return _statInFrame(b);}).length;
     const staked=bb.reduce(function(a,b){return a+(parseFloat(b.stake)||0);},0);
     const pl=bb.reduce(function(a,b){return a+(pnl(b)||0);},0);
     const roi=staked>0?(pl/staked*100):0;
@@ -1091,7 +1105,7 @@ function renderCkSignals(set){
     if(!bb||!bb.length)return null;
     const st=bb.reduce(function(a,b){return a+(parseFloat(b.stake)||0);},0);
     const p=bb.reduce(function(a,b){return a+(pnl(b)||0);},0);
-    const w=bb.filter(function(b){return b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'));}).length;
+    const w=bb.filter(function(b){return _statInFrame(b);}).length;
     return{n:bb.length,sr:st>0?(w/bb.length*100):0,pl:p,roi:st>0?(p/st*100):0};
   }
 
@@ -1209,7 +1223,7 @@ function renderCkTip(){
     if(!bb.length)return null;
     const st=bb.reduce(function(a,b){return a+(parseFloat(b.stake)||0);},0);
     const p=bb.reduce(function(a,b){return a+(pnl(b)||0);},0);
-    const w=bb.filter(function(b){return b.result==='win'||(b.result==='place'&&(b.betType==='ew'||b.betType==='place'));}).length;
+    const w=bb.filter(function(b){return _statInFrame(b);}).length;
     return{n:bb.length,sr:bb.length>0?(w/bb.length*100):0,p,roi:st>0?(p/st*100):0};
   }
 

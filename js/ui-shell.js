@@ -287,17 +287,25 @@ function updHdr(){
 
 // ─── Auto-Scroll Widget ───────────────────────────────────────────────────────
 (function(){
-  var _raf=null, _speed=1.2, _active=false;
+  var _raf=null, _speed=1.0, _active=false;
 
   function _scrollTarget(){
-    var sw=document.getElementById('sw-shell');
-    if(sw&&sw.offsetParent!==null&&sw.scrollHeight>sw.clientHeight)return sw;
+    // Find the visible .cin inside the active card
+    var cins=document.querySelectorAll('.cin');
+    for(var i=0;i<cins.length;i++){
+      var el=cins[i];
+      var rect=el.getBoundingClientRect();
+      if(rect.width>0&&rect.height>0&&el.scrollHeight>el.clientHeight)return el;
+    }
+    // Fallback: any scrollable .cin or cpane-wrap
+    var pane=document.querySelector('.cpane-wrap');
+    if(pane&&pane.scrollHeight>pane.clientHeight)return pane;
     return document.scrollingElement||document.documentElement;
   }
 
   function _tick(){
     var el=_scrollTarget();
-    el.scrollTop+=_speed;
+    if(el)el.scrollTop+=_speed;
     _raf=requestAnimationFrame(_tick);
   }
 
@@ -305,22 +313,22 @@ function updHdr(){
     _active=true;
     _raf=requestAnimationFrame(_tick);
     var btn=document.getElementById('as-playbtn');
-    if(btn)btn.textContent='⏸';
+    if(btn){btn.textContent='⏸';btn.style.background='var(--red)';}
   }
 
   function _pause(){
     _active=false;
-    if(_raf)cancelAnimationFrame(_raf);
+    if(_raf){cancelAnimationFrame(_raf);_raf=null;}
     var btn=document.getElementById('as-playbtn');
-    if(btn)btn.textContent='▶';
+    if(btn){btn.textContent='▶';btn.style.background='var(--gld)';}
   }
 
   window.asToggle=function(){_active?_pause():_play();};
 
   window.asSetSpeed=function(v){
-    _speed=parseFloat(v)||1.2;
+    _speed=parseFloat(v)||1.0;
     var lbl=document.getElementById('as-speedlbl');
-    if(lbl)lbl.textContent=parseFloat(_speed).toFixed(1)+'×';
+    if(lbl)lbl.textContent=_speed.toFixed(1)+'×';
   };
 
   window.asClose=function(){
@@ -333,17 +341,13 @@ function updHdr(){
     if(document.getElementById('as-widget'))return;
     var w=document.createElement('div');
     w.id='as-widget';
-    w.style.cssText='position:fixed;bottom:90px;right:14px;z-index:9999;background:var(--sur);border:1px solid var(--bdr);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(0,0,0,.35);min-width:90px;';
+    // Compact horizontal pill — sits at bottom edge, won't cover content
+    w.style.cssText='position:fixed;bottom:72px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);border-radius:50px;padding:6px 10px 6px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.4);pointer-events:all;';
     w.innerHTML=
-      '<div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;">'
-        +'<span style="font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);">Scroll</span>'
-        +'<button onclick="asClose()" style="background:none;border:none;color:var(--mut);font-size:14px;cursor:pointer;padding:0;line-height:1;">✕</button>'
-      +'</div>'
-      +'<button id="as-playbtn" onclick="asToggle()" style="width:48px;height:48px;border-radius:50%;border:none;background:var(--gld);color:#000;font-size:20px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;">▶</button>'
-      +'<div style="display:flex;flex-direction:column;align-items:center;gap:3px;width:100%;">'
-        +'<input type="range" min="0.3" max="4" step="0.1" value="1.2" oninput="asSetSpeed(this.value)" style="width:100%;accent-color:var(--gld);">'
-        +'<span id="as-speedlbl" style="font-size:10px;font-weight:700;color:var(--mut);">1.2×</span>'
-      +'</div>';
+      '<input type="range" id="as-slider" min="0.2" max="5" step="0.1" value="1" oninput="asSetSpeed(this.value)" style="width:80px;accent-color:#f59e0b;cursor:pointer;">'
+      +'<span id="as-speedlbl" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);min-width:26px;">1.0×</span>'
+      +'<button id="as-playbtn" onclick="asToggle()" style="width:34px;height:34px;border-radius:50%;border:none;background:var(--gld);color:#000;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">▶</button>'
+      +'<button onclick="asClose()" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0;">✕</button>';
     document.body.appendChild(w);
   };
 })();

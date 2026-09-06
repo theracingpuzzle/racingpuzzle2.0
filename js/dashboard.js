@@ -80,10 +80,10 @@ function renderCompare(set){
           const rWin=r.length>3&&r[3]>r[4],vWin=r.length>3&&r[4]>r[3];
           return'<div style="background:var(--sur2);padding:8px 12px;font-family:var(--font);font-size:13px;color:var(--mut);border-bottom:1px solid var(--bdr);">'+r[0]+'</div>'
             +'<div style="padding:8px 12px;font-family:var(--font);font-size:15px;font-weight:600;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);color:'+(r.length>3?(r[3]>=0?'var(--blu)':'var(--red)'):'var(--txt)')+';">'
-              +r[1]+(rWin?' ◀':'')
+              +r[1]
             +'</div>'
             +'<div style="padding:8px 12px;font-family:var(--font);font-size:15px;font-weight:600;text-align:center;border-bottom:1px solid var(--bdr);border-left:1px solid var(--bdr);color:'+(r.length>3?(r[4]>=0?'#fb923c':'var(--red)'):'var(--txt)')+';">'
-              +r[2]+(vWin?' ◀':'')
+              +r[2]
             +'</div>';
         }).join('')
         +'</div>'

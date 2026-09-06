@@ -20,9 +20,8 @@ function renderDash(){} // Dashboard removed - stats is now the default tab
 function setStatsTab(tab, btn){
   document.getElementById('cp-stats').style.display  = tab==='stats'  ? 'block' : 'none';
   document.getElementById('cp-betlog').style.display = tab==='betlog' ? 'block' : 'none';
-  document.querySelectorAll('#stats-tab-bar .set-tab').forEach(function(b){
+  document.querySelectorAll('#stats-tab-bar .stats-tile').forEach(function(b){
     b.classList.toggle('on', b===btn);
-    b.classList.toggle('off', b!==btn);
   });
   if(tab==='betlog') renderHist();
 }

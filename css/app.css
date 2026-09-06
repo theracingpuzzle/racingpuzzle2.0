@@ -749,3 +749,50 @@ tr:hover td { background: var(--sur2); }
 
 .set-panel { display: none; }
 .set-panel.on { display: block; }
+
+/* ── Stats icon tiles ── */
+.stats-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--bdr);
+  background: var(--sur2);
+  color: var(--mut);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s, transform .1s;
+  text-align: center;
+}
+.stats-tile:active { transform: scale(.97); }
+.stats-tile-icon { opacity: .45; transition: opacity .15s; }
+.stats-tile-label {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--mut);
+  transition: color .15s;
+}
+.stats-tile-sub {
+  font-size: 10px;
+  color: var(--mut);
+  opacity: .55;
+  font-family: var(--font);
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+/* Active state — strong blue highlight */
+.stats-tile.on {
+  background: rgba(59,130,246,.12);
+  border: 2px solid #3b82f6;
+  color: #60a5fa;
+}
+.stats-tile.on .stats-tile-icon { opacity: 1; }
+.stats-tile.on .stats-tile-icon svg { stroke: #60a5fa; }
+.stats-tile.on .stats-tile-label { color: #60a5fa; }
+.stats-tile.on .stats-tile-sub { color: rgba(96,165,250,.7); opacity: 1; }

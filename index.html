@@ -345,15 +345,21 @@
           <div class="card-title" style="color:#60a5fa;" id="stats-card-title">Stats</div>
         </div>
 
-        <!-- ══ TAB BAR ══ -->
-        <div class="set-tabs" id="stats-tab-bar" style="margin-bottom:12px;">
-          <button class="set-tab on" onclick="setStatsTab('stats',this)">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15V9M8 15V5M12 15V11M16 15V7"/></svg>
-            <span>Stats</span>
+        <!-- ══ TAB TILES ══ -->
+        <div id="stats-tab-bar" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <button class="stats-tile on" onclick="setStatsTab('stats',this)" data-tile="stats">
+            <div class="stats-tile-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18V9M8 18V5M12 18V12M16 18V8M20 18V14"/></svg>
+            </div>
+            <div class="stats-tile-label">Stats</div>
+            <div class="stats-tile-sub">Performance</div>
           </button>
-          <button class="set-tab" onclick="setStatsTab('betlog',this)">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            <span>Bet Log</span>
+          <button class="stats-tile" onclick="setStatsTab('betlog',this)" data-tile="betlog">
+            <div class="stats-tile-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <div class="stats-tile-label">Bet Log</div>
+            <div class="stats-tile-sub">History</div>
           </button>
         </div>
 

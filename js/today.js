@@ -444,8 +444,6 @@ function renderNextRace(){
     const parts=t.split(':');
     if(parts.length<2)return null;
     let h=parseInt(parts[0],10),m=parseInt(parts[1],10);
-    // Apply PM convention: before 09:30 = evening
-    if(h<9||(h===9&&m<30))h+=12;
     const dt=new Date(todayStr+'T'+(String(h).padStart(2,'0'))+':'+String(m).padStart(2,'0')+':00');
     if(isNaN(dt.getTime()))return null;
     return{race:item.race,course:item.course,dt,diff:Math.round((dt-now)/60000)};

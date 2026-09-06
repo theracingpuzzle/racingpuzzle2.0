@@ -179,8 +179,6 @@ function _notifParseRaceTime(timeStr, minutesBefore) {
   if (parts.length < 2) return null;
   let h = parseInt(parts[0], 10);
   const m = parseInt(parts[1], 10);
-  // Apply the same PM convention used elsewhere: before 09:30 = evening
-  if (h < 9 || (h === 9 && m < 30)) h += 12;
   const now  = new Date();
   const fire = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m + (minutesBefore || 0), 0, 0);
   return fire.getTime();

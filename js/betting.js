@@ -700,8 +700,6 @@ function _betFlowAutoCapture(i,c){
       const m=raceTimeStr.match(/(\d{1,2}):(\d{2})/);
       if(m){
         let rh=parseInt(m[1]),rm=parseInt(m[2]);
-        // Treat times before 09:30 as PM (evening meetings)
-        if(rh*60+rm<570)rh+=12;
         const raceMins=rh*60+rm;
         minsUntilRace=raceMins-nowMins;
       }

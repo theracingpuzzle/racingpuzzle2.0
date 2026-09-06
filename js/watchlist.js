@@ -484,6 +484,8 @@ function setWLFilter(id){
 }
 
 function _applyWLFilter(entries){
+  // Always hide cold horses regardless of active filter
+  entries=entries.filter(function(e){return (e.betReadiness||'watching')!=='cold';});
   if(!_wlFilter) return entries;
   const today=td();
   if(_wlFilter==='needs-attention'){
@@ -523,8 +525,7 @@ function _applyWLFilter(entries){
   if(_wlFilter==='ready'){
     return entries.filter(function(e){return e.betReadiness==='ready';});
   }
-  // Cold horses are always hidden from the list
-  return entries.filter(function(e){return (e.betReadiness||'watching')!=='cold';});
+  return entries;
 }
 
 // ── Patch silk URLs from API runner data into watchlist profiles ──
@@ -648,8 +649,8 @@ function renderWLList(){
       btn.addEventListener('click',function(){setWLFilter(f.id);});
       filterBar.appendChild(btn);
     });
-    // Needs attention button — pushed to the right
-    const allEntries=getWL();
+    // Needs attention button — pushed to the right (cold excluded)
+    const allEntries=getWL().filter(function(e){return (e.betReadiness||'watching')!=='cold';});
     const attnCount=_wlAttentionCount(allEntries);
     if(attnCount>0){
       const on=_wlFilter==='needs-attention';
@@ -780,6 +781,32 @@ function renderWLList(){
     html+='</div>';
   }
 
+  // ── Awaiting Review — pinned alert section ────────────────────────────────
+  const _allPending=(D.pendingReviews||[]).filter(function(p){
+    const e2=getWL().find(function(x){return x.id===p.profileId;});
+    if(!e2)return false;
+    return!(D.reviews||[]).some(function(r){return r.profileId===p.profileId&&r.date===p.date;});
+  });
+  if(_allPending.length){
+    html+='<div style="border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.07);border-radius:10px;margin-bottom:10px;overflow:hidden;">'
+      +'<div style="padding:9px 14px;background:rgba(245,158,11,.12);border-bottom:1px solid rgba(245,158,11,.2);display:flex;align-items:center;gap:8px;">'
+        +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+        +'<span style="font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#f59e0b;">Awaiting Review</span>'
+        +'<span style="font-size:11px;color:var(--mut);margin-left:auto;">'+_allPending.length+' run'+(  _allPending.length>1?'s':'')+' to log</span>'
+      +'</div>'
+      +_allPending.map(function(p){
+        const _pe=getWL().find(function(x){return x.id===p.profileId;})||{};
+        return'<div onclick="openWLProfile(\''+p.profileId+'\')" style="padding:10px 14px;border-bottom:1px solid rgba(245,158,11,.12);display:flex;align-items:center;gap:10px;cursor:pointer;">'
+          +'<div style="flex:1;min-width:0;">'
+            +'<div style="font-size:13px;font-weight:800;color:var(--txt);">'+(_pe.horse||p.horse||'Unknown')+'</div>'
+            +'<div style="font-size:11px;color:var(--mut);margin-top:1px;">'+(p.course||p.track||'')+( p.course&&p.time?' · ':'')+( p.time||'')+( p.raceName?' — '+p.raceName:'')+'</div>'
+          +'</div>'
+          +(p.sp?'<div style="font-size:12px;font-weight:700;color:var(--gld);">SP '+p.sp+'</div>':'')
+          +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+        +'</div>';
+      }).join('')
+    +'</div>';
+  }
 
   // ── Group-by selector ──
   const GB_OPTS=[
@@ -930,7 +957,14 @@ function renderWLEntry(e){
   const or=parseFloat(e.currentRating)||null;
   const mr=parseFloat(e.myRating)||null;
   const lastObs=obs.length?obs.slice().sort(function(a,b){return(b.date||'').localeCompare(a.date||'');})[0]:null;
-  const daysAgo=lastObs&&lastObs.date?(function(){const d=new Date(lastObs.date+'T00:00:00');const diff=Math.round((new Date()-d)/(1000*60*60*24));return diff===0?'Today':diff===1?'Yesterday':diff>0?diff+'d ago':'Upcoming';}()):'';
+  // Most recent activity for THIS profile only — pick the latest across all activity sources
+  const _lastObsMs=lastObs&&lastObs.date?new Date(lastObs.date+'T00:00:00').getTime():0;
+  const _profileReviews=(D.reviews||[]).filter(function(r){return r.profileId===e.id&&r.date;});
+  const _lastReviewMs=_profileReviews.length?Math.max.apply(null,_profileReviews.map(function(r){return new Date(r.date+'T00:00:00').getTime();})):0;
+  const _updatedMs=e.updatedAt||e.createdAt||0;
+  const _activityMs=Math.max(_updatedMs,_lastObsMs,_lastReviewMs)||null;
+  const daysAgo=_activityMs?(function(){const diff=Math.round((Date.now()-_activityMs)/(1000*60*60*24));return diff===0?'Today':diff===1?'Yesterday':diff>0?diff+'d ago':'';}()):'';
+
   const subParts=[];
   if(e.trainer)subParts.push(e.trainer);
   const comp=_wlCompleteness(e);

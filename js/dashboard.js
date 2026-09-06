@@ -718,7 +718,7 @@ function renderStats(){
         const bd='padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);';
         const srCol=r.sr>=20?'var(--grn)':r.sr>=10?'var(--gld)':r.n>=4?'var(--red)':'var(--mut)';
         return'<tr>'
-          +'<td style="'+bd+'max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+r.k+'">'+r.k+'</td>'
+          +'<td style="'+bd+'">'+r.k+'</td>'
           +'<td style="font-family:var(--font);text-align:right;'+bd+'color:var(--mut);">'+r.n+'</td>'
           +'<td style="font-family:var(--font);text-align:right;'+bd+'color:#4ade80;font-weight:700;">'+r.wins+'</td>'
           +'<td style="font-family:var(--font);text-align:right;'+bd+'color:#fbbf24;font-weight:700;">'+r.places+'</td>'
@@ -757,7 +757,7 @@ function renderStats(){
       +'<th style="text-align:right;font-family:var(--font);font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.07em;padding:0 0 7px;border-bottom:1px solid var(--bdr);">ROI</th>'
       +'</tr></thead><tbody>'
       +rows.map(r=>'<tr>'
-        +'<td style="padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+r.k+'</td>'
+        +'<td style="padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);">'+r.k+'</td>'
         +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:var(--mut);">'+r.n+'</td>'
         +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);">'+r.sr.toFixed(0)+'%</td>'
         +'<td style="font-family:var(--font);text-align:right;padding:7px 0;border-bottom:1px solid rgba(28,50,80,.4);color:'+(r.p>=0?'var(--grn)':'var(--red)')+';">'+fmt(r.p)+'</td>'

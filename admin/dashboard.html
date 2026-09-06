@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Racing Puzzle — Admin</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0d1b2e;
+    --navy2: #112236;
+    --sur: #1a2d45;
+    --sur2: #1e3350;
+    --bdr: rgba(255,255,255,.08);
+    --txt: #e8edf4;
+    --mut: rgba(255,255,255,.4);
+    --blue: #3b82f6;
+    --grn: #22c55e;
+    --red: #ef4444;
+    --ora: #f97316;
+    --gld: #f59e0b;
+    --font: 'Barlow Condensed', system-ui, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&display=swap');
+
+  body {
+    background: var(--navy);
+    color: var(--txt);
+    font-family: var(--font);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* Header */
+  .hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--bdr);
+    background: var(--navy2);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .logo span { color: var(--gld); }
+  .logo-badge {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    background: rgba(239,68,68,.15);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,.3);
+    border-radius: 4px;
+    padding: 2px 7px;
+  }
+  .hdr-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .ts {
+    font-size: 11px;
+    color: var(--mut);
+    letter-spacing: .05em;
+  }
+  .refresh-btn {
+    padding: 6px 14px;
+    border-radius: 7px;
+    border: 1px solid var(--bdr);
+    background: var(--sur);
+    color: var(--txt);
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .refresh-btn:hover { background: var(--sur2); }
+
+  /* Layout */
+  .page { max-width: 1100px; margin: 0 auto; padding: 28px 28px 0; }
+
+  /* Stat grid */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--sur);
+    border: 1px solid var(--bdr);
+    border-radius: 12px;
+    padding: 16px 18px;
+    border-left: 3px solid var(--blue);
+  }
+  .stat-card.grn { border-left-color: var(--grn); }
+  .stat-card.ora { border-left-color: var(--ora); }
+  .stat-card.gld { border-left-color: var(--gld); }
+  .stat-card.red { border-left-color: var(--red); }
+  .stat-lbl {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--mut);
+    margin-bottom: 6px;
+  }
+  .stat-val {
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--txt);
+  }
+  .stat-sub {
+    font-size: 11px;
+    color: var(--mut);
+    margin-top: 4px;
+  }
+
+  /* Section */
+  .section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 700px) { .section-grid { grid-template-columns: 1fr; } }
+
+  .blk {
+    background: var(--sur);
+    border: 1px solid var(--bdr);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .blk-hdr {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--bdr);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--mut);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .blk-hdr-count {
+    font-size: 10px;
+    background: rgba(255,255,255,.06);
+    border-radius: 4px;
+    padding: 2px 7px;
+    color: var(--mut);
+  }
+  .blk-body { padding: 4px 0; }
+
+  /* Row items */
+  .row-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    font-size: 13px;
+  }
+  .row-item:last-child { border-bottom: none; }
+  .row-main { font-weight: 700; color: var(--txt); }
+  .row-sub { font-size: 11px; color: var(--mut); margin-top: 2px; }
+  .row-right { text-align: right; flex-shrink: 0; margin-left: 10px; }
+  .pill {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .pill-win  { background: rgba(34,197,94,.15); color: #4ade80; }
+  .pill-loss { background: rgba(239,68,68,.12); color: #f87171; }
+  .pill-pend { background: rgba(245,158,11,.12); color: #fbbf24; }
+  .pill-place { background: rgba(59,130,246,.12); color: #60a5fa; }
+
+  /* Retention bar */
+  .ret-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+  .ret-item { text-align: center; }
+  .ret-pct {
+    font-size: 38px;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .ret-pct.hi { color: var(--grn); }
+  .ret-pct.mid { color: var(--gld); }
+  .ret-pct.lo { color: var(--red); }
+  .ret-lbl { font-size: 10px; color: var(--mut); letter-spacing: .1em; text-transform: uppercase; margin-top: 4px; }
+  .bar-wrap { height: 6px; background: rgba(255,255,255,.06); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width .6s; }
+
+  /* Error banner */
+  .error-banner {
+    background: rgba(239,68,68,.1);
+    border: 1px solid rgba(239,68,68,.3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: #f87171;
+    font-size: 13px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  /* Loading shimmer */
+  .shimmer {
+    background: linear-gradient(90deg, var(--sur) 25%, var(--sur2) 50%, var(--sur) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+    border-radius: 6px;
+    height: 32px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .empty { padding: 24px; text-align: center; color: var(--mut); font-size: 12px; }
+
+  /* Auto-refresh indicator */
+  .auto-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--grn);
+    animation: pulse 2s infinite;
+    display: inline-block;
+    margin-right: 6px;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">
+    Racing <span>Puzzle</span>
+    <span class="logo-badge">Admin</span>
+  </div>
+  <div class="hdr-right">
+    <span class="ts"><span class="auto-dot"></span>Auto-refresh 30s &nbsp;·&nbsp; Last updated: <span id="last-ts">—</span></span>
+    <button class="refresh-btn" onclick="load()">↻ Refresh</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div id="error-banner" class="error-banner"></div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid" id="stat-grid">
+    <div class="stat-card"><div class="stat-lbl">Total Users</div><div class="shimmer" style="width:60px;margin:4px 0;"></div></div>
+    <div class="stat-card grn"><div class="stat-lbl">New Today</div><div class="shimmer" style="width:40px;margin:4px 0;"></div></div>
+    <div class="stat-card ora"><div class="stat-lbl">New This Week</div><div class="shimmer" style="width:40px;margin:4px 0;"></div></div>
+    <div class="stat-card"><div class="stat-lbl">Total Bets</div><div class="shimmer" style="width:60px;margin:4px 0;"></div></div>
+    <div class="stat-card gld"><div class="stat-lbl">Bets Today</div><div class="shimmer" style="width:40px;margin:4px 0;"></div></div>
+    <div class="stat-card grn"><div class="stat-lbl">Active Today</div><div class="shimmer" style="width:40px;margin:4px 0;"></div></div>
+  </div>
+
+  <!-- Retention -->
+  <div class="blk" style="margin-bottom:16px;">
+    <div class="blk-hdr">Retention</div>
+    <div class="ret-grid" id="ret-grid">
+      <div class="ret-item">
+        <div class="ret-pct" id="ret7">—</div>
+        <div class="ret-lbl">7-day active</div>
+        <div class="bar-wrap"><div class="bar-fill" id="bar7" style="width:0%;background:var(--grn);"></div></div>
+      </div>
+      <div class="ret-item">
+        <div class="ret-pct" id="ret30">—</div>
+        <div class="ret-lbl">30-day active</div>
+        <div class="bar-wrap"><div class="bar-fill" id="bar30" style="width:0%;background:var(--blue);"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-grid">
+    <!-- Recent signups -->
+    <div class="blk">
+      <div class="blk-hdr">Recent Signups <span class="blk-hdr-count" id="signup-count">—</span></div>
+      <div class="blk-body" id="signup-list"><div class="empty">Loading…</div></div>
+    </div>
+
+    <!-- Recent bets -->
+    <div class="blk">
+      <div class="blk-hdr">Recent Bets <span class="blk-hdr-count" id="bets-count">—</span></div>
+      <div class="blk-body" id="bets-list"><div class="empty">Loading…</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function fmt(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = (now - d) / 1000;
+  if (diff < 60)   return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
+}
+
+function retClass(pct) {
+  if (pct >= 40) return 'hi';
+  if (pct >= 20) return 'mid';
+  return 'lo';
+}
+
+function resultPill(r) {
+  if (!r || r === 'pending') return '<span class="pill pill-pend">Pending</span>';
+  if (r === 'win')   return '<span class="pill pill-win">Win</span>';
+  if (r === 'loss')  return '<span class="pill pill-loss">Loss</span>';
+  if (r === 'place') return '<span class="pill pill-place">Place</span>';
+  return '<span class="pill pill-pend">' + r + '</span>';
+}
+
+function maskEmail(email) {
+  if (!email) return '—';
+  const [u, d] = email.split('@');
+  if (!d) return email;
+  return u.slice(0,2) + '***@' + d;
+}
+
+async function load() {
+  const errBanner = document.getElementById('error-banner');
+  errBanner.style.display = 'none';
+
+  try {
+    const res  = await fetch('/api/stats');
+    const data = await res.json();
+
+    if (data.error) {
+      errBanner.style.display = 'block';
+      errBanner.textContent   = '⚠️  ' + data.error;
+      return;
+    }
+
+    document.getElementById('last-ts').textContent = new Date(data.ts).toLocaleTimeString();
+
+    // Stat cards
+    document.getElementById('stat-grid').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-lbl">Total Users</div>
+        <div class="stat-val">${data.users.total}</div>
+        <div class="stat-sub">all time</div>
+      </div>
+      <div class="stat-card grn">
+        <div class="stat-lbl">New Today</div>
+        <div class="stat-val">${data.users.newToday}</div>
+        <div class="stat-sub">signups</div>
+      </div>
+      <div class="stat-card ora">
+        <div class="stat-lbl">New This Week</div>
+        <div class="stat-val">${data.users.newWeek}</div>
+        <div class="stat-sub">last 7 days</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Total Bets</div>
+        <div class="stat-val">${data.bets.total}</div>
+        <div class="stat-sub">real bets logged</div>
+      </div>
+      <div class="stat-card gld">
+        <div class="stat-lbl">Bets Today</div>
+        <div class="stat-val">${data.bets.today}</div>
+        <div class="stat-sub">logged today</div>
+      </div>
+      <div class="stat-card grn">
+        <div class="stat-lbl">Active Today</div>
+        <div class="stat-val">${data.activity.activeToday}</div>
+        <div class="stat-sub">check-ins</div>
+      </div>
+    `;
+
+    // Retention
+    const r7  = data.retention.d7;
+    const r30 = data.retention.d30;
+    document.getElementById('ret7').textContent   = r7  + '%';
+    document.getElementById('ret30').textContent  = r30 + '%';
+    document.getElementById('ret7').className     = 'ret-pct ' + retClass(r7);
+    document.getElementById('ret30').className    = 'ret-pct ' + retClass(r30);
+    setTimeout(() => {
+      document.getElementById('bar7').style.width  = Math.min(r7,  100) + '%';
+      document.getElementById('bar30').style.width = Math.min(r30, 100) + '%';
+    }, 100);
+
+    // Recent signups
+    document.getElementById('signup-count').textContent = data.users.total;
+    if (data.users.recent.length === 0) {
+      document.getElementById('signup-list').innerHTML = '<div class="empty">No signups yet.</div>';
+    } else {
+      document.getElementById('signup-list').innerHTML = data.users.recent.map(u => `
+        <div class="row-item">
+          <div>
+            <div class="row-main">${maskEmail(u.email)}</div>
+            <div class="row-sub">${new Date(u.created_at).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})}</div>
+          </div>
+          <div class="row-right" style="color:var(--mut);font-size:12px;">${fmt(u.created_at)}</div>
+        </div>
+      `).join('');
+    }
+
+    // Recent bets
+    document.getElementById('bets-count').textContent = data.bets.total;
+    if (data.bets.recent.length === 0) {
+      document.getElementById('bets-list').innerHTML = '<div class="empty">No bets logged yet.</div>';
+    } else {
+      document.getElementById('bets-list').innerHTML = data.bets.recent.map(b => `
+        <div class="row-item">
+          <div>
+            <div class="row-main">${b.horse || '—'}${b.track ? ' <span style="color:var(--mut);font-weight:400;">@ ' + b.track + '</span>' : ''}</div>
+            <div class="row-sub">£${b.stake} · ${b.date}</div>
+          </div>
+          <div class="row-right">${resultPill(b.result)}</div>
+        </div>
+      `).join('');
+    }
+
+  } catch(e) {
+    errBanner.style.display = 'block';
+    errBanner.textContent   = '⚠️  Could not connect to server: ' + e.message;
+  }
+}
+
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>

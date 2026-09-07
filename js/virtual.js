@@ -130,11 +130,35 @@ const FIXTURES=[
   {id:'ebor26',name:'Ebor Festival',course:'York',dates:['2026-08-19','2026-08-20','2026-08-21','2026-08-22'],colour:'#0ea5e9',emoji:'🎖️'},
   {id:'haydock26',name:'Sprint Cup Day',course:'Haydock',dates:['2026-09-05'],colour:'#84cc16',emoji:'⚡'},
   {id:'ayr26',name:'Ayr Gold Cup',course:'Ayr',dates:['2026-09-19'],colour:'#22d3ee',emoji:'🏅'},
+  {id:'leger26',name:'St Leger Festival',course:'Doncaster',dates:['2026-09-09','2026-09-10','2026-09-11','2026-09-12'],colour:'#f59e0b',emoji:'🏆'},
+  {id:'icw26',name:'Irish Champions Weekend',course:'Leopardstown/Curragh',dates:['2026-09-12','2026-09-13'],colour:'#34d399',emoji:'☘️'},
+  {id:'arc26',name:"Prix de l'Arc de Triomphe",course:'Longchamp',dates:['2026-10-03','2026-10-04'],colour:'#f43f5e',emoji:'🇫🇷'},
+  {id:'cesarewitch26',name:'Cesarewitch Weekend',course:'Newmarket',dates:['2026-10-10'],colour:'#f59e0b',emoji:'🏇'},
   {id:'champions26',name:'British Champions Day',course:'Ascot',dates:['2026-10-17'],colour:'#f43f5e',emoji:'🏆'},
-  // 2026 Jump
+  // 2026 NH — autumn / winter
+  {id:'chelt-nov26',name:'Cheltenham November Meeting',course:'Cheltenham',dates:['2026-11-13','2026-11-14'],colour:'#34d399',emoji:'🏇'},
+  {id:'betfair26',name:'Betfair Chase',course:'Haydock',dates:['2026-11-21'],colour:'#0ea5e9',emoji:'⚡'},
+  {id:'ladbrokes26',name:'Ladbrokes Trophy',course:'Newbury',dates:['2026-11-28','2026-11-29'],colour:'#a78bfa',emoji:'🏆'},
+  {id:'tingle26',name:'Tingle Creek Chase',course:'Sandown',dates:['2026-12-05'],colour:'#84cc16',emoji:'⚡'},
+  {id:'chelt-dec26',name:'International Meeting',course:'Cheltenham',dates:['2026-12-11','2026-12-12'],colour:'#34d399',emoji:'🎄'},
+  {id:'kgvi26',name:'King George VI Chase',course:'Kempton',dates:['2026-12-26'],colour:'#f43f5e',emoji:'👑'},
+  {id:'welsh-nat26',name:'Welsh Grand National',course:'Chepstow',dates:['2026-12-27'],colour:'#fb923c',emoji:'🏔️'},
+  {id:'leopard-xmas26',name:'Leopardstown Christmas Festival',course:'Leopardstown',dates:['2026-12-26','2026-12-27','2026-12-28','2026-12-29'],colour:'#a78bfa',emoji:'☘️'},
+  // 2026 Jump — early year
   {id:'cheltenham26',name:'Cheltenham Festival',course:'Cheltenham',dates:['2026-03-10','2026-03-11','2026-03-12','2026-03-13'],colour:'#34d399',emoji:'🏆'},
   {id:'national26',name:'Grand National',course:'Aintree',dates:['2026-04-02','2026-04-03','2026-04-04'],colour:'#fb923c',emoji:'🐎'},
   {id:'punchestown26',name:'Punchestown Festival',course:'Punchestown',dates:['2026-04-28','2026-04-29','2026-04-30','2026-05-01','2026-05-02'],colour:'#a78bfa',emoji:'☘️'},
+  // 2027 NH
+  {id:'cheltenham27',name:'Cheltenham Festival',course:'Cheltenham',dates:['2027-03-09','2027-03-10','2027-03-11','2027-03-12'],colour:'#34d399',emoji:'🏆'},
+  {id:'national27',name:'Grand National',course:'Aintree',dates:['2027-04-08','2027-04-09','2027-04-10'],colour:'#fb923c',emoji:'🐎'},
+  {id:'punchestown27',name:'Punchestown Festival',course:'Punchestown',dates:['2027-04-27','2027-04-28','2027-04-29','2027-04-30','2027-05-01'],colour:'#a78bfa',emoji:'☘️'},
+  // 2027 Flat
+  {id:'guineas27',name:'Guineas Festival',course:'Newmarket',dates:['2027-05-01','2027-05-02'],colour:'#f59e0b',emoji:'🏆'},
+  {id:'derby27',name:'Derby Festival',course:'Epsom',dates:['2027-06-04','2027-06-05'],colour:'#10b981',emoji:'🏆'},
+  {id:'ascot27',name:'Royal Ascot',course:'Ascot',dates:['2027-06-15','2027-06-16','2027-06-17','2027-06-18','2027-06-19'],colour:'#f43f5e',emoji:'👑'},
+  {id:'july27',name:'July Festival',course:'Newmarket',dates:['2027-07-08','2027-07-09','2027-07-10'],colour:'#f59e0b',emoji:'☀️'},
+  {id:'goodwood27',name:'Glorious Goodwood',course:'Goodwood',dates:['2027-07-27','2027-07-28','2027-07-29','2027-07-30','2027-07-31'],colour:'#8b5cf6',emoji:'🌟'},
+  {id:'ebor27',name:'Ebor Festival',course:'York',dates:['2027-08-18','2027-08-19','2027-08-20','2027-08-21'],colour:'#0ea5e9',emoji:'🎖️'},
 ];
 function getFixtureForDate(dateStr){
   return FIXTURES.filter(f=>f.dates.includes(dateStr));

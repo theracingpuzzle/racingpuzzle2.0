@@ -407,10 +407,10 @@ function renderStats(){
     })();
 
     const perfCard=function(label,item,valueKey){
-      if(!item)return'<div style="flex:1;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);opacity:.35;text-align:center;"><div style="font-size:12px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">'+label+'</div><div style="font-size:13px;color:var(--mut);">No data</div></div>';
+      if(!item)return'<div style="flex:1 1 45%;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);opacity:.35;text-align:center;box-sizing:border-box;"><div style="font-size:12px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">'+label+'</div><div style="font-size:13px;color:var(--mut);">No data</div></div>';
       const val=valueKey==='p'?fmt(item.p):(item.roi>=0?'+':'')+Math.round(item.roi)+'%';
       const col=((valueKey==='p'?item.p:item.roi)>=0)?'#10b981':'#f87171';
-      return'<div style="flex:1;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);overflow:hidden;">'
+      return'<div style="flex:1 1 45%;min-width:0;padding:11px 10px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);overflow:hidden;box-sizing:border-box;">'
         +'<div style="font-size:11px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">'+label+'</div>'
         +'<div style="font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;" title="'+item.k+'">'+item.k+'</div>'
         +'<div style="font-size:13px;font-weight:800;color:'+col+';">'+val+'</div>'
@@ -435,17 +435,17 @@ function renderStats(){
       +'<div style="padding:8px 12px 6px;border-bottom:1px solid var(--bdr);">'
         +'<div style="font-size:11px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.08em;text-transform:uppercase;">Best Performers (min. 2 bets, by ROI)</div>'
       +'</div>'
-      // Row 4 — best jockey / trainer / source / track
-      +'<div style="display:flex;">'
+      // Row 4 — best jockey / trainer / source / track (wraps to 2×2 on mobile)
+      +'<div style="display:flex;flex-wrap:wrap;">'
         +perfCard('Jockey',bestJockey,'roi')
         +perfCard('Trainer',bestTrainer,'roi')
         +(!ownStudyOnly?perfCard('Source',bestSource,'roi'):'')
-        +(bestTrack?'<div style="flex:1;min-width:0;padding:11px 10px;overflow:hidden;">'
+        +(bestTrack?'<div style="flex:1 1 45%;min-width:0;padding:11px 10px;overflow:hidden;border-bottom:1px solid var(--bdr);box-sizing:border-box;">'
           +'<div style="font-size:11px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">Racecourse</div>'
           +'<div style="font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;" title="'+bestTrack.k+'">'+bestTrack.k+'</div>'
           +'<div style="font-size:13px;font-weight:800;color:'+(bestTrack.p>=0?'#10b981':'#f87171')+';">'+fmt(bestTrack.p)+'</div>'
           +'<div style="font-size:11px;color:var(--mut);">'+bestTrack.n+' bets</div>'
-        +'</div>':'<div style="flex:1;min-width:0;padding:11px 10px;opacity:.35;text-align:center;"><div style="font-size:11px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">Racecourse</div><div style="font-size:13px;color:var(--mut);">No data</div></div>')
+        +'</div>':'<div style="flex:1 1 45%;min-width:0;padding:11px 10px;opacity:.35;text-align:center;border-bottom:1px solid var(--bdr);box-sizing:border-box;"><div style="font-size:11px;font-weight:700;color:var(--mut);font-family:var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;">Racecourse</div><div style="font-size:13px;color:var(--mut);">No data</div></div>')
       +'</div>'
     +'</div>';
   }
@@ -1266,7 +1266,7 @@ function renderCkTip(){
 }
 
 // ─── CMD TAB ROUTER ───
-function cTab(id,btn){document.querySelectorAll('.cpane').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));document.getElementById('cp-'+id).classList.add('on');btn.classList.add('on');if(id==='hist')renderHist();if(id==='stats')renderStats();if(id==='rules')renderCmdRules();if(id==='set'){loadApiKeyField();loadStartBankField();loadRacingCredsFields();loadAILimitField();renderSettingsSources();}
+function cTab(id,btn){document.querySelectorAll('.cpane').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));document.getElementById('cp-'+id).classList.add('on');btn.classList.add('on');if(id==='hist')renderHist();if(id==='stats')renderStats();if(id==='rules')renderCmdRules();if(id==='set'){loadApiKeyField();loadStartBankField();loadRacingCredsFields();loadAILimitField();renderSettingsSources();loadDisplayNameField();}
   if(id==='cards'){rcInit();}}
 
 // ─── EDIT MODAL ───

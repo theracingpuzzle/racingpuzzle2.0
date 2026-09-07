@@ -80,13 +80,21 @@ function _lgToday(){return typeof td==='function'?td():new Date().toISOString().
 
 // ─── Load ────────────────────────────────────────────────────────────────────
 // Derive a friendly display name from the user's email (e.g. "dan.hill7@hotmail.com" → "Dan")
+const _LG_RESERVED_NAMES=['the racing puzzle','racing puzzle','racing puzzle admin'];
 function _lgDefaultDisplayName(){
+  // 1. User-chosen display name (set in onboarding or Settings)
+  if(typeof D!=='undefined'&&D.settings&&D.settings.displayName){
+    const chosen=D.settings.displayName.trim();
+    if(chosen&&!_LG_RESERVED_NAMES.includes(chosen.toLowerCase()))return chosen;
+  }
+  // 2. Fall back to email-derived name
   const email=window._rpUserEmail||'';
   if(!email)return'Member';
   const local=email.split('@')[0]||'';
-  // Take the part before the first dot or number run, capitalise it
   const base=(local.split('.')[0]||local).replace(/[^a-zA-Z]/g,'');
-  return base?base.charAt(0).toUpperCase()+base.slice(1).toLowerCase():'Member';
+  const name=base?base.charAt(0).toUpperCase()+base.slice(1).toLowerCase():'Member';
+  if(_LG_RESERVED_NAMES.includes(name.toLowerCase()))return'Member';
+  return name;
 }
 
 async function lgLoad(){
@@ -874,14 +882,15 @@ function lgRenderPick(el){
       const raceName=r.race_name||r.name||r.title||'Race';
       const runners=(r.runners||r.horses||[]).filter(function(x){return !x.non_runner&&!x.isNonRunner;});
       if(!runners.length)return;
-      h+='<div class="blk" style="padding:0;margin-bottom:10px;overflow:hidden;">'
+      const raceOff=_lgRaceIsOff(time);
+      h+='<div class="blk" style="padding:0;margin-bottom:10px;overflow:hidden;'+(raceOff?'opacity:.6;':'') +'">'
         +'<div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;">'
-          +'<span style="font-family:var(--font);font-size:18px;font-weight:900;color:var(--txt);flex-shrink:0;">'+time+'</span>'
+          +'<span style="font-family:var(--font);font-size:18px;font-weight:900;color:'+(raceOff?'var(--mut)':'var(--txt)')+';flex-shrink:0;">'+time+'</span>'
           +'<div style="flex:1;min-width:0;">'
             +'<div style="font-size:15px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+item.course+'</div>'
             +'<div style="font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+raceName+'</div>'
           +'</div>'
-          +'<span style="color:var(--mut);">›</span>'
+          +(raceOff?'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(107,114,128,.1);border:1px solid rgba(107,114,128,.25);color:var(--mut);">Race Off</span>':'<span style="color:var(--mut);">›</span>')
         +'</div>'
         +'<div style="display:none;">'
         +runners.map(function(runner){
@@ -896,6 +905,8 @@ function lgRenderPick(el){
             +'</div>'
             +(isPicked
               ?'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.25);color:var(--grn);">Picked ✓</span>'
+              :raceOff
+                ?'<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:rgba(107,114,128,.1);border:1px solid rgba(107,114,128,.25);color:var(--mut);">Race Off</span>'
               :(function(){
                   const isStakes=l.scoring==='stakes';
                   const safeKey=_lgEsc(horse.replace(/\s/g,'_'));
@@ -927,6 +938,15 @@ function lgRenderPick(el){
 }
 
 // ─── Pick actions ─────────────────────────────────────────────────────────────
+// Returns true if the race has already gone off (time is in the past today)
+function _lgRaceIsOff(timeStr){
+  if(!timeStr||timeStr==='—')return false;
+  const nowMins=new Date().getHours()*60+new Date().getMinutes();
+  const raceMins=(typeof timeToMins==='function')?timeToMins(timeStr):
+    (function(t){const p=t.split(':');return p.length===2?(parseInt(p[0]||0)*60+parseInt(p[1]||0)):0;})(timeStr);
+  return raceMins>0&&nowMins>=raceMins;
+}
+
 // Enable/disable Pick button as odds field changes (stakes leagues only)
 function lgOddsInputChange(safeKey, leagueId, isStakes){
   const inp=document.getElementById('lg-odds-'+safeKey);
@@ -937,6 +957,11 @@ function lgOddsInputChange(safeKey, leagueId, isStakes){
 }
 
 function lgConfirmPick(leagueId, horse, course, time, safeKey){
+  // Hard guard — race must not have already gone off
+  if(_lgRaceIsOff(time)){
+    alert('This race has already gone off — picks are closed.');
+    return;
+  }
   const inp=document.getElementById('lg-odds-'+safeKey);
   const odds=inp?inp.value.trim():'';
   lgAddPickFromCard(leagueId, horse, course, time, odds);

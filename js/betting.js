@@ -85,6 +85,36 @@ function _clearAllBets(){
   setTimeout(()=>{const el=document.getElementById('set-bk-status');if(el)el.textContent='';},3000);
 }
 
+function loadDisplayNameField(){
+  const el=document.getElementById('set-display-name');
+  if(el)el.value=(D.settings&&D.settings.displayName)||'';
+  const st=document.getElementById('set-display-name-status');
+  if(st)st.textContent='';
+}
+function settingsDisplayNameHint(){
+  const el=document.getElementById('set-display-name');
+  const st=document.getElementById('set-display-name-status');
+  if(!el||!st)return;
+  const reserved=['the racing puzzle','racing puzzle','racing puzzle admin'];
+  const val=el.value.trim();
+  if(reserved.includes(val.toLowerCase())){st.style.color='var(--red)';st.textContent='That name is reserved.';}
+  else if(val.length>0&&val.length<2){st.style.color='var(--red)';st.textContent='Must be at least 2 characters.';}
+  else{st.textContent='';}
+}
+function settingsSaveDisplayName(){
+  const el=document.getElementById('set-display-name');
+  const st=document.getElementById('set-display-name-status');
+  if(!el)return;
+  const val=el.value.trim();
+  const reserved=['the racing puzzle','racing puzzle','racing puzzle admin'];
+  if(reserved.includes(val.toLowerCase())){if(st){st.style.color='var(--red)';st.textContent='That name is reserved.';}return;}
+  if(val&&val.length<2){if(st){st.style.color='var(--red)';st.textContent='Must be at least 2 characters.';}return;}
+  if(!D.settings)D.settings={};
+  D.settings.displayName=val||'';
+  save();
+  if(st){st.style.color='var(--grn)';st.textContent='✓ Saved';}
+  setTimeout(()=>{const s=document.getElementById('set-display-name-status');if(s)s.textContent='';},3000);
+}
 function loadStartBankField(){
   const el=document.getElementById('set-bk-start');if(el)el.value=D.bank&&D.bank.start?D.bank.start:'';
   const vs=document.getElementById('set-vbk-start');if(vs)vs.value=D.vBank&&D.vBank.start?D.vBank.start:500;

@@ -1,6 +1,6 @@
 // ─── ONBOARDING ─── first-run wizard for new users
 
-const OB_STEPS = ['welcome', 'bank', 'sources'];
+const OB_STEPS = ['welcome', 'displayname', 'bank', 'sources'];
 let _obStep = 0;
 
 // ── Entry point ───────────────────────────────────────────────────
@@ -70,9 +70,10 @@ function obRender() {
   const el = document.getElementById('ob-content');
   if (!el) return;
 
-  if (step === 'welcome')  el.innerHTML = obStepWelcome();
-  if (step === 'bank')     el.innerHTML = obStepBank();
-  if (step === 'sources')  el.innerHTML = obStepSources();
+  if (step === 'welcome')     el.innerHTML = obStepWelcome();
+  if (step === 'displayname') el.innerHTML = obStepDisplayName();
+  if (step === 'bank')        el.innerHTML = obStepBank();
+  if (step === 'sources')     el.innerHTML = obStepSources();
 }
 
 // ── Step styles (shared) ─────────────────────────────────────────
@@ -116,7 +117,83 @@ function _obFeatureRow(emoji, title, desc) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// STEP 2 — Set Starting Bank
+// STEP 2 — Display Name (used in Community Leagues)
+// ─────────────────────────────────────────────────────────────────
+function obStepDisplayName() {
+  const suggested = _obSuggestDisplayName();
+  return '<div style="margin-bottom:24px;">'
+    + '<div style="font-family:var(--font);font-size:26px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff;margin-bottom:8px;">Your display name</div>'
+    + '<div style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;">This is the name other members see in Community Leagues. Pick something you\'re happy being known by — you can change it any time in Settings.</div>'
+    + '</div>'
+
+    + '<div style="' + _OB_CARD + '">'
+    + '<label style="' + _OB_LBL + '">Display Name</label>'
+    + '<input id="ob-dname-input" type="text" maxlength="24" placeholder="e.g. ' + suggested + '" '
+    +   'value="' + suggested + '" '
+    +   'style="' + _OB_INPUT + '" oninput="obDisplayNamePreview()">'
+    + '<div id="ob-dname-hint" style="font-size:11px;color:rgba(255,255,255,.3);margin-top:6px;">Max 24 characters. Shown to other members in shared leagues.</div>'
+    + '</div>'
+
+    + '<button style="' + _OB_BTN + '" onclick="obSaveDisplayName()">Save & Continue →</button>'
+    + '<button style="' + _OB_BTN_S + '" onclick="obNext()">Skip for now</button>';
+}
+
+function _obSuggestDisplayName() {
+  // Use saved value if already set
+  if (D.settings && D.settings.displayName) return _lgEsc ? _lgEsc(D.settings.displayName) : D.settings.displayName;
+  const email = window._rpUserEmail || '';
+  if (!email) return '';
+  const local = email.split('@')[0] || '';
+  const base = (local.split('.')[0] || local).replace(/[^a-zA-Z]/g, '');
+  const name = base ? base.charAt(0).toUpperCase() + base.slice(1).toLowerCase() : '';
+  // Don't suggest reserved names
+  const reserved = ['the racing puzzle','racing puzzle','racing puzzle admin'];
+  return reserved.includes(name.toLowerCase()) ? '' : name;
+}
+
+function obDisplayNamePreview() {
+  const inp = document.getElementById('ob-dname-input');
+  const hint = document.getElementById('ob-dname-hint');
+  if (!inp || !hint) return;
+  const val = inp.value.trim();
+  const reserved = ['the racing puzzle','racing puzzle','racing puzzle admin'];
+  if (reserved.includes(val.toLowerCase())) {
+    hint.style.color = '#f87171';
+    hint.textContent = 'That name is reserved. Please choose a different one.';
+  } else if (val.length > 0 && val.length < 2) {
+    hint.style.color = '#f87171';
+    hint.textContent = 'Must be at least 2 characters.';
+  } else {
+    hint.style.color = 'rgba(255,255,255,.3)';
+    hint.textContent = 'Max 24 characters. Shown to other members in shared leagues.';
+  }
+}
+
+function obSaveDisplayName() {
+  const inp = document.getElementById('ob-dname-input');
+  if (!inp) { obNext(); return; }
+  const val = inp.value.trim();
+  const reserved = ['the racing puzzle','racing puzzle','racing puzzle admin'];
+  if (val && reserved.includes(val.toLowerCase())) {
+    const hint = document.getElementById('ob-dname-hint');
+    if (hint) { hint.style.color='#f87171'; hint.textContent='That name is reserved. Please choose a different one.'; }
+    return;
+  }
+  if (val && val.length < 2) {
+    const hint = document.getElementById('ob-dname-hint');
+    if (hint) { hint.style.color='#f87171'; hint.textContent='Must be at least 2 characters.'; }
+    return;
+  }
+  if (val) {
+    if (!D.settings) D.settings = {};
+    D.settings.displayName = val;
+    save();
+  }
+  obNext();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// STEP 3 — Set Starting Bank
 // ─────────────────────────────────────────────────────────────────
 function obStepBank() {
   return '<div style="margin-bottom:24px;">'

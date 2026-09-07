@@ -70,7 +70,7 @@ function _igContent(platform) {
   const configs = {
     'ios-safari': {
       label: 'iPhone / iPad — Safari',
-      emoji: '🍎',
+      emoji: '',
       note: 'Must use <strong>Safari</strong> — other iOS browsers cannot install web apps.',
       steps: [
         step(1, SHARE_SVG,  'Tap the <strong>Share</strong> button in the bottom toolbar'),
@@ -81,7 +81,7 @@ function _igContent(platform) {
     },
     'ios-chrome': {
       label: 'iPhone / iPad — Chrome',
-      emoji: '🍎',
+      emoji: '',
       note: 'Chrome on iOS uses Safari\'s engine. Tap the Share icon (not Chrome\'s menu) to install.',
       steps: [
         step(1, SHARE_SVG, 'Tap the <strong>Share</strong> icon at the bottom of the screen'),
@@ -161,66 +161,7 @@ function igShow() {
     return;
   }
 
-  const cfg = _igContent(platform);
-  const hasNative = cfg.showNative && _igDeferredPrompt;
-
-  const modal = document.createElement('div');
-  modal.id = 'ig-modal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:9500;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);';
-
-  modal.innerHTML =
-    '<div style="width:100%;max-width:480px;background:var(--sur);border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,16px);box-shadow:0 -4px 32px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto;">'
-
-      // Handle bar
-      + '<div style="display:flex;justify-content:center;padding:10px 0 4px;">'
-        + '<div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);"></div>'
-      + '</div>'
-
-      // Header
-      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px 0;">'
-        + '<div>'
-          + '<div style="font-family:var(--font);font-size:20px;font-weight:900;letter-spacing:.02em;color:var(--navy);">' + cfg.emoji + ' Add to Home Screen</div>'
-          + '<div style="font-size:11px;color:var(--mut);margin-top:2px;">' + cfg.label + '</div>'
-        + '</div>'
-        + '<button onclick="igClose()" style="background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer;padding:4px;line-height:1;">×</button>'
-      + '</div>'
-
-      // Note
-      + (cfg.note ? '<div style="margin:12px 20px 4px;padding:10px 12px;border-radius:9px;background:rgba(30,58,95,.06);border:1px solid rgba(30,58,95,.12);font-size:12px;color:var(--txt);line-height:1.5;">' + cfg.note + '</div>' : '')
-
-      // Steps
-      + '<div style="padding:4px 20px 16px;">'
-        + cfg.steps.join('')
-      + '</div>'
-
-      // Native install button (Chrome/Edge/Android only — shown when browser fires beforeinstallprompt)
-      + '<div id="ig-native-btn" style="display:' + (hasNative ? 'flex' : 'none') + ';margin:0 20px 12px;gap:10px;">'
-        + '<button onclick="igNativeInstall()" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">Install Now</button>'
-      + '</div>'
-
-      // Platform switcher
-      + '<div style="padding:0 20px 8px;">'
-        + '<div style="font-size:10px;color:var(--mut);margin-bottom:6px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;">Wrong device?</div>'
-        + '<div style="display:flex;flex-wrap:wrap;gap:5px;">'
-          + ['ios-safari','android-chrome','desktop-chrome','desktop-safari'].map(function(p) {
-              const labels = {'ios-safari':'iPhone/iPad','android-chrome':'Android','desktop-chrome':'Chrome PC','desktop-safari':'Mac Safari'};
-              const active = p === platform;
-              return '<button onclick="igSwitchPlatform(\'' + p + '\')" style="padding:4px 10px;border-radius:6px;border:1px solid '+(active?'var(--navy)':'var(--bdr)')+';background:'+(active?'var(--navy)':'transparent')+';color:'+(active?'#fff':'var(--mut)')+';font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;">' + labels[p] + '</button>';
-            }).join('')
-        + '</div>'
-      + '</div>'
-
-      // Dismiss
-      + '<div style="padding:8px 20px 16px;border-top:1px solid var(--bdr);display:flex;gap:8px;">'
-        + '<button onclick="igDismiss()" style="flex:1;padding:11px;border-radius:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Maybe Later</button>'
-        + '<button onclick="igDismissPermanent()" style="padding:11px 16px;border-radius:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Don\'t Show Again</button>'
-      + '</div>'
-
-    + '</div>';
-
-  // Tap backdrop to close
-  modal.addEventListener('click', function(e) { if (e.target === modal) igClose(); });
-  document.body.appendChild(modal);
+  _igBuild(platform);
 }
 
 function igClose() {
@@ -239,24 +180,55 @@ function igDismissPermanent() {
 }
 
 function igSwitchPlatform(platform) {
-  const m = document.getElementById('ig-modal');
-  if (m) m.remove();
+  // Remove existing modal then re-render with the chosen platform
+  const old = document.getElementById('ig-modal');
+  if (old) old.remove();
+  _igBuild(platform);
+}
+
+function _igBuild(platform) {
   const cfg = _igContent(platform);
   const hasNative = cfg.showNative && _igDeferredPrompt;
 
-  // Re-render with new platform — reuse igShow logic
-  const _origPlatform = _igPlatform;
-  window._igPlatform = _igPlatform;
-  // Temporarily override platform detection
-  window._igForcePlatform = platform;
-  igShow._forced = platform;
+  const modal = document.createElement('div');
+  modal.id = 'ig-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9500;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);';
 
-  // Quick re-render by patching and calling igShow
-  const saved = window._igContent;
-  igShow();
-  // Patch the native button
-  const btn = document.getElementById('ig-native-btn');
-  if (btn) btn.style.display = hasNative ? 'flex' : 'none';
+  modal.innerHTML =
+    '<div style="width:100%;max-width:480px;background:var(--sur);border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,16px);box-shadow:0 -4px 32px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto;">'
+      + '<div style="display:flex;justify-content:center;padding:10px 0 4px;">'
+        + '<div style="width:36px;height:4px;border-radius:2px;background:var(--bdr);"></div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px 0;">'
+        + '<div>'
+          + '<div style="font-family:var(--font);font-size:20px;font-weight:900;letter-spacing:.02em;color:var(--navy);">' + (cfg.emoji ? cfg.emoji + ' ' : '') + 'Add to Home Screen</div>'
+          + '<div style="font-size:11px;color:var(--mut);margin-top:2px;">' + cfg.label + '</div>'
+        + '</div>'
+        + '<button onclick="igClose()" style="background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer;padding:4px;line-height:1;">×</button>'
+      + '</div>'
+      + (cfg.note ? '<div style="margin:12px 20px 4px;padding:10px 12px;border-radius:9px;background:rgba(30,58,95,.06);border:1px solid rgba(30,58,95,.12);font-size:12px;color:var(--txt);line-height:1.5;">' + cfg.note + '</div>' : '')
+      + '<div style="padding:4px 20px 16px;">' + cfg.steps.join('') + '</div>'
+      + '<div id="ig-native-btn" style="display:' + (hasNative ? 'flex' : 'none') + ';margin:0 20px 12px;gap:10px;">'
+        + '<button onclick="igNativeInstall()" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">Install Now</button>'
+      + '</div>'
+      + '<div style="padding:0 20px 8px;">'
+        + '<div style="font-size:10px;color:var(--mut);margin-bottom:6px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;">Wrong device?</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:5px;">'
+          + ['ios-safari','android-chrome','desktop-chrome','desktop-safari'].map(function(p) {
+              const labels = {'ios-safari':'iPhone/iPad','android-chrome':'Android','desktop-chrome':'Chrome PC','desktop-safari':'Mac Safari'};
+              const active = p === platform;
+              return '<button onclick="igSwitchPlatform(\'' + p + '\')" style="padding:4px 10px;border-radius:6px;border:1px solid '+(active?'var(--navy)':'var(--bdr)')+';background:'+(active?'var(--navy)':'transparent')+';color:'+(active?'#fff':'var(--mut)')+';font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;">' + labels[p] + '</button>';
+            }).join('')
+        + '</div>'
+      + '</div>'
+      + '<div style="padding:8px 20px 16px;border-top:1px solid var(--bdr);display:flex;gap:8px;">'
+        + '<button onclick="igDismiss()" style="flex:1;padding:11px;border-radius:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Maybe Later</button>'
+        + '<button onclick="igDismissPermanent()" style="padding:11px 16px;border-radius:9px;border:1px solid var(--bdr);background:transparent;color:var(--mut);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Don\'t Show Again</button>'
+      + '</div>'
+    + '</div>';
+
+  modal.addEventListener('click', function(e) { if (e.target === modal) igClose(); });
+  document.body.appendChild(modal);
 }
 
 async function igNativeInstall() {

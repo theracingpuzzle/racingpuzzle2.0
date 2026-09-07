@@ -571,6 +571,17 @@
         <!-- ── Tab: Setup ── -->
         <div class="set-panel" id="set-panel-setup">
 
+          <!-- Display Name -->
+          <div class="blk">
+            <div class="bttl">👤 Display Name</div>
+            <div style="font-size:13px;color:var(--mut);margin-bottom:12px;line-height:1.5;">The name other members see in Community Leagues. Max 24 characters.</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="text" id="set-display-name" maxlength="24" placeholder="Your display name" autocomplete="off" style="flex:1;" oninput="settingsDisplayNameHint()">
+              <button class="btn bgrn" onclick="settingsSaveDisplayName()" style="white-space:nowrap;">Save</button>
+            </div>
+            <div id="set-display-name-status" style="font-family:monospace;font-size:11px;margin-top:8px;"></div>
+          </div>
+
           <!-- Notifications -->
           <div class="blk">
             <div class="bttl">🔔 Notifications</div>

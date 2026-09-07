@@ -40,6 +40,9 @@
 //   ALTER TABLE league_picks ENABLE ROW LEVEL SECURITY;
 //   CREATE POLICY "lp_all" ON league_picks FOR ALL USING (true) WITH CHECK (true);
 
+// ─── DB migration (run once in Supabase SQL editor) ─────────────────────────
+// ALTER TABLE leagues ADD COLUMN IF NOT EXISTS is_community boolean DEFAULT false;
+
 // ─── State ──────────────────────────────────────────────────────────────────
 let _lgMyLeagues   = [];   // leagues this user belongs to
 let _lgCurrent     = null; // league object being viewed
@@ -76,10 +79,36 @@ function _lgUid(){return SUPA_USER_ID||'anon';}
 function _lgToday(){return typeof td==='function'?td():new Date().toISOString().slice(0,10);}
 
 // ─── Load ────────────────────────────────────────────────────────────────────
+// Derive a friendly display name from the user's email (e.g. "dan.hill7@hotmail.com" → "Dan")
+function _lgDefaultDisplayName(){
+  const email=window._rpUserEmail||'';
+  if(!email)return'Member';
+  const local=email.split('@')[0]||'';
+  // Take the part before the first dot or number run, capitalise it
+  const base=(local.split('.')[0]||local).replace(/[^a-zA-Z]/g,'');
+  return base?base.charAt(0).toUpperCase()+base.slice(1).toLowerCase():'Member';
+}
+
 async function lgLoad(){
   const uid=_lgUid();
   try{
-    // My memberships
+    // ── Auto-join any community leagues this user isn't already in ──────────
+    try{
+      const communityLeagues=await _lgFetch('leagues?is_community=eq.true&order=created_at.asc');
+      if(communityLeagues.length){
+        const myMems=await _lgFetch('league_members?user_id=eq.'+encodeURIComponent(uid)+'&select=league_id');
+        const myLeagueIds=new Set(myMems.map(function(m){return m.league_id;}));
+        const toJoin=communityLeagues.filter(function(l){return !myLeagueIds.has(l.id);});
+        if(toJoin.length){
+          const dname=_lgDefaultDisplayName();
+          await Promise.all(toJoin.map(function(l){
+            return _lgFetch('league_members',{method:'POST',body:JSON.stringify({id:_lgGid(),league_id:l.id,user_id:uid,display_name:dname})});
+          }));
+        }
+      }
+    }catch(e){console.warn('community-auto-join',e);}
+
+    // ── My memberships ──────────────────────────────────────────────────────
     const mems=await _lgFetch('league_members?user_id=eq.'+encodeURIComponent(uid)+'&select=league_id,display_name,joined_at');
     if(!mems.length){_lgMyLeagues=[];_lgLoaded=true;lgRender();return;}
     const ids=mems.map(m=>m.league_id);
@@ -190,6 +219,8 @@ function _lgBackBtn(label){
 const SVG_TROPHY='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>';
 
 // ─── Screen 1: My Leagues list ───────────────────────────────────────────────
+const SVG_GLOBE='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
+
 function lgRenderList(el){
   let h='';
 
@@ -199,6 +230,8 @@ function lgRenderList(el){
     +'<button onclick="lgShowCreate()" class="btn-refresh" style="flex:1;">+ Create</button>'
   +'</div>';
 
+  const communityLeagues=_lgMyLeagues.filter(function(l){return l.is_community&&!_lgIsEnded(l);});
+  const privateLeagues=_lgMyLeagues.filter(function(l){return !l.is_community&&!_lgIsEnded(l);});
   const activeLeagues=_lgMyLeagues.filter(function(l){return !_lgIsEnded(l);});
   const archivedLeagues=_lgMyLeagues.filter(function(l){return _lgIsEnded(l);});
 
@@ -230,15 +263,19 @@ function lgRenderList(el){
         +posLabel+' <span style="font-size:11px;font-weight:700;opacity:.7;">of '+total+'</span>'
       +'</div>';
     }
-    // Determine swipe action: delete if owner+solo, leave otherwise
+    // Community leagues: no swipe action; private leagues: delete if owner+solo, leave otherwise
+    const isCommunity=!!l.is_community;
     const isOwner=l.created_by===uid;
     const memberCount=allMembers?allMembers.length:1;
-    const canDelete=isOwner&&memberCount<=1;
+    const canDelete=!isCommunity&&isOwner&&memberCount<=1;
     const actionLabel=canDelete?'Delete':'Leave';
     const actionBg=canDelete?'#dc2626':'#f59e0b';
     const actionFn=canDelete?'lgDeleteLeague(\''+l.id+'\')':'lgLeaveLeague(\''+l.id+'\')';
+    const communityBadge=isCommunity
+      ?'<span style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:4px;background:rgba(30,58,95,.1);border:1px solid rgba(30,58,95,.25);color:var(--navy);vertical-align:middle;margin-left:6px;">'+SVG_GLOBE+' Community</span>'
+      :'';
     const rowContent='<div style="flex:1;min-width:0;">'
-      +'<div style="font-family:var(--font);font-size:20px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1;">'+_lgEsc(l.name)+'</div>'
+      +'<div style="font-family:var(--font);font-size:20px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1;">'+_lgEsc(l.name)+communityBadge+'</div>'
       +'<div style="font-size:12px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Win count':'£1 stakes')+(l.end_date?' · Ended '+_lgFmtDate(l.end_date):'')+'</div>'
       +posHtml
     +'</div>'
@@ -247,6 +284,15 @@ function lgRenderList(el){
       +'<div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;">'+(l.scoring==='wins'?'wins':'P&L')+'</div>'
     +'</div>'
     +'<span id="lg-row-chev-'+l.id+'" style="color:var(--mut);font-size:18px;margin-left:2px;">›</span>';
+    // Community leagues: no swipe-to-action exposed
+    if(isCommunity){
+      return '<div style="position:relative;overflow:hidden;'+(idx?'border-top:1px solid var(--bdr);':'')+'">'
+        +'<div id="lg-row-inner-'+l.id+'" onclick="_lgRowClick(\''+l.id+'\')" '
+          +'style="display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;'+(dimmed?'opacity:.75;':'')+';background:var(--sur);position:relative;">'
+          +rowContent
+        +'</div>'
+      +'</div>';
+    }
     return '<div style="position:relative;overflow:hidden;'+(idx?'border-top:1px solid var(--bdr);':'')+'">'
       +'<div style="position:absolute;right:0;top:0;bottom:0;width:88px;display:flex;align-items:center;justify-content:center;background:'+actionBg+';">'
         +'<button onclick="'+actionFn+'" style="background:none;border:none;color:#fff;font-family:var(--font);font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;padding:0;display:flex;flex-direction:column;align-items:center;gap:3px;">'
@@ -265,36 +311,50 @@ function lgRenderList(el){
     +'</div>';
   }
 
+  // ── Community leagues section ──────────────────────────────────────────────
+  if(communityLeagues.length){
+    h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:0 2px;">'
+      +'<span style="color:var(--navy);">'+SVG_GLOBE+'</span>'
+      +'<span style="font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Community Leagues</span>'
+    +'</div>'
+    +'<div class="blk" style="padding:0;margin-bottom:14px;">';
+    communityLeagues.forEach(function(l,idx){ h+=_lgLeagueRow(l,idx,false); });
+    h+='</div>';
+  }
+
+  // ── Private leagues section ────────────────────────────────────────────────
+  if(privateLeagues.length){
+    h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:0 2px;">'
+      +'<span style="color:var(--mut);">'+SVG_TROPHY+'</span>'
+      +'<span style="font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">My Leagues</span>'
+    +'</div>'
+    +'<div class="blk" style="padding:0;">';
+    privateLeagues.forEach(function(l,idx){ h+=_lgLeagueRow(l,idx,false); });
+    h+='</div>';
+  }
+
   if(!_lgMyLeagues.length){
     h+='<div class="blk" style="text-align:center;padding:30px 16px;">'
       +'<div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;background:rgba(30,58,95,.08);border:1px solid rgba(30,58,95,.15);color:var(--navy);margin-bottom:14px;">'+SVG_TROPHY+'</div>'
       +'<div style="font-family:var(--font);font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No leagues yet</div>'
       +'<div style="font-size:12px;color:var(--mut);line-height:1.6;">Create a league or join one with a friend\'s invite code.</div>'
     +'</div>';
-  }else{
-    // Active leagues
-    if(activeLeagues.length){
-      h+='<div class="blk" style="padding:0;">';
-      activeLeagues.forEach(function(l,idx){ h+=_lgLeagueRow(l,idx,false); });
-      h+='</div>';
-    }else{
-      h+='<div class="blk" style="text-align:center;padding:20px 16px;font-size:13px;color:var(--mut);">No active leagues</div>';
-    }
+  }
 
-    // Archived leagues
-    if(archivedLeagues.length){
-      h+='<button onclick="_lgToggleArchived()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:4px;">'
-        +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>'
-        +'Archived Leagues <span style="background:var(--bdr);color:var(--txt);border-radius:10px;padding:1px 7px;font-size:11px;margin-left:2px;">'+archivedLeagues.length+'</span>'
-        +'<span style="margin-left:auto;font-size:16px;transition:transform .2s;transform:rotate('+(_lgShowArchived?'180':'0')+'deg);">▾</span>'
-      +'</button>';
-      if(_lgShowArchived){
-        h+='<div class="blk" style="padding:0;margin-top:4px;">';
-        archivedLeagues.forEach(function(l,idx){ h+=_lgLeagueRow(l,idx,true); });
-        h+='</div>';
-      }
+  // Archived leagues
+  if(archivedLeagues.length){
+    h+='<button onclick="_lgToggleArchived()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:4px;">'
+      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>'
+      +'Archived Leagues <span style="background:var(--bdr);color:var(--txt);border-radius:10px;padding:1px 7px;font-size:11px;margin-left:2px;">'+archivedLeagues.length+'</span>'
+      +'<span style="margin-left:auto;font-size:16px;transition:transform .2s;transform:rotate('+(_lgShowArchived?'180':'0')+'deg);">▾</span>'
+    +'</button>';
+    if(_lgShowArchived){
+      h+='<div class="blk" style="padding:0;margin-top:4px;">';
+      archivedLeagues.forEach(function(l,idx){ h+=_lgLeagueRow(l,idx,true); });
+      h+='</div>';
     }
   }
+
   el.innerHTML=h;
 }
 
@@ -345,9 +405,11 @@ function lgRenderDetail(el){
   let h=_lgBackBtn('Leagues');
 
   // League info blk
-  h+='<div class="blk" style="background:rgba(16,185,129,.05);border-color:rgba(30,58,95,.15);">'
+  const _isCommunity=!!l.is_community;
+  h+='<div class="blk" style="background:'+(_isCommunity?'rgba(30,58,95,.04)':'rgba(16,185,129,.05)')+';border-color:rgba(30,58,95,.15);">'
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
       +'<div>'
+        +(_isCommunity?'<div style="display:inline-flex;align-items:center;gap:4px;font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:rgba(30,58,95,.1);border:1px solid rgba(30,58,95,.25);color:var(--navy);margin-bottom:6px;">'+SVG_GLOBE+' Community League · Everyone is a member</div>':'')
         +'<div style="font-family:var(--font);font-size:22px;font-weight:900;letter-spacing:.02em;color:var(--txt);">'+_lgEsc(l.name)+'</div>'
         +'<div style="font-size:13px;color:var(--mut);margin-top:3px;">'+(l.scoring==='wins'?'Win count scoring':'£1 level stakes scoring')+(l.end_date?' · Ends '+_lgFmtDate(l.end_date):'')+(l.pick_days?(' · '+_lgFmtPickDays(l.pick_days)):'')+'</div>'
         +(function(){var admin=members.find(function(m){return m.user_id===l.created_by;});return admin?'<div style="margin-top:6px;display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--mut);">'+SVG_ADMIN_KEY+'<span>League Admin: <strong style="color:var(--txt);">'+_lgEsc(admin.display_name||'Unknown')+'</strong></span></div>':'';})()
@@ -548,9 +610,9 @@ function lgRenderDetail(el){
     +'</div>';
   }
 
-  // Footer action — archived leagues show no actions; active leagues show role-based option
+  // Footer action — community and archived leagues show no actions; private active leagues show role-based option
   const _isArchived=_lgIsEnded(l);
-  if(!_isArchived){
+  if(!_isArchived&&!_isCommunity){
     h+='<div style="text-align:center;margin-top:4px;display:flex;gap:16px;justify-content:center;">'
       +(!isAdmin?'<button onclick="lgLeaveLeague(\''+l.id+'\')" style="font-size:11px;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;">Leave league</button>':'')
       +(isAdmin?'<button onclick="lgDeleteLeague(\''+l.id+'\')" style="font-size:11px;color:#f87171;background:none;border:none;cursor:pointer;text-decoration:underline;">Delete league</button>':'')
@@ -622,6 +684,15 @@ function lgShowCreate(){
       +'</div>'
       +'<div style="font-size:11px;color:var(--mut);margin-top:6px;" id="lg-sc-desc">Win at 5/1 = +5pts, loss = −1pt. Rewards value hunting.</div>'
     +'</div>'
+    +(function(){
+        // Only show Community toggle for the app owner
+        const ownerEmail='theracingpuzzle@gmail.com';
+        if((window._rpUserEmail||'')!==ownerEmail)return'';
+        return'<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;">'
+          +'<input type="checkbox" id="lg-new-community" style="width:16px;height:16px;accent-color:var(--navy);">'
+          +'<span>Community League <span style="color:var(--mut);font-weight:400;font-size:11px;">— all users auto-join</span></span>'
+        +'</label></div>';
+      })()
     +'<button id="lg-create-btn" onclick="lgCreateSubmit()" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:8px;">Create League</button>'
     +'<div id="lg-create-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
   );
@@ -696,7 +767,9 @@ async function lgCreateSubmit(){
   const code=_lgCode();
   try{
     const pickDays=_lgPickDays.size?_LG_ALL_DAYS.filter(function(d){return _lgPickDays.has(d);}).join(','):null;
-    await _lgFetch('leagues',{method:'POST',body:JSON.stringify({id:leagueId,name,created_by:uid,invite_code:code,scoring:_lgScoring,end_date:endDate,pick_days:pickDays})});
+    const isCommunityChk=document.getElementById('lg-new-community');
+    const isCommunity=isCommunityChk?isCommunityChk.checked:false;
+    await _lgFetch('leagues',{method:'POST',body:JSON.stringify({id:leagueId,name,created_by:uid,invite_code:code,scoring:_lgScoring,end_date:endDate,pick_days:pickDays,is_community:isCommunity})});
     await _lgFetch('league_members',{method:'POST',body:JSON.stringify({id:_lgGid(),league_id:leagueId,user_id:uid,display_name:dname})});
     await lgLoad();
     const l=_lgMyLeagues.find(function(x){return x.id===leagueId;});

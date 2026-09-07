@@ -852,8 +852,9 @@ function openLogbetOverlay(mode, prefill){
     else subEl.style.display='none';
   }
 
-  // Determine pre-selected source from bet flow state
-  const bfs=window._betFlowState||{};
+  // Determine pre-selected source — prefer the explicit prefill values (passed from _rcDoLogBet)
+  // so the user's tip/source choice is never lost if _betFlowState has already been cleared.
+  const bfs=(prefill&&prefill.source)?prefill:(window._betFlowState||{});
   const preSrc=bfs.source==='tip'?(bfs.tipSource||'Own Form Study'):'Own Form Study';
 
   // ── Source options — ensure preSrc is always present ──
@@ -1674,7 +1675,7 @@ function rcPromoteToProfile(horse, or_val, trainer, age){
 
 // Called by _betFlowProceed in betting.js once checklist is complete
 function _rcDoLogBet(s){
-  const _pf={horse:s.horse,course:s.course,time:s.time,jockey:s.jockey,trainer:s.trainer};
+  const _pf={horse:s.horse,course:s.course,time:s.time,jockey:s.jockey,trainer:s.trainer,source:s.source,tipSource:s.tipSource};
   openLogbetOverlay(s.mode, _pf);
 }
 

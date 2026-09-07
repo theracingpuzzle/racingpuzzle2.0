@@ -629,7 +629,7 @@ async function checkWatchlistRunners(races){
     if(alertEl){
       alertEl.style.display='block';
       alertEl.innerHTML='<div class="t-alert-pur" style="text-align:center;padding:20px 16px;">'
-        +'<div style="font-size:28px;margin-bottom:10px;">⭐</div>'
+        +'<div style="display:flex;justify-content:center;margin-bottom:10px;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--mut);opacity:.7;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>'
         +'<div style="font-family:var(--font);font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No horses on your Profiler</div>'
         +'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:14px;">Add horses to your Puzzle Profiler and they\'ll appear here when they\'re declared to run today.</div>'
         +'<button onclick="navTo(\'watch\')" style="padding:9px 18px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">Open Profiler →</button>'
@@ -1953,7 +1953,7 @@ function renderTodayBets(tb, vtb){
   const allBets=[...tb.map(b=>({...b,_type:'real'})),...vtb.map(b=>({...b,_type:'virt'}))];
   if(!allBets.length){
     le.innerHTML='<div style="text-align:center;padding:28px 16px;">'
-      +'<div style="font-size:32px;margin-bottom:10px;">🎯</div>'
+      +'<div style="display:flex;justify-content:center;margin-bottom:10px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--mut);opacity:.7;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>'
       +'<div style="font-family:var(--font);font-size:14px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:6px;">No bets today</div>'
       +'<div style="font-size:12px;color:var(--mut);line-height:1.6;">Use the form above to log your first bet of the day.</div>'
       +'</div>';

@@ -675,11 +675,11 @@ function renderWLList(){
       el.innerHTML='<div class="wll-empty">No profiles match "'+search+'".</div>';
     } else {
       el.innerHTML='<div style="text-align:center;padding:36px 20px;">'
-        +'<div style="font-size:40px;margin-bottom:14px;">🐴</div>'
+        +'<div style="margin-bottom:14px;display:flex;justify-content:center;"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--mut);opacity:.7;"><path d="M19 4c0 0-1 1-3 1s-3-2-5-2C8 3 6 5 6 7c0 1 .5 2 1 2.5L5 22h3l1-6h2l1 6h3l-2-9c1.5-.5 3-2 3-4 0 0 1 1 2 1s2-1 2-1V4z"/><circle cx="8.5" cy="8.5" r=".5" fill="currentColor"/></svg></div>'
         +'<div style="font-family:var(--font);font-size:17px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--txt);margin-bottom:8px;">Your Profiler is empty</div>'
         +'<div style="font-size:13px;color:var(--mut);line-height:1.65;margin-bottom:6px;">Build private profiles for every horse you follow — track ratings, going preferences, trainer intel, and race targets.</div>'
         +'<div style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:20px;">When they\'re declared to run, they\'ll appear on your Today card automatically.</div>'
-        +'<button onclick="wlNew()" style="padding:11px 24px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">+ Add First Horse</button>'
+        +'<button onclick="openWLForm(null)" style="padding:11px 24px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;">+ Add First Horse</button>'
         +'</div>';
     }
     return;

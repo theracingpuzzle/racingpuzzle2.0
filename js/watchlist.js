@@ -611,9 +611,9 @@ function _injectAlbumCSS(){
     .wll-sec-cnt{font-family:var(--font);font-size:10px;color:var(--mut);}
     .wll-row{display:flex;align-items:center;border-left:3px solid;padding:10px 10px 10px 12px;margin-bottom:6px;background:var(--sur2);border-radius:0 9px 9px 0;cursor:pointer;transition:background .12s;}
     .wll-row:active{background:var(--dim);}
-    .wll-silks{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;}
+    .wll-silks{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:10px;border-radius:0;background:transparent;border:none;}
     .wll-main{flex:1;min-width:0;}
-    .wll-name{font-family:var(--font);font-size:16px;font-weight:600;letter-spacing:.2px;color:var(--txt);line-height:1;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .wll-name{font-family:var(--font);font-size:16px;font-weight:600;letter-spacing:.2px;color:var(--txt);line-height:1;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:2px;}
     .wll-sub{font-size:11px;color:var(--mut);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .wll-tag{display:inline-flex;align-items:center;gap:3px;font-family:var(--font);font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:3px;}
     .wll-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;margin-left:10px;}
@@ -3445,31 +3445,110 @@ function _wlpBuildHTML(e){
       'Surface': 'Flat / Jumps / AW — set manually on the profile. Not auto-inferred from reviews.',
       'Type':    'Race type preference (Handicap, Maiden etc.) — set manually on the profile.',
     };
-    const conds=[
-      {label:'Ground',  value:idealGoing,  note:classNote},
-      {label:'Distance',value:idealDist},
-      {label:'Class',   value:idealClass,  note:classNote},
-      {label:'Surface', value:idealSurface},
-      {label:'Type',    value:idealType},
-    ];
-    const hasAny=conds.some(function(c){return c.value;});
+    const hasAny=!!(idealGoing||idealDist||idealClass||idealSurface||idealType||e.runStyle||e.trackPref);
     h+='<div class="wlp-section" data-wlp-tab="intel">';
     h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">1</div><span class="wlp-section-title">Ideal Conditions</span></div></div>';
     if(hasAny){
-      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--bdr);">';
-      conds.forEach(function(c){
-        const infoTip=_iInfo[c.label]||'';
-        h+='<div style="background:var(--sur);padding:11px 13px;">'
-          +'<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">'
-            +'<div style="font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);">'+c.label+'</div>'
-            +'<button onclick="event.stopPropagation();_wlCondInfo(this,\''+infoTip+'\')" style="display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-size:8px;font-weight:700;cursor:pointer;flex-shrink:0;line-height:1;padding:0;">i</button>'
-          +'</div>'
-          +'<div style="font-size:13px;font-weight:800;color:'+(c.value?'var(--txt)':'var(--mut)')+';">'+(c.value||'—')+'</div>'
-          +(c.note?'<div style="font-size:9px;color:var(--mut);margin-top:2px;">'+c.note+'</div>':'')
-          +'</div>';
-      });
+      // ── helpers ──────────────────────────────────────────────────────────────
+      var _cs=function(active,strong){
+        if(strong)return'background:#16a34a;color:#fff;font-weight:600;';
+        if(active)return'background:rgba(22,163,74,.22);color:var(--grn);font-weight:500;';
+        return'background:var(--sur2);color:var(--dim);';
+      };
+
+      // ── GOING SCALE ──────────────────────────────────────────────────────────
+      const GOING_SCALE=[
+        {key:'Firm',          short:'Firm'},
+        {key:'Good to Firm',  short:'G/Firm'},
+        {key:'Good',          short:'Good'},
+        {key:'Good to Soft',  short:'G/Soft'},
+        {key:'Soft',          short:'Soft'},
+        {key:'Heavy',         short:'Heavy'},
+        {key:'Standard to Slow',short:'Std/Slw'},
+        {key:'Slow',          short:'Slow'},
+      ];
+      const winGoingSet={};winGoing.forEach(function(g){winGoingSet[g]=(winGoingSet[g]||0)+1;});
+      const hasWinGoing=winGoing.length>0;
+      const manualGoingSet={};_cleanGoingPrefs.forEach(function(g){manualGoingSet[g]=1;});
+      const showAW=e.surface==='aw';
+
+      h+='<div style="padding:10px 13px 4px;">';
+
+      // Going strip
+      h+='<div style="font-size:9px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;">';
+      h+='<span>Ground</span>';
+      if(hasWinGoing)h+='<span style="color:var(--grn);font-size:9px;font-weight:600;">from '+wpReviews.length+' win'+(wpReviews.length!==1?'s/places':'/place')+'</span>';
+      else if(_cleanGoingPrefs.length)h+='<span style="color:var(--mut);font-size:9px;">manual prefs</span>';
       h+='</div>';
-      h+='<div style="padding:8px 13px;font-size:10px;color:var(--mut);">Based on '+wpReviews.length+' win'+(wpReviews.length!==1?'s/places':'/place')+' from '+allReviews.length+' race'+(allReviews.length!==1?'s':'')+'</div>';
+      var gCols=GOING_SCALE.length+(showAW?1:0);
+      h+='<div style="display:grid;grid-template-columns:repeat('+gCols+',1fr);gap:2px;margin-bottom:10px;">';
+      GOING_SCALE.forEach(function(g){
+        const freq=winGoingSet[g.key]||0;
+        const fromManual=!hasWinGoing&&manualGoingSet[g.key];
+        const active=freq>0||fromManual;
+        const strong=freq>=2||(fromManual&&!hasWinGoing);
+        h+='<div style="height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7.5px;text-align:center;line-height:1.1;'+_cs(active,strong)+'">'+g.short+'</div>';
+      });
+      if(showAW){
+        // AW — highlight if surface is aw
+        h+='<div style="height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7.5px;text-align:center;'+_cs(true,true)+'">AW</div>';
+      } else {
+        h+='<div style="height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7.5px;text-align:center;'+_cs(false,false)+'">AW</div>';
+      }
+      h+='</div>';
+
+      // ── DISTANCE SCALE ───────────────────────────────────────────────────────
+      if(idealDist||winDists.length>0){
+        const DIST_BUCKETS=['5f','6f','7f','1m','1m1f','1m2f','1m4f','2m+'];
+        const winDistCounts={};
+        winDists.forEach(function(d){
+          var bucket=d.trim();
+          // Normalise "2m" and longer to "2m+"
+          if(bucket.match(/^[2-9]m/)&&!bucket.match(/^2m\+/))bucket='2m+';
+          winDistCounts[bucket]=(winDistCounts[bucket]||0)+1;
+        });
+        // If manual pref, try to match it to a bucket
+        var manualDistBucket=null;
+        if(!winDists.length&&e.distancePref){
+          const dp=e.distancePref.trim();
+          if(DIST_BUCKETS.indexOf(dp)>-1)manualDistBucket=dp;
+        }
+        h+='<div style="font-size:9px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;">';
+        h+='<span>Distance</span>';
+        if(winDists.length)h+='<span style="color:var(--grn);font-size:9px;font-weight:600;">from '+winDists.length+' run'+(winDists.length!==1?'s':'')+'</span>';
+        else h+='<span style="color:var(--mut);font-size:9px;">manual</span>';
+        h+='</div>';
+        h+='<div style="display:grid;grid-template-columns:repeat('+DIST_BUCKETS.length+',1fr);gap:2px;margin-bottom:10px;">';
+        DIST_BUCKETS.forEach(function(d){
+          const freq=winDistCounts[d]||0;
+          const fromManual=manualDistBucket===d;
+          const active=freq>0||fromManual;
+          const strong=freq>=2||(fromManual&&!winDists.length);
+          h+='<div style="height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;text-align:center;'+_cs(active,strong)+'">'+d+'</div>';
+        });
+        h+='</div>';
+      }
+
+      // ── CHIPS: Class, Run Style, Track, Type, Surface ────────────────────────
+      const chips=[];
+      if(idealClass)chips.push({icon:'🏆',label:idealClass,grn:true});
+      if(e.runStyle)chips.push({icon:'🏇',label:e.runStyle,grn:false});
+      if(e.trackPref)chips.push({icon:'📍',label:e.trackPref,grn:false});
+      if(idealType)chips.push({icon:'📋',label:idealType,grn:false});
+      if(idealSurface&&e.surface!=='aw')chips.push({icon:'🌿',label:idealSurface,grn:false});
+      if(chips.length){
+        h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">';
+        chips.forEach(function(ch){
+          const bg=ch.grn?'rgba(22,163,74,.1)':'var(--sur2)';
+          const col=ch.grn?'var(--grn)':'var(--mut)';
+          const bdr=ch.grn?'rgba(22,163,74,.35)':'var(--bdr)';
+          h+='<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:6px;background:'+bg+';border:0.5px solid '+bdr+';font-size:11px;font-weight:500;color:'+col+';">'+ch.icon+' '+ch.label+'</span>';
+        });
+        h+='</div>';
+      }
+
+      h+='</div>';
+      h+='<div style="padding:0 13px 9px;font-size:10px;color:var(--dim);">Darker cells = wins/places · Faded = not yet run there</div>';
     } else {
       h+='<div style="padding:16px 13px;font-size:12px;color:var(--mut);">Add race reviews with results to build ideal conditions automatically.</div>';
     }

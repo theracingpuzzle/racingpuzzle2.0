@@ -3747,51 +3747,72 @@ function _wlpBuildHTML(e){
   h+='<div class="wlp-section-hdr"><div class="wlp-section-left"><div class="wlp-section-num">5</div><span class="wlp-section-title">Race Reviews</span></div>';
   h+='<span class="wlp-section-action" onclick="openWLPostRaceReview(\''+e.id+'\',\''+jsq(e.horse)+'\',\'\',\'\',\'\')">Add +</span></div>';
   if(profileReviews.length){
-    h+='<div style="position:relative;">'
-      +'<div style="position:absolute;left:26px;top:8px;bottom:8px;width:2px;background:var(--bdr);border-radius:1px;"></div>';
     profileReviews.forEach(function(r){
       const isObs=r.source==='observation';
       const vm=VERDICT_META[r.verdict]||null;
       const rc=RESULT_COL[r.result]||'var(--mut)';
-      h+='<div style="padding:12px 13px 12px 44px;border-bottom:1px solid var(--bdr);position:relative;">'
-        +'<div style="position:absolute;left:20px;top:18px;width:13px;height:13px;border-radius:50%;background:'+rc+';border:2px solid var(--sur);z-index:1;box-shadow:0 0 0 2px '+rc+'40;"></div>';
-      // Row 1: date · course · race name + result badge
-      h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:'+(isObs||r.notes||vm?'6':'0')+'px;">';
-        h+='<div style="min-width:0;flex:1;">';
-          // Date + course — always consistent, always first
-          h+='<div style="font-size:10px;font-weight:700;color:var(--mut);letter-spacing:.04em;margin-bottom:3px;">'+[r.date?_wlpFmt(r.date):'',r.course||''].filter(Boolean).join(' · ')+'</div>';
-          // Race name — primary label
-          h+='<div style="font-family:var(--font);font-size:14px;font-weight:800;color:'+(isObs?'var(--mut)':'var(--txt)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(isObs?'Initial Sighting':(r.raceName||'Race'))+'</div>';
-        h+='</div>';
-        // Result badge right-aligned
-        h+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">';
-          if(r.result)h+='<span style="font-family:var(--font);font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:5px;background:'+rc+'20;border:1px solid '+rc+'40;color:'+rc+';">'+r.result+'</span>';
-          if(vm)h+='<span style="font-family:var(--font);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:'+vm.col+'15;border:1px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';
-        h+='</div>';
-      h+='</div>';
-      // Row 2: detail chips — always show all stats, dash if missing
       const _rGoing=r.groundConditions||r.going||r.raceGoing||r.goingConfirmed||'';
-      const chips=[
-        {l:'Pos',   v:ordinal(r.position)||'—'},
-        {l:'Dist',  v:r.distance||'—'},
-        {l:'Class', v:r.raceClass||'—'},
-        {l:'Ground',v:_rGoing||'—'},
-        ...(r.result==='win'&&!r.beatenDistance?[]:[{l:'Beaten',v:r.beatenDistance||'—'}]),
-        {l:'SP',    v:r.odds||'—'},
-      ];
-      if(r.mrAdjustment)chips.push({l:'MR',v:(r.mrAdjustment>0?'+':'')+r.mrAdjustment});
-      h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">'+chips.map(function(c){return'<div style="font-size:10px;color:var(--txt);"><span style="color:var(--mut);font-weight:600;">'+c.l+'</span> <span style="font-weight:700;">'+esc(c.v)+'</span></div>';}).join('<span style="color:var(--bdr);margin:0 1px;">·</span>')+'</div>';
-      // Row 3: notes
-      if(r.notes)h+='<div style="font-size:12px;color:var(--mut);line-height:1.55;margin-bottom:6px;">'+esc(r.notes)+'</div>';
-      // Row 4: actions — small and subtle
-      h+='<div style="display:flex;gap:8px;margin-top:4px;">'
-        +'<button onclick="openWLEditReview(\''+r.id+'\')" style="font-size:10px;font-weight:700;color:var(--mut);background:none;border:none;padding:0;cursor:pointer;letter-spacing:.03em;">Edit</button>'
-        +'<span style="color:var(--bdr);">·</span>'
-        +'<button onclick="wlDeleteReview(\''+r.id+'\',\''+e.id+'\')" style="font-size:10px;font-weight:700;color:#f87171;background:none;border:none;padding:0;cursor:pointer;letter-spacing:.03em;">Delete</button>'
-      +'</div>';
-      h+='</div>';
+      const pos=r.position?ordinal(r.position):'—';
+
+      // Position tile colour: 1st=green, 2nd=amber, 3rd=bronze, win/place but no pos=green/amber, rest=red
+      var posBg,posCol;
+      if(r.result==='nr'){posBg='rgba(58,58,92,.18)';posCol='#a78bfa';}
+      else if(pos==='1st'||r.result==='win'){posBg='rgba(22,163,74,.15)';posCol='var(--grn)';}
+      else if(pos==='2nd'||r.result==='place'){posBg='rgba(217,119,6,.15)';posCol='#d97706';}
+      else if(pos==='3rd'){posBg='rgba(180,83,9,.15)';posCol='#b45309';}
+      else{posBg='rgba(248,113,113,.15)';posCol='#f87171';}
+
+      // Back next time flag
+      const bnt=r.backNextTime||'';
+      var bntHtml='';
+      if(bnt==='yes')bntHtml='<span style="display:inline-flex;align-items:center;gap:3px;margin-top:5px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:rgba(22,163,74,.1);border:0.5px solid rgba(22,163,74,.3);color:var(--grn);">✓ Back next time</span>';
+      else if(bnt==='maybe')bntHtml='<span style="display:inline-flex;align-items:center;gap:3px;margin-top:5px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:rgba(245,158,11,.1);border:0.5px solid rgba(245,158,11,.3);color:#d97706;">? Watch next time</span>';
+
+      h+='<div style="padding:12px 13px;border-bottom:1px solid var(--bdr);display:flex;gap:11px;">';
+
+      // Position tile
+      h+='<div style="width:38px;height:38px;border-radius:8px;background:'+posBg+';color:'+posCol+';display:flex;align-items:center;justify-content:center;font-size:'+(pos.length>3?'11':'13')+'px;font-weight:800;flex-shrink:0;letter-spacing:-.01em;">'+pos+'</div>';
+
+      // Body
+      h+='<div style="flex:1;min-width:0;">';
+        // Top row: meta + badges
+        h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:3px;">';
+          h+='<div style="min-width:0;flex:1;">';
+            h+='<div style="font-size:10px;font-weight:700;color:var(--mut);letter-spacing:.04em;margin-bottom:2px;">'+[r.date?_wlpFmt(r.date):'',r.course||''].filter(Boolean).join(' · ')+'</div>';
+            h+='<div style="font-size:13px;font-weight:800;color:'+(isObs?'var(--mut)':'var(--txt)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(isObs?'Initial Sighting':(r.raceName||'Race'))+'</div>';
+          h+='</div>';
+          h+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">';
+            if(r.result)h+='<span style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:'+rc+'22;border:0.5px solid '+rc+'44;color:'+rc+';">'+r.result+'</span>';
+            if(vm)h+='<span style="font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:'+vm.col+'15;border:0.5px solid '+vm.col+'30;color:'+vm.col+';">'+vm.label+'</span>';
+          h+='</div>';
+        h+='</div>';
+
+        // Chip row
+        const chipParts=[];
+        if(_rGoing)chipParts.push(esc(_rGoing));
+        if(r.distance)chipParts.push(esc(r.distance));
+        if(r.raceClass)chipParts.push('Cls '+esc(r.raceClass));
+        if(r.beatenDistance&&r.result!=='win')chipParts.push(esc(r.beatenDistance)+'L');
+        if(r.odds)chipParts.push(esc(r.odds)+' SP');
+        if(r.mrAdjustment)chipParts.push('MR '+(r.mrAdjustment>0?'+':'')+r.mrAdjustment);
+        if(chipParts.length)h+='<div style="font-size:10px;color:var(--mut);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+chipParts.join(' · ')+'</div>';
+
+        // Notes
+        if(r.notes)h+='<div style="font-size:12px;color:var(--mut);line-height:1.5;margin-top:5px;">'+esc(r.notes)+'</div>';
+
+        // Back next time
+        if(bntHtml)h+=bntHtml;
+
+        // Actions
+        h+='<div style="display:flex;gap:8px;margin-top:6px;">'
+          +'<button onclick="openWLEditReview(\''+r.id+'\')" style="font-size:10px;font-weight:700;color:var(--mut);background:none;border:none;padding:0;cursor:pointer;letter-spacing:.03em;">Edit</button>'
+          +'<span style="color:var(--bdr);">·</span>'
+          +'<button onclick="wlDeleteReview(\''+r.id+'\',\''+e.id+'\')" style="font-size:10px;font-weight:700;color:#f87171;background:none;border:none;padding:0;cursor:pointer;letter-spacing:.03em;">Delete</button>'
+        +'</div>';
+
+      h+='</div>'; // body
+      h+='</div>'; // card
     });
-    h+='</div>'; // close timeline wrapper
   } else {
     h+='<div style="padding:14px 13px;font-size:12px;color:var(--mut);font-style:italic;text-align:center;">No reviews yet — tap Add after a run</div>';
   }

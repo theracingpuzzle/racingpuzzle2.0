@@ -57,12 +57,19 @@ function saveLocal() {
 function gid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
 function td()  { return new Date().toISOString().slice(0,10); }
 
+// Courses that race in genuine early-morning UK time (HK, etc.) — no PM-bump for these
+const _EARLY_MORNING_COURSES = ['sha tin','happy valley','sha-tin'];
+
 // Time helpers
-function timeToMins(t) {
+// The Racing API returns 12h-format times (e.g. "2:30" = 14:30, "6:00" = 18:00).
+// Apply a PM-bump for times before 09:30, UNLESS the course is a known early-morning venue.
+function timeToMins(t, course) {
   if (!t) return 9999;
   const p = String(t).split(':');
   if (p.length < 2) return 9999;
-  const h = parseInt(p[0])||0, m = parseInt(p[1])||0;
+  let h = parseInt(p[0])||0, m = parseInt(p[1])||0;
+  const isEarlyVenue = course && _EARLY_MORNING_COURSES.some(function(c){return (course+'').toLowerCase().includes(c);});
+  if (!isEarlyVenue && (h < 9 || (h === 9 && m < 30))) h += 12;
   return h*60+m;
 }
 function cmpTime(a, b) { return timeToMins(a) - timeToMins(b); }

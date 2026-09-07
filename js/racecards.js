@@ -175,13 +175,13 @@ function rcSwRenderTime(listEl){
     }
   });
   allRaces.sort(function(a,b){
-    return timeToMins(a.off||a.off_time||a.time||'') - timeToMins(b.off||b.off_time||b.time||'');
+    return timeToMins(a.off||a.off_time||a.time||'',a._course) - timeToMins(b.off||b.off_time||b.time||'',b._course);
   });
   const filteredRaces=allRaces.filter(_rcRaceMatchesFilter);
   const nowMins=new Date().getHours()*60+new Date().getMinutes();
   const upcoming=[],past=[];
   filteredRaces.forEach(function(r){
-    const mins=timeToMins(r.off||r.off_time||r.time||'');
+    const mins=timeToMins(r.off||r.off_time||r.time||'',r._course);
     if(mins===9999||(mins-nowMins)>-5) upcoming.push(r);
     else past.push(r);
   });

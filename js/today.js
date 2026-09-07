@@ -444,6 +444,10 @@ function renderNextRace(){
     const parts=t.split(':');
     if(parts.length<2)return null;
     let h=parseInt(parts[0],10),m=parseInt(parts[1],10);
+    // Apply same PM-bump logic as timeToMins for consistent date construction
+    const _course=item.course||'';
+    const _isEarlyVenue=typeof _EARLY_MORNING_COURSES!=='undefined'&&_EARLY_MORNING_COURSES.some(function(c){return _course.toLowerCase().includes(c);});
+    if(!_isEarlyVenue&&(h<9||(h===9&&m<30)))h+=12;
     const dt=new Date(todayStr+'T'+(String(h).padStart(2,'0'))+':'+String(m).padStart(2,'0')+':00');
     if(isNaN(dt.getTime()))return null;
     return{race:item.race,course:item.course,dt,diff:Math.round((dt-now)/60000)};
@@ -850,8 +854,12 @@ async function checkWatchlistRunners(races){
       // Only show review button once the race has a result or the time has passed
       const raceMinsPast=(function(){
         try{const t=a.time||'';const parts=t.match(/(\d+):(\d+)/);if(!parts)return false;
+          let rh=parseInt(parts[1]),rm=parseInt(parts[2]);
+          const _crs=a.course||'';
+          const _earlyVenue=typeof _EARLY_MORNING_COURSES!=='undefined'&&_EARLY_MORNING_COURSES.some(function(c){return _crs.toLowerCase().includes(c);});
+          if(!_earlyVenue&&(rh<9||(rh===9&&rm<30)))rh+=12;
           const now=new Date();const raceDate=new Date();
-          raceDate.setHours(parseInt(parts[1]),parseInt(parts[2]),0,0);
+          raceDate.setHours(rh,rm,0,0);
           return now>raceDate;}catch(e){return false;}
       })();
       const reviewedInline=alreadyReviewed?'<span class="t-reviewed-inline">✓ Reviewed</span>':'';

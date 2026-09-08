@@ -1168,13 +1168,13 @@ function rcSwRenderResultsUI(){
 
   filterEl.style.display = 'block';
   filterEl.innerHTML =
-    '<div style="display:flex;align-items:center;gap:8px;">'
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:'+(onT?'6':'0')+'px;">'
     + '<div class="rc-view-tog">'
     + '<button class="rc-view-btn '+(onT?'on':'off')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
     + '<button class="rc-view-btn '+(!onT?'on':'off')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
     + '</div>'
-    + (onT?'<button onclick="rcSwResultsDesc=!rcSwResultsDesc;rcSwRenderResultsUI();" style="margin-left:auto;background:none;border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--mut);cursor:pointer;white-space:nowrap;">'+(rcSwResultsDesc?'↓ Latest first':'↑ Earliest first')+'</button>':'')
-    + '</div>';
+    + '</div>'
+    + (onT?'<div style="margin-bottom:8px;"><button onclick="rcSwResultsDesc=!rcSwResultsDesc;rcSwRenderResultsUI();" style="background:none;border:1px solid var(--bdr);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--mut);cursor:pointer;white-space:nowrap;">'+(rcSwResultsDesc?'↓ Latest first':'↑ Earliest first')+'</button></div>':'');
 
   const listEl = document.getElementById('sw-results-list');
   if(!listEl) return;
@@ -1300,10 +1300,7 @@ function rcSwRenderResultsTime(listEl){
       +'<div class="rc-meeting-hdr rc-mtg-ora" onclick="rcSwToggleResTime('+i+')">'
         +'<span class="rc-meeting-flag">'+flag+'</span>'
         +'<div class="rc-meeting-info">'
-          +'<div style="display:flex;align-items:baseline;gap:10px;">'
-            +'<span class="rc-mtg-course" style="letter-spacing:.5px;">'+time+'</span>'
-            +'<span class="rc-mtg-course" style="letter-spacing:.2px;color:rgba(255,255,255,.9);">'+course+'</span>'
-          +'</div>'
+          +'<div class="rc-mtg-course">'+time+' <span style="opacity:.85;font-weight:600;">'+course+'</span></div>'
           +'<div class="rc-mtg-meta">'+count+' runners'+(name?' · '+name:'')+'</div>'
         +'</div>'
         +'<span id="rcrt-chev-'+i+'" class="rc-meeting-chevron'+(isOpen?' open':'')+'" style="'+(isOpen?'transform:rotate(90deg);':'')+'">\u203a</span>'

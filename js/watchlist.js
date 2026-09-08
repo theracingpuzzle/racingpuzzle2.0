@@ -3472,28 +3472,27 @@ function _wlpBuildHTML(e){
       const manualGoingSet={};_cleanGoingPrefs.forEach(function(g){manualGoingSet[g]=1;});
       const showAW=e.surface==='aw';
 
-      h+='<div style="padding:10px 13px 4px;">';
+      h+='<div style="padding:12px 13px 6px;">';
 
       // Going strip
-      h+='<div style="font-size:9px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;">';
+      h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">';
       h+='<span>Ground</span>';
-      if(hasWinGoing)h+='<span style="color:var(--grn);font-size:9px;font-weight:600;">from '+wpReviews.length+' win'+(wpReviews.length!==1?'s/places':'/place')+'</span>';
-      else if(_cleanGoingPrefs.length)h+='<span style="color:var(--mut);font-size:9px;">manual prefs</span>';
+      if(hasWinGoing)h+='<span style="color:var(--grn);font-size:10px;font-weight:600;">from '+wpReviews.length+' win'+(wpReviews.length!==1?'s/places':'/place')+'</span>';
+      else if(_cleanGoingPrefs.length)h+='<span style="color:var(--mut);font-size:10px;">manual prefs</span>';
       h+='</div>';
-      var gCols=GOING_SCALE.length+(showAW?1:0);
-      h+='<div style="display:grid;grid-template-columns:repeat('+gCols+',1fr);gap:2px;margin-bottom:10px;">';
+      var gCols=GOING_SCALE.length+1; // always show AW
+      h+='<div style="display:grid;grid-template-columns:repeat('+gCols+',1fr);gap:3px;margin-bottom:14px;">';
       GOING_SCALE.forEach(function(g){
         const freq=winGoingSet[g.key]||0;
         const fromManual=!hasWinGoing&&manualGoingSet[g.key];
         const active=freq>0||fromManual;
         const strong=freq>=2||(fromManual&&!hasWinGoing);
-        h+='<div style="height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7.5px;text-align:center;line-height:1.1;'+_cs(active,strong)+'">'+g.short+'</div>';
+        h+='<div style="height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;text-align:center;line-height:1.2;padding:0 2px;'+_cs(active,strong)+'">'+g.short+'</div>';
       });
       if(showAW){
-        // AW — highlight if surface is aw
-        h+='<div style="height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7.5px;text-align:center;'+_cs(true,true)+'">AW</div>';
+        h+='<div style="height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;text-align:center;'+_cs(true,true)+'">AW</div>';
       } else {
-        h+='<div style="height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7.5px;text-align:center;'+_cs(false,false)+'">AW</div>';
+        h+='<div style="height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;text-align:center;'+_cs(false,false)+'">AW</div>';
       }
       h+='</div>';
 
@@ -3513,36 +3512,36 @@ function _wlpBuildHTML(e){
           const dp=e.distancePref.trim();
           if(DIST_BUCKETS.indexOf(dp)>-1)manualDistBucket=dp;
         }
-        h+='<div style="font-size:9px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--mut);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;">';
+        h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">';
         h+='<span>Distance</span>';
-        if(winDists.length)h+='<span style="color:var(--grn);font-size:9px;font-weight:600;">from '+winDists.length+' run'+(winDists.length!==1?'s':'')+'</span>';
-        else h+='<span style="color:var(--mut);font-size:9px;">manual</span>';
+        if(winDists.length)h+='<span style="color:var(--grn);font-size:10px;font-weight:600;">from '+winDists.length+' run'+(winDists.length!==1?'s':'')+'</span>';
+        else h+='<span style="color:var(--mut);font-size:10px;">manual</span>';
         h+='</div>';
-        h+='<div style="display:grid;grid-template-columns:repeat('+DIST_BUCKETS.length+',1fr);gap:2px;margin-bottom:10px;">';
+        h+='<div style="display:grid;grid-template-columns:repeat('+DIST_BUCKETS.length+',1fr);gap:3px;margin-bottom:14px;">';
         DIST_BUCKETS.forEach(function(d){
           const freq=winDistCounts[d]||0;
           const fromManual=manualDistBucket===d;
           const active=freq>0||fromManual;
           const strong=freq>=2||(fromManual&&!winDists.length);
-          h+='<div style="height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;text-align:center;'+_cs(active,strong)+'">'+d+'</div>';
+          h+='<div style="height:32px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;text-align:center;'+_cs(active,strong)+'">'+d+'</div>';
         });
         h+='</div>';
       }
 
       // ── CHIPS: Class, Run Style, Track, Type, Surface ────────────────────────
       const chips=[];
-      if(idealClass)chips.push({icon:'🏆',label:idealClass,grn:true});
-      if(e.runStyle)chips.push({icon:'🏇',label:e.runStyle,grn:false});
-      if(e.trackPref)chips.push({icon:'📍',label:e.trackPref,grn:false});
-      if(idealType)chips.push({icon:'📋',label:idealType,grn:false});
-      if(idealSurface&&e.surface!=='aw')chips.push({icon:'🌿',label:idealSurface,grn:false});
+      if(idealClass)chips.push({label:idealClass,grn:true});
+      if(e.runStyle)chips.push({label:e.runStyle,grn:false});
+      if(e.trackPref)chips.push({label:e.trackPref,grn:false});
+      if(idealType)chips.push({label:idealType,grn:false});
+      if(idealSurface&&e.surface!=='aw')chips.push({label:idealSurface,grn:false});
       if(chips.length){
         h+='<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">';
         chips.forEach(function(ch){
           const bg=ch.grn?'rgba(22,163,74,.1)':'var(--sur2)';
           const col=ch.grn?'var(--grn)':'var(--mut)';
           const bdr=ch.grn?'rgba(22,163,74,.35)':'var(--bdr)';
-          h+='<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:6px;background:'+bg+';border:0.5px solid '+bdr+';font-size:11px;font-weight:500;color:'+col+';">'+ch.icon+' '+ch.label+'</span>';
+          h+='<span style="display:inline-flex;align-items:center;padding:4px 9px;border-radius:6px;background:'+bg+';border:0.5px solid '+bdr+';font-size:11px;font-weight:500;color:'+col+';">'+ch.label+'</span>';
         });
         h+='</div>';
       }
@@ -3592,7 +3591,7 @@ function _wlpBuildHTML(e){
   if((e.orHistory||[]).length>1)h+='<span class="wlp-section-action">History ›</span>';
   h+='</div>';
   h+='<div class="wlp-ratings-row">';
-  [{key:'Official Rating',val:e.currentRating,col:'var(--txt)'},{key:'My Rating',val:e.myRating,col:'#f97316'}].forEach(function(r){
+  [{key:'Official Rating',val:e.currentRating,col:'#ffffff'},{key:'My Rating',val:e.myRating,col:'#f97316'}].forEach(function(r){
     const v=parseFloat(r.val)||null;
     h+='<div class="wlp-rating-col"><span class="wlp-rating-key">'+r.key+'</span>';
     if(v){h+='<span class="wlp-rating-val" style="color:'+r.col+';">'+v+'</span>';

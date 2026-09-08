@@ -3492,18 +3492,30 @@ function _wlpBuildHTML(e){
       // ── DISTANCE SCALE ───────────────────────────────────────────────────────
       if(idealDist||winDists.length>0){
         const DIST_BUCKETS=['5f','6f','7f','1m','1m1f','1m2f','1m4f','2m+'];
+        // Map furlongs → bucket label
+        const _fToBucket=function(f){
+          if(f===null||f===undefined)return null;
+          if(f<=5.3)return'5f';
+          if(f<=6.3)return'6f';
+          if(f<=7.3)return'7f';
+          if(f<=8.3)return'1m';
+          if(f<=9.3)return'1m1f';
+          if(f<=11)return'1m2f';
+          if(f<=13)return'1m4f';
+          return'2m+';
+        };
         const winDistCounts={};
         winDists.forEach(function(d){
-          var bucket=d.trim();
-          // Normalise "2m" and longer to "2m+"
-          if(bucket.match(/^[2-9]m/)&&!bucket.match(/^2m\+/))bucket='2m+';
-          winDistCounts[bucket]=(winDistCounts[bucket]||0)+1;
+          const f=_distToFurlongs(d);
+          const bucket=f!==null?_fToBucket(f):null;
+          if(bucket)winDistCounts[bucket]=(winDistCounts[bucket]||0)+1;
         });
-        // If manual pref, try to match it to a bucket
+        // If manual pref, map it to a bucket too
         var manualDistBucket=null;
         if(!winDists.length&&e.distancePref){
-          const dp=e.distancePref.trim();
-          if(DIST_BUCKETS.indexOf(dp)>-1)manualDistBucket=dp;
+          const f=_distToFurlongs(e.distancePref);
+          const b=f!==null?_fToBucket(f):null;
+          if(b&&DIST_BUCKETS.indexOf(b)>-1)manualDistBucket=b;
         }
         h+='<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">';
         h+='<span>Distance</span>';

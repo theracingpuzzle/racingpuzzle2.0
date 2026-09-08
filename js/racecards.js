@@ -1168,8 +1168,8 @@ function rcSwRenderResultsUI(){
 
   filterEl.style.display = 'block';
   filterEl.innerHTML =
-    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:'+(onT?'6':'0')+'px;">'
-    + '<div class="rc-view-tog">'
+    '<div style="margin-bottom:'+(onT?'6':'0')+'px;">'
+    + '<div class="rc-view-tog" style="width:100%;margin-bottom:0;">'
     + '<button class="rc-view-btn '+(onT?'on':'off')+'" onclick="rcSwResultsView=\'time\';rcSwRenderResultsUI();">Time</button>'
     + '<button class="rc-view-btn '+(!onT?'on':'off')+'" onclick="rcSwResultsView=\'course\';rcSwResultsOpenCourse=\'\';rcSwRenderResultsUI();">Course</button>'
     + '</div>'

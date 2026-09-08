@@ -261,8 +261,8 @@ async function _syncProfiles(){
     silk_url:e.silkUrl||null,
     ai_assessment:e.aiAssessment||null,
     ai_assessed_at:e.aiAssessedAt?new Date(e.aiAssessedAt).toISOString():null,
-    created_at:e.createdAt?new Date(e.createdAt).toISOString():new Date().toISOString(),
-    updated_at:e.updatedAt?new Date(e.updatedAt).toISOString():new Date().toISOString()
+    created_at:e.createdAt?new Date(e.createdAt).toISOString():null,
+    updated_at:e.updatedAt?new Date(e.updatedAt).toISOString():null
   };});
   const obs=[];const targets=[];
   wl.forEach(function(e){

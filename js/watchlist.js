@@ -3312,16 +3312,9 @@ function _wlpBuildHTML(e){
           +(e.surface?' · '+({flat:'Flat',jumps:'Jumps',aw:'AW'}[e.surface]||e.surface):'')
         +'</div>'
         // Reason + bet readiness badges
-        +(function(){
-          const br=_brStage(e);
-          return'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">'
-            +'<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:'+reason.col+'20;border:1px solid '+reason.col+'40;color:'+reason.col+';">'+reason.svg+' '+reason.label+'</span>'
-            +'<span onclick="wlToggleBRPicker(\''+e.id+'\')" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:5px;background:'+br.col+'20;border:1px solid '+br.col+'40;color:'+br.col+';cursor:pointer;">'
-              +'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+br.col+';flex-shrink:0;"></span>'
-              +br.label+' ▾'
-            +'</span>'
-          +'</div>';
-        })()
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">'
+          +'<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:'+reason.col+';border:1px solid '+reason.col+';color:#fff;">'+reason.svg+' '+reason.label+'</span>'
+        +'</div>'
       +'</div>'
       +(e.silkUrl
         ?'<img src="'+esc(e.silkUrl)+'" alt="silk" width="100" height="100" style="object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));flex-shrink:0;" onerror="this.style.display=\'none\'">'

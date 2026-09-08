@@ -285,7 +285,8 @@ function setStatsScope(scope){
   window._statsScope=scope;
   // Colour overrides for Real (blue) and Virtual (orange) active states;
   // Both uses the default navy from .rc-view-btn.on
-  const colMap={real:'#60a5fa',virt:'#fb923c'};
+  const colMap={real:'var(--blu)',virt:'#fb923c'};
+  const txtMap={real:'white',virt:'#141414'};
   ['real','virt','both'].forEach(function(s){
     const el=document.getElementById('st-tog-'+s);if(!el)return;
     const active=s===scope;
@@ -294,7 +295,7 @@ function setStatsScope(scope){
     // Override background/color for real and virt active states
     if(active&&colMap[s]){
       el.style.background=colMap[s];
-      el.style.color='#141414';
+      el.style.color=txtMap[s]||'white';
     } else {
       el.style.background='';
       el.style.color='';

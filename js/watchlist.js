@@ -2744,8 +2744,8 @@ const WLP_CSS = `
 }
 .wlp-name-row { display: flex; align-items: center; gap: 8px; }
 .wlp-name {
-  
-  font-size: 40px; letter-spacing: 2px; color: #fff; line-height: 1;
+  font-size: 40px; letter-spacing: 2px; color: #fff; line-height: 1.15;
+  padding-bottom: 3px;
 }
 .wlp-verified {
   width: 20px; height: 20px; background: var(--gld2); border-radius: 50%;
@@ -3305,7 +3305,7 @@ function _wlpBuildHTML(e){
     // Row 1: name + OR badge
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;">'
       +'<div style="flex:1;min-width:0;padding-right:10px;">'
-        +'<div class="wlp-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(e.horse)+'</div>'
+        +(function(){const n=e.horse||'';const fs=n.length>20?n.length>28?'26px':'32px':'40px';return'<div class="wlp-name" style="font-size:'+fs+';display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;">'+esc(n)+'</div>';})()
         +'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600;">'
           +esc(e.trainer||'Unknown trainer')
           +(e.age?' · '+e.age+'yo':'')
@@ -3333,7 +3333,7 @@ function _wlpBuildHTML(e){
       +'<div class="wlp-hero-metric">'
         +'<span class="wlp-hero-metric-label">My Rating</span>'
         +(mr
-          ?'<div class="wlp-hero-metric-val" style="color:var(--gld);">'+mr+'</div>'
+          ?'<div class="wlp-hero-metric-val" style="color:#fbbf24;text-shadow:0 0 12px rgba(251,191,36,.4);">'+mr+'</div>'
           :'<div style="font-size:13px;color:rgba(255,255,255,.3);font-weight:700;padding-top:2px;">—</div>')
       +'</div>'
       // Edge vs OR

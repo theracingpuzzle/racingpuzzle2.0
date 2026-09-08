@@ -53,6 +53,7 @@ let _lgLoaded      = false;
 let _lgView        = 'list'; // 'list' | 'detail' | 'create' | 'join' | 'pick'
 let _lgPickRaces   = [];   // races available to pick from (shared cache)
 
+let _lgAllCommunity   = [];   // all community leagues (joined or not)
 let _lgShowArchived   = false; // toggle for archived (ended) leagues section
 let _lgReactions      = {};   // { pickId: { emoji: [{user_id,display_name}] } }
 let _lgActivity       = [];   // activity feed for current league
@@ -100,21 +101,10 @@ function _lgDefaultDisplayName(){
 async function lgLoad(){
   const uid=_lgUid();
   try{
-    // ── Auto-join any community leagues this user isn't already in ──────────
+    // ── Fetch all community leagues (for the "join" discovery section) ──────
     try{
-      const communityLeagues=await _lgFetch('leagues?is_community=eq.true&order=created_at.asc');
-      if(communityLeagues.length){
-        const myMems=await _lgFetch('league_members?user_id=eq.'+encodeURIComponent(uid)+'&select=league_id');
-        const myLeagueIds=new Set(myMems.map(function(m){return m.league_id;}));
-        const toJoin=communityLeagues.filter(function(l){return !myLeagueIds.has(l.id);});
-        if(toJoin.length){
-          const dname=_lgDefaultDisplayName();
-          await Promise.all(toJoin.map(function(l){
-            return _lgFetch('league_members',{method:'POST',body:JSON.stringify({id:_lgGid(),league_id:l.id,user_id:uid,display_name:dname})});
-          }));
-        }
-      }
-    }catch(e){console.warn('community-auto-join',e);}
+      _lgAllCommunity=await _lgFetch('leagues?is_community=eq.true&order=created_at.asc');
+    }catch(e){console.warn('community-load',e);_lgAllCommunity=[];}
 
     // ── My memberships ──────────────────────────────────────────────────────
     const mems=await _lgFetch('league_members?user_id=eq.'+encodeURIComponent(uid)+'&select=league_id,display_name,joined_at');
@@ -319,7 +309,7 @@ function lgRenderList(el){
     +'</div>';
   }
 
-  // ── Community leagues section ──────────────────────────────────────────────
+  // ── Community leagues section (joined) ────────────────────────────────────
   if(communityLeagues.length){
     h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:0 2px;">'
       +'<span style="color:var(--navy);">'+SVG_GLOBE+'</span>'
@@ -327,6 +317,29 @@ function lgRenderList(el){
     +'</div>'
     +'<div class="blk" style="padding:0;margin-bottom:14px;">';
     communityLeagues.forEach(function(l,idx){ h+=_lgLeagueRow(l,idx,false); });
+    h+='</div>';
+  }
+
+  // ── Available community leagues (not yet joined) ───────────────────────────
+  const myJoinedIds=new Set(_lgMyLeagues.map(function(l){return l.id;}));
+  const availableCommunity=(_lgAllCommunity||[]).filter(function(l){return !myJoinedIds.has(l.id)&&!_lgIsEnded(l);});
+  if(availableCommunity.length){
+    h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:0 2px;">'
+      +'<span style="color:var(--navy);">'+SVG_GLOBE+'</span>'
+      +'<span style="font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);">Available to Join</span>'
+    +'</div>'
+    +'<div class="blk" style="padding:0;margin-bottom:14px;">';
+    availableCommunity.forEach(function(l,idx){
+      h+='<div style="'+(idx?'border-top:1px solid var(--bdr);':'')+'">'
+        +'<div style="display:flex;align-items:center;gap:12px;padding:15px 16px;">'
+          +'<div style="flex:1;min-width:0;">'
+            +'<div style="font-family:var(--font);font-size:17px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_lgEsc(l.name)+'</div>'
+            +'<div style="font-size:12px;color:var(--mut);margin-top:2px;">'+(l.scoring==='wins'?'Win count':'£1 stakes')+'</div>'
+          +'</div>'
+          +'<button onclick="lgJoinCommunity(\''+l.id+'\')" style="flex-shrink:0;padding:7px 14px;border-radius:8px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;">Join</button>'
+        +'</div>'
+      +'</div>';
+    });
     h+='</div>';
   }
 
@@ -832,6 +845,40 @@ async function lgJoinSubmit(){
   }catch(e){
     _lgSetBtnLoading('lg-join-btn', false, 'Join League');
     if(errEl)errEl.textContent='Error joining league: '+(e.message||e);
+  }
+}
+
+// ─── Join a community league directly (no invite code) ───────────────────────
+function lgJoinCommunity(leagueId){
+  const league=(_lgAllCommunity||[]).find(function(l){return l.id===leagueId;});
+  if(!league)return;
+  const defaultName=_lgDefaultDisplayName();
+  _lgOpenModal('Join '+_lgEsc(league.name),
+    '<div class="fg"><label>Your Display Name</label><input id="lg-cjoin-dname" type="text" placeholder="e.g. Dan" autocomplete="off" style="width:100%;box-sizing:border-box;" value="'+_lgEsc(defaultName)+'"></div>'
+    +'<button id="lg-cjoin-btn" onclick="lgJoinCommunitySubmit(\''+leagueId+'\')" style="width:100%;padding:12px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:var(--font);font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-top:8px;">Join League</button>'
+    +'<div id="lg-cjoin-err" style="color:var(--red);font-size:11px;margin-top:8px;text-align:center;"></div>'
+  );
+}
+async function lgJoinCommunitySubmit(leagueId){
+  const dname=(document.getElementById('lg-cjoin-dname')||{value:''}).value.trim();
+  const errEl=document.getElementById('lg-cjoin-err');
+  if(!dname){if(errEl)errEl.textContent='Please enter your display name.';return;}
+  _lgSetBtnLoading('lg-cjoin-btn', true, 'Joining…');
+  if(errEl)errEl.textContent='';
+  try{
+    const uid=_lgUid();
+    const existing=await _lgFetch('league_members?league_id=eq.'+encodeURIComponent(leagueId)+'&user_id=eq.'+encodeURIComponent(uid));
+    if(!existing.length){
+      await _lgFetch('league_members',{method:'POST',body:JSON.stringify({id:_lgGid(),league_id:leagueId,user_id:uid,display_name:dname})});
+    }
+    await lgLoad();
+    const joined=_lgMyLeagues.find(function(x){return x.id===leagueId;});
+    if(joined){_lgCurrent=joined;_lgView='detail';}
+    _lgCloseModal();
+    lgRender();
+  }catch(e){
+    _lgSetBtnLoading('lg-cjoin-btn', false, 'Join League');
+    if(errEl)errEl.textContent='Error joining: '+(e.message||e);
   }
 }
 

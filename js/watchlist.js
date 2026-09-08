@@ -3333,7 +3333,7 @@ function _wlpBuildHTML(e){
       +'<div class="wlp-hero-metric">'
         +'<span class="wlp-hero-metric-label">Official Rating</span>'
         +(or
-          ?'<div class="wlp-hero-metric-val" style="color:#94a3b8;">'+or+'</div>'
+          ?'<div class="wlp-hero-metric-val" style="color:#ffffff;">'+or+'</div>'
           :'<div style="font-size:13px;color:rgba(255,255,255,.3);font-weight:700;padding-top:2px;">—</div>')
       +'</div>'
       // My Mark
@@ -3648,18 +3648,20 @@ function _wlpBuildHTML(e){
       const rv='openWLPostRaceReview(\''+e.id+'\',\''+esc(e.horse)+'\',\''+esc(t.track||'')+'\',\'\',\''+esc(t.race||'')+'\',\'\',\'\',\'\')';
       h+='<div style="padding:11px 13px;border-bottom:1px solid var(--bdr);">';
         // Line 1: date · course — consistent with reviews
-        h+='<div style="font-size:10px;font-weight:700;color:'+(isPast?'var(--mut)':alreadyReviewed?'#4ade80':'var(--gld)')+';letter-spacing:.04em;margin-bottom:3px;">'
-          +[t.date?fdate(t.date):'TBC',t.track||''].filter(Boolean).join(' · ')
-          +(alreadyReviewed?' · <span style="color:#4ade80;">✓ Reviewed</span>':isPast?' · <span style="color:#f59e0b;">Awaiting review</span>':'')
+        h+='<div style="font-size:10px;font-weight:700;color:var(--mut);letter-spacing:.04em;margin-bottom:2px;">'
+          +[t.date?_wlpFmt(t.date):'TBC',t.track||''].filter(Boolean).join(' · ')
         +'</div>';
         // Line 2: race name
-        h+='<div style="font-family:var(--font);font-size:14px;font-weight:800;color:'+(isPast&&!alreadyReviewed?'var(--mut)':'var(--txt)')+';">'+esc(t.race||'—')+'</div>';
+        h+='<div style="font-family:var(--font);font-size:14px;font-weight:800;color:var(--txt);margin-bottom:'+(alreadyReviewed||isPast?'5':'0')+'px;">'+esc(t.race||'—')+'</div>';
+        // Line 3: status badge
+        if(alreadyReviewed)h+='<span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:rgba(74,222,128,.15);border:0.5px solid rgba(74,222,128,.4);color:#4ade80;">✓ Reviewed</span>';
+        else if(isPast)h+='<span style="font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:rgba(245,158,11,.12);border:0.5px solid rgba(245,158,11,.35);color:#f59e0b;">Awaiting</span>';
         // Line 3: condition note if set
         if(t.condition)h+='<div style="font-size:11px;color:var(--mut);margin-top:2px;font-style:italic;">'+esc(t.condition)+'</div>';
         // Line 4: actions — plain text, unobtrusive
         h+='<div style="display:flex;gap:8px;margin-top:6px;align-items:center;">';
           if(!alreadyReviewed)h+='<button onclick="'+rv+'" style="font-size:10px;font-weight:700;color:'+(isPast?'#f59e0b':'var(--mut)')+';background:none;border:none;padding:0;cursor:pointer;">Write review</button><span style="color:var(--bdr);">·</span>';
-          h+='<button onclick="wlDeleteTarget(\''+e.id+'\',\''+esc(t.id||t.race)+'\')" style="font-size:10px;font-weight:700;color:var(--mut);background:none;border:none;padding:0;cursor:pointer;">Remove</button>';
+          h+='<button onclick="wlDeleteTarget(\''+e.id+'\',\''+esc(t.id||t.race)+'\')" style="font-size:10px;font-weight:700;color:#f87171;background:none;border:none;padding:0;cursor:pointer;letter-spacing:.03em;">Remove</button>';
         h+='</div>';
       h+='</div>';
     });

@@ -1569,6 +1569,10 @@ async function rcLoadResults(){
 }
 
 function rcAddToWatchlist(horse, course, jockey, trainer, raceName, ofr, going, time, date, distF, position, raceClass, silkUrl, age){
+  // Values arrive pre-escaped for onclick attribute safety (e.g. O\'Brien → O'Brien) — unescape before storing
+  function _unesc(s){return(s||'').replace(/\\'/g,"'").replace(/\\"/g,'"').replace(/\\\\/g,'\\');}
+  horse=_unesc(horse);trainer=_unesc(trainer);jockey=_unesc(jockey);
+  raceName=_unesc(raceName);course=_unesc(course);silkUrl=_unesc(silkUrl);
   var posNum=parseInt(position)||0;
   var resultVal=posNum===1?'win':posNum>=2&&posNum<=3?'place':posNum>3?'unplaced':'watched';
   var cleanClass=String(raceClass||'').trim().replace(/^class\s*/i,'');
@@ -1600,6 +1604,8 @@ function rcBetFromRunner(event, horse, course, time, jockey, trainer, raceName){
 // ── Quick MR Rating ──────────────────────────────────────────────────────────
 function rcQuickRate(event, horse, or_val, trainer, age){
   event.stopPropagation();
+  function _unesc(s){return(s||'').replace(/\\'/g,"'").replace(/\\"/g,'"').replace(/\\\\/g,'\\');}
+  horse=_unesc(horse);trainer=_unesc(trainer);
   const key=(horse||'').toLowerCase().trim();
   const existing=D.ratings[key]||{};
   const overlay=document.createElement('div');
@@ -1639,6 +1645,8 @@ function rcQuickRate(event, horse, or_val, trainer, age){
 }
 
 function rcSaveQuickRate(horse, or_val){
+  function _unesc(s){return(s||'').replace(/\\'/g,"'").replace(/\\"/g,'"').replace(/\\\\/g,'\\');}
+  horse=_unesc(horse);
   const key=(horse||'').toLowerCase().trim();
   const mr=parseInt(document.getElementById('qr-mr').value)||0;
   const note=(document.getElementById('qr-note').value||'').trim();
@@ -1658,6 +1666,8 @@ function rcSaveQuickRate(horse, or_val){
 }
 
 function rcPromoteToProfile(horse, or_val, trainer, age){
+  function _unesc(s){return(s||'').replace(/\\'/g,"'").replace(/\\"/g,'"').replace(/\\\\/g,'\\');}
+  horse=_unesc(horse);trainer=_unesc(trainer);
   const key=(horse||'').toLowerCase().trim();
   const mr=parseInt((document.getElementById('qr-mr')||{}).value)||0;
   const note=(document.getElementById('qr-note').value||'').trim();

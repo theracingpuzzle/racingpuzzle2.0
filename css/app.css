@@ -81,6 +81,14 @@ body.dark input::placeholder, body.dark textarea::placeholder { color: var(--mut
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--txt); font-family: var(--font); font-size: 16px; -webkit-font-smoothing: antialiased; }
+/* 100% (not 100vh) against the initial containing block is usually safe-area
+   aware, but 100dvh is the unit WebKit specifically keeps in sync with the
+   true visible viewport — including standalone-mode sizing quirks that a
+   plain percentage height can miss. Layered on top of height:100% so it only
+   takes effect where dvh is supported (iOS 15.4+), never a regression. */
+@supports (height: 100dvh) {
+  html, body { height: 100dvh; }
+}
 
 /* ═══════════════════════════════════════════════════════════
    HEADER — navy
@@ -140,7 +148,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
    strip unpainted below the nav. The shell reserves matching space via
    padding-bottom so scrolling content never sits underneath the fixed bar. */
 @media (max-width: 767.98px) {
-  body { display: flex; flex-direction: column; }
+  /* iOS "Add to Home Screen" apps reserve the home-indicator strip for
+     themselves on some versions regardless of viewport-fit:cover — no CSS
+     layout can put real content there. Paint it navy (matching the nav bar
+     behind it) so it reads as more of the bar instead of a stray gap. */
+  body { display: flex; flex-direction: column; background: var(--navy); }
   .sw-shell, .cmd-shell {
     height: auto; flex: 1 1 auto; min-height: 0;
     padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));

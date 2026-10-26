@@ -18,6 +18,24 @@ function ordinal(pos){
 }
 // Ensures a space between jockey name and apprentice claim e.g. "J.Smith(5)" → "J.Smith (5)"
 function fmtJockey(j){return(j||'—').replace(/([a-zA-Z])\(/g,'$1 (');}
+// Converts a decimal beaten-distance (racing API 'btn' convention, in lengths) into
+// racing shorthand below 1 length, and "N 1/4/1/2/3/4 lengths" at and above it.
+// Non-numeric input (already-formatted text, "dist", etc.) passes through unchanged.
+function formatBeatenDistance(v){
+  if(v===null||v===undefined||v==='')return '';
+  const n=parseFloat(v);
+  if(isNaN(n))return v;
+  if(n===0)return 'dead-heat';
+  if(n===0.05)return 'nose';
+  if(n===0.1)return 'short-head';
+  if(n===0.2)return 'head';
+  if(n===0.3)return 'neck';
+  const whole=Math.floor(n);
+  const frac=Math.round((n-whole)*4)/4;
+  const fracLbl=frac===0.75?'3/4':frac===0.5?'1/2':frac===0.25?'1/4':'';
+  const numLbl=whole>0?(whole+(fracLbl?' '+fracLbl:'')):fracLbl;
+  return (numLbl||String(n))+' '+(n>1?'lengths':'length');
+}
 function fp(n){return'£'+(parseFloat(n)||0).toFixed(2);}
 // Converts a stored YYYY-MM-DD date string to DD-MM-YYYY for display
 function fdate(d){if(!d)return d;const p=String(d).split('-');return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:d;}

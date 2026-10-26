@@ -1267,7 +1267,7 @@ function rcSwRaceCard(race, course){
             + '</div>'
             + (jock?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Jockey</span><span class="rc-runner-jt">'+jock+'</span></div>':'')
             + (trainer?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Trainer</span><span class="rc-runner-jt">'+trainer+'</span></div>':'')
-            + (pos>1&&(r.ovr_btn||r.btn||r.distance_beaten||r.beaten)?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Beaten</span><span class="rc-runner-jt" style="color:var(--mut);">'+(r.ovr_btn||r.btn||r.distance_beaten||r.beaten)+'</span></div>':'')
+            + (pos>1&&(r.ovr_btn||r.btn||r.distance_beaten||r.beaten)?'<div class="rc-runner-detail-row"><span class="rc-detail-lbl">Beaten</span><span class="rc-runner-jt" style="color:var(--mut);">'+formatBeatenDistance(r.ovr_btn||r.btn||r.distance_beaten||r.beaten)+'</span></div>':'')
           + '</div>'
           + '<div class="rc-runner-right">'
             + (sp?'<span class="rc-sp">'+sp+'</span>':'')

@@ -2024,7 +2024,7 @@ function openWLForm(id,prefill){
                   {lbl:'Dist',   val:r.distance||'—'},
                   {lbl:'Class',  val:r.raceClass||'—'},
                   {lbl:'Ground', val:r.going||r.groundConditions||'—'},
-                  ...(r.result==='win'&&!r.beatenDistance?[]:[{lbl:'Beaten',val:r.beatenDistance||'—'}]),
+                  ...(r.result==='win'&&!r.beatenDistance?[]:[{lbl:'Beaten',val:r.beatenDistance?formatBeatenDistance(r.beatenDistance):'—'}]),
                   {lbl:'SP',     val:r.odds||'—', color:r.odds?'var(--gld)':undefined},
                 ];
                 const statsRow=stats.length
@@ -3729,7 +3729,7 @@ function _wlpBuildHTML(e){
             +'<div style="font-size:11px;color:var(--mut);margin-top:2px;">'
               +[item.date?_wlpFmt(item.date):'',item.course,item.raceDist,item.raceGoing].filter(Boolean).join(' · ')
             +'</div>'
-            +((item.position||item.sp)?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">'+(item.position?'Finished: <strong>'+esc(ordinal(item.position))+'</strong>'+(item.beatenDistance?' · <span style="color:var(--mut);">'+esc(item.beatenDistance)+'L</span>':''):'')+(item.sp?(item.position?' · ':'')+'<span style="color:var(--gld);font-weight:700;">SP '+esc(item.sp)+'</span>':'')+'</div>':'')
+            +((item.position||item.sp)?'<div style="font-size:11px;color:var(--txt);margin-top:2px;">'+(item.position?'Finished: <strong>'+esc(ordinal(item.position))+'</strong>'+(item.beatenDistance?' · <span style="color:var(--mut);">'+esc(formatBeatenDistance(item.beatenDistance))+'</span>':''):'')+(item.sp?(item.position?' · ':'')+'<span style="color:var(--gld);font-weight:700;">SP '+esc(item.sp)+'</span>':'')+'</div>':'')
             +(label?'<div style="font-size:10px;color:#f59e0b;margin-top:3px;font-style:italic;">'+label+'</div>':'')
           +'</div>'
           +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;">'
@@ -3798,7 +3798,7 @@ function _wlpBuildHTML(e){
         if(_rGoing)chipParts.push(esc(_rGoing));
         if(r.distance)chipParts.push(esc(r.distance));
         if(r.raceClass)chipParts.push('Cls '+esc(r.raceClass));
-        if(r.beatenDistance&&r.result!=='win')chipParts.push(esc(r.beatenDistance)+'L');
+        if(r.beatenDistance&&r.result!=='win')chipParts.push(esc(formatBeatenDistance(r.beatenDistance)));
         if(r.odds)chipParts.push(esc(r.odds)+' SP');
         if(r.mrAdjustment)chipParts.push('MR '+(r.mrAdjustment>0?'+':'')+r.mrAdjustment);
         if(chipParts.length)h+='<div style="font-size:10px;color:var(--mut);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+chipParts.join(' · ')+'</div>';

@@ -5,27 +5,18 @@ const NAV_CARD_MAP  = {today:0, races:1, results:2, tracker:3};
 
 (function(){
   function setH(){
-    // Measure safe-area-inset-top
-    const tTop = document.createElement('div');
-    tTop.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);height:0;pointer-events:none;visibility:hidden;';
-    document.body.appendChild(tTop);
-    const sat = tTop.getBoundingClientRect().top;
-    document.body.removeChild(tTop);
-
-    // Measure safe-area-inset-bottom (extends the nav on iOS PWA)
-    const tBot = document.createElement('div');
-    tBot.style.cssText = 'position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);pointer-events:none;visibility:hidden;';
-    document.body.appendChild(tBot);
-    const sab = tBot.offsetHeight || 0;
-    document.body.removeChild(tBot);
-
-    // On desktop (≥768px) nav is a sidebar — shell fills full height minus header only
+    // On desktop (≥768px) nav is a fixed sidebar — shell fills full height minus
+    // header only. Below that breakpoint, app.css sizes the shell with flexbox
+    // instead (a JS window.innerHeight read can go stale right after an
+    // installed PWA launches, leaving a blank gap below the bottom nav).
     const isDesktop = window.innerWidth >= 768;
     if(isDesktop){
+      const tTop = document.createElement('div');
+      tTop.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);height:0;pointer-events:none;visibility:hidden;';
+      document.body.appendChild(tTop);
+      const sat = tTop.getBoundingClientRect().top;
+      document.body.removeChild(tTop);
       document.documentElement.style.setProperty('--shell-h', (window.innerHeight - 56 - sat - 34) + 'px');
-    } else {
-      // Shell sits between header (56px) and nav (72px base + safe-area-bottom)
-      document.documentElement.style.setProperty('--shell-h', (window.innerHeight - 56 - sat - 72 - sab) + 'px');
     }
   }
   setH();

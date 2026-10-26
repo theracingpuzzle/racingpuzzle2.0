@@ -6,6 +6,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "-l", "4321", "."],
       "port": 4321
+    },
+    {
+      "name": "racingpuzzle-py",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4322"],
+      "port": 4322
     }
   ]
 }

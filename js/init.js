@@ -10,8 +10,16 @@ const _SUN_SVG  = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 
 function _applyDark(dark) {
   document.body.classList.toggle('dark', dark);
-  const btn = document.getElementById('dark-toggle-btn');
-  if (btn) btn.innerHTML = dark ? _SUN_SVG : _MOON_SVG;
+  const icon = document.getElementById('profile-dark-icon');
+  if (icon) icon.innerHTML = dark ? _SUN_SVG : _MOON_SVG;
+  const label = document.getElementById('profile-dark-label');
+  if (label) label.textContent = dark ? 'Dark mode — tap to switch to light' : 'Light mode — tap to switch to dark';
+  const sw = document.getElementById('profile-dark-switch');
+  if (sw) {
+    sw.style.background = dark ? 'var(--navy)' : 'var(--bdr)';
+    const dot = sw.firstElementChild;
+    if (dot) dot.style.transform = dark ? 'translateX(18px)' : 'translateX(0)';
+  }
 }
 
 function toggleDarkMode() {

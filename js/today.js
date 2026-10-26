@@ -2049,10 +2049,9 @@ async function fetchTodayResults(){
     window._todayResultsCache=rcSwResultsData;
     return rcSwResultsData;
   }
-  // 2. Fetch from the correct results endpoint
+  // 2. Fetch from the correct results endpoint (paginated — busy days exceed the 50/page default)
   try{
-    const _rtd=await callRacingAPI('results/today',{});
-    const res=_rtd.results||_rtd.racecards||_rtd.races||[];
+    const res=await callRacingAPIAll('results/today',{},'results');
     if(res.length){
       window._todayResultsCache=res;
       if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(res);

@@ -1145,8 +1145,7 @@ async function rcSwLoadResults(){
   if(filterEl) filterEl.style.display='none';
 
   try{
-    const raw=await callRacingAPI('results/today',{});
-    rcSwResultsData=raw.results||raw.races||[];
+    rcSwResultsData=await callRacingAPIAll('results/today',{},'results');
     if(stEl) stEl.style.display='none';
     autoMatchBetResults(rcSwResultsData);
     if(!rcSwResultsData.length){
@@ -1509,8 +1508,7 @@ async function rcLoadResults(){
   const el=document.getElementById('rc-results-list');
   if(el)el.innerHTML='';
   try{
-    const _rd=await callRacingAPI('results/today',{});
-    const results=_rd.results||_rd.races||[];
+    const results=await callRacingAPIAll('results/today',{},'results');
     rcSetStatus('');
     autoMatchBetResults(results);
     if(typeof wlPatchSilksFromRunners==='function') wlPatchSilksFromRunners(results);

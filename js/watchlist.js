@@ -551,13 +551,13 @@ async function wlFetchAndPatchSilks(){
   if(btn){btn.textContent='Fetching…';btn.disabled=true;}
   try{
     const [todayData,yestData,cardsData]=await Promise.allSettled([
-      callRacingAPI('results/today',{}),
-      callRacingAPI('results/yesterday',{}),
+      callRacingAPIAll('results/today',{},'results'),
+      callRacingAPIAll('results/yesterday',{},'results'),
       callRacingAPI('racecards/basic',{})
     ]);
     const allRaces=[
-      ...((todayData.status==='fulfilled'&&(todayData.value.results||todayData.value.races))||[]),
-      ...((yestData.status==='fulfilled'&&(yestData.value.results||yestData.value.races))||[]),
+      ...((todayData.status==='fulfilled'&&todayData.value)||[]),
+      ...((yestData.status==='fulfilled'&&yestData.value)||[]),
       ...((cardsData.status==='fulfilled'&&(cardsData.value.racecards||cardsData.value.races))||[])
     ];
     wlPatchSilksFromRunners(allRaces);

@@ -140,24 +140,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .cmd-shell { display: none !important; height: var(--shell-h); flex-direction: column; overflow: hidden; background: var(--bg); }
 .cmd-shell.on { display: flex !important; }
 
-/* Mobile: size the shell with flexbox instead of a JS-measured pixel height,
-   and pin the bottom nav with position:fixed instead of normal flow.
-   WebKit applies env(safe-area-inset-bottom) unreliably to statically
-   positioned elements in standalone (installed) PWA mode — fixed-position
-   elements are the reliable case — which was leaving the home-indicator
-   strip unpainted below the nav. The shell reserves matching space via
-   padding-bottom so scrolling content never sits underneath the fixed bar. */
+/* Mobile: size the shell with flexbox instead of a JS-measured pixel height.
+   The app no longer requests viewport-fit:cover (see index.html), so iOS
+   reserves the status bar and home-indicator areas outside the page's own
+   viewport automatically — the bottom nav stays in normal document flow
+   and flexbox gives the shell exactly the space between header and nav,
+   no safe-area arithmetic required. */
 @media (max-width: 767.98px) {
-  /* iOS "Add to Home Screen" apps reserve the home-indicator strip for
-     themselves on some versions regardless of viewport-fit:cover — no CSS
-     layout can put real content there. Paint it navy (matching the nav bar
-     behind it) so it reads as more of the bar instead of a stray gap. */
   body { display: flex; flex-direction: column; background: var(--navy); }
-  .sw-shell, .cmd-shell {
-    height: auto; flex: 1 1 auto; min-height: 0;
-    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
-  }
-  .bnav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; }
+  .sw-shell, .cmd-shell { height: auto; flex: 1 1 auto; min-height: 0; }
 }
 
 .deck { position: relative; flex: 1; overflow: hidden; min-height: 0; }

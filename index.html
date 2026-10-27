@@ -47,12 +47,6 @@
       </button>
     </div>
     <div class="hdr-icons">
-      <button onclick="initAutoScroll()" title="Auto-scroll (record mode)" style="background:none;border:none;cursor:pointer;padding:2px 4px;color:rgba(255,255,255,.45);display:flex;align-items:center;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg>
-      </button>
-      <button class="coach-hdr-btn" id="coach-hdr-btn" onclick="coachDrawerOpen()" title="The Coach">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 1 5 5c0 2.05-1.23 3.81-3 4.58V13a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-1.42C8.23 10.81 7 9.05 7 7a5 5 0 0 1 5-5z"/><path d="M9 17h6"/><path d="M10 20h4"/></svg>
-      </button>
       <button class="hdr-profile-btn" id="hdr-profile-btn" onclick="profileOpen()" title="Account &amp; Profile">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="10" cy="7" r="3"/>
@@ -671,6 +665,13 @@
             </div>
           </div>
 
+          <!-- Record Mode (demo/screenshot auto-scroll — not a user setting) -->
+          <div class="blk">
+            <div class="bttl">🎬 Record Mode</div>
+            <div style="font-size:11px;color:var(--mut);margin-bottom:9px;">Auto-scrolls the app at an adjustable speed — for recording demo footage, not everyday use.</div>
+            <button class="btn bout" onclick="initAutoScroll()">Start Auto-Scroll</button>
+          </div>
+
           <!-- Terms -->
           <div class="blk" style="text-align:center;padding:14px 0 4px;">
             <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
@@ -1049,6 +1050,17 @@
           <span id="profile-dark-switch" style="flex-shrink:0;width:40px;height:22px;border-radius:999px;background:var(--bdr);position:relative;transition:background .15s;">
             <span style="position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s;"></span>
           </span>
+        </button>
+        <!-- The Coach -->
+        <button onclick="profileClose();coachDrawerOpen();" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--txt);text-align:left;cursor:pointer;margin-bottom:10px;font-family:inherit;">
+          <span style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(168,85,247,.1);color:#a855f7;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 1 5 5c0 2.05-1.23 3.81-3 4.58V13a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-1.42C8.23 10.81 7 9.05 7 7a5 5 0 0 1 5-5z"/><path d="M9 17h6"/><path d="M10 20h4"/></svg>
+          </span>
+          <div style="flex:1;">
+            <div style="font-family:var(--font);font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;">The Coach</div>
+            <div style="font-size:11px;color:var(--mut);margin-top:1px;">AI feedback on your betting discipline</div>
+          </div>
+          <span style="color:var(--mut);font-size:16px;">›</span>
         </button>
         <!-- Guide -->
         <button onclick="profileClose();helpOpen('overview');" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;border:1px solid var(--bdr);background:transparent;color:var(--txt);text-align:left;cursor:pointer;margin-bottom:10px;font-family:inherit;">

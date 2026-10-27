@@ -281,6 +281,7 @@ function lgRenderList(el){
       +'<div style="font-family:var(--font);font-size:22px;font-weight:900;color:'+scoreCol+';">'+scoreVal+'</div>'
       +'<div style="font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;">'+(l.scoring==='wins'?'wins':'P&L')+'</div>'
     +'</div>'
+    +(isCommunity?'':'<button onclick="event.stopPropagation();'+actionFn+'" title="'+actionLabel+' league" style="background:none;border:none;color:var(--mut);padding:4px;margin-left:2px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>')
     +'<span id="lg-row-chev-'+l.id+'" style="color:var(--mut);font-size:18px;margin-left:2px;">›</span>';
     // Community leagues: no swipe-to-action exposed
     if(isCommunity){
@@ -460,15 +461,10 @@ function lgRenderDetail(el){
     {id:'history',label:'History'},
     {id:'feed',label:'Feed'},
   ];
-  const missingOddsCount=(function(){
-    const hp=isAdmin?allPicks:allPicks.filter(function(p){return p.user_id===uid;});
-    return hp.filter(function(p){return !p.odds&&p.result==='pending';}).length;
-  })();
   h+='<div style="display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--bdr);margin-bottom:12px;">'
     +tabs.map(function(t){
       const active=_lgDetailTab===t.id;
-      const badge=t.id==='history'&&missingOddsCount?'<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#f59e0b;color:#000;font-size:9px;font-weight:900;margin-left:4px;">'+missingOddsCount+'</span>':'';
-      return'<button onclick="lgDetailTab(\''+t.id+'\')" style="flex:1;padding:10px 4px;border:none;border-right:'+(t.id!=='feed'?'1px solid var(--bdr)':'none')+';background:'+(active?'var(--navy)':'var(--sur2)')+';color:'+(active?'#fff':'var(--mut)')+';font-family:var(--font);font-size:13px;font-weight:'+(active?'800':'600')+';letter-spacing:.03em;cursor:pointer;transition:background .15s;">'+t.label+badge+'</button>';
+      return'<button onclick="lgDetailTab(\''+t.id+'\')" style="flex:1;padding:10px 4px;border:none;border-right:'+(t.id!=='feed'?'1px solid var(--bdr)':'none')+';background:'+(active?'var(--navy)':'var(--sur2)')+';color:'+(active?'#fff':'var(--mut)')+';font-family:var(--font);font-size:13px;font-weight:'+(active?'800':'600')+';letter-spacing:.03em;cursor:pointer;transition:background .15s;">'+t.label+'</button>';
     }).join('')
   +'</div>';
 
@@ -508,14 +504,14 @@ function lgRenderDetail(el){
         const canEditOdds=(isMe||isAdmin)&&!p.odds;
         const canOverrideOdds=(isMe||isAdmin)&&p.odds;
         h+='<div style="display:flex;flex-direction:column;gap:4px;">'
-          +'<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(canEditOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(canEditOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.15);':'')+'">'
+          +'<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid var(--bdr);">'
             +'<div style="flex:1;min-width:0;">'
               +'<div style="font-size:16px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+'</div>'
-              +'<div style="font-size:12px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+(p.odds_display||p.odds)+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+'</div>'
+              +'<div style="font-size:12px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+(p.odds_display||p.odds)+'</span>':'')+'</div>'
             +'</div>'
             +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">'
               +(canEditOdds||canOverrideOdds?'<div id="lg-odds-edit-'+p.id+'">'
-                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds_display||p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
+                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds_display||p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
                   +'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>'
                   +(p.odds?'Edit Odds':'Add Odds')
                 +'</button>'
@@ -570,12 +566,10 @@ function lgRenderDetail(el){
     const histPicks=isAdmin
       ?allPicks.slice().sort(function(a,b){return b.pick_date<a.pick_date?-1:b.pick_date>a.pick_date?1:0;})
       :allPicks.filter(function(p){return p.user_id===uid;}).sort(function(a,b){return b.pick_date<a.pick_date?-1:b.pick_date>a.pick_date?1:0;});
-    const missingOdds=histPicks.filter(function(p){return !p.odds&&p.result==='pending';});
     if(histPicks.length){
       h+='<div class="blk">'
         +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'
           +'<div class="bttl" style="border:none;padding:0;margin:0;">Pick History</div>'
-          +(missingOdds.length?'<span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:5px;padding:2px 7px;">'+missingOdds.length+' missing odds</span>':'')
         +'</div>';
       // Group by date
       const byDate={};
@@ -593,18 +587,17 @@ function lgRenderDetail(el){
           const res=p.result||'pending';
           const resCol=res==='win'?'var(--grn)':res==='loss'?'#f87171':'var(--mut)';
           const resBg=res==='win'?'rgba(30,58,95,.08)':res==='loss'?'rgba(248,113,113,.1)':'rgba(255,255,255,.04)';
-          const needsOdds=res==='pending'&&!p.odds;
           const canEdit=(p.user_id===uid||isAdmin);
           // Find member display name for admin view
           const memberName=isAdmin?(function(){const mb=members.find(function(m){return m.user_id===p.user_id;});return mb?mb.display_name:'';})():'';
-          h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid '+(needsOdds?'rgba(245,158,11,.35)':'var(--bdr)')+';'+(needsOdds?'box-shadow:0 0 0 1px rgba(245,158,11,.12);':'')+'">'
+          h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;background:var(--bg);border:1px solid var(--bdr);">'
             +'<div style="flex:1;min-width:0;">'
               +'<div style="font-size:16px;font-weight:700;color:var(--txt);">'+_lgEsc(p.horse)+(isAdmin&&memberName?' <span style="font-size:11px;color:var(--mut);font-weight:500;">'+_lgEsc(memberName)+'</span>':'')+'</div>'
-              +'<div style="font-size:12px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+(p.odds_display||p.odds)+'</span>':'<span style="color:#f59e0b;"> · No odds</span>')+(res==='win'&&p.returns?' · <span style="color:var(--grn);">+'+Number(p.returns).toFixed(2)+'</span>':'')+'</div>'
+              +'<div style="font-size:12px;color:var(--mut);">'+(p.race_time||'')+(p.course?' · '+p.course:'')+(p.odds?' · <span style="color:var(--gld);font-weight:700;">'+(p.odds_display||p.odds)+'</span>':'')+(res==='win'&&p.returns?' · <span style="color:var(--grn);">+'+Number(p.returns).toFixed(2)+'</span>':'')+'</div>'
             +'</div>'
             +'<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">'
               +(canEdit?'<div id="lg-odds-edit-'+p.id+'">'
-                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds_display||p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#f59e0b;font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
+                +'<button onclick="lgShowOddsEdit(\''+p.id+'\',\''+_lgEsc(p.odds_display||p.odds||'')+'\')" style="display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;border:1px solid var(--bdr);background:var(--sur2);color:var(--mut);font-family:var(--font);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">'
                   +'<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>'
                   +(p.odds?'Edit':'Add Odds')
                 +'</button>'
@@ -631,12 +624,16 @@ function lgRenderDetail(el){
     +'</div>';
   }
 
-  // Footer action — community and archived leagues show no actions; private active leagues show role-based option
+  // Footer action — community and archived leagues show no actions; private active leagues show role-based option.
+  // Admins with other members get "End League" (soft-close, keeps everyone's history) rather than a
+  // permanent delete — hard delete is reserved for when the admin is still the only member.
   const _isArchived=_lgIsEnded(l);
   if(!_isArchived&&!_isCommunity){
+    const _soloAdmin=isAdmin&&members.length<=1;
     h+='<div style="text-align:center;margin-top:4px;display:flex;gap:16px;justify-content:center;">'
       +(!isAdmin?'<button onclick="lgLeaveLeague(\''+l.id+'\')" style="font-size:11px;color:var(--mut);background:none;border:none;cursor:pointer;text-decoration:underline;">Leave league</button>':'')
-      +(isAdmin?'<button onclick="lgDeleteLeague(\''+l.id+'\')" style="font-size:11px;color:#f87171;background:none;border:none;cursor:pointer;text-decoration:underline;">Delete league</button>':'')
+      +(isAdmin&&_soloAdmin?'<button onclick="lgDeleteLeague(\''+l.id+'\')" style="font-size:11px;color:#f87171;background:none;border:none;cursor:pointer;text-decoration:underline;">Delete league</button>':'')
+      +(isAdmin&&!_soloAdmin?'<button onclick="lgEndLeague(\''+l.id+'\')" style="font-size:11px;color:#f87171;background:none;border:none;cursor:pointer;text-decoration:underline;">End league</button>':'')
     +'</div>';
   }
 
@@ -1237,6 +1234,24 @@ async function lgDeleteLeague(id){
     _lgCurrent=null;_lgView='list';
     lgRender();
   }catch(e){alert('Error deleting league.');}
+}
+
+// Soft-close a league with other members in it — locks picks and moves it to
+// Archived, but keeps every member's history and standings intact (unlike
+// lgDeleteLeague, which permanently destroys everyone's picks).
+async function lgEndLeague(id){
+  if(!confirm('End this league now? The leaderboard will be locked and no more picks can be added. This will not delete anyone’s picks or history.'))return;
+  // _lgIsEnded() treats end_date as the last active day (today > end_date), so
+  // closing "as of right now" means setting it to yesterday, not today.
+  const d=new Date();d.setDate(d.getDate()-1);
+  const endDate=d.toISOString().slice(0,10);
+  try{
+    await _lgFetch('leagues?id=eq.'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({end_date:endDate})});
+    const l=_lgMyLeagues.find(function(x){return x.id===id;});
+    if(l)l.end_date=endDate;
+    if(_lgCurrent&&_lgCurrent.id===id)_lgCurrent.end_date=endDate;
+    lgRender();
+  }catch(e){alert('Error ending league.');}
 }
 
 async function lgLeaveLeague(id){

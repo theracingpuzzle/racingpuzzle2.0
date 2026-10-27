@@ -38,6 +38,60 @@ function timeToMins(t) {
   return h * 60 + m;
 }
 
+// ── Odds / returns — server-side port of fo() and calcReturns() from js/utils.js ──
+
+function foToDecimal(s) {
+  if (!s) return 0;
+  s = String(s).trim().toUpperCase().replace(/\s/g, '');
+  if (s === 'EVS' || s === 'EVENS' || s === '1/1') return 2;
+  const m = s.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if (m) {
+    const n = parseFloat(m[1]), d = parseFloat(m[2]);
+    return d > 0 ? parseFloat((n / d + 1).toFixed(4)) : 0;
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+// Standard UK each-way place terms by field size
+function placeTermsFor(numRunners) {
+  if (numRunners <= 4) return null;
+  if (numRunners <= 7) return '1/4';
+  if (numRunners <= 12) return '1/5';
+  return '1/4';
+}
+function placesNumFor(numRunners) {
+  if (numRunners <= 4) return 1;
+  if (numRunners <= 7) return 2;
+  if (numRunners <= 12) return 3;
+  return 4;
+}
+
+function calcReturnsServer(result, stake, odDec, betType, ewTerms) {
+  stake = parseFloat(stake) || 0; odDec = parseFloat(odDec) || 0;
+  if (!stake || !odDec) return 0;
+  if (result === 'win') {
+    if (betType === 'ew') {
+      const leg = stake / 2;
+      let frac = 0.25; const m = (ewTerms || '').match(/1\/(\d+)/); if (m) frac = 1 / parseInt(m[1]);
+      return parseFloat((leg * odDec + leg * (frac * (odDec - 1) + 1)).toFixed(2));
+    }
+    return parseFloat((stake * odDec).toFixed(2));
+  }
+  if (result === 'place') {
+    if (betType === 'ew') {
+      const leg = stake / 2;
+      let frac = 0.25; const m = (ewTerms || '').match(/1\/(\d+)/); if (m) frac = 1 / parseInt(m[1]);
+      return parseFloat((leg * (frac * (odDec - 1) + 1)).toFixed(2));
+    }
+    if (betType === 'place') return parseFloat((stake * odDec).toFixed(2));
+    return 0;
+  }
+  if (result === 'loss') return 0;
+  if (result === 'void' || result === 'nr') return stake;
+  return 0;
+}
+
 // ── HKDF ─────────────────────────────────────────────────────────────────────
 
 async function hkdf(salt, ikm, info, length) {
@@ -156,6 +210,138 @@ async function supaFetch(env, path, method = 'GET', body = null) {
   return fetch(env.SUPA_URL + '/rest/v1' + path, opts);
 }
 
+// ── Racing API: fetch a results endpoint, following pagination ────────────────
+// (results/today and results/yesterday cap at 50 per page by default — a busy
+// day can have 70+ results, so a single unpaginated fetch silently drops some.)
+async function fetchResultsPaginated(env, endpoint) {
+  const all = [];
+  let skip = 0;
+  const LIMIT = 100;
+  while (true) {
+    const resp = await fetch(
+      `https://api.theracingapi.com/v1/${endpoint}?limit=${LIMIT}&skip=${skip}`,
+      { headers: { 'Authorization': 'Basic ' + btoa(`${env.RACING_API_USER}:${env.RACING_API_PASS}`), 'Accept': 'application/json' } }
+    );
+    const data = await resp.json().catch(() => ({}));
+    const page = data.results || data.races || [];
+    if (!page.length) break;
+    all.push(...page);
+    if (page.length < LIMIT) break;
+    skip += LIMIT;
+    if (skip >= 1000) break; // safety cap
+  }
+  return all;
+}
+
+// Build normalized-horse-name → {pos, numRunners, sp} lookup from a results payload
+function buildResultMap(races) {
+  const map = {};
+  (races || []).forEach(race => {
+    const runners = race.runners || race.horses || [];
+    const numRunners = runners.length;
+    runners.forEach(r => {
+      const hn = normHorse(r.horse || r.name || '');
+      if (!hn) return;
+      const posRaw = r.position || r.place || '';
+      const pos = parseInt(posRaw);
+      if (!posRaw || isNaN(pos)) return;
+      if (!map[hn]) map[hn] = { pos, numRunners, sp: r.sp || r.starting_price || '' };
+    });
+  });
+  return map;
+}
+
+// ── Cron: settle pending real/virtual bets and league picks server-side ───────
+// Mirrors syncBetResults() (js/today.js) and lgSyncResults() (js/leagues.js),
+// but runs independently of any device opening the app, and additionally
+// covers "yesterday" — the client only ever checks bets placed the same day,
+// so a bet/pick is otherwise stuck pending forever if the app isn't opened
+// again before the next day's cards push it out of the API's 2-day window
+// (the Basic plan has no historical date-range results endpoint).
+async function settleResults(env) {
+  const now = new Date();
+  const month = now.getUTCMonth();
+  const isDST = month >= 2 && month <= 9;
+  const ukTime = new Date(now.getTime() + (isDST ? 3600000 : 0));
+  const todayStr = ukTime.toISOString().slice(0, 10);
+  const yesterdayStr = new Date(ukTime.getTime() - 86400000).toISOString().slice(0, 10);
+
+  let resultsToday = [], resultsYesterday = [];
+  try {
+    resultsToday = await fetchResultsPaginated(env, 'results/today');
+    resultsYesterday = await fetchResultsPaginated(env, 'results/yesterday');
+  } catch (e) {
+    console.error('settleResults: results fetch failed', e);
+    return;
+  }
+  const mapToday = buildResultMap(resultsToday);
+  const mapYesterday = buildResultMap(resultsYesterday);
+  if (!Object.keys(mapToday).length && !Object.keys(mapYesterday).length) return;
+
+  const resultMapFor = dateStr => dateStr === todayStr ? mapToday : dateStr === yesterdayStr ? mapYesterday : null;
+
+  // ── Real + virtual bets (one table, distinguished by is_virtual) ────────────
+  try {
+    const resp = await supaFetch(
+      env,
+      `/bets?bet_date=in.(${todayStr},${yesterdayStr})&or=(result.is.null,result.eq.pending)&select=*`
+    );
+    const pending = await resp.json();
+    for (const b of (pending || [])) {
+      const resMap = resultMapFor(b.bet_date);
+      if (!resMap) continue;
+      const res = resMap[normHorse(b.horse || '')];
+      if (!res) continue;
+
+      const patch = {};
+      let odDec = foToDecimal(b.odds_display || b.odds || '');
+      if (!odDec && res.sp) {
+        patch.odds = foToDecimal(String(res.sp));
+        patch.odds_display = String(res.sp);
+        odDec = patch.odds;
+      }
+      if (!b.finish_position && res.pos) patch.finish_position = res.pos;
+
+      const places = placesNumFor(res.numRunners);
+      const betType = b.bet_type || 'win';
+      let result;
+      if (res.pos === 1) result = 'win';
+      else if (res.pos <= places && (betType === 'ew' || betType === 'place')) result = 'place';
+      else result = 'loss';
+
+      const ewT = placeTermsFor(res.numRunners) || '1/4';
+      patch.result = result;
+      patch.returns = calcReturnsServer(result, b.stake, odDec, betType, ewT);
+
+      await supaFetch(env, `/bets?id=eq.${encodeURIComponent(b.id)}`, 'PATCH', patch);
+    }
+  } catch (e) { console.error('settleResults: bets settlement failed', e); }
+
+  // ── League picks (win/loss only, no each-way) ───────────────────────────────
+  try {
+    const resp = await supaFetch(
+      env,
+      `/league_picks?pick_date=in.(${todayStr},${yesterdayStr})&result=eq.pending&select=*`
+    );
+    const pending = await resp.json();
+    for (const p of (pending || [])) {
+      const resMap = resultMapFor(p.pick_date);
+      if (!resMap) continue;
+      const res = resMap[normHorse(p.horse || '')];
+      if (!res) continue;
+
+      const result = res.pos === 1 ? 'win' : 'loss';
+      const oddsStr = p.odds || res.sp || '';
+      const dec = foToDecimal(oddsStr);
+      const returns = result === 'win' && dec > 0 ? dec : 0;
+
+      await supaFetch(env, `/league_picks?id=eq.${encodeURIComponent(p.id)}`, 'PATCH', {
+        result, returns, odds: p.odds || oddsStr || null,
+      });
+    }
+  } catch (e) { console.error('settleResults: league_picks settlement failed', e); }
+}
+
 // ── Cron: check watchlists and send push alerts ───────────────────────────────
 
 async function handleScheduled(env) {
@@ -166,6 +352,11 @@ async function handleScheduled(env) {
   const ukHour = ukTime.getUTCHours();
 
   if (ukHour < 10 || ukHour >= 21) return;
+
+  // Settle any pending bets/league picks against real results — independent
+  // of whether anyone opens the app. Safe to run every tick: it only touches
+  // rows still marked pending, so re-running is a no-op once settled.
+  await settleResults(env);
 
   const todayStr = ukTime.toISOString().slice(0, 10);
   const nowMins  = ukTime.getUTCHours() * 60 + ukTime.getUTCMinutes();

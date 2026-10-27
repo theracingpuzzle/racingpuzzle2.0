@@ -1314,6 +1314,15 @@ function rcSwRenderResultsTime(listEl){
 }
 
 
+function rcSwToggleResCourse(course, safeId){
+  const opening = rcSwResultsOpenCourse !== course;
+  rcSwResultsOpenCourse = opening ? course : '';
+  rcSwRenderResultsCourse(document.getElementById('sw-results-list'));
+  if(opening){
+    const row = document.getElementById('res-mtg-'+safeId);
+    if(row) setTimeout(function(){ row.scrollIntoView({behavior:'smooth', block:'start'}); }, 60);
+  }
+}
 function rcSwRenderResultsCourse(listEl){
   const meetings = {};
   rcSwResultsData.forEach(function(r){
@@ -1338,7 +1347,7 @@ function rcSwRenderResultsCourse(listEl){
     const count = races.length;
     const flag=rcCountryFlag(rcCourseCountry(course));
     return '<div class="rc-meeting">'
-      + '<div class="rc-meeting-hdr rc-mtg-ora" onclick="rcSwResultsOpenCourse=rcSwResultsOpenCourse===\''+course+'\'?\'\':' +"'"+course+"'"+ ';rcSwRenderResultsCourse(document.getElementById(\'sw-results-list\'));">'
+      + '<div id="res-mtg-'+safeId+'" class="rc-meeting-hdr rc-mtg-ora" onclick="rcSwToggleResCourse(\''+course.replace(/'/g,"\\'")+'\',\''+safeId+'\')">'
         + '<span class="rc-meeting-flag">'+flag+'</span>'
         + '<div class="rc-meeting-info">'
           + '<div class="rc-mtg-course">'+course+'</div>'

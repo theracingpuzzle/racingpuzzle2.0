@@ -55,6 +55,22 @@ function formatDist(d){
   return s;
 }
 
+// ─── HEADGEAR LABEL ───
+// The Racing API's raw headgear code uses single letters per the industry
+// convention (b/h/p/t/v/e), plus combo codes like "tp" (tongue tie + cheekpieces).
+// "p" for cheekpieces reads as unclear/arbitrary to users unfamiliar with the
+// convention, so it (and any combo code containing it) is expanded to "CP" —
+// every other code is left as the API returns it.
+const _RC_HG_PART_MAP={p:'CP'};
+function rcHeadgearLabel(code){
+  const raw=(code||'').trim();
+  if(!raw)return raw;
+  // Atomic multi-letter codes that aren't a combination of single-letter codes
+  if(raw.toLowerCase()==='ow')return raw;
+  if(!/p/i.test(raw))return raw;
+  return raw.toLowerCase().split('').map(function(ch){return _RC_HG_PART_MAP[ch]||ch.toUpperCase();}).join('+');
+}
+
 // ─── SWIPE RACECARDS / RESULTS ───
 let rcSwCurrentRaces=[], rcSwRacesByMeeting={}, rcSwView='time', _pendingRCBet=null, rcSwFilter='all', rcSwDensity='compact';
 
@@ -725,7 +741,7 @@ function rcSwRenderRunners(idx, course, el){
               +(_suffix?'<span style="opacity:.8;">'+_suffix+'</span>':'')
               +'</span>';
           }());
-          const _hg=r.headgear||r.head_gear||'';
+          const _hg=rcHeadgearLabel(r.headgear||r.head_gear||'');
           return'<div class="rc-runner-name-row">'
             +'<span class="rc-runner-name'+(isNR?' rc-runner-name-nr':'')+'">'+name+'</span>'
             +(_hg?'<span style="font-size:10px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);border-radius:4px;padding:1px 5px;margin-left:3px;letter-spacing:.03em;">'+_hg+'</span>':'')
@@ -773,7 +789,7 @@ function rcSwRenderRunners(idx, course, el){
   if(_hasHG){
     html+='<div style="padding:8px 14px 4px;font-size:10px;color:var(--mut);line-height:1.8;border-top:1px solid var(--bdr);">'
       +'<span style="font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-right:6px;">Headgear:</span>'
-      +'b Blinkers · p Cheekpieces · v Visor · h Hood · t Tongue tie · e Eye shield · ow Overreach boots'
+      +'b Blinkers · CP Cheekpieces · v Visor · h Hood · t Tongue tie · e Eye shield · ow Overreach boots'
     +'</div>';
   }
   el.innerHTML=html;

@@ -25,6 +25,7 @@ function load() {
     }
   } catch(e) {}
   _migrateEWStakes();
+  _migrateGoingPoorReset();
 }
 
 // ─── MIGRATION: EW stake → total outlay ───
@@ -44,6 +45,23 @@ function _migrateEWStakes() {
   };
   migrate(D.bets);
   migrate(D.vBank && D.vBank.bets);
+  if (changed) { try { localStorage.setItem(SK, JSON.stringify(D)); } catch(e) {} }
+  localStorage.setItem(FLAG, '1');
+}
+
+// ─── MIGRATION: reset inflated _goingPoor counts ───
+// _goingPoor was incremented on every app boot (not just on real reviews),
+// so counts could be inflated. wlBackfillInference() rebuilds it correctly
+// from review history on the next boot once cleared.
+// Runs once, guarded by a flag in localStorage.
+function _migrateGoingPoorReset() {
+  const FLAG = 'rp-going-poor-reset-v1';
+  if (localStorage.getItem(FLAG)) return;
+  let changed = false;
+  (D.watchlist || []).forEach(function(w) {
+    if (w._goingPoor && Object.keys(w._goingPoor).length) { w._goingPoor = {}; changed = true; }
+    if (w._goingPoorCounted && w._goingPoorCounted.length) { w._goingPoorCounted = []; changed = true; }
+  });
   if (changed) { try { localStorage.setItem(SK, JSON.stringify(D)); } catch(e) {} }
   localStorage.setItem(FLAG, '1');
 }

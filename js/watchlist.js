@@ -1498,10 +1498,14 @@ function _wlInferFromReview(profileId, review){
       entry.goingPrefs.push(going);
       changed=true;
     }
-    // Track poor-going patterns so we can flag them later
+    // Track poor-going patterns so we can flag them later — guard against
+    // re-counting the same review every time backfill reprocesses history
+    // (wlBackfillInference runs on every app boot, not just on real edits)
     if(!entry._goingPoor)entry._goingPoor={};
-    if(ranPoor){
+    if(!entry._goingPoorCounted)entry._goingPoorCounted=[];
+    if(ranPoor&&review.id&&entry._goingPoorCounted.indexOf(review.id)===-1){
       entry._goingPoor[going]=(entry._goingPoor[going]||0)+1;
+      entry._goingPoorCounted.push(review.id);
       changed=true;
     }
   }
@@ -1515,9 +1519,12 @@ function _wlInferFromReview(profileId, review){
       entry.distanceWins.push(dist);
       changed=true;
     }
-    // Update primary distancePref to most recent win/place distance
-    entry.distancePref=dist;
-    changed=true;
+    // Update primary distancePref to most recent win/place distance —
+    // only counts as a change if the value is actually different
+    if(entry.distancePref!==dist){
+      entry.distancePref=dist;
+      changed=true;
+    }
   }
 
   // ── Surface inference ────────────────────────────────────────────────────────
@@ -2501,6 +2508,7 @@ function saveWLEntry(id){
     distancePref:(_wlDossier.distPrefs||[]).join(', '),
     distanceWins:old?old.distanceWins||[]:[], // preserved — set by review inference
     _goingPoor:old?old._goingPoor||{}:{},    // preserved — set by review inference
+    _goingPoorCounted:old?old._goingPoorCounted||[]:[], // preserved — review ids already folded into _goingPoor
     trackPref:((document.getElementById('wlf-track')||{value:''}).value||'').trim(),
     classPref:(document.getElementById('wlf-classpref')||{value:''}).value||'',
     fieldSizePref:(document.getElementById('wlf-fieldsize')||{value:''}).value||'',

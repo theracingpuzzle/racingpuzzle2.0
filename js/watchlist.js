@@ -2752,7 +2752,7 @@ const WLP_CSS = `
 }
 .wlp-name-row { display: flex; align-items: center; gap: 8px; }
 .wlp-name {
-  font-size: 40px; letter-spacing: 2px; color: #fff; line-height: 1.15;
+  font-size: 40px; letter-spacing: 2px; color: #fff; line-height: 1.3;
   padding-bottom: 3px;
 }
 .wlp-verified {

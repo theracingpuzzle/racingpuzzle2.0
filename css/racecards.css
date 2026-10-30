@@ -224,3 +224,32 @@ body.dark .rc-info-val  { color: var(--txt); }
 body.dark .rc-cloth     { color: var(--txt); }
 body.dark .rc-meeting   { background: var(--sur); border-color: var(--bdr); }
 body.dark .rc-view-tog  { background: var(--sur); border-color: var(--bdr); }
+
+/* ── Race simulation ── */
+.sim-track { display: flex; flex-direction: column; gap: 2px; }
+.sim-lane {
+  display: flex; align-items: center; gap: 8px;
+  padding: 3px 0; border-bottom: 1px solid var(--bdr);
+}
+.sim-lane:last-child { border-bottom: none; }
+.sim-lane-label {
+  display: flex; align-items: center; gap: 5px;
+  width: 112px; flex-shrink: 0;
+  font-size: 11px; font-weight: 600;
+}
+.sim-lane-label span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sim-lane-rail {
+  position: relative; flex: 1; height: 26px;
+  background: linear-gradient(90deg, var(--sur2) 0%, var(--sur2) 100%);
+  border-radius: 6px; overflow: hidden;
+}
+.sim-finish-line {
+  position: absolute; right: 6%; top: 0; bottom: 0; width: 2px;
+  background: repeating-linear-gradient(0deg, var(--mut) 0 4px, transparent 4px 8px);
+}
+.sim-horse-marker {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  font-size: 16px; line-height: 1;
+  transition: left .3s linear;
+  will-change: left;
+}

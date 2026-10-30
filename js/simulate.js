@@ -1,0 +1,214 @@
+// ─── RACE SIMULATION ───
+// A lightweight, visual "what if" race sim for real declared runners pulled from
+// the Racing API. The model is deliberately simple (weighted-random progress per
+// step, not real physics) — the Racing API gives no sectional/in-running data for
+// either upcoming or past races, so there is no real "ghost" to recreate stride by
+// stride. What this does instead: builds a believable, noisy race from each
+// runner's rating, animates it, and — if the real result is already cached in this
+// session (window._todayResultsCache) — shows how the sim's read compared to what
+// actually happened.
+
+let _simHorses = null;
+let _simStep = 0;
+let _simTotalSteps = 24;
+let _simTimer = null;
+let _simRunning = false;
+
+// Build a noisy, rating-weighted race. Returns horses sorted by finish order,
+// each carrying a ._pct[] array (progress 0-100 at every animation step).
+function simBuildRace(runners){
+  const active = (runners||[]).filter(function(r){
+    return !(r.non_runner||r.isNonRunner||(''+r.number).toUpperCase()==='NR');
+  });
+  const ratings = active.map(function(r){ return parseFloat(r.ofr||r.rpr||r.ts)||0; });
+  const valid = ratings.filter(function(v){ return v>0; });
+  const avg = valid.length ? valid.reduce(function(a,b){return a+b;},0)/valid.length : 80;
+  const minR = valid.length ? Math.min.apply(null,valid) : avg-10;
+  const maxR = valid.length ? Math.max.apply(null,valid) : avg+10;
+  const range = Math.max(1, maxR-minR);
+
+  const horses = active.map(function(r,i){
+    const rating = ratings[i]||avg;
+    // 0.55–1.0 so even a field's weakest horse still has a running chance
+    const strength = 0.55 + 0.45*((rating-minR)/range);
+    return {
+      horse: r.horse||r.name||'', number: r.number||(i+1), draw: r.draw||'',
+      jockey: r.jockey||'', silkUrl: r.silk_url||r.silk||'',
+      rating: ratings[i]||null, _strength: strength, _progress: 0, _history: [0]
+    };
+  });
+
+  for(let step=1; step<=_simTotalSteps; step++){
+    const stretch = step > _simTotalSteps*0.75; // final quarter: class counts more, noise shrinks
+    horses.forEach(function(h){
+      // Sum of 3 uniforms approximates a bell curve — more realistic jostling than flat noise
+      const noise = (Math.random()+Math.random()+Math.random()-1.5) * (stretch?0.35:0.55);
+      const base = stretch ? (0.8+0.4*h._strength) : (0.85+0.25*h._strength);
+      h._progress += Math.max(0.1, base+noise);
+      h._history.push(h._progress);
+    });
+  }
+
+  const maxProgress = Math.max.apply(null, horses.map(function(h){return h._progress;}));
+  horses.forEach(function(h){
+    // Capped at 94%, matching .sim-finish-line's position, so the winner's marker
+    // center lands exactly on the line instead of clipping past the rail's edge.
+    h._pct = h._history.map(function(p){ return Math.min(94, (p/maxProgress)*94); });
+  });
+  horses.sort(function(a,b){ return b._progress-a._progress; });
+  // Rough "beaten lengths" flavour — not a real measurement, just a believable gap
+  const winnerProgress = horses[0]._progress;
+  horses.forEach(function(h,i){
+    h._beaten = i===0 ? 0 : Math.max(0.1, (winnerProgress-h._progress)/winnerProgress*28);
+  });
+  return horses;
+}
+
+function simOpen(idx){
+  const entry=_rcSwFlatRaces[idx];
+  if(!entry){return;}
+  const race=entry.race, course=entry.course;
+  const runners=race.runners||race.horses||[];
+  const active=runners.filter(function(r){return !(r.non_runner||r.isNonRunner||(''+r.number).toUpperCase()==='NR');});
+  if(active.length<2){ _simToast('Need at least 2 runners to simulate.'); return; }
+
+  _simHorses=simBuildRace(runners);
+  _simStep=0;
+  _simRunning=false;
+  if(_simTimer){clearTimeout(_simTimer);_simTimer=null;}
+
+  const time=race.off||race.off_time||race.time||'';
+  const name=race.race_name||race.name||race.title||'Race';
+  document.getElementById('sim-title').textContent=(course||'')+' '+time;
+  document.getElementById('sim-sub').textContent=name;
+
+  simRenderTrack();
+  const ov=document.getElementById('sim-overlay');
+  ov.style.display='flex';
+
+  setTimeout(simPlay, 350); // brief beat before the gate opens
+}
+
+function simClose(){
+  if(_simTimer){clearTimeout(_simTimer);_simTimer=null;}
+  _simRunning=false;
+  const ov=document.getElementById('sim-overlay');
+  if(ov)ov.style.display='none';
+}
+
+function _simToast(msg){
+  if(typeof _lgToast==='function'){_lgToast(msg);return;}
+  alert(msg);
+}
+
+function simRenderTrack(){
+  const body=document.getElementById('sim-body');
+  const lanes=_simHorses.map(function(h,i){
+    const silk=h.silkUrl?'<img src="'+h.silkUrl+'" alt="" width="18" height="18" style="object-fit:contain;flex-shrink:0;border-radius:3px;" onerror="this.style.display=\'none\'">':'';
+    return '<div class="sim-lane">'
+      +'<div class="sim-lane-label">'+silk+'<span style="font-weight:800;color:var(--txt);">'+(h.number||'')+'</span>'
+        +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt);">'+h.horse+'</span>'
+      +'</div>'
+      +'<div class="sim-lane-rail">'
+        +'<div class="sim-finish-line"></div>'
+        +'<div id="sim-marker-'+i+'" class="sim-horse-marker" style="left:0%;">🐎</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+
+  body.innerHTML=
+    '<div class="sim-track" id="sim-track">'+lanes+'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:16px;">'
+      +'<button id="sim-skip-btn" onclick="simSkip()" class="btn bout" style="flex:1;">Skip to result</button>'
+    +'</div>'
+    +'<div id="sim-result-panel" style="margin-top:16px;"></div>';
+}
+
+function simPlay(){
+  if(_simRunning)return;
+  _simRunning=true;
+  function tick(){
+    if(_simStep>=_simTotalSteps){ simFinish(); return; }
+    _simStep++;
+    _simHorses.forEach(function(h,i){
+      const el=document.getElementById('sim-marker-'+i);
+      if(el)el.style.left=h._pct[_simStep]+'%';
+    });
+    _simTimer=setTimeout(tick, 320);
+  }
+  tick();
+}
+
+function simSkip(){
+  if(_simTimer){clearTimeout(_simTimer);_simTimer=null;}
+  _simStep=_simTotalSteps;
+  _simHorses.forEach(function(h,i){
+    const el=document.getElementById('sim-marker-'+i);
+    if(el){el.style.transition='none';el.style.left=h._pct[_simTotalSteps]+'%';}
+  });
+  simFinish();
+}
+
+function simFinish(){
+  _simRunning=false;
+  const skipBtn=document.getElementById('sim-skip-btn');
+  if(skipBtn){skipBtn.textContent='Race again';skipBtn.setAttribute('onclick','simReplay()');}
+
+  const real=_simFindRealResult();
+  const rows=_simHorses.map(function(h,i){
+    const pos=i+1;
+    const beaten=i===0?'':(h._beaten<1?'nose–¾L':h._beaten.toFixed(1)+'L');
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;'+(i?'border-top:1px solid var(--bdr);':'')+'">'
+      +'<span style="width:22px;font-family:var(--font);font-weight:900;color:'+(pos===1?'#f59e0b':'var(--mut)')+';">'+pos+'</span>'
+      +'<span style="flex:1;font-weight:700;color:var(--txt);">'+h.horse+'</span>'
+      +'<span style="font-size:11px;color:var(--mut);">'+beaten+'</span>'
+    +'</div>';
+  }).join('');
+
+  let compareHtml='';
+  if(real){
+    const simWinner=_simHorses[0].horse;
+    const matched=_normSimHorse(simWinner)===_normSimHorse(real.winner);
+    compareHtml='<div style="margin-top:14px;padding:10px 12px;border-radius:8px;background:'+(matched?'rgba(74,222,128,.08)':'rgba(96,165,250,.08)')+';border:1px solid '+(matched?'rgba(74,222,128,.3)':'rgba(96,165,250,.3)')+';font-size:12px;color:var(--txt);">'
+      +(matched
+        ? '✅ Your sim called it — <strong>'+real.winner+'</strong> actually won.'
+        : '📋 In reality, <strong>'+real.winner+'</strong> won this one' + (real.sp?' at '+real.sp:'') + '.')
+    +'</div>';
+  }
+
+  document.getElementById('sim-result-panel').innerHTML=
+    '<div class="bttl" style="margin-bottom:4px;">Result</div>'+rows+compareHtml;
+}
+
+function simReplay(){
+  const idx=_rcSwFlatRaces.findIndex(function(e){
+    return e.race && (e.race.runners||e.race.horses||[]).some(function(r){return _simHorses&&_simHorses[0]&&r.horse===_simHorses[0].horse;});
+  });
+  // Rebuild from the same horse list rather than re-resolving idx (cheap and avoids edge cases)
+  const runners=_simHorses.map(function(h){return {horse:h.horse,number:h.number,draw:h.draw,jockey:h.jockey,silk_url:h.silkUrl,ofr:h.rating};});
+  _simHorses=simBuildRace(runners);
+  _simStep=0;
+  simRenderTrack();
+  setTimeout(simPlay, 300);
+}
+
+function _normSimHorse(s){ return (s||'').replace(/\s*\([^)]+\)\s*$/,'').toLowerCase().trim(); }
+
+// If this race has already run and its result is sitting in the session's
+// results cache, surface the real winner for the "called it or not" comparison.
+function _simFindRealResult(){
+  try{
+    const cache=(typeof rcSwResultsData!=='undefined'&&rcSwResultsData&&rcSwResultsData.length)?rcSwResultsData
+      :(window._todayResultsCache||[]);
+    const title=(document.getElementById('sim-title')||{}).textContent||'';
+    for(const race of cache){
+      const course=race.course||race.venue||'';
+      const time=race.off||race.off_time||race.time||'';
+      if(!title.includes(course)||!title.includes(time))continue;
+      const runners=race.runners||race.horses||[];
+      const winner=runners.find(function(r){ return String(r.position||r.place||'')==='1'; });
+      if(winner)return{winner:winner.horse||winner.name||'',sp:winner.sp||winner.starting_price||''};
+    }
+  }catch(e){}
+  return null;
+}

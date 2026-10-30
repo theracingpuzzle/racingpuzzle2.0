@@ -716,6 +716,18 @@
   <div id="rc-sl-body" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
 </div>
 
+<!-- RACE SIMULATION OVERLAY -->
+<div id="sim-overlay" style="display:none;position:fixed;inset:0;z-index:600;background:var(--bg);flex-direction:column;overflow:hidden;">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;">
+    <div style="min-width:0;">
+      <div id="sim-title" style="font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      <div id="sim-sub" style="font-size:11px;color:var(--mut);margin-top:2px;"></div>
+    </div>
+    <button onclick="simClose()" style="background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>
+  </div>
+  <div id="sim-body" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px;"></div>
+</div>
+
 <!-- COACH DRAWER -->
 <div id="coach-drawer-overlay" onclick="coachDrawerClose()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;backdrop-filter:blur(2px);"></div>
 <div id="coach-drawer" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:901;background:var(--sur);border-radius:20px 20px 0 0;border-top:1px solid var(--bdr);max-height:85vh;display:none;flex-direction:column;">
@@ -1260,6 +1272,7 @@
 <script src="js/auth.js?v=1783632393"></script>
 <script src="js/racing-api.js?v=1783632393"></script>
 <script src="js/racecards.js?v=1783632393"></script>
+<script src="js/simulate.js?v=1783632393"></script>
 <script src="js/ui-shell.js?v=1783632393"></script>
 <script src="js/today.js?v=1783770001"></script>
 <script src="js/betting.js?v=1783632393"></script>

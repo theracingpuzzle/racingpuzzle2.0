@@ -241,17 +241,22 @@ body.dark .rc-view-tog  { background: var(--sur); border-color: var(--bdr); }
 }
 .sim-course {
   position: relative;
-  height: 258px;
-  transform: rotateX(13deg) scale(1.07);
+  height: 320px;
+  /* A shallow tilt reads as standing trackside at the rail, roughly eye-level
+     with the horses — a steep tilt reads as an aerial/crane shot looking
+     down at the track, which is the opposite of "by the side of the track". */
+  transform: rotateX(5deg) scale(1.015);
   transform-origin: center bottom;
-  /* sky · hazy distant hills · near grass bands fixed; the track band
-     (26%-74%) is painted by the surface-specific rule below. */
+  /* sky · hazy distant hills · far grass bands fixed; the track band
+     (18%-82%) is painted by the surface-specific rule below. Track gets
+     the lion's share of the height so runners have real room to be seen
+     clearly, not squeezed into a thin strip. */
   background: linear-gradient(180deg,
-    #afe3f7 0%,  #afe3f7 10%,
-    #8fc7c9 10%, #8fc7c9 16%,
-    #6abf5e 16%, #6abf5e 26%,
-    transparent 26%, transparent 74%,
-    #6abf5e 74%, #6abf5e 100%);
+    #afe3f7 0%,  #afe3f7 7%,
+    #8fc7c9 7%,  #8fc7c9 11%,
+    #6abf5e 11%, #6abf5e 18%,
+    transparent 18%, transparent 82%,
+    #6abf5e 82%, #6abf5e 100%);
 }
 .sim-grandstand {
   position: absolute; top: 2px; right: 6%; width: 46px; height: 13px;
@@ -265,17 +270,20 @@ body.dark .rc-view-tog  { background: var(--sur); border-color: var(--bdr); }
 /* Turf (Flat or Jumps on grass) — mown-stripe pattern, distinct from the border grass */
 .sim-course-turf {
   background-color: #4f9a46;
-  background-image: repeating-linear-gradient(90deg, #4f9a46 0 26px, #5aab50 26px 52px);
-  background-position: 0 26%;
-  background-size: 100% 48%;
+  /* Mowing stripes run lengthwise with the direction of travel, like a real
+     racecourse straight — not across it. */
+  background-image: repeating-linear-gradient(0deg, #4f9a46 0 10px, #5aab50 10px 20px);
+  background-position: 0 18%;
+  background-size: 100% 64%;
   background-repeat: no-repeat;
 }
 /* All-Weather (Polytrack/Tapeta/Fibresand) — sandy synthetic surface, no mowing lines */
 .sim-course-aw {
   background-color: #c99056;
-  background-image: repeating-linear-gradient(90deg, #c99056 0 10px, #d29d62 10px 20px);
-  background-position: 0 26%;
-  background-size: 100% 48%;
+  /* Harrow/groomer lines also run lengthwise with the direction of travel */
+  background-image: repeating-linear-gradient(0deg, #c99056 0 4px, #d29d62 4px 8px);
+  background-position: 0 18%;
+  background-size: 100% 64%;
   background-repeat: no-repeat;
 }
 .sim-scenery {
@@ -283,28 +291,69 @@ body.dark .rc-view-tog  { background: var(--sur); border-color: var(--bdr); }
   display: flex; align-items: flex-end; justify-content: space-around;
   font-size: 15px; opacity: .85; pointer-events: none; user-select: none;
 }
-.sim-rail {
-  position: absolute; left: 0; right: 0; height: 3px;
-  background: repeating-linear-gradient(90deg, #fff 0 9px, transparent 9px 15px);
+/* Running rail — a raised white rail tube (light/shadow gradient for
+   roundness) on evenly-spaced posts, not a flat painted line, so it reads
+   as a real trackside rail rather than a dashed stripe. */
+.sim-rail { position: absolute; left: 0; right: 0; height: 10px; pointer-events: none; }
+.sim-rail-top { top: 18%; margin-top: -10px; }
+.sim-rail-bottom { top: 82%; margin-top: 0; }
+.sim-rail-bar {
+  position: absolute; left: 0; right: 0; top: 0; height: 4px; border-radius: 2px;
+  background: linear-gradient(180deg, #fff 0%, #fff 40%, #c7cbd1 40%, #c7cbd1 65%, #fff 65%, #fff 100%);
+  box-shadow: 0 2px 2px rgba(0,0,0,.3);
+}
+.sim-rail-posts {
+  position: absolute; left: 0; right: 0; top: 4px; height: 6px;
+  background: repeating-linear-gradient(90deg,
+    rgba(120,125,135,.9) 0 2px, rgba(230,232,236,.9) 2px 3px, transparent 3px 42px);
   opacity: .9;
 }
-.sim-rail-top { top: 26%; margin-top: -1.5px; }
-.sim-rail-bottom { top: 74%; margin-top: -1.5px; }
 /* Hurdle/Chase obstacles — a plain birch-brush bar, same for both disciplines */
 .sim-jump {
-  position: absolute; top: 26%; bottom: 26%; width: 7px;
+  position: absolute; top: 18%; bottom: 18%; width: 7px;
   background: repeating-linear-gradient(0deg, #8b5a2b 0 4px, #a9744f 4px 8px);
   border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.2);
 }
+/* The winning post — taller and capped, so it reads as the one marker that
+   matters, not just another pole. Rises above the running rail into the
+   grass border on both sides. */
 .sim-finish-post {
-  position: absolute; right: 6%; top: 26%; bottom: 26%; width: 5px;
+  position: absolute; right: 6%; top: 9%; bottom: 9%; width: 6px;
   background: repeating-linear-gradient(45deg, #111 0 5px, #fff 5px 10px);
-  box-shadow: 0 0 0 1px rgba(0,0,0,.25);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.3);
+  z-index: 3;
 }
-.sim-runway { position: absolute; left: 0; right: 0; top: 26%; bottom: 26%; }
+.sim-finish-post::after {
+  content: ''; position: absolute; top: -7px; left: 50%; transform: translateX(-50%);
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; border: 2px solid #111;
+  box-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+/* Furlong poles — real distance markers standing just outside the rail (in
+   the far grass band), each labelled with furlongs still to run. Kept off
+   the runway itself so they never visually collide with a horse marker. */
+.sim-furlong-pole {
+  position: absolute; top: 12%; height: 7%; width: 3px;
+  background: repeating-linear-gradient(0deg, #222 0 3px, #fff 3px 6px);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.2);
+}
+.sim-furlong-label {
+  position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+  font-size: 7px; font-weight: 800; color: #fff; background: rgba(0,0,0,.55);
+  border-radius: 2px; padding: 0 2px; white-space: nowrap;
+}
+/* Live "distance to go" readout — a small broadcast-style graphic pinned to
+   the top of the scene, updated every step of simPlay(). */
+.sim-distance-hud {
+  position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+  font-family: var(--font); font-size: 10px; font-weight: 800; letter-spacing: .06em;
+  color: #fff; background: rgba(0,0,0,.55); border-radius: 4px; padding: 3px 8px;
+  text-transform: uppercase; white-space: nowrap; z-index: 5; pointer-events: none;
+}
+.sim-runway { position: absolute; left: 0; right: 0; top: 18%; bottom: 18%; }
 .sim-horse-marker {
   position: absolute; transform: translate(-50%, -50%);
-  display: flex; align-items: center; gap: 2px;
+  display: flex; align-items: center; gap: 3px;
   transition: left .3s linear;
   will-change: left;
   animation: sim-gallop .35s ease-in-out infinite alternate;
@@ -312,25 +361,35 @@ body.dark .rc-view-tog  { background: var(--sur); border-color: var(--bdr); }
 /* A short speed-blur streak trailing behind each runner, for a sense of pace */
 .sim-horse-marker::before {
   content: ''; position: absolute; top: 50%; right: 100%;
-  width: 16px; height: 3px; transform: translateY(-50%);
+  width: 18px; height: 3px; transform: translateY(-50%);
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.55));
   border-radius: 2px; pointer-events: none;
 }
+/* Number label, always visible above the runner — not a tiny corner badge —
+   so you can tell at a glance which horse is which while they are running. */
+.sim-horse-label {
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  margin-bottom: 2px;
+  font-size: 9px; font-weight: 800; line-height: 1.4;
+  background: #fff; color: #111; border: 1px solid rgba(0,0,0,.3);
+  border-radius: 3px; padding: 0 3px; white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,.3);
+}
 /* The runner's silk — real image from the API when available, else a
    deterministic coloured swatch (see _simSilkColor in simulate.js) */
-.sim-silk-wrap { position: relative; width: 13px; height: 13px; flex-shrink: 0; }
+.sim-silk-wrap { position: relative; width: 15px; height: 15px; flex-shrink: 0; }
 .sim-silk {
-  display: block; width: 13px; height: 13px; border-radius: 3px;
+  display: block; width: 15px; height: 15px; border-radius: 3px;
   object-fit: contain; background: #fff; border: 1px solid rgba(0,0,0,.25);
   box-shadow: 0 1px 2px rgba(0,0,0,.3);
 }
-.sim-horse-num {
-  position: absolute; bottom: -4px; right: -4px;
-  font-size: 7px; font-weight: 800; line-height: 1.3;
-  background: #fff; color: #111; border-radius: 2px; padding: 0 2px;
-  box-shadow: 0 1px 1px rgba(0,0,0,.3); white-space: nowrap;
+/* The 🐎 glyph faces left by default; the sim always runs left-to-right,
+   so it is mirrored to actually face the direction of travel. */
+.sim-horse-icon {
+  font-size: 27px; line-height: 1;
+  display: inline-block; transform: scaleX(-1);
+  filter: drop-shadow(0 2px 1px rgba(0,0,0,.35));
 }
-.sim-horse-icon { font-size: 19px; line-height: 1; filter: drop-shadow(0 2px 1px rgba(0,0,0,.35)); }
 @keyframes sim-gallop {
   from { margin-top: 0; }
   to   { margin-top: -3px; }

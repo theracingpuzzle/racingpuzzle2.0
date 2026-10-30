@@ -88,9 +88,11 @@ function simOpen(idx){
   // Flat/Jumps/All-Weather — drives the track surface and whether obstacles are drawn
   const rType=(race.type||'').trim();
   const rSurface=(race.surface||'').trim();
+  const distF=parseFloat(race.distance_f);
   _simMeta={
     isJumps: rType==='Hurdle'||rType==='Chase',
-    isAW: rSurface==='AW'
+    isAW: rSurface==='AW',
+    furlongs: (distF&&distF>0) ? distF : 8 // sensible fallback when the API has no distance
   };
 
   const time=race.off||race.off_time||race.time||'';
@@ -131,7 +133,8 @@ function simRenderTrack(){
       ? '<img src="'+h.silkUrl+'" alt="" class="sim-silk" onerror="this.outerHTML=\'<span class=&quot;sim-silk&quot; style=&quot;background:'+fc.body+';border-color:'+fc.accent+';&quot;></span>\';">'
       : '<span class="sim-silk" style="background:'+fc.body+';border-color:'+fc.accent+';"></span>';
     return '<div id="sim-marker-'+i+'" class="sim-horse-marker" style="left:0%;top:'+topPct+'%;">'
-      +'<span class="sim-silk-wrap">'+silk+'<span class="sim-horse-num">'+(h.number||(i+1))+'</span></span>'
+      +'<span class="sim-horse-label">'+(h.number||(i+1))+'</span>'
+      +'<span class="sim-silk-wrap">'+silk+'</span>'
       +'<span class="sim-horse-icon">🐎</span>'
     +'</div>';
   }).join('');
@@ -150,13 +153,27 @@ function simRenderTrack(){
     : '';
   const courseClass='sim-course'+(_simMeta.isAW?' sim-course-aw':' sim-course-turf');
 
+  // Furlong poles — real distance-to-go markers at every whole furlong, standing
+  // just outside the rail so they never collide with the runners. The number on
+  // each pole is furlongs still to run, matching how UK courses mark them.
+  const F=Math.max(2, Math.round(_simMeta.furlongs||8));
+  const poles=[];
+  for(let k=1;k<F;k++){
+    const pct=94-(94/F)*k;
+    if(pct<4)continue; // too close to the stalls to read cleanly
+    poles.push('<div class="sim-furlong-pole" style="left:'+pct.toFixed(1)+'%;"><span class="sim-furlong-label">'+k+'</span></div>');
+  }
+  const polesHtml=poles.join('');
+
   body.innerHTML=
     '<div class="sim-stage">'
       +'<div class="'+courseClass+'" id="sim-track">'
         +'<div class="sim-scenery">'+trees+'</div>'
         +'<div class="sim-grandstand"></div>'
-        +'<div class="sim-rail sim-rail-top"></div>'
-        +'<div class="sim-rail sim-rail-bottom"></div>'
+        +'<div class="sim-distance-hud" id="sim-distance-hud">'+_simDistanceLabel(0)+'</div>'
+        +'<div class="sim-rail sim-rail-top"><div class="sim-rail-bar"></div><div class="sim-rail-posts"></div></div>'
+        +'<div class="sim-rail sim-rail-bottom"><div class="sim-rail-bar"></div><div class="sim-rail-posts"></div></div>'
+        +polesHtml
         +jumps
         +'<div class="sim-finish-post"></div>'
         +'<div class="sim-runway">'+markers+'</div>'
@@ -169,6 +186,16 @@ function simRenderTrack(){
     +'<div id="sim-result-panel" style="margin-top:16px;"></div>';
 }
 
+// Live "distance to go" readout, derived from the race's real distance_f and
+// how far through the animation we are — not literal, but a believable read.
+function _simDistanceLabel(step){
+  const F=_simMeta.furlongs||8;
+  if(step>=_simTotalSteps)return 'FINISH';
+  const remaining=Math.max(0, F-(F*step/_simTotalSteps));
+  if(remaining<0.5)return 'FINAL FURLONG';
+  return Math.ceil(remaining-0.001)+'F TO GO';
+}
+
 function simPlay(){
   if(_simRunning)return;
   _simRunning=true;
@@ -179,6 +206,8 @@ function simPlay(){
       const el=document.getElementById('sim-marker-'+i);
       if(el)el.style.left=h._pct[_simStep]+'%';
     });
+    const hud=document.getElementById('sim-distance-hud');
+    if(hud)hud.textContent=_simDistanceLabel(_simStep);
     _simTimer=setTimeout(tick, 320);
   }
   tick();
@@ -191,6 +220,8 @@ function simSkip(){
     const el=document.getElementById('sim-marker-'+i);
     if(el){el.style.transition='none';el.style.left=h._pct[_simTotalSteps]+'%';}
   });
+  const hud=document.getElementById('sim-distance-hud');
+  if(hud)hud.textContent=_simDistanceLabel(_simTotalSteps);
   simFinish();
 }
 

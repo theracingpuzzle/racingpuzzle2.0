@@ -720,7 +720,10 @@
 <div id="sim-overlay" style="display:none;position:fixed;inset:0;z-index:600;background:var(--bg);flex-direction:column;overflow:hidden;">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;">
     <div style="min-width:0;">
-      <div id="sim-title" style="font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div id="sim-title" style="font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+        <span class="sim-beta-badge">BETA</span>
+      </div>
       <div id="sim-sub" style="font-size:11px;color:var(--mut);margin-top:2px;"></div>
     </div>
     <button onclick="simClose()" style="background:none;border:none;color:var(--mut);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>

@@ -13,6 +13,14 @@ let _simStep = 0;
 let _simTotalSteps = 24;
 let _simTimer = null;
 let _simRunning = false;
+let _simMeta = {isJumps:false, isAW:false}; // drives track styling — see simRenderTrack()
+
+// Deterministic fallback colour for a runner with no real silk_url, so every
+// horse still has a distinct, consistent identity across replays.
+function _simSilkColor(name){
+  if(typeof _silkColors==='function')return _silkColors(name||'');
+  return {body:'#64748b',accent:'#ffffff'};
+}
 
 // Build a noisy, rating-weighted race. Returns horses sorted by finish order,
 // each carrying a ._pct[] array (progress 0-100 at every animation step).
@@ -51,8 +59,8 @@ function simBuildRace(runners){
 
   const maxProgress = Math.max.apply(null, horses.map(function(h){return h._progress;}));
   horses.forEach(function(h){
-    // Capped at 94%, matching .sim-finish-line's position, so the winner's marker
-    // center lands exactly on the line instead of clipping past the rail's edge.
+    // Capped at 94%, matching .sim-finish-post's position, so the winner's marker
+    // center lands exactly on the post instead of clipping past the track's edge.
     h._pct = h._history.map(function(p){ return Math.min(94, (p/maxProgress)*94); });
   });
   horses.sort(function(a,b){ return b._progress-a._progress; });
@@ -77,10 +85,18 @@ function simOpen(idx){
   _simRunning=false;
   if(_simTimer){clearTimeout(_simTimer);_simTimer=null;}
 
+  // Flat/Jumps/All-Weather — drives the track surface and whether obstacles are drawn
+  const rType=(race.type||'').trim();
+  const rSurface=(race.surface||'').trim();
+  _simMeta={
+    isJumps: rType==='Hurdle'||rType==='Chase',
+    isAW: rSurface==='AW'
+  };
+
   const time=race.off||race.off_time||race.time||'';
   const name=race.race_name||race.name||race.title||'Race';
   document.getElementById('sim-title').textContent=(course||'')+' '+time;
-  document.getElementById('sim-sub').textContent=name;
+  document.getElementById('sim-sub').textContent=name+(rType?' · '+rType:'')+(_simMeta.isAW?' (AW)':'');
 
   simRenderTrack();
   const ov=document.getElementById('sim-overlay');
@@ -103,21 +119,50 @@ function _simToast(msg){
 
 function simRenderTrack(){
   const body=document.getElementById('sim-body');
-  const lanes=_simHorses.map(function(h,i){
-    const silk=h.silkUrl?'<img src="'+h.silkUrl+'" alt="" width="18" height="18" style="object-fit:contain;flex-shrink:0;border-radius:3px;" onerror="this.style.display=\'none\'">':'';
-    return '<div class="sim-lane">'
-      +'<div class="sim-lane-label">'+silk+'<span style="font-weight:800;color:var(--txt);">'+(h.number||'')+'</span>'
-        +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt);">'+h.horse+'</span>'
-      +'</div>'
-      +'<div class="sim-lane-rail">'
-        +'<div class="sim-finish-line"></div>'
-        +'<div id="sim-marker-'+i+'" class="sim-horse-marker" style="left:0%;">🐎</div>'
-      +'</div>'
+  const n=_simHorses.length;
+  const trees=['🌳','🌲','🌳','🌲','🌳','🌲','🌳'].join('');
+
+  const markers=_simHorses.map(function(h,i){
+    const topPct=((i+0.5)/n*100).toFixed(1);
+    const fc=_simSilkColor(h.horse);
+    // Real silk colours when the API has them; a deterministic fallback swatch
+    // otherwise, so every runner still reads as a distinct, consistent "colours".
+    const silk=h.silkUrl
+      ? '<img src="'+h.silkUrl+'" alt="" class="sim-silk" onerror="this.outerHTML=\'<span class=&quot;sim-silk&quot; style=&quot;background:'+fc.body+';border-color:'+fc.accent+';&quot;></span>\';">'
+      : '<span class="sim-silk" style="background:'+fc.body+';border-color:'+fc.accent+';"></span>';
+    return '<div id="sim-marker-'+i+'" class="sim-horse-marker" style="left:0%;top:'+topPct+'%;">'
+      +'<span class="sim-silk-wrap">'+silk+'<span class="sim-horse-num">'+(h.number||(i+1))+'</span></span>'
+      +'<span class="sim-horse-icon">🐎</span>'
     +'</div>';
   }).join('');
 
+  const key=_simHorses.map(function(h){
+    const fc=_simSilkColor(h.horse);
+    const swatch=h.silkUrl
+      ?'<img src="'+h.silkUrl+'" alt="" width="14" height="14" style="object-fit:contain;flex-shrink:0;" onerror="this.outerHTML=\'<span class=&quot;sim-key-swatch&quot; style=&quot;background:'+fc.body+';border-color:'+fc.accent+';&quot;></span>\';">'
+      :'<span class="sim-key-swatch" style="background:'+fc.body+';border-color:'+fc.accent+';"></span>';
+    return '<div class="sim-key-row">'+swatch+'<span class="sim-key-num">'+(h.number||'')+'</span><span class="sim-key-name">'+h.horse+'</span></div>';
+  }).join('');
+
+  // Jump obstacles only for Hurdle/Chase — NH Flat ("bumper") races have no jumps
+  const jumps=_simMeta.isJumps
+    ? [18,38,58,78].map(function(l){return '<div class="sim-jump" style="left:'+l+'%;"></div>';}).join('')
+    : '';
+  const courseClass='sim-course'+(_simMeta.isAW?' sim-course-aw':' sim-course-turf');
+
   body.innerHTML=
-    '<div class="sim-track" id="sim-track">'+lanes+'</div>'
+    '<div class="sim-stage">'
+      +'<div class="'+courseClass+'" id="sim-track">'
+        +'<div class="sim-scenery">'+trees+'</div>'
+        +'<div class="sim-grandstand"></div>'
+        +'<div class="sim-rail sim-rail-top"></div>'
+        +'<div class="sim-rail sim-rail-bottom"></div>'
+        +jumps
+        +'<div class="sim-finish-post"></div>'
+        +'<div class="sim-runway">'+markers+'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div class="sim-key">'+key+'</div>'
     +'<div style="display:flex;gap:8px;margin-top:16px;">'
       +'<button id="sim-skip-btn" onclick="simSkip()" class="btn bout" style="flex:1;">Skip to result</button>'
     +'</div>'

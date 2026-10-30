@@ -258,7 +258,7 @@ function buildResultMap(races) {
 // so a bet/pick is otherwise stuck pending forever if the app isn't opened
 // again before the next day's cards push it out of the API's 2-day window
 // (the Basic plan has no historical date-range results endpoint).
-async function settleResults(env) {
+async function settleResults(env, subs) {
   const now = new Date();
   const month = now.getUTCMonth();
   const isDST = month >= 2 && month <= 9;
@@ -279,6 +279,14 @@ async function settleResults(env) {
   if (!Object.keys(mapToday).length && !Object.keys(mapYesterday).length) return;
 
   const resultMapFor = dateStr => dateStr === todayStr ? mapToday : dateStr === yesterdayStr ? mapYesterday : null;
+
+  // Newly-settled items this run, per user — used to send one consolidated
+  // "here's what happened" push per user below, instead of per-bet spam.
+  const settledByUser = {};
+  const addSettled = (userId, item) => {
+    if (!settledByUser[userId]) settledByUser[userId] = [];
+    settledByUser[userId].push(item);
+  };
 
   // ── Real + virtual bets (one table, distinguished by is_virtual) ────────────
   try {
@@ -314,6 +322,10 @@ async function settleResults(env) {
       patch.returns = calcReturnsServer(result, b.stake, odDec, betType, ewT);
 
       await supaFetch(env, `/bets?id=eq.${encodeURIComponent(b.id)}`, 'PATCH', patch);
+
+      const stake = parseFloat(b.stake) || 0;
+      const pnl = (parseFloat(patch.returns) || 0) - stake; // match the app's own P&L display (returns − stake)
+      addSettled(b.user_id, { horse: b.horse, result, pnl, virtual: !!b.is_virtual });
     }
   } catch (e) { console.error('settleResults: bets settlement failed', e); }
 
@@ -338,8 +350,95 @@ async function settleResults(env) {
       await supaFetch(env, `/league_picks?id=eq.${encodeURIComponent(p.id)}`, 'PATCH', {
         result, returns, odds: p.odds || oddsStr || null,
       });
+
+      addSettled(p.user_id, { horse: p.horse, result, pnl: returns, league: true });
     }
   } catch (e) { console.error('settleResults: league_picks settlement failed', e); }
+
+  // ── One consolidated "results in" push per user with anything newly settled ──
+  for (const [userId, items] of Object.entries(settledByUser)) {
+    const sub = (subs || []).find(s => s.user_id === userId);
+    if (!sub) continue;
+
+    const winners = items.filter(i => i.result === 'win' || i.result === 'place');
+    const title = winners.length
+      ? `✅ ${items.length} settled — ${winners.length} winner${winners.length !== 1 ? 's' : ''}`
+      : `${items.length} bet${items.length !== 1 ? 's' : ''} settled`;
+    const body = items.map(i => {
+      const label = i.league ? `${i.horse} (league)` : i.virtual ? `${i.horse} (virtual)` : i.horse;
+      const resLabel = i.result === 'win' ? 'WON' : i.result === 'place' ? 'PLACED' : 'lost';
+      const pnlStr = i.pnl ? ` ${i.pnl >= 0 ? '+' : '-'}£${Math.abs(i.pnl).toFixed(2)}` : '';
+      return `${label} — ${resLabel}${pnlStr}`;
+    }).join('\n');
+
+    try {
+      const status = await sendWebPush(
+        sub,
+        { title, body, tag: `rp-settled-${userId}-${Date.now()}` },
+        env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY,
+        'mailto:dan.hill7@hotmail.com'
+      );
+      if (status === 410) {
+        await supaFetch(env, `/push_subscriptions?endpoint=eq.${encodeURIComponent(sub.endpoint)}`, 'DELETE');
+      }
+    } catch (e) { console.error('Settlement push failed:', e); }
+  }
+}
+
+// ── 07:00 reminder: read today's racecards, make a league pick ────────────────
+// Mirrors renderLeagueReminder()'s "missing pick" logic (js/today.js) exactly:
+// active (not ended) leagues, respecting pick_days, with no pick yet today.
+async function sendLeagueReminders(env, subs, todayStr, ukTime) {
+  const todayDow = ['sun','mon','tue','wed','thu','fri','sat'][ukTime.getUTCDay()];
+
+  for (const sub of (subs || [])) {
+    const userId = sub.user_id;
+    const reminderId = `rp-lgreminder-${todayStr}-${userId.slice(-6)}`;
+
+    const sentResp = await supaFetch(env, `/push_sent?id=eq.${encodeURIComponent(reminderId)}&select=id`);
+    const sent = await sentResp.json().catch(() => []);
+    if (sent.length) continue;
+
+    try {
+      const memResp = await supaFetch(
+        env,
+        `/league_members?user_id=eq.${encodeURIComponent(userId)}&select=league_id,leagues(id,name,end_date,pick_days)`
+      );
+      const memberships = await memResp.json().catch(() => []);
+      const activeLeagues = (memberships || [])
+        .map(m => m.leagues)
+        .filter(l => l && (!l.end_date || todayStr <= l.end_date))
+        .filter(l => !l.pick_days || l.pick_days.split(',').includes(todayDow));
+      if (!activeLeagues.length) continue;
+
+      const picksResp = await supaFetch(
+        env,
+        `/league_picks?user_id=eq.${encodeURIComponent(userId)}&pick_date=eq.${todayStr}&select=league_id`
+      );
+      const todaysPicks = await picksResp.json().catch(() => []);
+      const pickedIds = new Set((todaysPicks || []).map(p => p.league_id));
+      const missing = activeLeagues.filter(l => !pickedIds.has(l.id));
+      if (!missing.length) continue;
+
+      const names = missing.map(l => l.name);
+      const title = '🏇 New race day — pick time';
+      const body = names.length === 1
+        ? `Check today's racecards and make your pick for ${names[0]}`
+        : `Check today's racecards and make your picks for ${names.join(', ')}`;
+
+      const status = await sendWebPush(
+        sub,
+        { title, body, tag: reminderId },
+        env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY,
+        'mailto:dan.hill7@hotmail.com'
+      );
+      if (status === 410) {
+        await supaFetch(env, `/push_subscriptions?endpoint=eq.${encodeURIComponent(sub.endpoint)}`, 'DELETE');
+      }
+    } catch (e) { console.error('League reminder push failed:', e); }
+
+    await supaFetch(env, '/push_sent', 'POST', { id: reminderId, user_id: userId, sent_at: new Date().toISOString() });
+  }
 }
 
 // ── Cron: check watchlists and send push alerts ───────────────────────────────
@@ -350,15 +449,29 @@ async function handleScheduled(env) {
   const isDST  = month >= 2 && month <= 9;
   const ukTime = new Date(now.getTime() + (isDST ? 3600000 : 0));
   const ukHour = ukTime.getUTCHours();
+  const todayStr = ukTime.toISOString().slice(0, 10);
 
-  if (ukHour < 10 || ukHour >= 21) return;
+  // Fetched once, shared by settlement notices, the league-pick reminder, and
+  // the racecard-dependent alerts below.
+  const subsResp = await supaFetch(env, '/push_subscriptions?select=*&paused=eq.false');
+  const subs = await subsResp.json();
 
   // Settle any pending bets/league picks against real results — independent
   // of whether anyone opens the app. Safe to run every tick: it only touches
-  // rows still marked pending, so re-running is a no-op once settled.
-  await settleResults(env);
+  // rows still marked pending, so re-running is a no-op once settled. Results
+  // can land outside racing hours too, so this runs on a wider window than
+  // the racecard-dependent alerts below.
+  if (ukHour >= 7 && ukHour < 23) {
+    await settleResults(env, subs);
+  }
 
-  const todayStr = ukTime.toISOString().slice(0, 10);
+  // 07:00 "read today's racecards and make your league pick" reminder.
+  if (ukHour === 7) {
+    await sendLeagueReminders(env, subs, todayStr, ukTime);
+  }
+
+  if (ukHour < 10 || ukHour >= 21) return;
+
   const nowMins  = ukTime.getUTCHours() * 60 + ukTime.getUTCMinutes();
 
   // Get racecard — use cache if < 2 hours old, else fetch fresh
@@ -392,9 +505,6 @@ async function handleScheduled(env) {
   }
 
   if (!races.length) return;
-
-  const subsResp = await supaFetch(env, '/push_subscriptions?select=*&paused=eq.false');
-  const subs = await subsResp.json();
   if (!subs.length) return;
 
   const isMorning = ukHour === 8; // morning summary fires during the 8am cron window
